@@ -6,12 +6,17 @@
 
 enum PSPM_SolverType {SOLVER_FMU, SOLVER_MMU, SOLVER_CM, SOLVER_EBT};
 
+template <class Model>
 class Solver{
 	private:
+	Model * mod;				// Model should be a class with growth, mortality, birth, env, and IC functions
+	
 	PSPM_SolverType method;
+
 	int J;
 	int state_size;
 	int nx;
+	
 	std::vector <double> X;	
 	std::vector <double> x;
 	std::vector <double> h;
@@ -25,19 +30,18 @@ class Solver{
 	Solver(int _J, double _xb, double _xm, PSPM_SolverType _method);
 	Solver(std::vector<double> xbreaks, PSPM_SolverType _method);
 
+	void setModel(Model *M);
 //	template<typename Func>
 //	void initialize(Func calcIC);
 	
-	template<class _Model>
-	void initialize(_Model mod);
+	void initialize();
 
 	const int size();
 	const int xsize();
 	const double* getX();
 
-//	template<typename growthFunc, typename mortFunc, typename fecFunc, typename envFunc>
-//	void calcRates_FMU(); // (Func w)	
-	
+	void calcRates_FMU();	
+	void calcRates_EBT();	
 	
 	void print();
 };

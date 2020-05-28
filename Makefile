@@ -1,48 +1,37 @@
-# MAKEFILE FOR CUDA
-
 #-------------------------------------------------------------------------------
 # executable name
 TARGET := 1
 
 # files
-CCFILES  :=  $(wildcard src/*.cpp) 
-
+SRCFILES  :=  $(wildcard src/*.cpp) 
 # ------------------------------------------------------------------------------
 
 # paths
 #CUDA_INSTALL_PATH ?= /usr/local/cuda#-5.0
 
-# compilers
-
 # include and lib dirs (esp for cuda)
-INC_PATH := -I./include #-I/home/jaideep/codes/quickGL/include
-LIB_PATH := -L./lib #-L/home/jaideep/codes/quickGL/lib
-GLLIB_PATH := 
+INC_PATH := -I./include 
+LIB_PATH := -L./lib 
 
 # flags
-COMMONFLAGS =  
-CPPFLAGS = -O3 -std=c++11 -g -Wall -Wno-unused-variable
-LINKFLAGS += $(COMMONFLAGS) 
+CPPFLAGS = -O3 -std=c++11 -g -pg -Wno-sign-compare -Wno-unused-variable -Wno-unused-but-set-variable
+LDFLAGS =  
 
 # libs
-#LIBS = -lcudart 					# cuda libs 		-lcutil_x86_64 -lshrutil_x86_64
-GLLIBS = #-lquickgl -lglut 				# openGL libs       -lGL -lGLEW  #-lX11 -lXi -lXmu 		
 LIBS = 	 -lgsl -lgslcblas 	# additional libs
+#LIBS = -lcudart 			# cuda libs 		
 
 # files
-OBJECTS = $(patsubst src/%.cpp, build/%.o, $(CCFILES))
+OBJECTS = $(patsubst src/%.cpp, build/%.o, $(SRCFILES))
 
-# common dependencies	
-COM_DEP = 
 
 all: dir $(TARGET)	
 
 dir: 
-	mkdir -p lib build
+	mkdir -p lib build tests/build
 
 $(TARGET): $(OBJECTS) 
-	g++ -o $(TARGET) $(LIB_PATH) $(GLLIB_PATH) $(OBJECTS) $(LIBS) $(GLLIBS)
-
+	g++ $(LDFLAGS) -o $(TARGET) $(LIB_PATH) $(OBJECTS) $(LIBS) 
 
 $(OBJECTS): build/%.o : src/%.cpp
 	g++ -c $(CPPFLAGS) $(INC_PATH) $< -o $@ 
@@ -52,6 +41,39 @@ clean:
 	
 re: clean all
 
+superclean: clean testclean
+
+
+## TESTING SUITE ##
+
+TEST_FILES = $(wildcard tests/*.cpp) 
+TEST_OBJECTS = $(patsubst tests/%.cpp, tests/%.o, $(TEST_FILES))
+TEST_TARGETS = $(patsubst tests/%.cpp, tests/%.test, $(TEST_FILES))
+TEST_RUNS = $(patsubst tests/%.cpp, tests/%.run, $(TEST_FILES))
+
+check: compile_tests run_tests
+
+compile_tests: $(TEST_TARGETS)
+	
+run_tests: $(TEST_RUNS) 
+	
+$(TEST_RUNS): tests/%.run : tests/%.test	
+	@./$< && \
+		printf "%b" "\033[0;32m[PASS]\033[m" ": $* \n"  || \
+		printf "%b" "\033[1;31m[FAIL]\033[m" ": $* \n"
+
+$(TEST_OBJECTS): tests/%.o : tests/%.cpp 
+	g++ -c $(CPPFLAGS) $(INC_PATH) $< -o $@
+
+$(TEST_TARGETS): tests/%.test : tests/%.o
+	g++ $(LDFLAGS) -o $@ $(LIB_PATH) $(OBJECTS) $< $(LIBS) 
+
+testclean: 
+	rm -f tests/*.o tests/*.test
+
+recheck: testclean check
+
+.PHONY: $(TEST_RUNS) run_tests clean testclean
 # ------------------------------------------------------------------------------
 
 

@@ -22,7 +22,9 @@ exec_*
 
 *.txt
 *.out
+*.test
 
 *.swp
 
+tags
 1
