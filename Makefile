@@ -4,6 +4,7 @@ TARGET := 1
 
 # files
 SRCFILES  :=  $(wildcard src/*.cpp) 
+HEADERS := $(wildcard src/*.tpp) $(wildcard include/*.h) $(wildcard tests/*.h)
 # ------------------------------------------------------------------------------
 
 # paths
@@ -15,7 +16,7 @@ LIB_PATH := -L./lib
 
 # flags
 CPPFLAGS = -O3 -std=c++11 -g -pg -Wno-sign-compare -Wno-unused-variable -Wno-unused-but-set-variable
-LDFLAGS =  
+LDFLAGS = -pg 
 
 # libs
 LIBS = 	 -lgsl -lgslcblas 	# additional libs
@@ -33,7 +34,7 @@ dir:
 $(TARGET): $(OBJECTS) 
 	g++ $(LDFLAGS) -o $(TARGET) $(LIB_PATH) $(OBJECTS) $(LIBS) 
 
-$(OBJECTS): build/%.o : src/%.cpp
+$(OBJECTS): build/%.o : src/%.cpp $(HEADERS)
 	g++ -c $(CPPFLAGS) $(INC_PATH) $< -o $@ 
 
 clean:
@@ -62,7 +63,7 @@ $(TEST_RUNS): tests/%.run : tests/%.test
 		printf "%b" "\033[0;32m[PASS]\033[m" ": $* \n"  || \
 		printf "%b" "\033[1;31m[FAIL]\033[m" ": $* \n"
 
-$(TEST_OBJECTS): tests/%.o : tests/%.cpp 
+$(TEST_OBJECTS): tests/%.o : tests/%.cpp $(HEADERS) 
 	g++ -c $(CPPFLAGS) $(INC_PATH) $< -o $@
 
 $(TEST_TARGETS): tests/%.test : tests/%.o

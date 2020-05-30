@@ -23,7 +23,8 @@ class Solver{
 
 	public:
 	double xb, xm;
-
+	
+	double current_time = 0;
 	std::vector <double> state;
 	std::vector <double> rates; 
 		
@@ -40,10 +41,15 @@ class Solver{
 	const int xsize();
 	const double* getX();
 
-	void calcRates_FMU();	
+	void calcRates_FMU(double t);	
 	void calcRates_EBT();	
 	
 	void print();
+	
+	template<typename wFunc>
+	double integrate_x(wFunc w, int power);
+	
+	void step_to(double tf);
 };
 
 #include "../src/solver.tpp"
