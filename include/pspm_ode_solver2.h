@@ -60,7 +60,7 @@ class RKCK45{
 	double ht;         // current time-step
 	double eps;        // Accuracy we check at each step
 	double xt, t_stop; // start and stop time
-	int nok, nbad;     // number of bad and good steps
+	int nok=0, nbad=0; // number of bad and good steps
 	container dydx;    // temporary current derivatives
 
 	container k1, k2, k3, k4, k5, yt;
@@ -74,12 +74,11 @@ class RKCK45{
 	// 3) size     -- number of equations 
 	// 4) accuracy -- desired accuracy
 	// 5) h1       -- trial size of the first step
-	RKCK45(double t_start_, double t_stop_, double accuracy=1e-6, double h1=0.1) :
-			ht(h1), eps(accuracy), xt(t_start_), t_stop(t_stop_), nok(0), nbad(0)/*, 
+	RKCK45(double t_start_, double accuracy=1e-6, double h1=0.1) :
+			ht(h1), eps(accuracy), xt(t_start_)/*, 
 			yscal(size), dydx(size), 
 			k1(size), k2(size), k3(size), k4(size), k5(size), yt(size)*/ {};
 	
-	public:
 	// Resize the container 
 	void resize(int new_size){
 		sys_size = new_size;
@@ -101,7 +100,7 @@ class RKCK45{
 	//           2) y      -- current solution (dependent variable)
 	//           3) derivs -- function which evaluates derivatives
 	template <class functor>
-	bool Step(double& x, container& y, functor& derivs){
+	void Step(double& x, container& y, functor& derivs){
 		
 		// resize the container if necessary
 		if (y.size() != sys_size) resize(y.size());
@@ -118,7 +117,7 @@ class RKCK45{
 		if (hdid == ht) ++nok; else ++nbad; // good or bad step
 		ht = hnext;
 		x = xt;
-		return x<t_stop;
+		//return x<t_stop;
 	}
   
 	double h(){return ht;}
