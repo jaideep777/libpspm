@@ -100,7 +100,7 @@ class RKCK45{
 	//           2) y      -- current solution (dependent variable)
 	//           3) derivs -- function which evaluates derivatives
 	template <class functor>
-	void Step(double& x, container& y, functor& derivs){
+	void Step(double& x, container& y, functor& derivs, double hmax=1e20){
 		
 		// resize the container if necessary
 		if (y.size() != sys_size) resize(y.size());
@@ -113,13 +113,19 @@ class RKCK45{
 		// Cals the Runge-Kutta rountine
 		// takes: y -- dependent variable, dydx -- derivative at the beginning
 		//        ht -- trial setpsize, hdid -- 
+		ht = std::min(ht, hmax);
 		RKStep(y, dydx, xt, ht, hdid, hnext, derivs); // Make one RK step
 		if (hdid == ht) ++nok; else ++nbad; // good or bad step
 		ht = hnext;
 		x = xt;
 		//return x<t_stop;
 	}
-  
+ 
+	template <class functor>
+	void Step_to(double t_stop, double& x, container& y, functor& derivs){
+		while (x < t_stop) Step(x,y,derivs, t_stop-x);
+	}
+
 	double h(){return ht;}
 	double size(){return sys_size;}
 

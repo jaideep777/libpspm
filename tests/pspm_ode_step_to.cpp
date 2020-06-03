@@ -47,18 +47,19 @@ int main(){
   */
   
 
-//	ofstream fout("pendulum.txt");
-  while(ti < t_stop) {
-//	fout<<ti<<" "<<y[0]<<" "<<y[1]<<" "<<y[0]-xmax*sin(ti)<<" "<<Energy(y)<<endl;
-    rk.Step(ti, y,  simple_pendulum);
-    
+	ofstream fout("pendulum2.txt");
+  for (double t=t_start; t <= t_stop; t=t+1) {
+    rk.Step_to(t, ti, y,  simple_pendulum);
+	fout<<ti<<" "<<y[0]<<" "<<y[1]<<" "<<y[0]-xmax*sin(ti)<<" "<<Energy(y)<<endl;
+
 	if (fabs(y[0] - xmax*sin(ti)) > 1e-6) return 1;
     if (fabs(y[1] - xmax*cos(ti)) > 1e-6) return 1;
 
   }
 
+  fout.close();
+  
   if (rk.size() != 2) return 1;
-//  fout<<ti<<" "<<y[0]<<" "<<y[1]<<" "<<y[0]-xmax*sin(ti)<<" "<<Energy(y)<<endl;
   
   return 0;
 }
