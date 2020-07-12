@@ -2,7 +2,7 @@
 #define  PSPM_SOLVER_H_
 
 #include <vector>
-
+#include "pspm_ode_solver2.h"
 
 enum PSPM_SolverType {SOLVER_FMU, SOLVER_MMU, SOLVER_CM, SOLVER_EBT};
 
@@ -20,6 +20,8 @@ class Solver{
 	std::vector <double> X;	
 	std::vector <double> x;
 	std::vector <double> h;
+	
+	RKCK45<vector<double>> odeStepper;
 
 	public:
 	double xb, xm;
@@ -41,15 +43,17 @@ class Solver{
 	const int xsize();
 	const double* getX();
 
-	void calcRates_FMU(double t);	
+	void calcRates_FMU(double t, vector<double> &U, vector<double> &dUdt);
+	//void calcRates_FMU(double t);	
 	void calcRates_EBT();	
-	
+
+	void step_to(double tstop);
+
 	void print();
 	
 	template<typename wFunc>
 	double integrate_x(wFunc w, int power);
 	
-	void step_to(double tf);
 };
 
 #include "../src/solver.tpp"

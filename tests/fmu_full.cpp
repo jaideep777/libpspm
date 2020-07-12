@@ -1,5 +1,6 @@
 #include <vector>
 #include <iostream>
+#include <fstream>
 #include <cmath>
 #include "solver.h"
 using namespace std;
@@ -14,13 +15,18 @@ int main(){
 	
 	S.setModel(&M);
 	S.initialize();
-	//S.print();	
 	
-	M.computeEnv(0,&S);
-	
-	if (fabs(M.evalEnv(0,0) - 0.380194) > 1e-6) return 1;
-	
+	ofstream fout("fmu_testmodel.txt");
+
+	for (double t=0; t <= 8; t=t+8.0/20) {
+		S.step_to(t);
+		fout << S.current_time << "\t";
+		for (auto y : S.state) fout << y << "\t";
+		fout << endl;
+	}
+
+	fout.close();
+  
 	return 0;
-	
 }
 

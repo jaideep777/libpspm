@@ -14,7 +14,10 @@ class TestModel{
 		return env;
 	}
 	
-	void computeEnv(double x, double t, Solver<TestModel> * S){
+	// This function must do any necessary precomputations to facilitate evalEnv()
+	// Therefore, this should calculate env for all X when it is a function of X
+	// In such a case, the solver's SubdivisionSpline can be ussed
+	void computeEnv(double t, Solver<TestModel> * S){
 		//            _xm 
 		// Calculate / w(z)u(z)dz
 		//        xb`

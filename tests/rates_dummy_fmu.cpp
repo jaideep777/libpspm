@@ -16,9 +16,10 @@ int main(){
 	S.initialize();
 	//S.print();	
 
-	M.computeEnv(0,0,&S);	
-	S.calcRates_FMU(1);  // dummy rates calc rates(X=X0, U=U0, t=1, E=E(U0))
-	
+	M.computeEnv(0,&S);	
+	S.calcRates_FMU(1, S.state, S.rates);  // dummy rates calc rates(X=X0, U=U0, t=1, E=E(U0))
+//	S.step_to(1);
+
 	vector <double> rates_exp = {
 		-0.355862928, -0.450926505, -0.417535387, -0.354046196, 
 		-0.301067280, -0.256580544, -0.219012561, -0.187124217,
