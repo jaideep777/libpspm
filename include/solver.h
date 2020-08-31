@@ -45,7 +45,7 @@ class Solver{
 
 	void calcRates_FMU(double t, vector<double> &U, vector<double> &dUdt);
 	//void calcRates_FMU(double t);	
-	void calcRates_EBT();	
+	void calcRates_EBT(double t, vector<double>&S, vector<double> &dSdt);
 
 	void step_to(double tstop);
 

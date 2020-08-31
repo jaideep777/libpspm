@@ -154,6 +154,20 @@ double Solver<Model>::integrate_x(wFunc w, int power){
 		}
 		return I;
 	}
+	if (method == SOLVER_EBT){
+		// integrate using EBT rule (sum over sohorts)
+		double   pi0  =  S[0];
+		double * xint = &S[1];
+		double   N0   =  S[J+1];
+		double * Nint = &S[J+2];
+		
+		double x0 = xb + pi0/(N0+1e-12); 
+		
+		double I = w(x0)*N0;
+		for (int i=0; i<J; ++i) I += w(xint[i])*Nint[i];
+		
+		return I;
+	}
 	else{
 		std::cout << "Only FMU and MMU are implemented\n";
 		return 0;

@@ -32,17 +32,20 @@ class TestModel{
 		env = S->integrate_x(w, 1);
 	}
 
-	double growthRate(double x, double t, double E){
+	double growthRate(double x, double t){
+		double E = evalEnv(x,t);
 		double a = 0.16+0.22*exp(-0.225*t*t);
 		return 0.225*(1-x*x)*(E/(1+E*E))*t*(1+a*a)/a;
 	}
 
-	double mortalityRate(double x, double t, double E){
+	double mortalityRate(double x, double t){
+		double E = evalEnv(x,t);
 		double a = 0.16+0.22*exp(-0.225*t*t);
 		return 1.35*t*E/a;
 	}
 
-	double birthRate(double x, double t, double E){
+	double birthRate(double x, double t){
+		double E = evalEnv(x,t);
 		double oneplusa = 1.16+0.22*exp(-0.225*t*t);
 		double a = 0.16+0.22*exp(-0.225*t*t);
 		double n1 = 0.225*t*x*x*(1-x)*(1-x)*E/(1+E)/(1+E)*oneplusa*oneplusa/a;

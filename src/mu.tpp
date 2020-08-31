@@ -8,14 +8,14 @@ template <class Model>
 void Solver<Model>::calcRates_FMU(double t, vector<double> &U, vector<double> &dUdt){
 
 	vector <double> growthArray(J+1);
-	for (int i=0; i<J+1; ++i) growthArray[i] = mod->growthRate(x[i], t, mod->evalEnv(x[i],t));
+	for (int i=0; i<J+1; ++i) growthArray[i] = mod->growthRate(x[i], t);
 
 //	#define growth(i) growthRate(x[i], mod->evalEnv(x[i],t))
 	#define growth(i) growthArray[i]
 
 	// i=0
 	double birthFlux = 0;
-	for (int j=0; j<J; ++j) birthFlux += h[j]*mod->birthRate(X[j], t, mod->evalEnv(X[j],t))*U[j];
+	for (int j=0; j<J; ++j) birthFlux += h[j]*mod->birthRate(X[j], t)*U[j];
 	
 	vector <double> u(J+1);
 
@@ -42,7 +42,7 @@ void Solver<Model>::calcRates_FMU(double t, vector<double> &U, vector<double> &d
 	for (int i=0; i<J; ++i){ // dU[i] ~ u[i+1] <-- U[i],U[i-1], u[i] <-- U[i-1],U[i-2]
 
 		//if (i == 0) assert( fabs(growthRate(x[i],env)*u[i] - birthFlux) < 1e-11);
-		dUdt[i] = -mod->mortalityRate(X[i], t, mod->evalEnv(X[i], t))*U[i] - (growth(i+1)*u[i+1] - growth(i)*u[i])/h[i];
+		dUdt[i] = -mod->mortalityRate(X[i], t)*U[i] - (growth(i+1)*u[i+1] - growth(i)*u[i])/h[i];
 		// cout << dUdt[i] << " | ";
 		//f[i] = dU[i];
 		
