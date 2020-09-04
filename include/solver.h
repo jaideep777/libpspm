@@ -15,12 +15,14 @@ class Solver{
 
 	int J;
 	int state_size;
-	int nx;
+	//int nx;
 	
 	std::vector <double> X;	
 	std::vector <double> x;
 	std::vector <double> h;
 	
+	double newborns;
+		
 	RKCK45<vector<double>> odeStepper;
 
 	public:
@@ -42,11 +44,22 @@ class Solver{
 	const int size();
 	const int xsize();
 	const double* getX();
+	vector<double> getx();
 
 	void calcRates_FMU(double t, vector<double> &U, vector<double> &dUdt);
 	//void calcRates_FMU(double t);	
+	
+	void addCohort_EBT();
+	void removeDeadCohorts_EBT();
 	void calcRates_EBT(double t, vector<double>&S, vector<double> &dSdt);
+	vector<double> cohortsToDensity_EBT(vector <double> &breaks);
 
+	void calcRates_CM(double t, vector<double>&S, vector<double> &dSdt);
+	double calcBirthFlux_CM(double _u0);
+	void addCohort_CM(double u0 = -1);
+	void removeCohort_CM();
+	
+	
 	void step_to(double tstop);
 
 	void print();

@@ -8,7 +8,7 @@ using namespace std;
 
 int main(){
 
-	Solver<TestModel> S(25, 0,1, SOLVER_FMU);
+	Solver<TestModel> S(25, 0,1, SOLVER_CM);
 	
 	TestModel M;
 	
@@ -18,7 +18,7 @@ int main(){
 	
 	M.computeEnv(0,&S);
 
-	if (fabs(M.evalEnv(0,0) - 0.380194) > 1e-6) return 1;
+	if (fabs(M.evalEnv(0,0) - 0.3821924) > 1e-6) return 1;
 	
 	return 0;
 	

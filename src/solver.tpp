@@ -22,37 +22,38 @@ Solver<Model>::Solver(std::vector<double> xbreaks, PSPM_SolverType _method) : od
 	xm = xbreaks[xbreaks.size()-1];
 	J  = xbreaks.size()-1;
 	method = _method;
+	newborns = 0;
 
 	x = xbreaks;
 
 	X.resize(J);
 	for (size_t i=0; i<J; ++i) X[i] = (xbreaks[i]+xbreaks[i+1])/2.0;
 	
-	h.resize(J);	// This will be used by FMU and updated by MMU, so pre-allocate
+	h.resize(J);	// This will be used by FMU and updated by MMU, EBT, so pre-allocate
 	for (size_t i=0; i<J; ++i) h[i] = xbreaks[i+1] - xbreaks[i];	
 	
 	if (method == SOLVER_FMU){	
-		nx = J;						// X
+		//nx = J;						// X
 		state_size = J;				// U
 		state.resize(state_size,0);
 	}
 
 	if (method == SOLVER_MMU){
-		nx = J;						// X
+		//nx = J;						// X
 		state_size = J+1 + J;		// x, U
 		state.resize(state_size,0);
 		for (size_t i=0; i<J+1; ++i) state[i] = xbreaks[i];
 	}
 
 	if (method == SOLVER_CM){
-		nx = J+1;					// x
+		//nx = J+1;					// x
 		state_size = J+1 + J+1;		// x, u
 		state.resize(state_size,0);
 		for (size_t i=0; i<J+1; ++i) state[i] = xbreaks[i];
 	}
 
 	if (method == SOLVER_EBT){
-		nx = J+1;					// [x0, xint]
+		//nx = J+1;					// [x0, xint]
 		state_size = 1 + J + 1 + J;	// pi0, xint, N0, Nint
 		state.resize(state_size,0);
 		for (size_t i=0; i<J; ++i) state[1+i] = X[i];	// leave [0] for pi0 (= 0)
@@ -78,12 +79,15 @@ Solver<Model>::Solver(int _J, double _xb, double _xm, PSPM_SolverType _method)
 
 template<class Model>
 const int Solver<Model>::size(){
-	return state_size;
+	return state.size();
 }
 
 template<class Model>
 const int Solver<Model>::xsize(){
-	return nx;	
+	if (method == SOLVER_FMU) return J;	
+	if (method == SOLVER_MMU) return J;  
+	if (method == SOLVER_CM ) return J+1;
+	if (method == SOLVER_EBT) return J+1;
 }
 
 	//for (int i=0; i<J; ++i){
@@ -102,6 +106,11 @@ const double * Solver<Model>::getX(){
 	if (method == SOLVER_EBT)	return X.data();
 }
 
+template<class Model>
+vector<double> Solver<Model>::getx(){
+	return x;
+}
+
 
 template<class Model>
 void Solver<Model>::print(){
@@ -113,10 +122,10 @@ void Solver<Model>::print(){
 	std::cout << std::endl;
 	
 	std::cout << "State (" << state.size() << "):\n";
-	std::cout << "  X (" << state.size()-nx << "): ";
-	for (int i=0; i<state.size()-nx; ++i) cout << state[i] << " ";
-	std::cout << "\n  U (" << nx << "): ";
-	for (int i=0; i<nx; ++i) cout << state[state.size()-nx + i] << " ";
+	std::cout << "  X (" << state.size()-xsize() << "): ";
+	for (int i=0; i<state.size()-xsize(); ++i) cout << state[i] << " ";
+	std::cout << "\n  U (" << xsize() << "): ";
+	for (int i=0; i<xsize(); ++i) cout << state[state.size()-xsize() + i] << " ";
 	std::cout << std::endl;
 }
 
@@ -138,7 +147,7 @@ void Solver<Model>::initialize(){
 		for (size_t i=0; i<J+1; ++i)  state[J+1 + i] = mod->calcIC(x[i]);
 	}
 	if (method == SOLVER_EBT){
-		for (size_t i=0; i<J; ++i)  state[J+1 + 1+i] = mod->calcIC(X[1+i]);	// state[J+1+0]=0 (N0)
+		for (size_t i=0; i<J; ++i)  state[J+1 + 1+i] = mod->calcIC(X[1+i])*h[i];	// state[J+1+0]=0 (N0)
 	}
 }
 
@@ -154,12 +163,12 @@ double Solver<Model>::integrate_x(wFunc w, int power){
 		}
 		return I;
 	}
-	if (method == SOLVER_EBT){
-		// integrate using EBT rule (sum over sohorts)
-		double   pi0  =  S[0];
-		double * xint = &S[1];
-		double   N0   =  S[J+1];
-		double * Nint = &S[J+2];
+	else if (method == SOLVER_EBT){
+		// integrate using EBT rule (sum over cohorts)
+		double   pi0  =  state[0];
+		double * xint = &state[1];
+		double   N0   =  state[J+1];
+		double * Nint = &state[J+2];
 		
 		double x0 = xb + pi0/(N0+1e-12); 
 		
@@ -167,6 +176,16 @@ double Solver<Model>::integrate_x(wFunc w, int power){
 		for (int i=0; i<J; ++i) I += w(xint[i])*Nint[i];
 		
 		return I;
+	}
+	else if (method == SOLVER_CM){
+		// integrate using trapezoidal rule
+		double * px = &state[0];
+		double * pu = &state[J+1];
+		double I = 0;
+		for (int i=0; i<J; ++i){
+			I += (px[i+1]-px[i])*(w(px[i+1])*pu[i+1]+w(px[i])*pu[i]);
+		}
+		return I*0.5;
 	}
 	else{
 		std::cout << "Only FMU and MMU are implemented\n";
@@ -188,13 +207,40 @@ void Solver<Model>::step_to(double tstop){
 	if (method == SOLVER_MMU){
 	}
 	if (method == SOLVER_EBT){
+		auto derivs = [this](double t, vector<double> &U, vector<double> &dUdt){
+			mod->computeEnv(current_time, this);
+			this->calcRates_EBT(t, U, dUdt);
+		};
+		
+		// integrate 
+		odeStepper.Step_to(tstop, current_time, state, derivs); // state = [pi0, Xint, N0, Nint]
+		
+		// update cohorts
+		removeDeadCohorts_EBT();
+		if (state[J+1] > 0) addCohort_EBT();  // Add new cohort if N0 > 0
+		
+		// update variables based on new state
+		// X, x, h, etc
+
 	}
 	if (method == SOLVER_CM){
+		auto derivs = [this](double t, vector<double> &U, vector<double> &dUdt){
+			mod->computeEnv(current_time, this);
+			this->calcRates_CM(t, U, dUdt);
+		};
+		
+		// integrate 
+		odeStepper.Step_to(tstop, current_time, state, derivs); // state = [pi0, Xint, N0, Nint]
+
+		// update cohorts
+		addCohort_CM();  
+		removeCohort_CM();
+
 	}
 }
 
 #include "mu.tpp"
 #include "ebt.tpp"
-
+#include "cm.tpp"
 
 

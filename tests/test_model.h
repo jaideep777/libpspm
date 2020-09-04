@@ -19,7 +19,7 @@ class TestModel{
 	// In such a case, the solver's SubdivisionSpline can be ussed
 	void computeEnv(double t, Solver<TestModel> * S){
 		//            _xm 
-		// Calculate / w(z)u(z)dz
+		// Calculate / w(z,t)u(z,t)dz
 		//        xb`
 		auto w = [](double z) -> double {
 			if (z <= 1.0/3) 
