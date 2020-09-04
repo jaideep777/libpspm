@@ -16,6 +16,8 @@ void Solver<Model>::calcRates_CM(double t, vector<double>&S, vector<double> &dSd
 		
 		du[i] = -mod->mortalityRate(x[i], t)*u[i] - growthGrad*u[i];
 	}
+
+	cout << endl;
 }
 
 
@@ -30,15 +32,18 @@ double Solver<Model>::calcBirthFlux_CM(double _u0){
 			// set u0 to given (trial) value
 			state[J+1] = utry;
 			// recompute environment based on new state
-			mod->computeEnv(current_time, this);
+			mod->computeEnv(current_time, state, this);
 			// calculate birthflux by trapezoidal integration (under new environment)
 			double * px = &state[0];
 			double * pu = &state[J+1];
-			double bf = 0;
+			double B = 0;
 			for (int i=0; i<J; ++i){
-				bf += (px[i+1]-px[i])*(mod->birthRate(px[i+1],current_time)*pu[i+1] + mod->birthRate(px[i],current_time)*pu[i]);
+				B += (px[i+1]-px[i])*(mod->birthRate(px[i+1],current_time)*pu[i+1] + mod->birthRate(px[i],current_time)*pu[i]);
 			}
-			bf *= 0.5;
+			B *= 0.5;
+			double bf = integrate_x([this](double z, double t){return mod->birthRate(z,t);}, current_time, state, 1);
+			
+			cout << "birthflux: " << B << " " << bf << endl;
 			double unext = bf/mod->growthRate(xb, current_time);
 			return unext;
 		};
@@ -46,13 +51,13 @@ double Solver<Model>::calcBirthFlux_CM(double _u0){
 		double u0 = state[J+2]; // initialize with u0 = u1
 		// iterate
 		double err = 100;
-		while(err > 1e-4){
+		while(err > 1e-6){
 			double u1 = f(u0);
 			err = abs(u1 - u0);
 			u0 = u1;
 		}
 		state[J+1] = u0;
-		cout << "u0 = " << u0 << endl;	
+		//cout << "u0 = " << u0 << endl;	
 	} 
 }
 

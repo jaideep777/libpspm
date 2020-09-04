@@ -16,6 +16,8 @@ void Solver<Model>::calcRates_FMU(double t, vector<double> &U, vector<double> &d
 	// i=0
 	double birthFlux = 0;
 	for (int j=0; j<J; ++j) birthFlux += h[j]*mod->birthRate(X[j], t)*U[j];
+	double bf = integrate_x([this](double z, double t){return mod->birthRate(z,t);}, t, U, 1);
+	cout << "birthFlux = " << birthFlux << " " << bf << endl;
 	
 	vector <double> u(J+1);
 

@@ -65,7 +65,7 @@ class Solver{
 	void print();
 	
 	template<typename wFunc>
-	double integrate_x(wFunc w, int power);
+	double integrate_x(wFunc w, double t, vector<double>&S, int power);
 	
 };
 
