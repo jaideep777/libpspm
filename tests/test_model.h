@@ -17,11 +17,13 @@ class TestModel{
 	// This function must do any necessary precomputations to facilitate evalEnv()
 	// Therefore, this should calculate env for all X when it is a function of X
 	// In such a case, the solver's SubdivisionSpline can be ussed
-	void computeEnv(double t, Solver<TestModel> * S){
+	// Note: The state vector in the solver will not be updated until the RK step is completed. 
+	// Hence, explicitly pass the state to this function.
+	void computeEnv(double t, vector<double> state_vec, Solver<TestModel> * S){
 		//            _xm 
 		// Calculate / w(z,t)u(z,t)dz
 		//        xb`
-		auto w = [](double z) -> double {
+		auto w = [](double z, double t) -> double {
 			if (z <= 1.0/3) 
 				return 1;
 			else if (z > 1.0/3 && z <= 2.0/3) 
@@ -29,7 +31,7 @@ class TestModel{
 			else 
 				return 0;
 		};
-		env = S->integrate_x(w, 1);
+		env = S->integrate_x(w, t, state_vec, 1);
 	}
 
 	double growthRate(double x, double t){

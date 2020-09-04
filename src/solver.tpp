@@ -153,37 +153,38 @@ void Solver<Model>::initialize(){
 
 template<class Model>
 template<typename wFunc>
-double Solver<Model>::integrate_x(wFunc w, int power){
+double Solver<Model>::integrate_x(wFunc w, double t, vector<double>&S, int power){
+	cout << " | " <<  t << " " << mod->evalEnv(0,t) << " ";
 	if (method == SOLVER_FMU || method == SOLVER_MMU){
 		// integrate using midpoint quadrature rule
 		double I=0;
-		double * U = state.data();
+		double * U = S.data();
 		for (unsigned int i=0; i<X.size(); ++i){
-			I += h[i]*w(X[i])*pow(U[i], power);  // TODO: Replace with std::transform after profiling
+			I += h[i]*w(X[i], t)*pow(U[i], power);  // TODO: Replace with std::transform after profiling
 		}
 		return I;
 	}
 	else if (method == SOLVER_EBT){
 		// integrate using EBT rule (sum over cohorts)
-		double   pi0  =  state[0];
-		double * xint = &state[1];
-		double   N0   =  state[J+1];
-		double * Nint = &state[J+2];
+		double   pi0  =  S[0];
+		double * xint = &S[1];
+		double   N0   =  S[J+1];
+		double * Nint = &S[J+2];
 		
 		double x0 = xb + pi0/(N0+1e-12); 
 		
-		double I = w(x0)*N0;
-		for (int i=0; i<J; ++i) I += w(xint[i])*Nint[i];
+		double I = w(x0, t)*N0;
+		for (int i=0; i<J; ++i) I += w(xint[i], t)*Nint[i];
 		
 		return I;
 	}
 	else if (method == SOLVER_CM){
-		// integrate using trapezoidal rule
-		double * px = &state[0];
-		double * pu = &state[J+1];
+		// integrate using trapezoidal rule TODO: Modify to avoid double computation of w(x)
+		double * px = &S[0];
+		double * pu = &S[J+1];
 		double I = 0;
 		for (int i=0; i<J; ++i){
-			I += (px[i+1]-px[i])*(w(px[i+1])*pu[i+1]+w(px[i])*pu[i]);
+			I += (px[i+1]-px[i])*(w(px[i+1], t)*pu[i+1]+w(px[i], t)*pu[i]);
 		}
 		return I*0.5;
 	}
@@ -194,12 +195,13 @@ double Solver<Model>::integrate_x(wFunc w, int power){
 }
 
 
+// current_time is updated by the ODE solver at every (internal) step
 template<class Model>
 void Solver<Model>::step_to(double tstop){
 	if (method == SOLVER_FMU){	
-		auto derivs = [this](double t, vector<double> &U, vector<double> &dUdt){
-			mod->computeEnv(current_time, this);
-			this->calcRates_FMU(t, U, dUdt);
+		auto derivs = [this](double t, vector<double> &S, vector<double> &dSdt){
+			mod->computeEnv(t, S, this);
+			this->calcRates_FMU(t, S, dSdt);
 		};
 		
 		odeStepper.Step_to(tstop, current_time, state, derivs); // state = [U]
@@ -207,9 +209,9 @@ void Solver<Model>::step_to(double tstop){
 	if (method == SOLVER_MMU){
 	}
 	if (method == SOLVER_EBT){
-		auto derivs = [this](double t, vector<double> &U, vector<double> &dUdt){
-			mod->computeEnv(current_time, this);
-			this->calcRates_EBT(t, U, dUdt);
+		auto derivs = [this](double t, vector<double> &S, vector<double> &dSdt){
+			mod->computeEnv(t, S, this);
+			this->calcRates_EBT(t, S, dSdt);
 		};
 		
 		// integrate 
@@ -224,9 +226,9 @@ void Solver<Model>::step_to(double tstop){
 
 	}
 	if (method == SOLVER_CM){
-		auto derivs = [this](double t, vector<double> &U, vector<double> &dUdt){
-			mod->computeEnv(current_time, this);
-			this->calcRates_CM(t, U, dUdt);
+		auto derivs = [this](double t, vector<double> &S, vector<double> &dSdt){
+			mod->computeEnv(t, S, this);
+			this->calcRates_CM(t, S, dSdt);
 		};
 		
 		// integrate 
