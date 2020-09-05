@@ -16,7 +16,7 @@ int main(){
 	S.initialize();
 	//S.print();	
 
-	M.computeEnv(0,&S);	
+	M.computeEnv(0,S.state, &S);	
 	S.calcRates_FMU(1, S.state, S.rates);  // dummy rates calc rates(X=X0, U=U0, t=1, E=E(U0))
 //	S.step_to(1);
 

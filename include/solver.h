@@ -62,6 +62,8 @@ class Solver{
 	
 	void step_to(double tstop);
 
+	double newborns_out();
+
 	void print();
 	
 	template<typename wFunc>

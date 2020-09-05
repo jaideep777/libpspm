@@ -154,7 +154,7 @@ void Solver<Model>::initialize(){
 template<class Model>
 template<typename wFunc>
 double Solver<Model>::integrate_x(wFunc w, double t, vector<double>&S, int power){
-	cout << " | " <<  t << " " << mod->evalEnv(0,t) << " ";
+	//cout << " | " <<  t << " " << mod->evalEnv(0,t) << " ";
 	if (method == SOLVER_FMU || method == SOLVER_MMU){
 		// integrate using midpoint quadrature rule
 		double I=0;
@@ -219,7 +219,7 @@ void Solver<Model>::step_to(double tstop){
 		
 		// update cohorts
 		removeDeadCohorts_EBT();
-		if (state[J+1] > 0) addCohort_EBT();  // Add new cohort if N0 > 0
+		if (state[J+1] > 0) addCohort_EBT();  // Add new cohort if N0 > 0. Add after removing dead ones otherwise this will also be removed. 
 		
 		// update variables based on new state
 		// X, x, h, etc
@@ -235,11 +235,22 @@ void Solver<Model>::step_to(double tstop){
 		odeStepper.Step_to(tstop, current_time, state, derivs); // state = [pi0, Xint, N0, Nint]
 
 		// update cohorts
-		addCohort_CM();  
+		addCohort_CM();		// add before so that it becomes boundary cohort and first internal cohort can be (potentially) removed
 		removeCohort_CM();
 
 	}
 }
+
+
+template<class Model>
+double Solver<Model>::newborns_out(){
+	// update Environment from latest state
+	mod->computeEnv(current_time, state, this);
+	// calculate birthflux 
+	double birthFlux = integrate_x([this](double z, double t){return mod->birthRate(z,t);}, current_time, state, 1);
+	return birthFlux;
+}
+
 
 #include "mu.tpp"
 #include "ebt.tpp"

@@ -1,4 +1,5 @@
 #include <algorithm>
+#include <cassert>
 
 template <class Model>
 void Solver<Model>::calcRates_CM(double t, vector<double>&S, vector<double> &dSdt){
@@ -17,7 +18,6 @@ void Solver<Model>::calcRates_CM(double t, vector<double>&S, vector<double> &dSd
 		du[i] = -mod->mortalityRate(x[i], t)*u[i] - growthGrad*u[i];
 	}
 
-	cout << endl;
 }
 
 
@@ -34,6 +34,8 @@ double Solver<Model>::calcBirthFlux_CM(double _u0){
 			// recompute environment based on new state
 			mod->computeEnv(current_time, state, this);
 			// calculate birthflux by trapezoidal integration (under new environment)
+			double birthFlux = integrate_x([this](double z, double t){return mod->birthRate(z,t);}, current_time, state, 1);
+			
 			double * px = &state[0];
 			double * pu = &state[J+1];
 			double B = 0;
@@ -41,10 +43,10 @@ double Solver<Model>::calcBirthFlux_CM(double _u0){
 				B += (px[i+1]-px[i])*(mod->birthRate(px[i+1],current_time)*pu[i+1] + mod->birthRate(px[i],current_time)*pu[i]);
 			}
 			B *= 0.5;
-			double bf = integrate_x([this](double z, double t){return mod->birthRate(z,t);}, current_time, state, 1);
-			
-			cout << "birthflux: " << B << " " << bf << endl;
-			double unext = bf/mod->growthRate(xb, current_time);
+			//cout << "birthflux: " << B << " " << bf << endl;
+			assert(B == birthFlux);
+
+			double unext = birthFlux/mod->growthRate(xb, current_time);
 			return unext;
 		};
 	

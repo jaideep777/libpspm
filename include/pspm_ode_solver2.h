@@ -106,7 +106,7 @@ class RKCK45{
 		if (y.size() != sys_size) resize(y.size());
 
 		// Calculates derivatives for the new step
-		cout << "\n>> init derivs ~~~\n";
+		//cout << "\n>> init derivs ~~~\n";
 		derivs(xt,y,dydx);
 		// good way of determining desired accuracy
 		for (int i=0; i<y.size(); i++) yscal[i] = fabs(y[i]) + fabs(dydx[i]*ht) + 1e-3;
@@ -181,7 +181,7 @@ void RKCK45<container>::RKStep(container& y, container& dydx, double& x, double 
 template <class container>
 template <class functor>
 void RKCK45<container>::RKTry(container& y, container& dydx, double& x, double h, container& yout, container& yerr, functor& derivs){ 
-	std::cout << "try:\n";
+	//std::cout << "try:\n";
 	//                              a0 a1   a2   a3   a4   a5
 	static constexpr double as[] = {0, 0.2, 0.3, 0.6, 1.0, 0.875};
 	//                              c0          c1   c2           c3           c4   c5

@@ -16,7 +16,7 @@ int main(){
 	S.initialize();
 	//S.print();	
 	
-	M.computeEnv(0,&S);
+	M.computeEnv(0,S.state,&S);
 
 	if (fabs(M.evalEnv(0,0) - 0.3821924) > 1e-6) return 1;
 	

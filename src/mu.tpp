@@ -1,3 +1,5 @@
+#include <cassert>
+
 // ~~~~~~~~~~~ FMU Solver ~~~~~~~~~~~
 double phi(double r){
 	return max(max(0.0,min(2*r,1.0)),min(r,2.0));
@@ -14,11 +16,13 @@ void Solver<Model>::calcRates_FMU(double t, vector<double> &U, vector<double> &d
 	#define growth(i) growthArray[i]
 
 	// i=0
-	double birthFlux = 0;
-	for (int j=0; j<J; ++j) birthFlux += h[j]*mod->birthRate(X[j], t)*U[j];
-	double bf = integrate_x([this](double z, double t){return mod->birthRate(z,t);}, t, U, 1);
-	cout << "birthFlux = " << birthFlux << " " << bf << endl;
+	double birthFlux = integrate_x([this](double z, double t){return mod->birthRate(z,t);}, t, U, 1);
 	
+	double B = 0;
+	for (int j=0; j<J; ++j) B += h[j]*mod->birthRate(X[j], t)*U[j];
+	//cout << "birthFlux = " << birthFlux << " " << bf << endl;
+	assert(birthFlux == B);
+
 	vector <double> u(J+1);
 
 	u[0] = birthFlux/(growth(0)+1e-12); // Q: is this correct? or g(X0,env)? 

@@ -9,7 +9,7 @@ using namespace std;
 
 int main(){
 
-	Solver<TestModel> S(25, 0,1, SOLVER_EBT);
+	Solver<TestModel> S(100, 0,1, SOLVER_EBT);
 	vector<double> x = S.getx();
 	
 	TestModel M;
@@ -19,12 +19,12 @@ int main(){
 	
 	ofstream fout("ebt_testmodel.txt");
 
-	for (double t=0; t <= 12; t=t+0.05) {
+	for (double t=0.05; t <= 8; t=t+0.05) {
 		S.step_to(t);
 	
 		vector<double> v = S.cohortsToDensity_EBT(x);
 		
-		fout << S.current_time << "\t";
+		fout << S.current_time << "\t" << S.newborns_out() << "\t";
 		for (auto y : S.state) fout << y << "\t";
 		fout << endl;
 	}

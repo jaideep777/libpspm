@@ -19,7 +19,7 @@ class TestModel{
 	// In such a case, the solver's SubdivisionSpline can be ussed
 	// Note: The state vector in the solver will not be updated until the RK step is completed. 
 	// Hence, explicitly pass the state to this function.
-	void computeEnv(double t, vector<double> state_vec, Solver<TestModel> * S){
+	void computeEnv(double t, vector<double> &state_vec, Solver<TestModel> * S){
 		//            _xm 
 		// Calculate / w(z,t)u(z,t)dz
 		//        xb`
