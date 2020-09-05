@@ -26,11 +26,11 @@ void Solver<Model>::calcRates_EBT(double t, vector<double>&S, vector<double> &dS
 	
 	double birthFlux = integrate_x([this](double z, double t){return mod->birthRate(z,t);}, t, S, 1);
 	
-	double B = mod->birthRate(x0, t)*N0;
-	for (int j=0; j<J; ++j) B += mod->birthRate(xint[j], t)*Nint[j];
-	//cout << "t/b = " << t << " " << mod->evalEnv(0,t) << " " << birthFlux << " ";
-	//cout << bf << endl;
-	assert(B == birthFlux);
+	//double B = mod->birthRate(x0, t)*N0;
+	//for (int j=0; j<J; ++j) B += mod->birthRate(xint[j], t)*Nint[j];
+	////cout << "t/b = " << t << " " << mod->evalEnv(0,t) << " " << birthFlux << " ";
+	////cout << bf << endl;
+	//assert(B == birthFlux);
 
 	*dN0  = -mod->mortalityRate(xb, t)*N0 - mortGrad*pi0 + birthFlux;
  	*dpi0 = mod->growthRate(xb, t)*N0 + growthGrad*pi0 - mod->mortalityRate(xb, t)*pi0;

@@ -36,15 +36,15 @@ double Solver<Model>::calcBirthFlux_CM(double _u0){
 			// calculate birthflux by trapezoidal integration (under new environment)
 			double birthFlux = integrate_x([this](double z, double t){return mod->birthRate(z,t);}, current_time, state, 1);
 			
-			double * px = &state[0];
-			double * pu = &state[J+1];
-			double B = 0;
-			for (int i=0; i<J; ++i){
-				B += (px[i+1]-px[i])*(mod->birthRate(px[i+1],current_time)*pu[i+1] + mod->birthRate(px[i],current_time)*pu[i]);
-			}
-			B *= 0.5;
-			//cout << "birthflux: " << B << " " << bf << endl;
-			assert(B == birthFlux);
+			//double * px = &state[0];
+			//double * pu = &state[J+1];
+			//double B = 0;
+			//for (int i=0; i<J; ++i){
+			//    B += (px[i+1]-px[i])*(mod->birthRate(px[i+1],current_time)*pu[i+1] + mod->birthRate(px[i],current_time)*pu[i]);
+			//}
+			//B *= 0.5;
+			////cout << "birthflux: " << B << " " << bf << endl;
+			//assert(B == birthFlux);
 
 			double unext = birthFlux/mod->growthRate(xb, current_time);
 			return unext;
