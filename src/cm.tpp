@@ -22,59 +22,51 @@ void Solver<Model>::calcRates_CM(double t, vector<double>&S, vector<double> &dSd
 
 
 template <class Model>
-double Solver<Model>::calcBirthFlux_CM(double _u0){
-	if (_u0 > 0) {  // if u0 is specified, set it
-		state[J+1] = _u0;
-	}
-	else{		   // else calculate iteratively
-		// function to iterate
-		auto f = [this](double utry){
-			// set u0 to given (trial) value
-			state[J+1] = utry;
-			// recompute environment based on new state
-			mod->computeEnv(current_time, state, this);
-			// calculate birthflux by trapezoidal integration (under new environment)
-			double birthFlux = integrate_x([this](double z, double t){return mod->birthRate(z,t);}, current_time, state, 1);
-			
-			//double * px = &state[0];
-			//double * pu = &state[J+1];
-			//double B = 0;
-			//for (int i=0; i<J; ++i){
-			//    B += (px[i+1]-px[i])*(mod->birthRate(px[i+1],current_time)*pu[i+1] + mod->birthRate(px[i],current_time)*pu[i]);
-			//}
-			//B *= 0.5;
-			////cout << "birthflux: " << B << " " << bf << endl;
-			//assert(B == birthFlux);
+double Solver<Model>::calc_u0_CM(){
+	// function to iterate
+	auto f = [this](double utry){
+		// set u0 to given (trial) value
+		state[J+1] = utry;
+		// recompute environment based on new state
+		mod->computeEnv(current_time, state, this);
+		// calculate birthflux by trapezoidal integration (under new environment)
+		double birthFlux = integrate_x([this](double z, double t){return mod->birthRate(z,t);}, current_time, state, 1);
+		
+		double unext = birthFlux/mod->growthRate(xb, current_time);
+		return unext;
+	};
 
-			double unext = birthFlux/mod->growthRate(xb, current_time);
-			return unext;
-		};
-	
-		double u0 = state[J+2]; // initialize with u0 = u1
-		// iterate
-		double err = 100;
-		while(err > 1e-6){
-			double u1 = f(u0);
-			err = abs(u1 - u0);
-			u0 = u1;
-		}
-		state[J+1] = u0;
-		//cout << "u0 = " << u0 << endl;	
-	} 
+	double u0 = state[J+2]; // initialize with u0 = u1
+	// iterate
+	double err = 100;
+	while(err > 1e-6){
+		double u1 = f(u0);
+		err = abs(u1 - u0);
+		u0 = u1;
+	}
+	state[J+1] = u0;
+	//cout << "u0 = " << u0 << endl;	
+	return state[J+1];
 }
 
 
 template <class Model>
-void Solver<Model>::addCohort_CM(double u0){
+void Solver<Model>::addCohort_CM(){
 	auto p_x  = state.begin();
 	auto p_u  = state.begin(); advance(p_u, J+1); 
 
-	state.insert(p_u, u0); // insert new u0 BEFORE p_u. (Now both iterators are invalid)
+	state.insert(p_u, -1); // insert new u0 (dummy value) BEFORE p_u. (Now both iterators are invalid)
 	state.insert(state.begin(), xb); // this inserts xb at the 1st position	
 	++J;	// increment J to reflect new system size
 
-	calcBirthFlux_CM(u0);
-	
+	// set u0 to correct value
+	if (u0_in < 0){
+		calc_u0_CM(); // this internally sets u0 in state
+	}
+	else {
+		state[J+1] = u0_in;
+	}
+
 }
 
 

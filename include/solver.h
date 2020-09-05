@@ -17,25 +17,30 @@ class Solver{
 	int state_size;
 	//int nx;
 	
+	// These are only initial values, and repeatedly used only by FMU. 
+	// Others derive them from the state. 
+	// Kept private so users dont accidently access them for other solvers
 	std::vector <double> X;	
 	std::vector <double> x;
 	std::vector <double> h;
 	
-	double newborns;
-		
 	RKCK45<vector<double>> odeStepper;
 
+	double u0_in = -1;
+	
 	public:
 	double xb, xm;
 	
-	double current_time = 0;
-	std::vector <double> state;
+	// The current state of the system, {t, S, dS/dt} 
+	double current_time = 0;      // These are synced with ODE solver after each successful step
+	std::vector <double> state;	  // +-- They are NOT synced during the ODE solver's internal steps
 	std::vector <double> rates; 
 		
 	Solver(int _J, double _xb, double _xm, PSPM_SolverType _method);
 	Solver(std::vector<double> xbreaks, PSPM_SolverType _method);
 
 	void setModel(Model *M);
+	void setInputNewbornDensity(double input_u0);
 //	template<typename Func>
 //	void initialize(Func calcIC);
 	
@@ -49,21 +54,22 @@ class Solver{
 	void calcRates_FMU(double t, vector<double> &U, vector<double> &dUdt);
 	//void calcRates_FMU(double t);	
 	
+	void calcRates_EBT(double t, vector<double>&S, vector<double> &dSdt);
 	void addCohort_EBT();
 	void removeDeadCohorts_EBT();
-	void calcRates_EBT(double t, vector<double>&S, vector<double> &dSdt);
 	vector<double> cohortsToDensity_EBT(vector <double> &breaks);
 
 	void calcRates_CM(double t, vector<double>&S, vector<double> &dSdt);
-	double calcBirthFlux_CM(double _u0);
-	void addCohort_CM(double u0 = -1);
+	double calc_u0_CM();
+	void addCohort_CM();
 	void removeCohort_CM();
 	
 	
 	void step_to(double tstop);
 
-	double newborns_out();
-
+	double newborns_out();  // This is the actual system reproduction (fitness) hence biologically relevant
+	double u0_out();        // This is used for equilibrium solving, because in general, u0 rather than birthFlux, will approach a constant value
+	
 	void print();
 	
 	template<typename wFunc>

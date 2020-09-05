@@ -22,7 +22,6 @@ Solver<Model>::Solver(std::vector<double> xbreaks, PSPM_SolverType _method) : od
 	xm = xbreaks[xbreaks.size()-1];
 	J  = xbreaks.size()-1;
 	method = _method;
-	newborns = 0;
 
 	x = xbreaks;
 
@@ -70,7 +69,13 @@ void Solver<Model>::setModel(Model *M){
 	mod = M;
 }
 
-	
+
+template<class Model>
+void Solver<Model>::setInputNewbornDensity(double input_u0){
+	u0_in = input_u0;
+}
+
+
 template<class Model>
 Solver<Model>::Solver(int _J, double _xb, double _xm, PSPM_SolverType _method) 
 	: Solver(seq(_xb, _xm, _J+1), _method){
@@ -198,6 +203,9 @@ double Solver<Model>::integrate_x(wFunc w, double t, vector<double>&S, int power
 // current_time is updated by the ODE solver at every (internal) step
 template<class Model>
 void Solver<Model>::step_to(double tstop){
+	// do nothing if tstop is <= current_time
+	if (tstop <= current_time) return;
+	
 	if (method == SOLVER_FMU){	
 		auto derivs = [this](double t, vector<double> &S, vector<double> &dSdt){
 			mod->computeEnv(t, S, this);
@@ -222,7 +230,7 @@ void Solver<Model>::step_to(double tstop){
 		if (state[J+1] > 0) addCohort_EBT();  // Add new cohort if N0 > 0. Add after removing dead ones otherwise this will also be removed. 
 		
 		// update variables based on new state
-		// X, x, h, etc
+		// X, x, h, etc  ==> Maybe not necessary
 
 	}
 	if (method == SOLVER_CM){
@@ -249,6 +257,12 @@ double Solver<Model>::newborns_out(){
 	// calculate birthflux 
 	double birthFlux = integrate_x([this](double z, double t){return mod->birthRate(z,t);}, current_time, state, 1);
 	return birthFlux;
+}
+
+
+template<class Model>
+double Solver<Model>::u0_out(){
+	return newborns_out()/mod->growthRate(xb, current_time);
 }
 
 
