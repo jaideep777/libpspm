@@ -28,7 +28,7 @@ int main(){
 	}
 
 	fout.close();
- 
+
 	if (abs(S.u0_out() - 1.46823) < 1e-5) return 0;
 	else return 1;
 

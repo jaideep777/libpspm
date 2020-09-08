@@ -16,12 +16,15 @@ std::vector <double> seq(double from, double to, int len){
 }
 
 // ~~~~~~~~~~~ SOLVER ~~~~~~~~~~~~~~~~~~~~~
+
 template<class Model>
-Solver<Model>::Solver(std::vector<double> xbreaks, PSPM_SolverType _method) : odeStepper(0){
+void Solver<Model>::resetState(const std::vector<double>& xbreaks){
+   	current_time = 0;
+	odeStepper = RKCK45<vector<double>> (0);  // this is a cheap operation, but this will empty the internal containers, which will then be (automatically) resized at next 1st ODE step. Maybe add a reset function to the ODE stepper? 
+
 	xb = xbreaks[0];
 	xm = xbreaks[xbreaks.size()-1];
 	J  = xbreaks.size()-1;
-	method = _method;
 
 	x = xbreaks;
 
@@ -61,8 +64,20 @@ Solver<Model>::Solver(std::vector<double> xbreaks, PSPM_SolverType _method) : od
 
 
 	rates.resize(state_size);
-
+	u0_out_history.clear();
 }
+
+template<class Model>
+Solver<Model>::Solver(std::vector<double> xbreaks, PSPM_SolverType _method) : odeStepper(0) {
+	method = _method;
+	resetState(xbreaks);	
+}
+
+template<class Model>
+Solver<Model>::Solver(int _J, double _xb, double _xm, PSPM_SolverType _method) 
+	: Solver(seq(_xb, _xm, _J+1), _method){
+}
+
 
 template<class Model>
 void Solver<Model>::setModel(Model *M){
@@ -73,12 +88,6 @@ void Solver<Model>::setModel(Model *M){
 template<class Model>
 void Solver<Model>::setInputNewbornDensity(double input_u0){
 	u0_in = input_u0;
-}
-
-
-template<class Model>
-Solver<Model>::Solver(int _J, double _xb, double _xm, PSPM_SolverType _method) 
-	: Solver(seq(_xb, _xm, _J+1), _method){
 }
 
 
@@ -125,7 +134,15 @@ void Solver<Model>::print(){
 	std::cout << "X (" << X.size() << "): ";
 	for (int i=0; i<X.size(); ++i) cout << X[i] << " ";
 	std::cout << std::endl;
-	
+	if (method == SOLVER_FMU){
+		std::cout << "x (" << x.size() << "): "; 
+		for (auto xx : x) std::cout << xx << " ";
+		std::cout << "\n";
+		std::cout << "h (" << h.size() << "): "; 
+		for (auto hh : h) std::cout << hh << " ";
+		std::cout << "\n";
+	}
+
 	std::cout << "State (" << state.size() << "):\n";
 	std::cout << "  X (" << state.size()-xsize() << "): ";
 	for (int i=0; i<state.size()-xsize(); ++i) cout << state[i] << " ";
@@ -155,6 +172,7 @@ void Solver<Model>::initialize(){
 		for (size_t i=0; i<J; ++i)  state[J+1 + 1+i] = mod->calcIC(X[1+i])*h[i];	// state[J+1+0]=0 (N0)
 	}
 }
+
 
 template<class Model>
 template<typename wFunc>
@@ -265,9 +283,45 @@ double Solver<Model>::u0_out(){
 	return newborns_out()/mod->growthRate(xb, current_time);
 }
 
+template<class Model>
+double Solver<Model>::get_u0_out(){
+	return u0_out_history.back();
+}
+
+
+template<class Model>
+double Solver<Model>::stepToEquilibrium(){
+	for (double t=0.05; ; t=t+0.05) {
+		step_to(t);
+		
+		u0_out_history.push_back(u0_out());
+		if (u0_out_history.size() > 5) u0_out_history.pop_front();
+		//cout << t << " | ";  
+		//for (auto u : u0_out_history) cout << u << " "; // cout << "\n";
+		double max_err = -1e20;
+		//cout << u0_out_history.size() << endl; 
+		for (auto it = ++u0_out_history.begin(); it != u0_out_history.end(); ++it){
+			double err = *it - *(prev(it)); 
+			max_err = std::max(max_err, abs(err));
+			//cout << err << " ";
+		}
+		//cout << " | " << max_err << endl;
+		
+		if (abs(max_err) < 1e-6){
+			cout << t << " | " << J << " | "; for (auto u : u0_out_history) cout << u << " "; cout << "|" << max_err << endl;
+			break;
+		}	
+	}
+	
+}
+
+
 
 #include "mu.tpp"
 #include "ebt.tpp"
 #include "cm.tpp"
+
+
+
 
 

@@ -2,6 +2,7 @@
 #define  PSPM_SOLVER_H_
 
 #include <vector>
+#include <list>
 #include "pspm_ode_solver2.h"
 
 enum PSPM_SolverType {SOLVER_FMU, SOLVER_MMU, SOLVER_CM, SOLVER_EBT};
@@ -28,16 +29,21 @@ class Solver{
 
 	double u0_in = -1;
 	
+	std::list<double> u0_out_history;                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    
+	std::vector<double> schedule;
+
 	public:
 	double xb, xm;
 	
 	// The current state of the system, {t, S, dS/dt} 
-	double current_time = 0;      // These are synced with ODE solver after each successful step
+	double current_time;      // These are synced with ODE solver after each successful step
 	std::vector <double> state;	  // +-- They are NOT synced during the ODE solver's internal steps
 	std::vector <double> rates; 
-		
+
+	public:	
 	Solver(int _J, double _xb, double _xm, PSPM_SolverType _method);
 	Solver(std::vector<double> xbreaks, PSPM_SolverType _method);
+	void resetState(const std::vector<double>& xbreaks); 	
 
 	void setModel(Model *M);
 	void setInputNewbornDensity(double input_u0);
@@ -67,9 +73,12 @@ class Solver{
 	
 	void step_to(double tstop);
 
+	double stepToEquilibrium();
+
 	double newborns_out();  // This is the actual system reproduction (fitness) hence biologically relevant
 	double u0_out();        // This is used for equilibrium solving, because in general, u0 rather than birthFlux, will approach a constant value
-	
+	double get_u0_out();	// just returns from history without recomputing
+
 	void print();
 	
 	template<typename wFunc>
