@@ -1,3 +1,6 @@
+#ifndef PSPM_PSPM_ODE_SOLVER_H
+#define PSPM_PSPM_ODE_SOLVER_H
+
 /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  *
  *  Code for RK Solvers 
@@ -229,7 +232,7 @@ void RKCK45<container>::RKTry(container& y, container& dydx, double& x, double h
 }
 
 
-
+#endif
 
 
 
