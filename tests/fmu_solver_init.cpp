@@ -11,6 +11,8 @@ class Model{
 	double calcIC(double x){
 		return sc*x;
 	}
+
+	vector<double> initStateExtra(double d){}
 };
 
 

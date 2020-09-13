@@ -5,6 +5,7 @@
 #include <cassert>
 #include <string>
 
+#include "iterator_set.h"
 
 using namespace std;
 
@@ -18,6 +19,15 @@ std::vector <double> seq(double from, double to, int len){
 // ~~~~~~~~~~~ SOLVER ~~~~~~~~~~~~~~~~~~~~~
 
 template<class Model>
+const int Solver<Model>::xsize(){
+	if (method == SOLVER_FMU) return J;	
+	if (method == SOLVER_MMU) return J;  
+	if (method == SOLVER_CM ) return J+1;
+	if (method == SOLVER_EBT) return J+1;
+}
+
+
+template<class Model>
 void Solver<Model>::resetState(const std::vector<double>& xbreaks){
    	current_time = 0;
 	odeStepper = RKCK45<vector<double>> (0);  // this is a cheap operation, but this will empty the internal containers, which will then be (automatically) resized at next 1st ODE step. Maybe add a reset function to the ODE stepper? 
@@ -28,42 +38,61 @@ void Solver<Model>::resetState(const std::vector<double>& xbreaks){
 
 	x = xbreaks;
 
-	X.resize(J);
-	for (size_t i=0; i<J; ++i) X[i] = (xbreaks[i]+xbreaks[i+1])/2.0;
+	// Set up layout of state vector, for e.g.
+	//  ------------------------------------------------------------
+	// | x | x | x : u | u | u : a | b | c | a | b | c | a | b | c |
+	//  ------------------------------------------------------------
+	//  In above layout, the internal variables x and u are tightly
+	//  packed, and the extra variables a, b, c are interleaved. 
+	//  This arrangement is cache friendly because:
+	//  1. When calculating integrals, x and u are traversed
+	//  2. When setting rates, typically a,b,c are calculated one 
+	//  after the other for each x.
+	auto addVar = [this](std::string name, int stride, int offset){
+		vars.push_back(name);
+		strides.push_back(stride);
+		offsets.push_back(offset);
+	};
+	vars.clear(); strides.clear(); offsets.clear(); 
+	if (method == SOLVER_FMU){ 
+		addVar("u", 1, xsize());		// uuuuu..
+	}
+	else{
+		addVar("X", 1, xsize());		// xxxxx.. uuuuu..
+		addVar("u", 1, xsize());		// 
+	}
+	for (int i=0; i<extra_vars_names.size(); ++i){
+		addVar(extra_vars_names[i], extra_vars_names.size(), 1);  // abc abc abc .. 
+	}
 	
-	h.resize(J);	// This will be used by FMU and updated by MMU, EBT, so pre-allocate
-	for (size_t i=0; i<J; ++i) h[i] = xbreaks[i+1] - xbreaks[i];	
+
+	state.resize(vars.size()*xsize());   // xsize() is J for FMU & MMU, and J+1 for CM and EBT
+	rates.resize(state.size());
+	std::fill(state.begin(), state.end(), 0); 
 	
+	// initialize X
 	if (method == SOLVER_FMU){	
-		//nx = J;						// X
-		state_size = J;				// U
-		state.resize(state_size,0);
+		X.resize(J);
+		for (size_t i=0; i<J; ++i) X[i] = (xbreaks[i]+xbreaks[i+1])/2.0;
+		
+		h.resize(J);	// This will be used only by FMU
+		for (size_t i=0; i<J; ++i) h[i] = xbreaks[i+1] - xbreaks[i];	
+
+		// no X in FMU state
 	}
 
 	if (method == SOLVER_MMU){
-		//nx = J;						// X
-		state_size = J+1 + J;		// x, U
-		state.resize(state_size,0);
-		for (size_t i=0; i<J+1; ++i) state[i] = xbreaks[i];
+		for (size_t i=0; i<J; ++i) state[i] = xbreaks[i];  // skip x_J+1 as it is fixed. 
 	}
 
 	if (method == SOLVER_CM){
-		//nx = J+1;					// x
-		state_size = J+1 + J+1;		// x, u
-		state.resize(state_size,0);
 		for (size_t i=0; i<J+1; ++i) state[i] = xbreaks[i];
 	}
 
 	if (method == SOLVER_EBT){
-		//nx = J+1;					// [x0, xint]
-		state_size = 1 + J + 1 + J;	// pi0, xint, N0, Nint
-		state.resize(state_size,0);
-		for (size_t i=0; i<J; ++i) state[1+i] = X[i];	// leave [0] for pi0 (= 0)
-		X.insert(X.begin(), xb);	// x0 = xb + pi0/N0
+		for (size_t i=0; i<J; ++i) state[1+i] = (xbreaks[i]+xbreaks[i+1])/2.0; // leave [0] for pi0 (= 0)
 	}
-
-
-	rates.resize(state_size);
+   
 	u0_out_history.clear();
 }
 
@@ -96,14 +125,6 @@ const int Solver<Model>::size(){
 	return state.size();
 }
 
-template<class Model>
-const int Solver<Model>::xsize(){
-	if (method == SOLVER_FMU) return J;	
-	if (method == SOLVER_MMU) return J;  
-	if (method == SOLVER_CM ) return J+1;
-	if (method == SOLVER_EBT) return J+1;
-}
-
 	//for (int i=0; i<J; ++i){
 	//    x[i+1] = exp(log(0.01) + (i)*(log(xm)-log(0.01))/(J-1));
 	//    h[i] = x[i+1]-x[i];
@@ -114,10 +135,8 @@ const int Solver<Model>::xsize(){
 
 template<class Model>
 const double * Solver<Model>::getX(){
-	if (method == SOLVER_FMU)	return x.data();  
-	if (method == SOLVER_MMU)	return x.data();
-	if (method == SOLVER_CM )	return x.data();
-	if (method == SOLVER_EBT)	return X.data();
+	auto iset = getIterators_state();
+	return &(*iset.get("X"));
 }
 
 template<class Model>
@@ -127,28 +146,41 @@ vector<double> Solver<Model>::getx(){
 
 
 template<class Model>
+IteratorSet<vector<double>::iterator> Solver<Model>::getIterators_state(){
+	
+	IteratorSet<vector<double>::iterator> iset(state.begin(), vars, xsize(), offsets, strides);
+	if (method == SOLVER_FMU) iset.push_back("X", X.begin(), 1);
+	return iset;
+}
+
+
+template<class Model>
+IteratorSet<vector<double>::iterator> Solver<Model>::getIterators_rates(){
+	return IteratorSet<vector<double>::iterator> (rates.begin(), vars, xsize(), offsets, strides);
+}
+
+
+
+template<class Model>
 void Solver<Model>::print(){
 	string types[] = {"FMU", "MMU", "CM", "EBT"};
 	std::cout << "Type: " << types[method] << std::endl;
 
-	std::cout << "X (" << X.size() << "): ";
-	for (int i=0; i<X.size(); ++i) cout << X[i] << " ";
-	std::cout << std::endl;
+	//IteratorSet<vector<double>::iterator> iset(state.begin(), vars.size(), vars, xsize());
+	auto iset = getIterators_state();
+
 	if (method == SOLVER_FMU){
+		iset.push_back("_X", X.begin(),1);
+		iset.push_back("_h", h.begin(),1);
 		std::cout << "x (" << x.size() << "): "; 
 		for (auto xx : x) std::cout << xx << " ";
-		std::cout << "\n";
-		std::cout << "h (" << h.size() << "): "; 
-		for (auto hh : h) std::cout << hh << " ";
 		std::cout << "\n";
 	}
 
 	std::cout << "State (" << state.size() << "):\n";
-	std::cout << "  X (" << state.size()-xsize() << "): ";
-	for (int i=0; i<state.size()-xsize(); ++i) cout << state[i] << " ";
-	std::cout << "\n  U (" << xsize() << "): ";
-	for (int i=0; i<xsize(); ++i) cout << state[state.size()-xsize() + i] << " ";
-	std::cout << std::endl;
+
+	iset.print();
+	
 }
 
 
@@ -158,18 +190,38 @@ void Solver<Model>::print(){
 template <class Model>
 void Solver<Model>::initialize(){
 	// state vector was initialized to 0 in Constrctor. Set non-zero elements here
+	vector<double> X0(J), h(J);
+	for (int i=0; i<X0.size(); ++i) X0[i] = (x[i]+x[i+1])/2;
+	for (int i=0; i<h.size(); ++i) h[i] = x[i+1]-x[i];
+	
+
 	if (method == SOLVER_FMU){
-		for (size_t i=0; i<J; ++i)  state[i] = mod->calcIC(X[i]);
+		for (size_t i=0; i<J; ++i)  state[i] = mod->calcIC(X0[i]);
 	}
 	if (method == SOLVER_MMU){
-		for (size_t i=0; i<J; ++i)  state[J+1 + i] = mod->calcIC(X[i]);
+		for (size_t i=0; i<J; ++i)  state[J + i] = mod->calcIC(X0[i]);
 		//for (size_t i=0; i<J+1; ++i) uprev[i] = calcIC(x[i]);
 	}
 	if (method == SOLVER_CM){
 		for (size_t i=0; i<J+1; ++i)  state[J+1 + i] = mod->calcIC(x[i]);
 	}
 	if (method == SOLVER_EBT){
-		for (size_t i=0; i<J; ++i)  state[J+1 + 1+i] = mod->calcIC(X[1+i])*h[i];	// state[J+1+0]=0 (N0)
+		for (size_t i=0; i<J; ++i)  state[J+1 + 1+i] = mod->calcIC(X0[i])*h[i];	// state[J+1+0]=0 (N0)
+	}
+
+	if (extra_vars_names.size() > 0){  // If extra state variables have been requested, initialize them
+		// Initialize extra size-dependent variables
+		auto is = getIterators_state();
+		
+		auto& itx = is.get("X");
+		int id = is.getIndex(extra_vars_names[0]); // get index of 1st extra variable
+		for (is.begin(); !is.end(); ++is){
+			vector <double> v = mod->initStateExtra(*itx);  // returned vector will be `move`d so this is fast 
+			auto it_vec = is.get();
+			for (size_t i = 0; i<extra_vars_names.size(); ++i){
+				*it_vec[id+i] = v[i];
+			}
+		}
 	}
 }
 
@@ -315,6 +367,13 @@ double Solver<Model>::stepToEquilibrium(){
 	
 }
 
+
+
+template<class Model>
+double Solver<Model>::createSizeStructuredVariables(vector<std::string> names){
+	extra_vars_names = names;
+	resetState(x);
+}
 
 
 #include "mu.tpp"

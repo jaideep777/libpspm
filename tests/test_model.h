@@ -10,6 +10,10 @@ class TestModel{
 		return pow(1-x,2)/pow(1+x,4) + (1-x)/pow(1+x,3);
 	}
 
+	vector<double> initStateExtra(double x){
+	
+	}
+
 	double evalEnv(double x, double t){
 		return env;
 	}

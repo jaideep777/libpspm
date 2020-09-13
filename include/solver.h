@@ -3,7 +3,10 @@
 
 #include <vector>
 #include <list>
+#include <map>
+
 #include "pspm_ode_solver2.h"
+#include "iterator_set.h"
 
 enum PSPM_SolverType {SOLVER_FMU, SOLVER_MMU, SOLVER_CM, SOLVER_EBT};
 
@@ -12,6 +15,12 @@ class Solver{
 	private:
 	Model * mod;				// Model should be a class with growth, mortality, birth, env, and IC functions
 	
+	std::vector<string> vars;				// state has internal variables (x, u) and possibly extra variables 
+	std::vector<string> extra_vars_names;   //   +-- which will be created in the state in this order (for each species)
+	std::vector<int> strides;				// defines how the variables are packed into the state vector
+	std::vector<int> offsets;				// 
+
+
 	PSPM_SolverType method;
 
 	int J;
@@ -36,8 +45,8 @@ class Solver{
 	double xb, xm;
 	
 	// The current state of the system, {t, S, dS/dt} 
-	double current_time;      // These are synced with ODE solver after each successful step
-	std::vector <double> state;	  // +-- They are NOT synced during the ODE solver's internal steps
+	double current_time;			// These are synced with ODE solver after each successful step
+	std::vector <double> state;		// +-- They are NOT synced during the ODE solver's internal steps
 	std::vector <double> rates; 
 
 	public:	
@@ -47,6 +56,7 @@ class Solver{
 
 	void setModel(Model *M);
 	void setInputNewbornDensity(double input_u0);
+	double createSizeStructuredVariables(std::vector<std::string> names);
 //	template<typename Func>
 //	void initialize(Func calcIC);
 	
@@ -56,6 +66,8 @@ class Solver{
 	const int xsize();
 	const double* getX();
 	vector<double> getx();
+	IteratorSet<vector<double>::iterator> getIterators_state();
+	IteratorSet<vector<double>::iterator> getIterators_rates();
 
 	void calcRates_FMU(double t, vector<double> &U, vector<double> &dUdt);
 	//void calcRates_FMU(double t);	
