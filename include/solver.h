@@ -69,6 +69,8 @@ class Solver{
 	IteratorSet<vector<double>::iterator> getIterators_state();
 	IteratorSet<vector<double>::iterator> getIterators_rates();
 
+	void calcRates_extra(double t, vector<double>&S, vector<double>& dSdt);
+	
 	void calcRates_FMU(double t, vector<double> &U, vector<double> &dUdt);
 	//void calcRates_FMU(double t);	
 	

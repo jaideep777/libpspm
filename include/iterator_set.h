@@ -118,11 +118,11 @@ class IteratorSet{
 	}
 
 	void printInfo(){
-		cout << "--- Iterator Set ---\n";
+		std::cout << "--- Iterator Set ---\n";
 		for (int i=0; i<names.size(); ++i){
-			cout << names[i] << "\t" << strides[i] << " :\t" << *iters[i] <<  endl;
+			std::cout << names[i] << "\t" << strides[i] << " :\t" << *iters[i] << "\n";
 		}
-		cout << "--------------------\n";
+		std::cout << "--------------------\n";
 
 	}
 };

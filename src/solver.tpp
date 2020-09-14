@@ -69,7 +69,8 @@ void Solver<Model>::resetState(const std::vector<double>& xbreaks){
 	state.resize(vars.size()*xsize());   // xsize() is J for FMU & MMU, and J+1 for CM and EBT
 	rates.resize(state.size());
 	std::fill(state.begin(), state.end(), 0); 
-	
+	std::fill(rates.begin(), rates.end(), -999); // DEBUG
+
 	// initialize X
 	if (method == SOLVER_FMU){	
 		X.resize(J);
@@ -178,8 +179,11 @@ void Solver<Model>::print(){
 	}
 
 	std::cout << "State (" << state.size() << "):\n";
-
 	iset.print();
+	
+	std::cout << "Rates (" << rates.size() << "):\n";
+	auto irates = getIterators_rates();
+	irates.print();
 	
 }
 
@@ -230,7 +234,7 @@ template<class Model>
 template<typename wFunc>
 double Solver<Model>::integrate_x(wFunc w, double t, vector<double>&S, int power){
 	//cout << " | " <<  t << " " << mod->evalEnv(0,t) << " ";
-	if (method == SOLVER_FMU || method == SOLVER_MMU){
+	if (method == SOLVER_FMU){
 		// integrate using midpoint quadrature rule
 		double I=0;
 		double * U = S.data();
@@ -269,6 +273,21 @@ double Solver<Model>::integrate_x(wFunc w, double t, vector<double>&S, int power
 	}
 }
 
+template<class Model>
+void Solver<Model>::calcRates_extra(double t, vector<double>&S, vector<double>& dSdt){
+	IteratorSet<vector<double>::iterator> is(S.begin(), vars, xsize(), offsets, strides);
+	if (method == SOLVER_FMU) is.push_back("X", X.begin(), 1);
+	IteratorSet<vector<double>::iterator> ir(dSdt.begin(), vars, xsize(), offsets, strides);
+	
+	auto& itx = is.get("X");
+	auto& itu = is.get("u");
+	auto& itse = is.get(extra_vars_names[0]);
+	auto& itre = ir.get(extra_vars_names[0]);
+	for (is.begin(), ir.begin(); !is.end(); ++is, ++ir){
+		auto it_returned = mod->calcRates_extra(t, itx, itu, itse, itre);
+		assert(distance(itre, it_returned) == extra_vars_names.size());
+	}
+}
 
 // current_time is updated by the ODE solver at every (internal) step
 template<class Model>

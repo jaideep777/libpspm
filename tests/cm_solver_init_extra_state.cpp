@@ -10,7 +10,7 @@ using namespace std;
 
 int main(){
 
-	Solver<TestModel> S(10, 0,1, SOLVER_FMU);
+	Solver<TestModel> S(10, 0,1, SOLVER_CM);
 	
 	TestModel M;
 	
@@ -19,11 +19,11 @@ int main(){
 
 	S.initialize();
 	M.computeEnv(0, S.state, &S);
-	S.calcRates_FMU(1, S.state, S.rates);
+	S.calcRates_CM(1, S.state, S.rates);
 	S.calcRates_extra(1, S.state, S.rates);
 	S.print();
 
-	ifstream fin("tests/test_data/fmu_extra_state_rates_J10_testmodel2.txt");
+	ifstream fin("tests/test_data/cm_extra_state_rates_J10_testmodel2.txt");
 	for (int i=0; i<S.state.size(); ++i){
 		double d;
 		fin >> d;

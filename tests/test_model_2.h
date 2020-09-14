@@ -1,6 +1,41 @@
 #ifndef __PSPM_TEST_TEST_TEST_MODEL_H_
 #define __PSPM_TEST_TEST_TEST_MODEL_H_
 
+
+
+class Plant{
+	public:
+	double height;
+	double mortality;
+	double viable_seeds;
+	double heart_mass;
+	double sap_mass;
+	
+	Plant(double h){
+		height = h;
+	}
+
+	void init_state(){
+		mortality = 3*exp(-height);	
+		viable_seeds = 100*height;
+		heart_mass = 1000*height*height*height;
+		sap_mass = 10*sqrt(height);
+	}
+
+	vector<double> calcRates(){
+		vector<double> rates(4);
+		rates[0] = -2;
+		rates[1] = 0;
+		rates[2] = -20*height;
+		rates[3] = -30*height;
+		return rates;
+	}
+};
+
+
+
+
+
 class TestModel{
 	public:
 	double sc = 10;
@@ -9,7 +44,6 @@ class TestModel{
 	double calcIC(double x){
 		return pow(1-x,2)/pow(1+x,4) + (1-x)/pow(1+x,3);
 	}
-
 
 	double evalEnv(double x, double t){
 		return env;
@@ -56,15 +90,33 @@ class TestModel{
 		return n1*n2;
 	}
 
-
-	vector<double> initStateExtra(double x){
 	
+	// optional functions, if extra size-structured variables are desired
+	vector<double> initStateExtra(double x){
+		Plant p(x);
+		p.init_state();
+		vector<double> sv;
+	    sv.reserve(4);	
+		sv.push_back(p.mortality); 
+		sv.push_back(p.viable_seeds); 
+		sv.push_back(p.heart_mass); 
+		sv.push_back(p.sap_mass);
+		return sv;
 	}
 
-
-	vector<double>::iterator calcRatesExtra(double t, vector<double>::iterator ix, vector<double>::iterator iu, 
+	vector<double>::iterator calcRates_extra(double t, vector<double>::iterator ix, vector<double>::iterator iu, 
 											vector<double>::iterator istate, vector<double>::iterator irates){
+		
+		Plant p(*ix);
+		p.init_state();
+		vector<double> r = p.calcRates();
+		*irates++ = r[0];
+		*irates++ = r[1];
+		*irates++ = r[2];
+		*irates++ = r[3];
+
 		return irates;
+	
 	}
 
 };
