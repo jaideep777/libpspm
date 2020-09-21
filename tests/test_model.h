@@ -6,7 +6,7 @@ class TestModel{
 	double sc = 10;
 	double env;
 	
-	double calcIC(double x){
+	double initDensity(double x){
 		return pow(1-x,2)/pow(1+x,4) + (1-x)/pow(1+x,3);
 	}
 

@@ -49,11 +49,11 @@ void Solver<Model>::resetState(const std::vector<double>& xbreaks){
 	//  2. When setting rates, typically a,b,c are calculated one 
 	//  after the other for each x.
 	auto addVar = [this](std::string name, int stride, int offset){
-		vars.push_back(name);
+		varnames.push_back(name);
 		strides.push_back(stride);
 		offsets.push_back(offset);
 	};
-	vars.clear(); strides.clear(); offsets.clear(); 
+	varnames.clear(); strides.clear(); offsets.clear(); 
 	if (method == SOLVER_FMU){ 
 		addVar("u", 1, xsize());		// uuuuu..
 	}
@@ -61,12 +61,12 @@ void Solver<Model>::resetState(const std::vector<double>& xbreaks){
 		addVar("X", 1, xsize());		// xxxxx.. uuuuu..
 		addVar("u", 1, xsize());		// 
 	}
-	for (int i=0; i<extra_vars_names.size(); ++i){
-		addVar(extra_vars_names[i], extra_vars_names.size(), 1);  // abc abc abc .. 
+	for (int i=0; i<varnames_extra.size(); ++i){
+		addVar(varnames_extra[i], varnames_extra.size(), 1);  // abc abc abc .. 
 	}
 	
 
-	state.resize(vars.size()*xsize());   // xsize() is J for FMU & MMU, and J+1 for CM and EBT
+	state.resize(varnames.size()*xsize());   // xsize() is J for FMU & MMU, and J+1 for CM and EBT
 	rates.resize(state.size());
 	std::fill(state.begin(), state.end(), 0); 
 	std::fill(rates.begin(), rates.end(), -999); // DEBUG
@@ -149,7 +149,7 @@ vector<double> Solver<Model>::getx(){
 template<class Model>
 IteratorSet<vector<double>::iterator> Solver<Model>::getIterators_state(){
 	
-	IteratorSet<vector<double>::iterator> iset(state.begin(), vars, xsize(), offsets, strides);
+	IteratorSet<vector<double>::iterator> iset(state.begin(), varnames, xsize(), offsets, strides);
 	if (method == SOLVER_FMU) iset.push_back("X", X.begin(), 1);
 	return iset;
 }
@@ -157,7 +157,7 @@ IteratorSet<vector<double>::iterator> Solver<Model>::getIterators_state(){
 
 template<class Model>
 IteratorSet<vector<double>::iterator> Solver<Model>::getIterators_rates(){
-	return IteratorSet<vector<double>::iterator> (rates.begin(), vars, xsize(), offsets, strides);
+	return IteratorSet<vector<double>::iterator> (rates.begin(), varnames, xsize(), offsets, strides);
 }
 
 
@@ -167,7 +167,7 @@ void Solver<Model>::print(){
 	string types[] = {"FMU", "MMU", "CM", "EBT"};
 	std::cout << "Type: " << types[method] << std::endl;
 
-	//IteratorSet<vector<double>::iterator> iset(state.begin(), vars.size(), vars, xsize());
+	//IteratorSet<vector<double>::iterator> iset(state.begin(), varnames.size(), vars, xsize());
 	auto iset = getIterators_state();
 
 	if (method == SOLVER_FMU){
@@ -200,29 +200,29 @@ void Solver<Model>::initialize(){
 	
 
 	if (method == SOLVER_FMU){
-		for (size_t i=0; i<J; ++i)  state[i] = mod->calcIC(X0[i]);
+		for (size_t i=0; i<J; ++i)  state[i] = mod->initDensity(X0[i]);
 	}
 	if (method == SOLVER_MMU){
-		for (size_t i=0; i<J; ++i)  state[J + i] = mod->calcIC(X0[i]);
-		//for (size_t i=0; i<J+1; ++i) uprev[i] = calcIC(x[i]);
+		for (size_t i=0; i<J; ++i)  state[J + i] = mod->initDensity(X0[i]);
+		//for (size_t i=0; i<J+1; ++i) uprev[i] = initDensity(x[i]);
 	}
 	if (method == SOLVER_CM){
-		for (size_t i=0; i<J+1; ++i)  state[J+1 + i] = mod->calcIC(x[i]);
+		for (size_t i=0; i<J+1; ++i)  state[J+1 + i] = mod->initDensity(x[i]);
 	}
 	if (method == SOLVER_EBT){
-		for (size_t i=0; i<J; ++i)  state[J+1 + 1+i] = mod->calcIC(X0[i])*h[i];	// state[J+1+0]=0 (N0)
+		for (size_t i=0; i<J; ++i)  state[J+1 + 1+i] = mod->initDensity(X0[i])*h[i];	// state[J+1+0]=0 (N0)
 	}
 
-	if (extra_vars_names.size() > 0){  // If extra state variables have been requested, initialize them
+	if (varnames_extra.size() > 0){  // If extra state variables have been requested, initialize them
 		// Initialize extra size-dependent variables
 		auto is = getIterators_state();
 		
 		auto& itx = is.get("X");
-		int id = is.getIndex(extra_vars_names[0]); // get index of 1st extra variable
+		int id = is.getIndex(varnames_extra[0]); // get index of 1st extra variable
 		for (is.begin(); !is.end(); ++is){
 			vector <double> v = mod->initStateExtra(*itx);  // returned vector will be `move`d so this is fast 
 			auto it_vec = is.get();
-			for (size_t i = 0; i<extra_vars_names.size(); ++i){
+			for (size_t i = 0; i<varnames_extra.size(); ++i){
 				*it_vec[id+i] = v[i];
 			}
 		}
@@ -275,17 +275,17 @@ double Solver<Model>::integrate_x(wFunc w, double t, vector<double>&S, int power
 
 template<class Model>
 void Solver<Model>::calcRates_extra(double t, vector<double>&S, vector<double>& dSdt){
-	IteratorSet<vector<double>::iterator> is(S.begin(), vars, xsize(), offsets, strides);
+	IteratorSet<vector<double>::iterator> is(S.begin(), varnames, xsize(), offsets, strides);
 	if (method == SOLVER_FMU) is.push_back("X", X.begin(), 1);
-	IteratorSet<vector<double>::iterator> ir(dSdt.begin(), vars, xsize(), offsets, strides);
+	IteratorSet<vector<double>::iterator> ir(dSdt.begin(), varnames, xsize(), offsets, strides);
 	
 	auto& itx = is.get("X");
 	auto& itu = is.get("u");
-	auto& itse = is.get(extra_vars_names[0]);
-	auto& itre = ir.get(extra_vars_names[0]);
+	auto& itse = is.get(varnames_extra[0]);
+	auto& itre = ir.get(varnames_extra[0]);
 	for (is.begin(), ir.begin(); !is.end(); ++is, ++ir){
 		auto it_returned = mod->calcRates_extra(t, itx, itu, itse, itre);
-		assert(distance(itre, it_returned) == extra_vars_names.size());
+		assert(distance(itre, it_returned) == varnames_extra.size());
 	}
 }
 
@@ -390,7 +390,7 @@ double Solver<Model>::stepToEquilibrium(){
 
 template<class Model>
 double Solver<Model>::createSizeStructuredVariables(vector<std::string> names){
-	extra_vars_names = names;
+	varnames_extra = names;
 	resetState(x);
 }
 

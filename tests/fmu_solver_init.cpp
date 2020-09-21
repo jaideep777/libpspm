@@ -8,7 +8,7 @@ class Model{
 	public:
 	double sc = 10;
 	
-	double calcIC(double x){
+	double initDensity(double x){
 		return sc*x;
 	}
 
@@ -28,7 +28,7 @@ int main(){
 	
 	for (int i=0; i<10; ++i){
 		float X = .1*i+0.05;
-		if (fabs(S.state[i] - M.calcIC(X)) > 1e-6) return 1;
+		if (fabs(S.state[i] - M.initDensity(X)) > 1e-6) return 1;
 	}
 	
 	return 0;

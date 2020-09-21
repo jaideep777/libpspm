@@ -15,8 +15,8 @@ class Solver{
 	private:
 	Model * mod;				// Model should be a class with growth, mortality, birth, env, and IC functions
 	
-	std::vector<string> vars;				// state has internal variables (x, u) and possibly extra variables 
-	std::vector<string> extra_vars_names;   //   +-- which will be created in the state in this order (for each species)
+	std::vector<string> varnames;				// state has internal variables (x, u) and possibly extra variables 
+	std::vector<string> varnames_extra;   //   +-- which will be created in the state in this order (for each species)
 	std::vector<int> strides;				// defines how the variables are packed into the state vector
 	std::vector<int> offsets;				// 
 
@@ -57,8 +57,6 @@ class Solver{
 	void setModel(Model *M);
 	void setInputNewbornDensity(double input_u0);
 	double createSizeStructuredVariables(std::vector<std::string> names);
-//	template<typename Func>
-//	void initialize(Func calcIC);
 	
 	void initialize();
 
