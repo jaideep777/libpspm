@@ -14,7 +14,7 @@ int main(){
 	
 	S.setModel(&M);
 	S.initialize();
-	//S.print();	
+	S.print();	
 
 	M.computeEnv(0,S.state, &S);	
 	S.calcRates_EBT(1, S.state, S.rates);  // dummy rates calc rates(X=X0, U=U0, t=1, E=E(U0))
