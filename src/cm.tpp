@@ -10,11 +10,15 @@ void Solver<Model>::calcRates_CM(double t, vector<double>&S, vector<double> &dSd
 	double * du = &dSdt[J+1];
 
 	for (size_t i=0; i<J+1; ++i){
-		dx[i] =  mod->growthRate(x[i], t);
 		
 		double grad_dx = 0.001;
-		double growthGrad = (mod->growthRate(x[i]+0.001, t) - mod->growthRate(x[i], t))/0.001;
 		
+		double gxplus = mod->growthRate(x[i]+grad_dx, t); 
+		double gx     = mod->growthRate(x[i], t); 
+		
+		double growthGrad = (gxplus-gx)/grad_dx;
+
+		dx[i] =  gx;
 		du[i] = -mod->mortalityRate(x[i], t)*u[i] - growthGrad*u[i];
 	}
 

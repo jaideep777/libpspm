@@ -15,7 +15,7 @@ INC_PATH := -I./include
 LIB_PATH := -L./lib 
 
 # flags
-CPPFLAGS = -O3 -std=c++11 -g -pg -Wno-sign-compare -Wno-unused-variable -Wno-unused-but-set-variable
+CPPFLAGS = -O0 -std=c++11 -g -pg -Wno-sign-compare -Wno-unused-variable -Wno-unused-but-set-variable
 LDFLAGS = -pg 
 
 # libs
@@ -51,6 +51,7 @@ TEST_FILES = $(wildcard tests/*.cpp)
 TEST_OBJECTS = $(patsubst tests/%.cpp, tests/%.o, $(TEST_FILES))
 TEST_TARGETS = $(patsubst tests/%.cpp, tests/%.test, $(TEST_FILES))
 TEST_RUNS = $(patsubst tests/%.cpp, tests/%.run, $(TEST_FILES))
+ADD_OBJECTS = 
 
 check: compile_tests run_tests
 
@@ -67,7 +68,7 @@ $(TEST_OBJECTS): tests/%.o : tests/%.cpp $(HEADERS)
 	g++ -c $(CPPFLAGS) $(INC_PATH) $< -o $@
 
 $(TEST_TARGETS): tests/%.test : tests/%.o
-	g++ $(LDFLAGS) -o $@ $(LIB_PATH) $(OBJECTS) $< $(LIBS) 
+	g++ $(LDFLAGS) -o $@ $(LIB_PATH) $(OBJECTS) $(ADD_OBJECTS) $< $(LIBS) 
 
 testclean: 
 	rm -f tests/*.o tests/*.test

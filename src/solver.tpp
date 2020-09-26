@@ -30,7 +30,7 @@ const int Solver<Model>::xsize(){
 template<class Model>
 void Solver<Model>::resetState(const std::vector<double>& xbreaks){
    	current_time = 0;
-	odeStepper = RKCK45<vector<double>> (0);  // this is a cheap operation, but this will empty the internal containers, which will then be (automatically) resized at next 1st ODE step. Maybe add a reset function to the ODE stepper? 
+	odeStepper = RKCK45<vector<double>> (0, 1e-4, 1e-4);  // this is a cheap operation, but this will empty the internal containers, which will then be (automatically) resized at next 1st ODE step. Maybe add a reset function to the ODE stepper? 
 
 	xb = xbreaks[0];
 	xm = xbreaks[xbreaks.size()-1];
@@ -98,7 +98,7 @@ void Solver<Model>::resetState(const std::vector<double>& xbreaks){
 }
 
 template<class Model>
-Solver<Model>::Solver(std::vector<double> xbreaks, PSPM_SolverType _method) : odeStepper(0) {
+Solver<Model>::Solver(std::vector<double> xbreaks, PSPM_SolverType _method) : odeStepper(0, 1e-4, 1e-4) {
 	method = _method;
 	resetState(xbreaks);	
 }
@@ -160,6 +160,19 @@ IteratorSet<vector<double>::iterator> Solver<Model>::getIterators_rates(){
 	return IteratorSet<vector<double>::iterator> (rates.begin(), varnames, xsize(), offsets, strides);
 }
 
+
+template<class Model>
+IteratorSet<vector<double>::iterator> Solver<Model>::createIterators_state(vector<double> &v){
+	IteratorSet<vector<double>::iterator> iset(v.begin(), varnames, xsize(), offsets, strides);
+	if (method == SOLVER_FMU) iset.push_back("X", X.begin(), 1);
+	return iset;
+}
+
+template<class Model>
+IteratorSet<vector<double>::iterator> Solver<Model>::createIterators_rates(vector<double> &v){
+	IteratorSet<vector<double>::iterator> iset(v.begin(), varnames, xsize(), offsets, strides);
+	return iset;
+}
 
 
 template<class Model>
@@ -275,16 +288,13 @@ double Solver<Model>::integrate_x(wFunc w, double t, vector<double>&S, int power
 
 template<class Model>
 void Solver<Model>::calcRates_extra(double t, vector<double>&S, vector<double>& dSdt){
-	IteratorSet<vector<double>::iterator> is(S.begin(), varnames, xsize(), offsets, strides);
-	if (method == SOLVER_FMU) is.push_back("X", X.begin(), 1);
-	IteratorSet<vector<double>::iterator> ir(dSdt.begin(), varnames, xsize(), offsets, strides);
-	
+	auto is = createIterators_state(S);
+	auto ir = createIterators_rates(dSdt);
 	auto& itx = is.get("X");
-	auto& itu = is.get("u");
-	auto& itse = is.get(varnames_extra[0]);
 	auto& itre = ir.get(varnames_extra[0]);
+	
 	for (is.begin(), ir.begin(); !is.end(); ++is, ++ir){
-		auto it_returned = mod->calcRates_extra(t, itx, itu, itse, itre);
+		auto it_returned = mod->calcRates_extra(t, *itx, itre);
 		assert(distance(itre, it_returned) == varnames_extra.size());
 	}
 }
@@ -299,6 +309,7 @@ void Solver<Model>::step_to(double tstop){
 		auto derivs = [this](double t, vector<double> &S, vector<double> &dSdt){
 			mod->computeEnv(t, S, this);
 			this->calcRates_FMU(t, S, dSdt);
+			if (varnames_extra.size() > 0) this->calcRates_extra(t, S, dSdt);
 		};
 		
 		odeStepper.Step_to(tstop, current_time, state, derivs); // state = [U]
@@ -309,6 +320,7 @@ void Solver<Model>::step_to(double tstop){
 		auto derivs = [this](double t, vector<double> &S, vector<double> &dSdt){
 			mod->computeEnv(t, S, this);
 			this->calcRates_EBT(t, S, dSdt);
+			if (varnames_extra.size() > 0) this->calcRates_extra(t, S, dSdt);
 		};
 		
 		// integrate 
@@ -317,23 +329,20 @@ void Solver<Model>::step_to(double tstop){
 		// update cohorts
 		removeDeadCohorts_EBT();
 		if (state[J+1] > 0) addCohort_EBT();  // Add new cohort if N0 > 0. Add after removing dead ones otherwise this will also be removed. 
-		
-		// update variables based on new state
-		// X, x, h, etc  ==> Maybe not necessary
-
 	}
 	if (method == SOLVER_CM){
 		auto derivs = [this](double t, vector<double> &S, vector<double> &dSdt){
 			mod->computeEnv(t, S, this);
 			this->calcRates_CM(t, S, dSdt);
+			if (varnames_extra.size() > 0) this->calcRates_extra(t, S, dSdt);
 		};
 		
 		// integrate 
 		odeStepper.Step_to(tstop, current_time, state, derivs); // state = [pi0, Xint, N0, Nint]
 
-		// update cohorts
-		addCohort_CM();		// add before so that it becomes boundary cohort and first internal cohort can be (potentially) removed
-		removeCohort_CM();
+		//// update cohorts
+		//addCohort_CM();		// add before so that it becomes boundary cohort and first internal cohort can be (potentially) removed
+		//removeCohort_CM();
 
 	}
 }

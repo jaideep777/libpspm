@@ -77,7 +77,7 @@ class RKCK45{
 	// 3) size     -- number of equations 
 	// 4) accuracy -- desired accuracy
 	// 5) h1       -- trial size of the first step
-	RKCK45(double t_start_, double accuracy=1e-6, double h1=0.1) :
+	RKCK45(double t_start_, double accuracy, double h1) :
 			ht(h1), eps(accuracy), xt(t_start_)/*, 
 			yscal(size), dydx(size), 
 			k1(size), k2(size), k3(size), k4(size), k5(size), yt(size)*/ {};

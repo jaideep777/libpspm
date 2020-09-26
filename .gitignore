@@ -4,6 +4,7 @@ inst/website
 *.Rhistory*
 ^plant.Rcheck$
 .Rproj.user
+*.png
 
 *~
 

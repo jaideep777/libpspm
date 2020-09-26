@@ -66,6 +66,9 @@ class Solver{
 	vector<double> getx();
 	IteratorSet<vector<double>::iterator> getIterators_state();
 	IteratorSet<vector<double>::iterator> getIterators_rates();
+	IteratorSet<vector<double>::iterator> createIterators_state(vector<double> &v);
+	IteratorSet<vector<double>::iterator> createIterators_rates(vector<double> &v);
+
 
 	void calcRates_extra(double t, vector<double>&S, vector<double>& dSdt);
 	
