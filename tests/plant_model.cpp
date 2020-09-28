@@ -5,7 +5,6 @@ using namespace std;
 #include "solver.h"
 #include "plant/plant.h"
 
-
 class PlantModel{
 	public:
 	
@@ -24,7 +23,7 @@ class PlantModel{
 	}
 
 	double evalEnv(double x, double t){
-		return 1;
+		env.light_profile.eval(x); // return 1;
 	}
 	
 	// This function must do any necessary precomputations to facilitate evalEnv()
@@ -36,10 +35,27 @@ class PlantModel{
 	// Also this is the only function that exposes the state vector, so if desired, the state vector 
 	// can be saved from here and reused in other rate functions (using createIterators_state())
 	// ~
+	// TODO: In Solver, add a add_iAttribute() function, that will calculate some individual 
+	// level attributes from x, which can be reused if required. E.g., in Plant, we can add leaf_area
+	// as an iAttribute. iAttributes can be mapped to integers, say using enums
 	void computeEnv(double t, vector<double> &state_vec, Solver<PlantModel> * S){
 		//            _xm 
 		// Calculate / w(z,t)u(z,t)dz
 		//        xb`
+		auto canopy_openness = [S, t](double z){
+			double kI = 0.5;
+
+			auto la_above = [z](double x, double t){
+				plant::Plant p1;
+				p1.set_height(x);
+				return p1.area_leaf_above(z, p1.vars.height, p1.vars.area_leaf);
+			};
+			double leaf_area_above = S->integrate_wudx_above(la_above, t, z, S->state);
+			return exp(-kI*leaf_area_above);
+		};	
+	
+		//cout << S->xb << " " << S->getMaxSize() << endl;	
+		env.light_profile.construct(canopy_openness, S->xb, S->getMaxSize()+1e-6);
 	}
 
 	double growthRate(double x, double t){
@@ -142,11 +158,15 @@ int main(){
 //	vector <double> heights;// = {p.vars.height};
 
 	ofstream fout("ind_plant.txt");
-
+	ofstream fli("light_profile_ind_plant.txt");
 	for (size_t i=0; i < nsteps; ++i){
 
 		S.step_to(i*dt);		
 		
+		vector<double> xl = logseq(0.1, 18, 100);
+		for (auto h : xl) fli << M.env.canopy_openness(h) << "\t";
+		fli << endl;
+
 		M.setState(&S);
 
 		fout << i*dt << "\t" <<
@@ -160,6 +180,8 @@ int main(){
 //		heights.push_back(p.vars.height);
 	}
 	
+	fli.close();
+	fout.close();
 	cout << M.p << endl;
 	cout << "derivative computations requested/done: " << M.nrc << " " << M.ndc << endl;
 

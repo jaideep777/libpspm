@@ -207,14 +207,16 @@ class Spline{
 	inline Float extrapolate_left(double x) const{
 		  double h=x-m_x[0];
 		  // extrapolation to the left
-		  return ((m_b[0])*h + m_c[0])*h + m_y[0];
+		  return m_y[0];	// constant
+		  // return ((m_b[0])*h + m_c[0])*h + m_y[0];  // quadratic
 	}
 	
 	inline Float extrapolate_right(double x) const{
 			size_t n=m_x.size();
 			double h=x-m_x[n-1];
 		  // extrapolation to the right
-			return ((m_b[n-1])*h + m_c[n-1])*h + m_y[n-1];
+			return m_y[n-1]; // constant
+			// return ((m_b[n-1])*h + m_c[n-1])*h + m_y[n-1];  // quadratic
 	
 	}
 	

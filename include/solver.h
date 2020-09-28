@@ -64,6 +64,9 @@ class Solver{
 	const int xsize();
 	const double* getX();
 	vector<double> getx();
+	double getMaxSize();
+	
+	
 	IteratorSet<vector<double>::iterator> getIterators_state();
 	IteratorSet<vector<double>::iterator> getIterators_rates();
 	IteratorSet<vector<double>::iterator> createIterators_state(vector<double> &v);
@@ -96,8 +99,12 @@ class Solver{
 
 	void print();
 	
+	// integrals over size and density
 	template<typename wFunc>
 	double integrate_x(wFunc w, double t, vector<double>&S, int power);
+
+	template<typename wFunc>
+	double integrate_wudx_above(wFunc w, double t, double xlow, vector<double>&S);
 	
 };
 

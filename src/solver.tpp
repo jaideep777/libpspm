@@ -16,6 +16,11 @@ std::vector <double> seq(double from, double to, int len){
 	return x;
 }
 
+std::vector <double> logseq(double from, double to, int len){
+	std::vector<double> x(len);
+	for (size_t i=0; i<len; ++i) x[i] = exp(log(from) + i*(log(to)-log(from))/(len-1));
+	return x;
+}
 // ~~~~~~~~~~~ SOLVER ~~~~~~~~~~~~~~~~~~~~~
 
 template<class Model>
@@ -125,6 +130,16 @@ template<class Model>
 const int Solver<Model>::size(){
 	return state.size();
 }
+
+
+template<class Model>
+double Solver<Model>::getMaxSize(){
+	if (method == SOLVER_FMU) return *x.rbegin();
+	else {
+		return *next(state.begin(), xsize()-1);
+	}
+}
+
 
 	//for (int i=0; i<J; ++i){
 	//    x[i+1] = exp(log(0.01) + (i)*(log(xm)-log(0.01))/(J-1));
@@ -241,6 +256,51 @@ void Solver<Model>::initialize(){
 		}
 	}
 }
+
+
+template<class Model>
+template<typename wFunc>
+double Solver<Model>::integrate_wudx_above(wFunc w, double t, double xlow, vector<double>&S){
+	//cout << " | " <<  t << " " << mod->evalEnv(0,t) << " ";
+	//if (method == SOLVER_FMU){
+	//}
+	//else if (method == SOLVER_EBT){
+	//}
+	if (method == SOLVER_CM){
+		// integrate using trapezoidal rule 
+		// Note, new cohorts are inserted at the beginning, so x will be ascending
+		auto itx = S.begin() + xsize()-1;
+		auto itu = S.begin() + 2*xsize()-1;
+		double I = 0;
+		double x_hi = *itx;
+		double f_hi = w(*itx--, t)*(*itu--);
+		for (int i=0; i<xsize()-1; ++i){
+			double x_lo = *itx;
+			double f_lo = w(*itx--,t)*(*itu--);
+			if (x_lo < xlow){
+				double f = f_lo + (f_hi-f_lo)/(x_hi-x_lo)*(xlow - x_lo); 
+				double x = xlow;
+				I += (x_hi-x) * (f_hi + f);
+				break;
+			}
+			else{
+				I += (x_hi - x_lo) * (f_hi + f_lo);
+			}
+			x_hi = x_lo;
+			f_hi = f_lo;
+		}
+		
+		// if (xsize() == 1) return f_hi;
+		// for now, ignoring the case of single cohort - 0 will be returned, and 
+		// that's probably okay.
+		return I*0.5;
+	}
+	else{
+		std::cout << "Only CM is implemented\n";
+		return 0;
+	}
+}
+
 
 
 template<class Model>
