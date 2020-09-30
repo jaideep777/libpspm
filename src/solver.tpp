@@ -33,16 +33,7 @@ const int Solver<Model>::xsize(){
 
 
 template<class Model>
-void Solver<Model>::resetState(const std::vector<double>& xbreaks){
-   	current_time = 0;
-	odeStepper = RKCK45<vector<double>> (0, 1e-4, 1e-4);  // this is a cheap operation, but this will empty the internal containers, which will then be (automatically) resized at next 1st ODE step. Maybe add a reset function to the ODE stepper? 
-
-	xb = xbreaks[0];
-	xm = xbreaks[xbreaks.size()-1];
-	J  = xbreaks.size()-1;
-
-	x = xbreaks;
-
+void Solver<Model>::setupLayout(){
 	// Set up layout of state vector, for e.g.
 	//  ------------------------------------------------------------
 	// | x | x | x : u | u | u : a | b | c | a | b | c | a | b | c |
@@ -69,7 +60,21 @@ void Solver<Model>::resetState(const std::vector<double>& xbreaks){
 	for (int i=0; i<varnames_extra.size(); ++i){
 		addVar(varnames_extra[i], varnames_extra.size(), 1);  // abc abc abc .. 
 	}
-	
+}
+
+
+template<class Model>
+void Solver<Model>::resetState(const std::vector<double>& xbreaks){
+   	current_time = 0;
+	odeStepper = RKCK45<vector<double>> (0, 1e-4, 1e-4);  // this is a cheap operation, but this will empty the internal containers, which will then be (automatically) resized at next 1st ODE step. Maybe add a reset function to the ODE stepper? 
+
+	xb = xbreaks[0];
+	xm = xbreaks[xbreaks.size()-1];
+	J  = xbreaks.size()-1;
+
+	x = xbreaks;
+
+	setupLayout();
 
 	state.resize(varnames.size()*xsize());   // xsize() is J for FMU & MMU, and J+1 for CM and EBT
 	rates.resize(state.size());
@@ -394,7 +399,7 @@ void Solver<Model>::step_to(double tstop){
 		auto derivs = [this](double t, vector<double> &S, vector<double> &dSdt){
 			mod->computeEnv(t, S, this);
 			this->calcRates_CM(t, S, dSdt);
-			if (varnames_extra.size() > 0) this->calcRates_extra(t, S, dSdt);
+			//if (varnames_extra.size() > 0) this->calcRates_extra(t, S, dSdt);
 		};
 		
 		// integrate 

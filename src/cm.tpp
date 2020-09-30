@@ -1,26 +1,45 @@
 #include <algorithm>
 #include <cassert>
 
+#include "vector_insert.h"
+
 template <class Model>
 void Solver<Model>::calcRates_CM(double t, vector<double>&S, vector<double> &dSdt){
-	double * x = &S[0];
-	double * u = &S[J+1];
-
-	double * dx = &dSdt[0];
-	double * du = &dSdt[J+1];
-
-	for (size_t i=0; i<J+1; ++i){
-		
+	auto is = createIterators_state(S);
+	auto ir = createIterators_rates(dSdt);
+	auto& itx = is.get("X");
+	auto& itu = is.get("u");
+	
+	auto& itdx = ir.get("X");
+	auto& itdu = ir.get("u");
+	auto& itre = ir.get((varnames_extra.size()>0)? varnames_extra[0] : "X");	// dummy init
+	
+	for (is.begin(), ir.begin(); !is.end(); ++is, ++ir){
 		double grad_dx = 0.001;
 		
-		double gxplus = mod->growthRate(x[i]+grad_dx, t); 
-		double gx     = mod->growthRate(x[i], t); 
+		double gxplus = mod->growthRate(*itx + grad_dx, t); 
+		double gx     = mod->growthRate(*itx, t); 
 		
 		double growthGrad = (gxplus-gx)/grad_dx;
 
-		dx[i] =  gx;
-		du[i] = -mod->mortalityRate(x[i], t)*u[i] - growthGrad*u[i];
+		*itdx =  gx;
+		*itdu = -mod->mortalityRate(*itx, t)*(*itu) - growthGrad*(*itu);
+		
+		if (varnames_extra.size() > 0){
+			auto it_returned = mod->calcRates_extra(t, *itx, itre);
+			assert(distance(itre, it_returned) == varnames_extra.size());
+		}
 	}
+	
+	//double * x = &S[0];
+	//double * u = &S[J+1];
+
+	//double * dx = &dSdt[0];
+	//double * du = &dSdt[J+1];
+
+	//for (size_t i=0; i<J+1; ++i){
+		
+	//}
 
 }
 
@@ -56,12 +75,22 @@ double Solver<Model>::calc_u0_CM(){
 
 template <class Model>
 void Solver<Model>::addCohort_CM(){
-	auto p_x  = state.begin();
-	auto p_u  = state.begin(); advance(p_u, J+1); 
-
-	state.insert(p_u, -1); // insert new u0 (dummy value) BEFORE p_u. (Now both iterators are invalid)
-	state.insert(state.begin(), xb); // this inserts xb at the 1st position	
+	//auto p_x  = state.begin();
+	//auto p_u  = state.begin(); advance(p_u, J+1); 
+	cout << "xsize = " << xsize() << " " << J << endl;
+	vector <int> at = {0, xsize()};
+	vector <double> vals = {xb+3, -1};
+	for (int i=0; i<varnames_extra.size(); ++i){
+		at.push_back(2*xsize());
+		vals.push_back(-2); // FIXME: get these from initStateExtra()
+	}
+	
+	vector_insert(state, at, vals);
+	rates.resize(state.size(), -999);
+	//state.insert(p_u, -1); // insert new u0 (dummy value) BEFORE p_u. (Now both iterators are invalid)
+	//state.insert(state.begin(), xb); // this inserts xb at the 1st position	
 	++J;	// increment J to reflect new system size
+	setupLayout();  // rebuild parameters for IteratorSet
 
 	// set u0 to correct value
 	if (u0_in < 0){

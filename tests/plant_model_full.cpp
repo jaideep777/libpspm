@@ -7,9 +7,11 @@ using namespace std;
 
 class PlantModel{
 	public:
-	
+
+	double input_seed_rain = 200;	
 	plant::Plant p;
 	plant::Environment env;
+	double u0;
 
 	int nrc = 0; // number of evals of compute_vars_phys() - derivative computations actually done by plant
 	int ndc = 0; // number of evals of mortality_rate() - derivative computations requested by solver
@@ -19,7 +21,9 @@ class PlantModel{
 	}
 
 	double initDensity(double x){
-		return 1;
+		p.compute_vars_phys(env);
+		u0 = input_seed_rain*p.germination_probability(env)/growthRate(p.vars.height, 0);
+		return u0;
 	}
 
 
@@ -152,11 +156,10 @@ int main(){
 	//plant::Environment env(1);
 
 	plant::Plant p;
-	p.lma = 0.1978791;
-	plant::par.r_l   = 198.4545; //39.27 / 0.1978791; // JAI: Should be 39.27/lma;
-	plant::par.k_l = 0.4565855;
-
-	p.set_height(0.3441948);
+	//p.lma = 0.1978791; // 0.0825;
+	//plant::par.r_l   = 198.4545; //39.27 / 0.1978791; // JAI: Should be 39.27/lma;
+	//plant::par.k_l = 0.4565855;
+	//p.set_height(0.3441948);
 	//for (int i=0; i<10000; ++i) p.compute_vars_phys(env);
 
 	cout << p << endl;
@@ -169,47 +172,61 @@ int main(){
 	S.setModel(&M);
 	//S.createSizeStructuredVariables({"mort", "fec", "heart", "sap"});
 	//S.print();
+	S.setInputNewbornDensity(M.input_seed_rain);
 
 	S.initialize();
 	//M.computeEnv(0, S.state, &S);
 	//S.calcRates_CM(1, S.state, S.rates);
 	//S.calcRates_extra(1, S.state, S.rates);
 	S.print();
+	cout << "state: "; for (auto s :S.state) cout << s << " "; cout << "\n";
+
+
+	S.addCohort_CM();
+	S.print();
+	cout << "state: "; for (auto s :S.state) cout << s << " "; cout << "\n";
 
 
 
+//    double t0 = 0, tf = 50, dt = 1;
+//    size_t nsteps = (tf-t0)/dt;
+////	vector <double> heights;// = {p.vars.height};
 
-	double t0 = 0, tf = 50, dt = 1;
-	size_t nsteps = (tf-t0)/dt;
-//	vector <double> heights;// = {p.vars.height};
+//    vector <double> times = M.generateDefaultCohortSchedule(105.32);
 
-	ofstream fout("ind_plant.txt");
-	ofstream fli("light_profile_ind_plant.txt");
-	for (size_t i=0; i < nsteps; ++i){
+//    ofstream fout("patch_full_hts.txt");
+//    ofstream fli("light_profile_ind_plant.txt");
+//    for (size_t i=0; i < times.size(); ++i){
 
-		S.step_to(i*dt);		
-		
-		vector<double> xl = logseq(0.1, 18, 100);
-		for (auto h : xl) fli << M.env.canopy_openness(h) << "\t";
-		fli << endl;
+//        S.step_to(times[i]);		
+//        cout << times[i] << " " << S.xsize() << M.env.light_profile.npoints << "\n";
 
-		M.setState(&S);
+//        vector<double> xl = logseq(0.1, 18, 100);
+//        for (auto h : xl) fli << M.env.canopy_openness(h) << "\t";
+//        fli << endl;
 
-		fout << i*dt << "\t" <<
-			M.p.vars.height         << "\t" <<
-			M.p.vars.mortality      << "\t" <<
-			M.p.vars.fecundity      << "\t" <<
-			M.p.vars.area_heartwood << "\t" <<
-			M.p.vars.mass_heartwood << endl;
+//        fout << times[i] << "\t";
+//        auto it = S.getX();
+//        for (int i=0; i<S.xsize(); ++i) fout << *it << "\t";
+//        fout << "\n";
+
+//        //M.setState(&S);
+
+//        //fout << i*dt << "\t" <<
+//        //    M.p.vars.height         << "\t" <<
+//        //    M.p.vars.mortality      << "\t" <<
+//        //    M.p.vars.fecundity      << "\t" <<
+//        //    M.p.vars.area_heartwood << "\t" <<
+//        //    M.p.vars.mass_heartwood << endl;
 						
-//		cout << p.vars.fecundity << " ";		
-//		heights.push_back(p.vars.height);
-	}
+////		cout << p.vars.fecundity << " ";		
+////		heights.push_back(p.vars.height);
+//    }
 	
-	fli.close();
-	fout.close();
-	cout << M.p << endl;
-	cout << "derivative computations requested/done: " << M.nrc << " " << M.ndc << endl;
+//    fli.close();
+//    fout.close();
+//    cout << M.p << endl;
+//    cout << "derivative computations requested/done: " << M.nrc << " " << M.ndc << endl;
 
 
 }
