@@ -51,15 +51,15 @@ class PlantModel{
 		//            _xm 
 		// Calculate / w(z,t)u(z,t)dz
 		//        xb`
-		auto canopy_openness = [S, t](double z){
+		auto canopy_openness = [S, t, &state_vec, this](double z){
 			double kI = 0.5;
 
-			auto la_above = [z](double x, double t){
-				plant::Plant p1;
-				p1.set_height(x);
-				return p1.area_leaf_above(z, p1.vars.height, p1.vars.area_leaf);
+			auto la_above = [z, this](double x, double t){
+				//plant::Plant p1;
+				p.set_height(x);
+				return p.area_leaf_above(z, p.vars.height, p.vars.area_leaf);
 			};
-			double leaf_area_above = S->integrate_wudx_above(la_above, t, z, S->state);
+			double leaf_area_above = S->integrate_wudx_above(la_above, t, z, state_vec);
 			//cout << "la = " << leaf_area_above << "\n";
 			return exp(-kI*leaf_area_above);
 		};	
@@ -76,6 +76,7 @@ class PlantModel{
 
 	double growthRate(double x, double t){
 		//if (p.vars.height != x){
+			env.time = t;
 			p.set_height(x);
 			p.compute_vars_phys(env);
 			++nrc;
@@ -221,7 +222,7 @@ int main(){
 		cout << times[i] << " " << S.xsize() << " " << M.env.light_profile.npoints << " | " << M.nrc << " " << M.ndc << "\n";
 		//S.print();
 
-		vector<double> xl = seq(0, 18, 100);
+		vector<double> xl = logseq(0.01, 18, 200);
 		for (auto h : xl) fli << M.env.canopy_openness(h) << "\t";
 		fli << endl;
 
