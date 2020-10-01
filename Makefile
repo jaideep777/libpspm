@@ -15,11 +15,11 @@ INC_PATH := -I./include
 LIB_PATH := -L./lib 
 
 # flags
-CPPFLAGS = -O3 -std=c++11 -g -pg -Wno-sign-compare -Wno-unused-variable -Wno-unused-but-set-variable
-LDFLAGS = -pg 
+CPPFLAGS = -O3 -std=c++11 -Wno-sign-compare -Wno-unused-variable -Wno-unused-but-set-variable
+LDFLAGS =  
 
 # libs
-LIBS = 	 -lgsl -lgslcblas 	# additional libs
+LIBS = 	 #-lgsl -lgslcblas 	# additional libs
 #LIBS = -lcudart 			# cuda libs 		
 
 # files

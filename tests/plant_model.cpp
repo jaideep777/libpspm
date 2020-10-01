@@ -23,30 +23,6 @@ class PlantModel{
 	}
 
 
-	vector<double> generateDefaultCohortSchedule(double max_time){
-
-		vector<double> tvec;
-
-		const double multiplier=0.2, min_step_size=1e-5, max_step_size=2.0;
-		
-		assert(min_step_size > 0 && "The minimum step size must be greater than zero");
-		
-		double dt = 0.0, time = 0.0;
-		tvec.push_back(time);
-		while (time <= max_time) {
-			dt = exp2(floor(log2(time * multiplier)));
-			time += min(max(dt, min_step_size), max_step_size);
-			tvec.push_back(time);
-		}
-
-		// Drop the last time; that's not going to be needed:
-		if (tvec.size() >=1) 	// JAI: added to avoid overflow warning
-			tvec.resize(tvec.size() - 1);
-
-		return tvec;
-	}
-
-
 	//double evalEnv(double x, double t){
 	//    env.light_profile.eval(x); // return 1;
 	//}
@@ -67,25 +43,26 @@ class PlantModel{
 		//            _xm 
 		// Calculate / w(z,t)u(z,t)dz
 		//        xb`
-		auto canopy_openness = [S, t](double z){
-			double kI = 0.5;
+		//auto canopy_openness = [S, t](double z){
+		//    double kI = 0.5;
 
-			auto la_above = [z](double x, double t){
-				plant::Plant p1;
-				p1.set_height(x);
-				return p1.area_leaf_above(z, p1.vars.height, p1.vars.area_leaf);
-			};
-			double leaf_area_above = S->integrate_wudx_above(la_above, t, z, S->state);
-			return exp(-kI*leaf_area_above);
-		};	
+		//    auto la_above = [z](double x, double t){
+		//        plant::Plant p1;
+		//        p1.set_height(x);
+		//        return p1.area_leaf_above(z, p1.vars.height, p1.vars.area_leaf);
+		//    };
+		//    double leaf_area_above = S->integrate_wudx_above(la_above, t, z, S->state);
+		//    return exp(-kI*leaf_area_above);
+		//};	
 	
-		//cout << S->xb << " " << S->getMaxSize() << endl;	
-		env.light_profile.construct(canopy_openness, S->xb, S->getMaxSize()+1e-6);
+		////cout << S->xb << " " << S->getMaxSize() << endl;	
+		//env.light_profile.construct(canopy_openness, S->xb, S->getMaxSize()+1e-6);
 	}
 
 
 	double growthRate(double x, double t){
 		//if (p.vars.height != x){
+			env.time = t;
 			p.set_height(x);
 			p.compute_vars_phys(env);
 			++nrc;
@@ -107,6 +84,8 @@ class PlantModel{
 		return p.vars.fecundity_dt;
 	}
 
+	double establishmentProbability(double t){
+	}
 	
 	// optional functions, if extra size-structured variables are desired
 	vector<double> initStateExtra(double x, double t){
