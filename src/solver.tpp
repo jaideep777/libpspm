@@ -33,16 +33,7 @@ const int Solver<Model>::xsize(){
 
 
 template<class Model>
-void Solver<Model>::resetState(const std::vector<double>& xbreaks){
-   	current_time = 0;
-	odeStepper = RKCK45<vector<double>> (0, 1e-4, 1e-4);  // this is a cheap operation, but this will empty the internal containers, which will then be (automatically) resized at next 1st ODE step. Maybe add a reset function to the ODE stepper? 
-
-	xb = xbreaks[0];
-	xm = xbreaks[xbreaks.size()-1];
-	J  = xbreaks.size()-1;
-
-	x = xbreaks;
-
+void Solver<Model>::setupLayout(){
 	// Set up layout of state vector, for e.g.
 	//  ------------------------------------------------------------
 	// | x | x | x : u | u | u : a | b | c | a | b | c | a | b | c |
@@ -69,7 +60,21 @@ void Solver<Model>::resetState(const std::vector<double>& xbreaks){
 	for (int i=0; i<varnames_extra.size(); ++i){
 		addVar(varnames_extra[i], varnames_extra.size(), 1);  // abc abc abc .. 
 	}
-	
+}
+
+
+template<class Model>
+void Solver<Model>::resetState(const std::vector<double>& xbreaks){
+   	current_time = 0;
+	odeStepper = RKCK45<vector<double>> (0, 1e-4, 1e-4);  // this is a cheap operation, but this will empty the internal containers, which will then be (automatically) resized at next 1st ODE step. Maybe add a reset function to the ODE stepper? 
+
+	xb = xbreaks[0];
+	xm = xbreaks[xbreaks.size()-1];
+	J  = xbreaks.size()-1;
+
+	x = xbreaks;
+
+	setupLayout();
 
 	state.resize(varnames.size()*xsize());   // xsize() is J for FMU & MMU, and J+1 for CM and EBT
 	rates.resize(state.size());
@@ -248,7 +253,7 @@ void Solver<Model>::initialize(){
 		auto& itx = is.get("X");
 		int id = is.getIndex(varnames_extra[0]); // get index of 1st extra variable
 		for (is.begin(); !is.end(); ++is){
-			vector <double> v = mod->initStateExtra(*itx);  // returned vector will be `move`d so this is fast 
+			vector <double> v = mod->initStateExtra(*itx, current_time);  // returned vector will be `move`d so this is fast 
 			auto it_vec = is.get();
 			for (size_t i = 0; i<varnames_extra.size(); ++i){
 				*it_vec[id+i] = v[i];
@@ -277,9 +282,10 @@ double Solver<Model>::integrate_wudx_above(wFunc w, double t, double xlow, vecto
 		for (int i=0; i<xsize()-1; ++i){
 			double x_lo = *itx;
 			double f_lo = w(*itx--,t)*(*itu--);
+			//cout << "x/f = " << x_lo << " " << f_lo << "\n";
 			if (x_lo < xlow){
-				double f = f_lo + (f_hi-f_lo)/(x_hi-x_lo)*(xlow - x_lo); 
-				double x = xlow;
+				double f = f_lo; //f_lo + (f_hi-f_lo)/(x_hi-x_lo)*(xlow - x_lo); 
+				double x = x_lo; //xlow;
 				I += (x_hi-x) * (f_hi + f);
 				break;
 			}
@@ -290,7 +296,13 @@ double Solver<Model>::integrate_wudx_above(wFunc w, double t, double xlow, vecto
 			f_hi = f_lo;
 		}
 		
-		// if (xsize() == 1) return f_hi;
+		//if (xsize() == 1 || f_hi > 0){
+		//    double x_lo = xb;
+		//    double g = mod->growthRate(xb, t);
+		//    double u0 = (g>0)? u0_in*mod->establishmentProbability(t)/g  :  0; //FIXME: set to 0 if g()<0
+		//    double f_lo =  w(xb, t)*u0;
+		//    I += (x_hi-x_lo)*(f_hi+f_lo);
+		//}
 		// for now, ignoring the case of single cohort - 0 will be returned, and 
 		// that's probably okay.
 		return I*0.5;
@@ -394,16 +406,16 @@ void Solver<Model>::step_to(double tstop){
 		auto derivs = [this](double t, vector<double> &S, vector<double> &dSdt){
 			mod->computeEnv(t, S, this);
 			this->calcRates_CM(t, S, dSdt);
-			if (varnames_extra.size() > 0) this->calcRates_extra(t, S, dSdt);
+			//if (varnames_extra.size() > 0) this->calcRates_extra(t, S, dSdt);
 		};
 		
 		// integrate 
 		odeStepper.Step_to(tstop, current_time, state, derivs); // state = [pi0, Xint, N0, Nint]
 
 		//// update cohorts
-		//addCohort_CM();		// add before so that it becomes boundary cohort and first internal cohort can be (potentially) removed
+		addCohort_CM();		// add before so that it becomes boundary cohort and first internal cohort can be (potentially) removed
 		//removeCohort_CM();
-
+		// computeEnv() is required here IF rescaleEnv is used in derivs
 	}
 }
 

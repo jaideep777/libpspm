@@ -72,7 +72,7 @@ class Plant {
 	public:
 	
 	// * Core traits
-	double lma       = 0.1978791;  // Leaf mass per area [kg / m2]
+	double lma       = 0.0825; //0.1978791;  // Leaf mass per area [kg / m2]
 	double rho       = 608.0;      // Wood density [kg/m3]
 	double hmat      = 16.5958691; // Height at maturation [m]
 	double omega     = 3.8e-5;     // Seed mass [kg]

@@ -27,6 +27,7 @@ exec_*
 
 *.swp
 *.swo
+*.swn
 
 tags
 1

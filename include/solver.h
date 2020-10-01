@@ -67,6 +67,7 @@ class Solver{
 	double getMaxSize();
 	
 	
+	void setupLayout();
 	IteratorSet<vector<double>::iterator> getIterators_state();
 	IteratorSet<vector<double>::iterator> getIterators_rates();
 	IteratorSet<vector<double>::iterator> createIterators_state(vector<double> &v);
