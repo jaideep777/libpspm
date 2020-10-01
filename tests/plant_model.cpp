@@ -83,21 +83,24 @@ class PlantModel{
 		env.light_profile.construct(canopy_openness, S->xb, S->getMaxSize()+1e-6);
 	}
 
+
 	double growthRate(double x, double t){
-		if (p.vars.height != x){
+		//if (p.vars.height != x){
 			p.set_height(x);
 			p.compute_vars_phys(env);
 			++nrc;
-		}
+		//}
 		return p.vars.height_dt;
 			
 	}
+
 
 	double mortalityRate(double x, double t){
 		assert(p.vars.height == x);
 		++ndc;
 		return p.vars.mortality_dt;
 	}
+
 
 	double birthRate(double x, double t){
 		assert(p.vars.height == x);
@@ -106,7 +109,7 @@ class PlantModel{
 
 	
 	// optional functions, if extra size-structured variables are desired
-	vector<double> initStateExtra(double x){
+	vector<double> initStateExtra(double x, double t){
 		vector<double> sv;
 		sv.reserve(4);	
 		sv.push_back(0); 

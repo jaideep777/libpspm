@@ -152,6 +152,7 @@ class SubdivisionSpline : public Spline{
 			indices.push_back(i*npoints_max/(npoints0-1));
 			
 			__DEBUG_AI_ std::cout << xi << " " << f(xi) << " " << i*npoints_max/(npoints0-1) << std::endl;
+			assert(!std::isnan(f(xi)));
 		}
 		__DEBUG_AI_ std::cout << "Size = " << xx.size() << " " << yy.size() << std::endl;
 		

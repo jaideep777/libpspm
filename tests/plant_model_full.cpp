@@ -9,45 +9,25 @@ class PlantModel{
 	public:
 
 	double input_seed_rain = 200;	
-	plant::Plant p;
 	plant::Environment env;
-	double u0;
+
+	plant::Plant seed; // prototype to be inserted
 
 	int nrc = 0; // number of evals of compute_vars_phys() - derivative computations actually done by plant
 	int ndc = 0; // number of evals of mortality_rate() - derivative computations requested by solver
 
-	PlantModel() : env(1) {
+	// use this to store one-shot rates for each individual and supply through the rate functions
+	plant::Plant p;
 	
+	PlantModel() : env(1) {
+		
 	}
 
 	double initDensity(double x){
-		p.compute_vars_phys(env);
-		u0 = input_seed_rain*p.germination_probability(env)/growthRate(p.vars.height, 0);
+		seed.set_height(x);
+		seed.compute_vars_phys(env);
+		double u0 = input_seed_rain*p.germination_probability(env)/growthRate(p.vars.height, 0);
 		return u0;
-	}
-
-
-	vector<double> generateDefaultCohortSchedule(double max_time){
-
-		vector<double> tvec;
-
-		const double multiplier=0.2, min_step_size=1e-5, max_step_size=2.0;
-		
-		assert(min_step_size > 0 && "The minimum step size must be greater than zero");
-		
-		double dt = 0.0, time = 0.0;
-		tvec.push_back(time);
-		while (time <= max_time) {
-			dt = exp2(floor(log2(time * multiplier)));
-			time += min(max(dt, min_step_size), max_step_size);
-			tvec.push_back(time);
-		}
-
-		// Drop the last time; that's not going to be needed:
-		if (tvec.size() >=1) 	// JAI: added to avoid overflow warning
-			tvec.resize(tvec.size() - 1);
-
-		return tvec;
 	}
 
 
@@ -80,19 +60,26 @@ class PlantModel{
 				return p1.area_leaf_above(z, p1.vars.height, p1.vars.area_leaf);
 			};
 			double leaf_area_above = S->integrate_wudx_above(la_above, t, z, S->state);
+			//cout << "la = " << leaf_area_above << "\n";
 			return exp(-kI*leaf_area_above);
 		};	
 	
 		//cout << S->xb << " " << S->getMaxSize() << endl;	
-		env.light_profile.construct(canopy_openness, S->xb, S->getMaxSize()+1e-6);
+		env.light_profile.construct(canopy_openness, 0, S->getMaxSize());
+	}
+
+	
+	double establishmentProbability(double t){
+		seed.compute_vars_phys(env);
+		return seed.germination_probability(env);
 	}
 
 	double growthRate(double x, double t){
-		if (p.vars.height != x){
+		//if (p.vars.height != x){
 			p.set_height(x);
 			p.compute_vars_phys(env);
 			++nrc;
-		}
+		//}
 		return p.vars.height_dt;
 			
 	}
@@ -110,7 +97,7 @@ class PlantModel{
 
 	
 	// optional functions, if extra size-structured variables are desired
-	vector<double> initStateExtra(double x){
+	vector<double> initStateExtra(double x, double t){
 		vector<double> sv;
 		sv.reserve(4);	
 		sv.push_back(0); 
@@ -149,6 +136,36 @@ class PlantModel{
 
 };
 
+
+
+
+vector<double> generateDefaultCohortSchedule(double max_time){
+
+	vector<double> tvec;
+
+	const double multiplier=0.2, min_step_size=1e-5, max_step_size=2.0;
+	
+	assert(min_step_size > 0 && "The minimum step size must be greater than zero");
+	
+	double dt = 0.0, time = 0.0;
+	tvec.push_back(time);
+	while (time <= max_time) {
+		dt = exp2(floor(log2(time * multiplier)));
+		time += min(max(dt, min_step_size), max_step_size);
+		tvec.push_back(time);
+	}
+
+	// Drop the last time; that's not going to be needed:
+	if (tvec.size() >=1) 	// JAI: added to avoid overflow warning
+		tvec.resize(tvec.size() - 1);
+
+	return tvec;
+}
+
+
+
+
+
 int main(){
 	
 	initPlantParameters(plant::par);
@@ -182,9 +199,9 @@ int main(){
 	cout << "state: "; for (auto s :S.state) cout << s << " "; cout << "\n";
 
 
-	S.addCohort_CM();
-	S.print();
-	cout << "state: "; for (auto s :S.state) cout << s << " "; cout << "\n";
+	//S.addCohort_CM();
+	//S.print();
+	//cout << "state: "; for (auto s :S.state) cout << s << " "; cout << "\n";
 
 
 
@@ -192,41 +209,51 @@ int main(){
 //    size_t nsteps = (tf-t0)/dt;
 ////	vector <double> heights;// = {p.vars.height};
 
-//    vector <double> times = M.generateDefaultCohortSchedule(105.32);
+	vector <double> times = generateDefaultCohortSchedule(105.32);
+	for (auto t : times) cout << t << " "; cout << endl;
 
-//    ofstream fout("patch_full_hts.txt");
-//    ofstream fli("light_profile_ind_plant.txt");
-//    for (size_t i=0; i < times.size(); ++i){
+	ofstream fout("patch_full_hts.txt");
+	ofstream fout_ld("patch_full_lds.txt");
+	ofstream fli("light_profile_ind_plant.txt");
+	for (size_t i=0; i < times.size(); ++i){
 
-//        S.step_to(times[i]);		
-//        cout << times[i] << " " << S.xsize() << M.env.light_profile.npoints << "\n";
+		S.step_to(times[i]);		
+		cout << times[i] << " " << S.xsize() << " " << M.env.light_profile.npoints << " | " << M.nrc << " " << M.ndc << "\n";
+		//S.print();
 
-//        vector<double> xl = logseq(0.1, 18, 100);
-//        for (auto h : xl) fli << M.env.canopy_openness(h) << "\t";
-//        fli << endl;
+		vector<double> xl = seq(0, 18, 100);
+		for (auto h : xl) fli << M.env.canopy_openness(h) << "\t";
+		fli << endl;
 
-//        fout << times[i] << "\t";
-//        auto it = S.getX();
-//        for (int i=0; i<S.xsize(); ++i) fout << *it << "\t";
-//        fout << "\n";
+		fout << times[i] << "\t";
+		fout_ld << times[i] << "\t";
+		auto it = S.getX()+S.xsize()-1;
+		auto itld = S.getX()+2*S.xsize()-1;
+		for (int i=0; i<S.xsize(); ++i){
+			fout << *it-- << "\t";
+			fout_ld << *itld-- << "\t";
+		}
+		fout << "\n";
+		fout_ld << "\n";
 
-//        //M.setState(&S);
+		//M.setState(&S);
 
-//        //fout << i*dt << "\t" <<
-//        //    M.p.vars.height         << "\t" <<
-//        //    M.p.vars.mortality      << "\t" <<
-//        //    M.p.vars.fecundity      << "\t" <<
-//        //    M.p.vars.area_heartwood << "\t" <<
-//        //    M.p.vars.mass_heartwood << endl;
+		//fout << i*dt << "\t" <<
+		//    M.p.vars.height         << "\t" <<
+		//    M.p.vars.mortality      << "\t" <<
+		//    M.p.vars.fecundity      << "\t" <<
+		//    M.p.vars.area_heartwood << "\t" <<
+		//    M.p.vars.mass_heartwood << endl;
 						
-////		cout << p.vars.fecundity << " ";		
-////		heights.push_back(p.vars.height);
-//    }
+//		cout << p.vars.fecundity << " ";		
+//		heights.push_back(p.vars.height);
+	}
 	
-//    fli.close();
-//    fout.close();
-//    cout << M.p << endl;
-//    cout << "derivative computations requested/done: " << M.nrc << " " << M.ndc << endl;
+	fli.close();
+	fout.close();
+	fout_ld.close();
+	cout << M.p << endl;
+	cout << "derivative computations requested/done: " << M.nrc << " " << M.ndc << endl;
 
 
 }

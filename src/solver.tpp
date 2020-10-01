@@ -253,7 +253,7 @@ void Solver<Model>::initialize(){
 		auto& itx = is.get("X");
 		int id = is.getIndex(varnames_extra[0]); // get index of 1st extra variable
 		for (is.begin(); !is.end(); ++is){
-			vector <double> v = mod->initStateExtra(*itx);  // returned vector will be `move`d so this is fast 
+			vector <double> v = mod->initStateExtra(*itx, current_time);  // returned vector will be `move`d so this is fast 
 			auto it_vec = is.get();
 			for (size_t i = 0; i<varnames_extra.size(); ++i){
 				*it_vec[id+i] = v[i];
@@ -282,9 +282,10 @@ double Solver<Model>::integrate_wudx_above(wFunc w, double t, double xlow, vecto
 		for (int i=0; i<xsize()-1; ++i){
 			double x_lo = *itx;
 			double f_lo = w(*itx--,t)*(*itu--);
+			//cout << "x/f = " << x_lo << " " << f_lo << "\n";
 			if (x_lo < xlow){
-				double f = f_lo + (f_hi-f_lo)/(x_hi-x_lo)*(xlow - x_lo); 
-				double x = xlow;
+				double f = f_lo; //f_lo + (f_hi-f_lo)/(x_hi-x_lo)*(xlow - x_lo); 
+				double x = x_lo; //xlow;
 				I += (x_hi-x) * (f_hi + f);
 				break;
 			}
@@ -295,7 +296,13 @@ double Solver<Model>::integrate_wudx_above(wFunc w, double t, double xlow, vecto
 			f_hi = f_lo;
 		}
 		
-		// if (xsize() == 1) return f_hi;
+		//if (xsize() == 1 || f_hi > 0){
+		//    double x_lo = xb;
+		//    double g = mod->growthRate(xb, t);
+		//    double u0 = (g>0)? u0_in*mod->establishmentProbability(t)/g  :  0; //FIXME: set to 0 if g()<0
+		//    double f_lo =  w(xb, t)*u0;
+		//    I += (x_hi-x_lo)*(f_hi+f_lo);
+		//}
 		// for now, ignoring the case of single cohort - 0 will be returned, and 
 		// that's probably okay.
 		return I*0.5;
@@ -406,9 +413,9 @@ void Solver<Model>::step_to(double tstop){
 		odeStepper.Step_to(tstop, current_time, state, derivs); // state = [pi0, Xint, N0, Nint]
 
 		//// update cohorts
-		//addCohort_CM();		// add before so that it becomes boundary cohort and first internal cohort can be (potentially) removed
+		addCohort_CM();		// add before so that it becomes boundary cohort and first internal cohort can be (potentially) removed
 		//removeCohort_CM();
-
+		// computeEnv() is required here IF rescaleEnv is used in derivs
 	}
 }
 
