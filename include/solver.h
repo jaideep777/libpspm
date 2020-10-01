@@ -5,7 +5,7 @@
 #include <list>
 #include <map>
 
-#include "pspm_ode_solver2.h"
+#include "pspm_ode_solver3.h"
 #include "iterator_set.h"
 
 enum PSPM_SolverType {SOLVER_FMU, SOLVER_MMU, SOLVER_CM, SOLVER_EBT};

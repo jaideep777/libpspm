@@ -15,7 +15,7 @@ void Solver<Model>::calcRates_CM(double t, vector<double>&S, vector<double> &dSd
 	auto& itre = ir.get((varnames_extra.size()>0)? varnames_extra[0] : "X");	// dummy init
 	
 	for (is.begin(), ir.begin(); !is.end(); ++is, ++ir){
-		double grad_dx = 0.001;
+		double grad_dx = 1e-6;
 		
 		double gxplus = mod->growthRate(*itx + grad_dx, t); 
 		double gx     = mod->growthRate(*itx, t); 
@@ -23,7 +23,7 @@ void Solver<Model>::calcRates_CM(double t, vector<double>&S, vector<double> &dSd
 		double growthGrad = (gxplus-gx)/grad_dx;
 
 		*itdx =  gx;
-		*itdu = -(mod->mortalityRate(*itx, t) + growthGrad)*(*itu);
+		*itdu = -(mod->mortalityRate(*itx, t) + growthGrad); //*(*itu);
 		
 		if (varnames_extra.size() > 0){
 			auto it_returned = mod->calcRates_extra(t, *itx, itre);
@@ -90,7 +90,7 @@ void Solver<Model>::addCohort_CM(){
 	else {
 		double g = mod->growthRate(xb, current_time);
 		cout << "g = " << g << "\n";
-		state[J+1] = (g>0)? u0_in*mod->establishmentProbability(current_time)/g  :  0; //FIXME: set to 0 if g()<0
+		state[J+1] = (g>0)? log(u0_in*mod->establishmentProbability(current_time)/g)  :  log(0); //FIXME: set to 0 if g()<0
 	}
 
 }
