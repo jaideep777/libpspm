@@ -9,6 +9,7 @@ void Solver<Model>::calcRates_CM(double t, vector<double>&S, vector<double> &dSd
 	auto ir = createIterators_rates(dSdt);
 	auto& itx = is.get("X");
 	auto& itu = is.get("u");
+	auto& itse = is.get((varnames_extra.size()>0)? varnames_extra[0] : "X");	// dummy init
 	
 	auto& itdx = ir.get("X");
 	auto& itdu = ir.get("u");
@@ -26,7 +27,7 @@ void Solver<Model>::calcRates_CM(double t, vector<double>&S, vector<double> &dSd
 		*itdu = -(mod->mortalityRate(*itx, t) + growthGrad); //*(*itu);
 		
 		if (varnames_extra.size() > 0){
-			auto it_returned = mod->calcRates_extra(t, *itx, itre);
+			auto it_returned = mod->calcRates_extra(t, *itx, itse, itre);
 			assert(distance(itre, it_returned) == varnames_extra.size());
 		}
 	}
@@ -73,7 +74,7 @@ void Solver<Model>::addCohort_CM(){
 	vector <double> ex = mod->initStateExtra(xb, current_time);
 	for (int i=0; i<varnames_extra.size(); ++i){
 		at.push_back(2*xsize());
-		vals.push_back(ex[i]); // FIXME: get these from initStateExtra()
+		vals.push_back(ex[i]); 
 	}
 	
 	vector_insert(state, at, vals);

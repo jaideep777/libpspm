@@ -265,15 +265,15 @@ void Solver<Model>::initialize(){
 
 template<class Model>
 void Solver<Model>::calcRates_extra(double t, vector<double>&S, vector<double>& dSdt){
-	auto is = createIterators_state(S);
-	auto ir = createIterators_rates(dSdt);
-	auto& itx = is.get("X");
-	auto& itre = ir.get(varnames_extra[0]);
+	//auto is = createIterators_state(S);
+	//auto ir = createIterators_rates(dSdt);
+	//auto& itx = is.get("X");
+	//auto& itre = ir.get(varnames_extra[0]);
 	
-	for (is.begin(), ir.begin(); !is.end(); ++is, ++ir){
-		auto it_returned = mod->calcRates_extra(t, *itx, itre);
-		assert(distance(itre, it_returned) == varnames_extra.size());
-	}
+	//for (is.begin(), ir.begin(); !is.end(); ++is, ++ir){
+	//    auto it_returned = mod->calcRates_extra(t, *itx, itre);
+	//    assert(distance(itre, it_returned) == varnames_extra.size());
+	//}
 }
 
 // current_time is updated by the ODE solver at every (internal) step

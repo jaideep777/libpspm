@@ -58,10 +58,8 @@ class PlantModel{
 			double kI = 0.5;
 
 			auto la_above = [z, this](double x, double t){
-				//plant::Plant p1;
 				p.set_height(x);
 				double a = p.area_leaf_above(z, p.vars.height, p.vars.area_leaf);
-				//if (z > 1.34) cout << "area above (" << z << "): " << " " << x << " " << a << "\n";
 				return a;	
 			};
 			double leaf_area_above = S->integrate_wudx_above(la_above, t, z, state_vec);
@@ -70,6 +68,7 @@ class PlantModel{
 		};	
 	
 		//cout << S->xb << " " << S->getMaxSize() << endl;	
+		env.time = t;
 		env.light_profile.construct(canopy_openness, 0, S->getMaxSize(state_vec.begin()));
 	}
 
@@ -81,7 +80,6 @@ class PlantModel{
 
 	double growthRate(double x, double t){
 		//if (p.vars.height != x){
-			env.time = t;
 			p.set_height(x);
 			p.compute_vars_phys(env);
 			++nrc;
@@ -106,22 +104,22 @@ class PlantModel{
 	vector<double> initStateExtra(double x, double t){
 		vector<double> sv;
 		sv.reserve(4);	
-		sv.push_back(0); 
-		sv.push_back(0); 
-		sv.push_back(0); 
-		sv.push_back(0);
+		sv.push_back(-log(seed.germination_probability(env))); // mortality 
+		sv.push_back(0); // viable_seeds
+		sv.push_back(0); // heartwood area
+		sv.push_back(0); // heartwood mass
 		return sv;
 	}
 
 
-	vector<double>::iterator calcRates_extra(double t, double x, vector<double>::iterator irates_ex){
+	vector<double>::iterator calcRates_extra(double t, double x, vector<double>::iterator istate_ex, vector<double>::iterator irates_ex){
 		
 		assert(p.vars.height == x);
 		
-		*irates_ex++ = p.vars.mortality_dt;
-		*irates_ex++ = p.vars.fecundity_dt;
-		*irates_ex++ = p.vars.area_heartwood_dt;
-		*irates_ex++ = p.vars.mass_heartwood_dt;
+		*irates_ex++ = p.vars.mortality_dt;	// mortality
+		*irates_ex++ = p.vars.fecundity_dt; // viable_seeds
+		*irates_ex++ = p.vars.area_heartwood_dt; // heartwood area
+		*irates_ex++ = p.vars.mass_heartwood_dt; // heartwood mass
 
 		return irates_ex;
 	
@@ -220,6 +218,9 @@ int main(){
 
 	ofstream fout("patch_full_hts.txt");
 	ofstream fout_ld("patch_full_lds.txt");
+	ofstream fout_m("patch_full_m.txt");
+	ofstream fout_ha("patch_full_ha.txt");
+	ofstream fout_hm("patch_full_hm.txt");
 	ofstream fli("light_profile_ind_plant.txt");
 	for (size_t i=0; i < times.size(); ++i){
 
@@ -233,32 +234,36 @@ int main(){
 
 		fout << times[i] << "\t";
 		fout_ld << times[i] << "\t";
-		auto it = S.getX()+S.xsize()-1;
-		auto itld = S.getX()+2*S.xsize()-1;
-		for (int i=0; i<S.xsize(); ++i){
-			fout << *it-- << "\t";
-			fout_ld << *itld-- << "\t";
+		fout_m << times[i] << "\t";
+		fout_ha << times[i] << "\t";
+		fout_hm << times[i] << "\t";
+		//fout_ha << times[i] << "\t";
+		auto iset = S.getIterators_state();
+		auto& itx = iset.get("X");
+		auto& itu = iset.get("u");
+		auto& ite = iset.get("mort");
+		for (iset.rbegin(); !iset.rend(); --iset){
+			fout << *itx << "\t";
+			fout_ld << *itu << "\t";
+			fout_m << *ite << "\t";
+			fout_ha << *next(ite,2) << "\t";
+			fout_hm << *next(ite,3) << "\t";
+			
 		}
 		fout << "\n";
 		fout_ld << "\n";
+		fout_m << "\n";
+		fout_ha << "\n";
+		fout_hm << "\n";
 
-		//M.setState(&S);
-
-		//fout << i*dt << "\t" <<
-		//    M.p.vars.height         << "\t" <<
-		//    M.p.vars.mortality      << "\t" <<
-		//    M.p.vars.fecundity      << "\t" <<
-		//    M.p.vars.area_heartwood << "\t" <<
-		//    M.p.vars.mass_heartwood << endl;
-						
-//		cout << p.vars.fecundity << " ";		
-//		heights.push_back(p.vars.height);
 	}
 	
 	fli.close();
 	fout.close();
 	fout_ld.close();
-	cout << M.p << endl;
+	fout_m.close();
+	fout_ha.close();
+	fout_hm.close();
 	cout << "derivative computations requested/done: " << M.nrc << " " << M.ndc << endl;
 
 
