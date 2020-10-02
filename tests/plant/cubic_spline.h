@@ -128,7 +128,7 @@ class Spline{
 	public:
 	template <typename Container>
 	void set_points(const Container &x, const Container &y){	// construct should be able to take any containers, as the points will be copied to the Spline's own storage anyway
-		assert(x.size() == y.size());
+	   assert(x.size() == y.size());
 	   m_x.assign(x.begin(), x.end());
 	   m_y.assign(y.begin(), y.end());
 	   

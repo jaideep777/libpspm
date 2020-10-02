@@ -24,10 +24,13 @@ class PlantModel{
 	}
 
 	double initDensity(double x){
-		seed.set_height(x);
-		seed.compute_vars_phys(env);
-		double u0 = input_seed_rain*p.germination_probability(env)/growthRate(p.vars.height, 0);
-		return u0;
+		if (x == seed.vars.height){
+			seed.set_height(x);
+			seed.compute_vars_phys(env);
+			double u0 = input_seed_rain*p.germination_probability(env)/growthRate(p.vars.height, 0);
+			return u0;
+		}
+		else return 0;
 	}
 
 
@@ -57,7 +60,9 @@ class PlantModel{
 			auto la_above = [z, this](double x, double t){
 				//plant::Plant p1;
 				p.set_height(x);
-				return p.area_leaf_above(z, p.vars.height, p.vars.area_leaf);
+				double a = p.area_leaf_above(z, p.vars.height, p.vars.area_leaf);
+				//if (z > 1.34) cout << "area above (" << z << "): " << " " << x << " " << a << "\n";
+				return a;	
 			};
 			double leaf_area_above = S->integrate_wudx_above(la_above, t, z, state_vec);
 			//cout << "la = " << leaf_area_above << "\n";
@@ -65,10 +70,10 @@ class PlantModel{
 		};	
 	
 		//cout << S->xb << " " << S->getMaxSize() << endl;	
-		env.light_profile.construct(canopy_openness, 0, S->getMaxSize());
+		env.light_profile.construct(canopy_openness, 0, S->getMaxSize(state_vec.begin()));
 	}
 
-	
+
 	double establishmentProbability(double t){
 		seed.compute_vars_phys(env);
 		return seed.germination_probability(env);
@@ -222,7 +227,7 @@ int main(){
 		cout << times[i] << " " << S.xsize() << " " << M.env.light_profile.npoints << " | " << M.nrc << " " << M.ndc << "\n";
 		//S.print();
 
-		vector<double> xl = logseq(0.01, 18, 200);
+		vector<double> xl = seq(0, 20, 200);
 		for (auto h : xl) fli << M.env.canopy_openness(h) << "\t";
 		fli << endl;
 

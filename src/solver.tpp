@@ -138,10 +138,10 @@ const int Solver<Model>::size(){
 
 
 template<class Model>
-double Solver<Model>::getMaxSize(){
+double Solver<Model>::getMaxSize(vector<double>::iterator sbegin){
 	if (method == SOLVER_FMU) return *x.rbegin();
 	else {
-		return *next(state.begin(), xsize()-1);
+		return *next(sbegin, xsize()-1);
 	}
 }
 
@@ -271,6 +271,8 @@ double Solver<Model>::integrate_wudx_above(wFunc w, double t, double xlow, vecto
 	//}
 	//else if (method == SOLVER_EBT){
 	//}
+	//cout << "Begin integrate: xsize = " << xsize() << "(" << S[0] << ", " << S[xsize()-1] << "), xlow = " << xlow << endl;
+	
 	if (method == SOLVER_CM){
 		// integrate using trapezoidal rule 
 		// Note, new cohorts are inserted at the beginning, so x will be ascending
@@ -278,11 +280,14 @@ double Solver<Model>::integrate_wudx_above(wFunc w, double t, double xlow, vecto
 		auto itu = S.begin() + 2*xsize()-1;
 		double I = 0;
 		double x_hi = *itx;
-		double f_hi = w(*itx--, t)*exp(*itu--);
+		double f_hi = w(*itx, t)*exp(*itu);
+		//if (xlow < 0.01) cout << "x/w/u/f = " << x_hi << " " <<  w(*itx,t) <<  " " << exp(*itu)  << " " << f_hi << "\n";
+		--itx; --itu;
 		for (int i=0; i<xsize()-1; ++i){
 			double x_lo = *itx;
-			double f_lo = w(*itx--,t)*exp(*itu--);
-			//cout << "x/f = " << x_lo << " " << f_lo << "\n";
+			double f_lo = w(*itx,t)*exp(*itu);
+			//if (xlow < 0.01) cout << "x/w/u/f = " << x_lo << " " <<  w(*itx,t) <<  " " << exp(*itu)  << " " << f_lo << "\n";
+			--itx; --itu;
 			if (x_lo < xlow){
 				double f = f_lo; //f_lo + (f_hi-f_lo)/(x_hi-x_lo)*(xlow - x_lo);  // FIXME: these should stop at the interpolating point
 				double x = x_lo; //xlow;
@@ -415,7 +420,7 @@ void Solver<Model>::step_to(double tstop){
 		//// update cohorts
 		addCohort_CM();		// add before so that it becomes boundary cohort and first internal cohort can be (potentially) removed
 		//removeCohort_CM();
-		//mod->computeEnv(current_time, state, this); // is required here IF rescaleEnv is used in derivs
+		mod->computeEnv(current_time, state, this); // is required here IF rescaleEnv is used in derivs
 	}
 }
 
