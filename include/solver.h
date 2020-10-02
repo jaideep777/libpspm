@@ -64,7 +64,7 @@ class Solver{
 	const int xsize();
 	const double* getX();
 	vector<double> getx();
-	double getMaxSize();
+	double getMaxSize(vector<double>::iterator sbegin);
 	
 	
 	void setupLayout();

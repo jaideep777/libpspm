@@ -89,7 +89,7 @@ void Solver<Model>::addCohort_CM(){
 	}
 	else {
 		double g = mod->growthRate(xb, current_time);
-		cout << "g = " << g << "\n";
+		//cout << "g = " << g << "\n";
 		state[J+1] = (g>0)? log(u0_in*mod->establishmentProbability(current_time)/g)  :  log(0); //FIXME: set to 0 if g()<0
 	}
 
