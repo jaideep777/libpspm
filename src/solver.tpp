@@ -108,7 +108,7 @@ void Solver<Model>::resetState(const std::vector<double>& xbreaks){
 }
 
 template<class Model>
-Solver<Model>::Solver(std::vector<double> xbreaks, PSPM_SolverType _method) : odeStepper(0, 1e-4, 1e-4) {
+Solver<Model>::Solver(std::vector<double> xbreaks, PSPM_SolverType _method) : odeStepper(0, 1e-6, 1e-6) {
 	method = _method;
 	resetState(xbreaks);	
 }

@@ -39,7 +39,7 @@ double Solver<Model>::integrate_wudx_above(wFunc w, double t, double xlow, vecto
 		//if (xsize() == 1 || f_hi > 0){
 		//    double x_lo = xb;
 		//    double g = mod->growthRate(xb, t);
-		//    double u0 = (g>0)? u0_in*mod->establishmentProbability(t)/g  :  0; //FIXME: as of now, this does not work
+		//    double u0 = (g>0)? u0_in*mod->establishmentProbability(t)/g  :  0; //FIXME: as of now, this does not work. To be fixed and discussed with Ake/Ulf
 		//    double f_lo =  w(xb, t)*u0;
 		//    I += (x_hi-x_lo)*(f_hi+f_lo);
 		//}

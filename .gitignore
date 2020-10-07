@@ -5,6 +5,7 @@ inst/website
 ^plant.Rcheck$
 .Rproj.user
 *.png
+*.pdf 
 
 *~
 

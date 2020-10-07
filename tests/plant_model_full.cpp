@@ -104,7 +104,7 @@ class PlantModel{
 	vector<double> initStateExtra(double x, double t){
 		vector<double> sv;
 		sv.reserve(4);	
-		sv.push_back(-log(seed.germination_probability(env))); // mortality 
+		sv.push_back(-log(seed.germination_probability(env)/env.patch_survival(t))); // mortality 
 		sv.push_back(0); // viable_seeds
 		sv.push_back(0); // heartwood area
 		sv.push_back(0); // heartwood mass
@@ -116,8 +116,10 @@ class PlantModel{
 		
 		assert(p.vars.height == x);
 		
+		double p_plant_survival = exp(-(*istate_ex));
+
 		*irates_ex++ = p.vars.mortality_dt;	// mortality
-		*irates_ex++ = p.vars.fecundity_dt; // viable_seeds
+		*irates_ex++ = p.vars.fecundity_dt * env.patch_survival(t) * p_plant_survival; // viable_seeds
 		*irates_ex++ = p.vars.area_heartwood_dt; // heartwood area
 		*irates_ex++ = p.vars.mass_heartwood_dt; // heartwood mass
 
@@ -216,15 +218,22 @@ int main(){
 	vector <double> times = generateDefaultCohortSchedule(105.32);
 	for (auto t : times) cout << t << " "; cout << endl;
 
+#define OUTPUT_TEXT
+
+#ifdef OUTPUT_TEXT
 	ofstream fout("patch_full_hts.txt");
 	ofstream fout_ld("patch_full_lds.txt");
 	ofstream fout_m("patch_full_m.txt");
+	ofstream fout_vs("patch_full_vs.txt");
 	ofstream fout_ha("patch_full_ha.txt");
 	ofstream fout_hm("patch_full_hm.txt");
 	ofstream fli("light_profile_ind_plant.txt");
+#endif
 	for (size_t i=0; i < times.size(); ++i){
 
 		S.step_to(times[i]);		
+
+#ifdef OUTPUT_TEXT
 		cout << times[i] << " " << S.xsize() << " " << M.env.light_profile.npoints << " | " << M.nrc << " " << M.ndc << "\n";
 		//S.print();
 
@@ -235,6 +244,7 @@ int main(){
 		fout << times[i] << "\t";
 		fout_ld << times[i] << "\t";
 		fout_m << times[i] << "\t";
+		fout_vs << times[i] << "\t";
 		fout_ha << times[i] << "\t";
 		fout_hm << times[i] << "\t";
 		//fout_ha << times[i] << "\t";
@@ -246,6 +256,7 @@ int main(){
 			fout << *itx << "\t";
 			fout_ld << *itu << "\t";
 			fout_m << *ite << "\t";
+			fout_vs << *next(ite,1) << "\t";
 			fout_ha << *next(ite,2) << "\t";
 			fout_hm << *next(ite,3) << "\t";
 			
@@ -253,19 +264,37 @@ int main(){
 		fout << "\n";
 		fout_ld << "\n";
 		fout_m << "\n";
+		fout_vs << "\n";
 		fout_ha << "\n";
 		fout_hm << "\n";
-
+#endif
 	}
 	
+#ifdef OUTPUT_TEXT
 	fli.close();
 	fout.close();
 	fout_ld.close();
 	fout_m.close();
+	fout_vs.close();
 	fout_ha.close();
 	fout_hm.close();
+#endif
 	cout << "derivative computations requested/done: " << M.nrc << " " << M.ndc << endl;
 
+	auto iset = S.getIterators_state();
+	auto& itf = iset.get("fec");
+	vector <double> fec_vec;
+	fec_vec.reserve(S.xsize());
+	iset.rbegin();
+	for (int i=0; !iset.rend(); --iset, ++i){
+		double patch_age_density = M.env.patch_age_density(times[i]);
+		double S_D = 0.25;
+		double output_seeds = M.input_seed_rain * S_D * patch_age_density * (*itf);
+		cout << times[i] << " " << M.input_seed_rain << " " << S_D << " " << patch_age_density << " " << (*itf) << " | " << output_seeds << endl;
+		fec_vec.push_back(output_seeds);
+	}
+	cout << "Seed rain out = " << pn::integrate_trapezium(times, fec_vec) << endl;
+		
 
 }
 
