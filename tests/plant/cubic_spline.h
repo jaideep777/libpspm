@@ -128,7 +128,7 @@ class Spline{
 	public:
 	template <typename Container>
 	void set_points(const Container &x, const Container &y){	// construct should be able to take any containers, as the points will be copied to the Spline's own storage anyway
-		assert(x.size() == y.size());
+	   assert(x.size() == y.size());
 	   m_x.assign(x.begin(), x.end());
 	   m_y.assign(y.begin(), y.end());
 	   
@@ -207,14 +207,16 @@ class Spline{
 	inline Float extrapolate_left(double x) const{
 		  double h=x-m_x[0];
 		  // extrapolation to the left
-		  return ((m_b[0])*h + m_c[0])*h + m_y[0];
+		  return m_y[0];	// constant
+		  // return ((m_b[0])*h + m_c[0])*h + m_y[0];  // quadratic
 	}
 	
 	inline Float extrapolate_right(double x) const{
 			size_t n=m_x.size();
 			double h=x-m_x[n-1];
 		  // extrapolation to the right
-			return ((m_b[n-1])*h + m_c[n-1])*h + m_y[n-1];
+			return m_y[n-1]; // constant
+			// return ((m_b[n-1])*h + m_c[n-1])*h + m_y[n-1];  // quadratic
 	
 	}
 	

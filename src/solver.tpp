@@ -16,6 +16,11 @@ std::vector <double> seq(double from, double to, int len){
 	return x;
 }
 
+std::vector <double> logseq(double from, double to, int len){
+	std::vector<double> x(len);
+	for (size_t i=0; i<len; ++i) x[i] = exp(log(from) + i*(log(to)-log(from))/(len-1));
+	return x;
+}
 // ~~~~~~~~~~~ SOLVER ~~~~~~~~~~~~~~~~~~~~~
 
 template<class Model>
@@ -28,16 +33,7 @@ const int Solver<Model>::xsize(){
 
 
 template<class Model>
-void Solver<Model>::resetState(const std::vector<double>& xbreaks){
-   	current_time = 0;
-	odeStepper = RKCK45<vector<double>> (0, 1e-4, 1e-4);  // this is a cheap operation, but this will empty the internal containers, which will then be (automatically) resized at next 1st ODE step. Maybe add a reset function to the ODE stepper? 
-
-	xb = xbreaks[0];
-	xm = xbreaks[xbreaks.size()-1];
-	J  = xbreaks.size()-1;
-
-	x = xbreaks;
-
+void Solver<Model>::setupLayout(){
 	// Set up layout of state vector, for e.g.
 	//  ------------------------------------------------------------
 	// | x | x | x : u | u | u : a | b | c | a | b | c | a | b | c |
@@ -64,7 +60,21 @@ void Solver<Model>::resetState(const std::vector<double>& xbreaks){
 	for (int i=0; i<varnames_extra.size(); ++i){
 		addVar(varnames_extra[i], varnames_extra.size(), 1);  // abc abc abc .. 
 	}
-	
+}
+
+
+template<class Model>
+void Solver<Model>::resetState(const std::vector<double>& xbreaks){
+   	current_time = 0;
+	odeStepper = RKCK45<vector<double>> (0, 1e-4, 1e-6);  // this is a cheap operation, but this will empty the internal containers, which will then be (automatically) resized at next 1st ODE step. Maybe add a reset function to the ODE stepper? 
+
+	xb = xbreaks[0];
+	xm = xbreaks[xbreaks.size()-1];
+	J  = xbreaks.size()-1;
+
+	x = xbreaks;
+
+	setupLayout();
 
 	state.resize(varnames.size()*xsize());   // xsize() is J for FMU & MMU, and J+1 for CM and EBT
 	rates.resize(state.size());
@@ -98,7 +108,7 @@ void Solver<Model>::resetState(const std::vector<double>& xbreaks){
 }
 
 template<class Model>
-Solver<Model>::Solver(std::vector<double> xbreaks, PSPM_SolverType _method) : odeStepper(0, 1e-4, 1e-4) {
+Solver<Model>::Solver(std::vector<double> xbreaks, PSPM_SolverType _method) : odeStepper(0, 1e-6, 1e-6) {
 	method = _method;
 	resetState(xbreaks);	
 }
@@ -125,6 +135,16 @@ template<class Model>
 const int Solver<Model>::size(){
 	return state.size();
 }
+
+
+template<class Model>
+double Solver<Model>::getMaxSize(vector<double>::iterator sbegin){
+	if (method == SOLVER_FMU) return *x.rbegin();
+	else {
+		return *next(sbegin, xsize()-1);
+	}
+}
+
 
 	//for (int i=0; i<J; ++i){
 	//    x[i+1] = exp(log(0.01) + (i)*(log(xm)-log(0.01))/(J-1));
@@ -220,7 +240,7 @@ void Solver<Model>::initialize(){
 		//for (size_t i=0; i<J+1; ++i) uprev[i] = initDensity(x[i]);
 	}
 	if (method == SOLVER_CM){
-		for (size_t i=0; i<J+1; ++i)  state[J+1 + i] = mod->initDensity(x[i]);
+		for (size_t i=0; i<J+1; ++i)  state[J+1 + i] = log(mod->initDensity(x[i]));
 	}
 	if (method == SOLVER_EBT){
 		for (size_t i=0; i<J; ++i)  state[J+1 + 1+i] = mod->initDensity(X0[i])*h[i];	// state[J+1+0]=0 (N0)
@@ -233,7 +253,7 @@ void Solver<Model>::initialize(){
 		auto& itx = is.get("X");
 		int id = is.getIndex(varnames_extra[0]); // get index of 1st extra variable
 		for (is.begin(); !is.end(); ++is){
-			vector <double> v = mod->initStateExtra(*itx);  // returned vector will be `move`d so this is fast 
+			vector <double> v = mod->initStateExtra(*itx, current_time);  // returned vector will be `move`d so this is fast 
 			auto it_vec = is.get();
 			for (size_t i = 0; i<varnames_extra.size(); ++i){
 				*it_vec[id+i] = v[i];
@@ -244,59 +264,16 @@ void Solver<Model>::initialize(){
 
 
 template<class Model>
-template<typename wFunc>
-double Solver<Model>::integrate_x(wFunc w, double t, vector<double>&S, int power){
-	//cout << " | " <<  t << " " << mod->evalEnv(0,t) << " ";
-	if (method == SOLVER_FMU){
-		// integrate using midpoint quadrature rule
-		double I=0;
-		double * U = S.data();
-		for (unsigned int i=0; i<X.size(); ++i){
-			I += h[i]*w(X[i], t)*pow(U[i], power);  // TODO: Replace with std::transform after profiling
-		}
-		return I;
-	}
-	else if (method == SOLVER_EBT){
-		// integrate using EBT rule (sum over cohorts)
-		double   pi0  =  S[0];
-		double * xint = &S[1];
-		double   N0   =  S[J+1];
-		double * Nint = &S[J+2];
-		
-		double x0 = xb + pi0/(N0+1e-12); 
-		
-		double I = w(x0, t)*N0;
-		for (int i=0; i<J; ++i) I += w(xint[i], t)*Nint[i];
-		
-		return I;
-	}
-	else if (method == SOLVER_CM){
-		// integrate using trapezoidal rule TODO: Modify to avoid double computation of w(x)
-		double * px = &S[0];
-		double * pu = &S[J+1];
-		double I = 0;
-		for (int i=0; i<J; ++i){
-			I += (px[i+1]-px[i])*(w(px[i+1], t)*pu[i+1]+w(px[i], t)*pu[i]);
-		}
-		return I*0.5;
-	}
-	else{
-		std::cout << "Only FMU and MMU are implemented\n";
-		return 0;
-	}
-}
-
-template<class Model>
 void Solver<Model>::calcRates_extra(double t, vector<double>&S, vector<double>& dSdt){
-	auto is = createIterators_state(S);
-	auto ir = createIterators_rates(dSdt);
-	auto& itx = is.get("X");
-	auto& itre = ir.get(varnames_extra[0]);
+	//auto is = createIterators_state(S);
+	//auto ir = createIterators_rates(dSdt);
+	//auto& itx = is.get("X");
+	//auto& itre = ir.get(varnames_extra[0]);
 	
-	for (is.begin(), ir.begin(); !is.end(); ++is, ++ir){
-		auto it_returned = mod->calcRates_extra(t, *itx, itre);
-		assert(distance(itre, it_returned) == varnames_extra.size());
-	}
+	//for (is.begin(), ir.begin(); !is.end(); ++is, ++ir){
+	//    auto it_returned = mod->calcRates_extra(t, *itx, itre);
+	//    assert(distance(itre, it_returned) == varnames_extra.size());
+	//}
 }
 
 // current_time is updated by the ODE solver at every (internal) step
@@ -334,16 +311,16 @@ void Solver<Model>::step_to(double tstop){
 		auto derivs = [this](double t, vector<double> &S, vector<double> &dSdt){
 			mod->computeEnv(t, S, this);
 			this->calcRates_CM(t, S, dSdt);
-			if (varnames_extra.size() > 0) this->calcRates_extra(t, S, dSdt);
+			//if (varnames_extra.size() > 0) this->calcRates_extra(t, S, dSdt);
 		};
 		
 		// integrate 
 		odeStepper.Step_to(tstop, current_time, state, derivs); // state = [pi0, Xint, N0, Nint]
 
 		//// update cohorts
-		//addCohort_CM();		// add before so that it becomes boundary cohort and first internal cohort can be (potentially) removed
+		addCohort_CM();		// add before so that it becomes boundary cohort and first internal cohort can be (potentially) removed
 		//removeCohort_CM();
-
+		mod->computeEnv(current_time, state, this); // is required here IF rescaleEnv is used in derivs
 	}
 }
 
@@ -407,7 +384,7 @@ double Solver<Model>::createSizeStructuredVariables(vector<std::string> names){
 #include "mu.tpp"
 #include "ebt.tpp"
 #include "cm.tpp"
-
+#include "size_integrals.tpp"
 
 
 

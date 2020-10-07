@@ -132,7 +132,7 @@ class SubdivisionSpline : public Spline{
 	template <typename Function>  
 	void construct(Function f, double _a, double _b){
 		// auto t1 = std::chrono::steady_clock::now();
-		__DEBUG_AI_ std::cout << "Constructing Spline: " << std::endl;
+		__DEBUG_AI_ std::cout << "Constructing Spline: (" << _a << ", " << _b << ")\n";
 		a = _a; b = _b;
 		assert(a < b);
 		
@@ -152,6 +152,7 @@ class SubdivisionSpline : public Spline{
 			indices.push_back(i*npoints_max/(npoints0-1));
 			
 			__DEBUG_AI_ std::cout << xi << " " << f(xi) << " " << i*npoints_max/(npoints0-1) << std::endl;
+			assert(!std::isnan(f(xi)));
 		}
 		__DEBUG_AI_ std::cout << "Size = " << xx.size() << " " << yy.size() << std::endl;
 		
@@ -170,6 +171,27 @@ class SubdivisionSpline : public Spline{
 		// std::cout << "Interpolator Construction: (" << xx.size() << " points) [" << std::chrono::duration_cast<std::chrono::microseconds>(t2 - t1).count() << " usec]" << std::endl;
 	}
 	
+	
+	// Scale points
+	// [a0, b0] ---> [_a, _b]
+	template <typename Function>  
+	void rescale(Function f, double _a, double _b){
+		__DEBUG_AI_ std::cout << "Rescaling Spline: (" << _a << ", " << _b << ")\n";
+		
+		double a0 = xx.front();
+		double b0 = xx.back();
+		
+		const double scale = (_b - _a) / (b0 - a0);
+		for (auto itx = xx.begin(), ity = yy.begin(); itx != xx.end() && ity != yy.end(); ++itx, ++ity){
+			double xnew = _a + (*itx - a0) * scale;
+			double ynew = f(xnew);
+			*itx = xnew;
+			*ity = ynew;
+		}
+		set_points(xx,yy);
+		
+	}
+
 
 	inline bool check_no_err(double y_true, double y_pred) const {
 		const double err_abs = fabs(y_true - y_pred);

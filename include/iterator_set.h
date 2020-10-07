@@ -50,6 +50,8 @@ class IteratorSet{
 		}
 	}
 
+	// FIXME: this is risky.. especially when rend() is checked. Better to save the beginning 
+	// iterators in a separate vector, and use that to initialize in begin() / rbegin()
 	// Reset iterators
 	void begin(){
 		for (int i=0; i<names.size(); ++i){
@@ -58,9 +60,21 @@ class IteratorSet{
 		dist = 0;
 	}
 
+
+	// Reset iterators
+	void rbegin(){
+		for (int i=0; i<names.size(); ++i) iters[i] += (-dist+size-1)*strides[i];
+		dist = size-1;
+	}
+
+
 	// Check whether the iterator set has traversed till the end
 	bool end(){
 		return dist >= size; //iters[0] == next(first,strides[0]*size);
+	}
+
+	bool rend(){
+		return dist < 0;
 	}
 
 	// add a new iterator to the set
@@ -84,6 +98,15 @@ class IteratorSet{
 		++dist;
 		return *this;
 	}
+
+
+	// increment all iterators
+	IteratorSet& operator--(){
+		for (int i=0; i<iters.size(); ++i) iters[i] -= strides[i];
+		--dist;
+		return *this;
+	}
+
 
 	// Get a specific iterator by name
     const Iterator& get(std::string name){
