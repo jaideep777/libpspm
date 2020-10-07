@@ -31,7 +31,7 @@ int main(){
   //    y[0,1] = [xmax*sin(t), xmax*cos(t)]
 
 
-  RKCK45<vector<double> > rk(t_start, 1e-8); // RK class for adaptive step
+  RKCK45<vector<double> > rk(t_start, 1e-8, 1e-8); // RK class for adaptive step
   
   cout.precision(15);
   int M = static_cast<int>((t_stop-t_start)/dh+0.5); // Number of timesteps

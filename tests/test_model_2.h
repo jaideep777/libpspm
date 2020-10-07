@@ -90,9 +90,12 @@ class TestModel{
 		return n1*n2;
 	}
 
+	double establishmentProbability(double t){
+		return 1;
+	}
 	
 	// optional functions, if extra size-structured variables are desired
-	vector<double> initStateExtra(double x){
+	vector<double> initStateExtra(double x, double t){
 		Plant p(x);
 		p.init_state();
 		vector<double> sv;
@@ -104,10 +107,10 @@ class TestModel{
 		return sv;
 	}
 
-	vector<double>::iterator calcRates_extra(double t, vector<double>::iterator ix, vector<double>::iterator iu, 
+	vector<double>::iterator calcRates_extra(double t, double x, 
 											vector<double>::iterator istate, vector<double>::iterator irates){
 		
-		Plant p(*ix);
+		Plant p(x);
 		p.init_state();
 		vector<double> r = p.calcRates();
 		*irates++ = r[0];

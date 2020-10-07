@@ -99,7 +99,7 @@ class PlantModel{
 	}
 
 
-	vector<double>::iterator calcRates_extra(double t, double x, vector<double>::iterator irates_ex){
+	vector<double>::iterator calcRates_extra(double t, double x, vector<double>::iterator istate_ex, vector<double>::iterator irates_ex){
 		
 		assert(p.vars.height == x);
 		

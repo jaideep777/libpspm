@@ -12,7 +12,7 @@ class Model{
 		return sc*x;
 	}
 
-	vector<double> initStateExtra(double d){}
+	vector<double> initStateExtra(double d, double t){}
 };
 
 

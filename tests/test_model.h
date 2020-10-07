@@ -56,14 +56,16 @@ class TestModel{
 		return n1*n2;
 	}
 
+	double establishmentProbability(double t){
+		return 1;
+	}
 
-	vector<double> initStateExtra(double x){
+	vector<double> initStateExtra(double x, double t){
 	
 	}
 
 
-	vector<double>::iterator calcRatesExtra(double t, vector<double>::iterator ix, vector<double>::iterator iu, 
-											vector<double>::iterator istate, vector<double>::iterator irates){
+	vector<double>::iterator calcRates_extra(double t, double x, vector<double>::iterator istate, vector<double>::iterator irates){
 		return irates;
 	}
 
