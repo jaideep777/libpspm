@@ -1,5 +1,5 @@
-#ifndef PSPM_PSPM_ODE_SOLVER_H
-#define PSPM_PSPM_ODE_SOLVER_H
+#ifndef PSPM_PSPM_ODE_SOLVER_H_
+#define PSPM_PSPM_ODE_SOLVER_H_
 
 /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  *

@@ -1,5 +1,5 @@
-#ifndef  PSPM_SOLVER_H_
-#define  PSPM_SOLVER_H_
+#ifndef  PSPM_PSPM_SOLVER_H_
+#define  PSPM_PSPM_SOLVER_H_
 
 #include <vector>
 #include <list>

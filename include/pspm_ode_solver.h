@@ -1,3 +1,6 @@
+#ifndef PSPM_PSPM_ODE_SOLVER_H_
+#define PSPM_PSPM_ODE_SOLVER_H_
+
 #include <iostream>
 #include <iomanip>
 #include <cmath>
@@ -170,6 +173,6 @@ void VRungeKutta<container>::RKTry(container& y, container& dydx, double& x, dou
 
 
 
-
+#endif
 
 

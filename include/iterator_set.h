@@ -1,5 +1,5 @@
-#ifndef PSPM_PSPM_ITERATOR_SET_H
-#define PSPM_PSPM_ITERATOR_SET_H
+#ifndef PSPM_PSPM_ITERATOR_SET_H_
+#define PSPM_PSPM_ITERATOR_SET_H_
 
 #include <vector>
 #include <string>
