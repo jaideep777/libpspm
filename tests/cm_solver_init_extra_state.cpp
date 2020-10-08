@@ -27,12 +27,18 @@ int main(){
 	for (int i=0; i<S.state.size(); ++i){
 		double d;
 		fin >> d;
-		if (abs(d - S.state[i]) > 1e-5) return 1;
+		//cout << d << " " << S.state[i] << endl;
+		if (abs(d - S.state[i]) > 1e-4 && !isinf(S.state[i])){
+			return 1;
+		}
 	}
 	for (int i=0; i<S.rates.size(); ++i){
 		double d;
 		fin >> d;
-		if (abs(d - S.rates[i]) > 1e-5) return 1;
+		if (abs(d - S.rates[i]) > 1e-4){
+			//cout << d << " " << S.rates[i] << endl;
+			return 1;
+		}
 	}
 	fin.close();
 

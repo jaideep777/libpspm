@@ -66,7 +66,7 @@ void Solver<Model>::setupLayout(){
 template<class Model>
 void Solver<Model>::resetState(const std::vector<double>& xbreaks){
    	current_time = 0;
-	odeStepper = RKCK45<vector<double>> (0, 1e-4, 1e-6);  // this is a cheap operation, but this will empty the internal containers, which will then be (automatically) resized at next 1st ODE step. Maybe add a reset function to the ODE stepper? 
+	odeStepper = RKCK45<vector<double>> (0, control.ode_eps, control.ode_initial_step_size);  // this is a cheap operation, but this will empty the internal containers, which will then be (automatically) resized at next 1st ODE step. Maybe add a reset function to the ODE stepper? 
 
 	xb = xbreaks[0];
 	xm = xbreaks[xbreaks.size()-1];
@@ -364,7 +364,7 @@ double Solver<Model>::stepToEquilibrium(){
 		}
 		//cout << " | " << max_err << endl;
 		
-		if (abs(max_err) < 1e-6){
+		if (abs(max_err) < control.convergence_eps){
 			cout << t << " | " << J << " | "; for (auto u : u0_out_history) cout << u << " "; cout << "|" << max_err << endl;
 			break;
 		}	

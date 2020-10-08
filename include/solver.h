@@ -41,6 +41,7 @@ class Solver{
 	std::list<double> u0_out_history;                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    
 	std::vector<double> schedule;
 
+	
 	public:
 	double xb, xm;
 	
@@ -49,6 +50,13 @@ class Solver{
 	std::vector <double> state;		// +-- They are NOT synced during the ODE solver's internal steps
 	std::vector <double> rates; 
 
+	struct{
+		double ode_eps = 1e-6;	// FIXME: Need a function to set these params, so ODE solver can be reset
+		double ode_initial_step_size = 1e-6;
+		double convergence_eps = 1e-6;
+	} control;
+	
+	
 	public:	
 	Solver(int _J, double _xb, double _xm, PSPM_SolverType _method);
 	Solver(std::vector<double> xbreaks, PSPM_SolverType _method);
@@ -76,7 +84,7 @@ class Solver{
 
 	void calcRates_extra(double t, vector<double>&S, vector<double>& dSdt);
 	
-	void calcRates_FMU(double t, vector<double> &U, vector<double> &dUdt);
+	void calcRates_FMU(double t, vector<double> &S, vector<double> &dSdt);
 	//void calcRates_FMU(double t);	
 	
 	void calcRates_EBT(double t, vector<double>&S, vector<double> &dSdt);
