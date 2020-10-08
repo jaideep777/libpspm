@@ -305,7 +305,7 @@ void Solver<Model>::step_to(double tstop){
 		
 		// update cohorts
 		removeDeadCohorts_EBT();
-		if (state[J+1] > 0) addCohort_EBT();  // Add new cohort if N0 > 0. Add after removing dead ones otherwise this will also be removed. 
+		if (state[xsize()] > 0) addCohort_EBT();  // Add new cohort if N0 > 0. Add after removing dead ones otherwise this will also be removed. 
 	}
 	if (method == SOLVER_CM){
 		auto derivs = [this](double t, vector<double> &S, vector<double> &dSdt){

@@ -12,14 +12,14 @@ void Solver<Model>::calcRates_EBT(double t, vector<double>&S, vector<double> &dS
 
 	double * dpi0  = &dSdt[0];
 	double * dxint = &dSdt[1];
-	double * dN0   = &dSdt[J+1];
-	double * dNint = &dSdt[J+2];
+	double * dN0   = &dSdt[xsize()];
+	double * dNint = &dSdt[xsize()+1];
 
 	double x0 = xb + pi0/(N0+1e-12); 
 
 	
 	//FIXME: Modify to maintain rate calc order
-	for (size_t i=0; i<J; ++i){
+	for (size_t i=0; i<xsize()-1; ++i){
 		dxint[i] =  mod->growthRate(xint[i], t);
 		dNint[i] = -mod->mortalityRate(xint[i], t)*Nint[i];
 	}
@@ -86,7 +86,7 @@ void Solver<Model>::removeDeadCohorts_EBT(){
 	// for dead cohorts, mark N and correponding x for removal  
 	++p_N; ++p_x_flag; ++p_N_flag; // skip pi0, N0 from removal
 	int Jnew = J;
-	for (int i=0; i<J; ++i){
+	for (int i=0; i<xsize()-1; ++i){
 		if (*p_N < 1e-10){
 			*p_x_flag = *p_N_flag = true; 
 			--Jnew;
