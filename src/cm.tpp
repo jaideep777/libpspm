@@ -9,11 +9,13 @@ void Solver<Model>::calcRates_CM(double t, vector<double>&S, vector<double> &dSd
 	auto ir = createIterators_rates(dSdt);
 	auto& itx = is.get("X");
 	auto& itu = is.get("u");
-	auto& itse = is.get((varnames_extra.size()>0)? varnames_extra[0] : "X");	// dummy init
+	auto& itse = is.get((varnames_extra.size()>0)? varnames_extra[0] : "X");	// dummy init //FIXME: commented line below does not work. Explore why
+	//auto& itse = (varnames_extra.size()>0)? is.get(varnames_extra[0]) : S.begin(); 
 	
 	auto& itdx = ir.get("X");
 	auto& itdu = ir.get("u");
 	auto& itre = ir.get((varnames_extra.size()>0)? varnames_extra[0] : "X");	// dummy init
+	//auto& itre = (varnames_extra.size()>0)? ir.get(varnames_extra[0]) : dSdt.begin(); 
 	
 	for (is.begin(), ir.begin(); !is.end(); ++is, ++ir){
 		double grad_dx = 1e-6;
@@ -40,7 +42,7 @@ double Solver<Model>::calc_u0_CM(){
 	// function to iterate
 	auto f = [this](double utry){
 		// set u0 to given (trial) value
-		state[J+1] = utry;
+		state[xsize()] = utry;
 		// recompute environment based on new state
 		mod->computeEnv(current_time, state, this);
 		// calculate birthflux by trapezoidal integration (under new environment)
@@ -50,7 +52,7 @@ double Solver<Model>::calc_u0_CM(){
 		return unext;
 	};
 
-	double u0 = state[J+2]; // initialize with u0 = u1
+	double u0 = state[xsize()+1]; // initialize with u0 = u1
 	// iterate
 	double err = 100;
 	while(err > 1e-6){
@@ -58,9 +60,9 @@ double Solver<Model>::calc_u0_CM(){
 		err = abs(u1 - u0);
 		u0 = u1;
 	}
-	state[J+1] = u0;
+	state[xsize()] = u0;
 	//cout << "u0 = " << u0 << endl;	
-	return state[J+1];
+	return state[xsize()];
 }
 
 
@@ -91,7 +93,7 @@ void Solver<Model>::addCohort_CM(){
 	else {
 		double g = mod->growthRate(xb, current_time);
 		//cout << "g = " << g << "\n";
-		state[J+1] = (g>0)? log(u0_in*mod->establishmentProbability(current_time)/g)  :  log(0); //FIXME: set to 0 if g()<0
+		state[xsize()] = (g>0)? log(u0_in*mod->establishmentProbability(current_time)/g)  :  log(0); //FIXME: set to 0 if g()<0
 	}
 
 }
@@ -99,7 +101,7 @@ void Solver<Model>::addCohort_CM(){
 
 template <class Model>
 void Solver<Model>::removeCohort_CM(){
-	// cohorts are x0, x1, x2, x3, ...xJ,  u0, u1, u2, u3, .... uJ 
+	// cohorts are x0, x1, x2, x3, ...xJ-1,  u0, u1, u2, u3, .... uJ-1 
 	auto px = state.begin(); advance(px, 1); // point at x1
 	auto pu = state.begin(); advance(pu, xsize()+1); // point at u1
 	auto last = state.begin(); advance(last, xsize()-1); // point at xJ (1 past the last value to be considered)

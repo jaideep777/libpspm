@@ -1,21 +1,25 @@
 #include <algorithm>
 #include <cassert>
 
+#include "vector_insert.h"
+
 template <class Model>
 void Solver<Model>::calcRates_EBT(double t, vector<double>&S, vector<double> &dSdt){
 	double   pi0  =  S[0];
 	double * xint = &S[1];
-	double   N0   =  S[J+1];
-	double * Nint = &S[J+2];
+	double   N0   =  S[xsize()];
+	double * Nint = &S[xsize()+1];
 
 	double * dpi0  = &dSdt[0];
 	double * dxint = &dSdt[1];
-	double * dN0   = &dSdt[J+1];
-	double * dNint = &dSdt[J+2];
+	double * dN0   = &dSdt[xsize()];
+	double * dNint = &dSdt[xsize()+1];
 
 	double x0 = xb + pi0/(N0+1e-12); 
 
-	for (size_t i=0; i<J; ++i){
+	
+	//FIXME: Modify to maintain rate calc order
+	for (size_t i=0; i<xsize()-1; ++i){
 		dxint[i] =  mod->growthRate(xint[i], t);
 		dNint[i] = -mod->mortalityRate(xint[i], t)*Nint[i];
 	}
@@ -40,17 +44,27 @@ void Solver<Model>::calcRates_EBT(double t, vector<double>&S, vector<double> &dS
 
 template <class Model>
 void Solver<Model>::addCohort_EBT(){
+	// internalize boundary cohort
 	auto p_pi0  = state.begin();
-	auto p_N0   = state.begin(); advance(p_N0, J+1); 
-
-	double x0 = xb + *p_pi0/(*p_N0+1e-12); 
+	auto p_N0   = state.begin() + xsize(); 
 	
+	double x0 = xb + *p_pi0/(*p_N0+1e-12); 
 	*p_pi0 = x0; // pi0 becomes x0 when boundary cohort is internalized
+	
+	// insert new boundary cohort
+	vector <int> at = {0, xsize()};
+	vector <double> vals = {0, 0};
+	vector <double> ex = mod->initStateExtra(xb, current_time);
+	for (int i=0; i<varnames_extra.size(); ++i){
+		at.push_back(2*xsize());
+		vals.push_back(ex[i]); 
+	}
 
-	state.insert(p_N0,  0); // insert new N0 (= 0) BEFORE p_p0. (Now both iterators are invalid)
-	state.insert(state.begin(), 0); // this inserts new pi0 (= 0) at the 1st position	
-
+	vector_insert(state, at, vals);
+	rates.resize(state.size(), -999);
 	++J;	// increment J to reflect new system size
+	setupLayout();  // rebuild parameters for IteratorSet
+
 }
 
 
@@ -65,14 +79,14 @@ void Solver<Model>::removeDeadCohorts_EBT(){
 	vector<bool> flags(state.size(), false);
 	
 	// iterators to beginning of x and beginning of N in state array
-    auto p_N = state.begin(); advance(p_N, J+1);
+    auto p_N = state.begin() + xsize();
 	auto p_x_flag = flags.begin();
-	auto p_N_flag = flags.begin(); advance(p_N_flag, J+1);
+	auto p_N_flag = flags.begin() + xsize();
 
 	// for dead cohorts, mark N and correponding x for removal  
 	++p_N; ++p_x_flag; ++p_N_flag; // skip pi0, N0 from removal
 	int Jnew = J;
-	for (int i=0; i<J; ++i){
+	for (int i=0; i<xsize()-1; ++i){
 		if (*p_N < 1e-10){
 			*p_x_flag = *p_N_flag = true; 
 			--Jnew;
@@ -98,7 +112,7 @@ template <class Model>
 vector<double> Solver<Model>::cohortsToDensity_EBT(vector <double> &breaks){
 
 	auto pX = state.begin();
-	auto pN = state.begin(); advance(pN, J+1);
+	auto pN = state.begin()+xsize();
 
 	*pX = xb + *pX/(*pN+1e-12); 
 				

@@ -75,22 +75,22 @@ double Solver<Model>::integrate_x(wFunc w, double t, vector<double>&S, int power
 		// integrate using EBT rule (sum over cohorts)
 		double   pi0  =  S[0];
 		double * xint = &S[1];
-		double   N0   =  S[J+1];
-		double * Nint = &S[J+2];
+		double   N0   =  S[xsize()];
+		double * Nint = &S[xsize()+1];
 		
 		double x0 = xb + pi0/(N0+1e-12); 
 		
 		double I = w(x0, t)*N0;
-		for (int i=0; i<J; ++i) I += w(xint[i], t)*Nint[i];
+		for (int i=0; i<xsize()-1; ++i) I += w(xint[i], t)*Nint[i];
 		
 		return I;
 	}
 	else if (method == SOLVER_CM){
 		// integrate using trapezoidal rule TODO: Modify to avoid double computation of w(x)
 		double * px = &S[0];
-		double * pu = &S[J+1];
+		double * pu = &S[xsize()];
 		double I = 0;
-		for (int i=0; i<J; ++i){
+		for (int i=0; i<xsize()-1; ++i){
 			I += (px[i+1]-px[i])*(w(px[i+1], t)*exp(pu[i+1]) + w(px[i], t)*exp(pu[i]));
 		}
 		return I*0.5;

@@ -188,6 +188,7 @@ int main(){
 	cout << p << endl;
 
 	Solver<PlantModel> S(vector<double> (1,p.vars.height), SOLVER_CM);
+	S.control.ode_eps = 1e-4;
 	S.createSizeStructuredVariables({"mort", "fec", "heart_area", "heart_mass"});
 
 	PlantModel M;
