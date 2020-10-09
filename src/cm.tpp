@@ -101,7 +101,7 @@ void Solver<Model>::addCohort_CM(){
 
 template <class Model>
 void Solver<Model>::removeCohort_CM(){
-	// cohorts are x0, x1, x2, x3, ...xJ,  u0, u1, u2, u3, .... uJ 
+	// cohorts are x0, x1, x2, x3, ...xJ-1,  u0, u1, u2, u3, .... uJ-1 
 	auto px = state.begin(); advance(px, 1); // point at x1
 	auto pu = state.begin(); advance(pu, xsize()+1); // point at u1
 	auto last = state.begin(); advance(last, xsize()-1); // point at xJ (1 past the last value to be considered)

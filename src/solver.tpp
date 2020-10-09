@@ -27,8 +27,8 @@ template<class Model>
 const int Solver<Model>::xsize(){
 	if (method == SOLVER_FMU) return J;	
 	if (method == SOLVER_MMU) return J;  
-	if (method == SOLVER_CM ) return J+1;
-	if (method == SOLVER_EBT) return J+1;
+	if (method == SOLVER_CM ) return J;
+	if (method == SOLVER_EBT) return J;
 }
 
 
@@ -70,13 +70,17 @@ void Solver<Model>::resetState(const std::vector<double>& xbreaks){
 
 	xb = xbreaks[0];
 	xm = xbreaks[xbreaks.size()-1];
-	J  = xbreaks.size()-1;
+
+	if (method == SOLVER_FMU) J = xbreaks.size()-1;	
+	if (method == SOLVER_MMU) J = xbreaks.size()-1;  
+	if (method == SOLVER_CM ) J = xbreaks.size();
+	if (method == SOLVER_EBT) J = xbreaks.size();
 
 	x = xbreaks;
 
 	setupLayout();
 
-	state.resize(varnames.size()*xsize());   // xsize() is J for FMU & MMU, and J+1 for CM and EBT
+	state.resize(varnames.size()*xsize());   // xsize() is size of X/U vectors in state, = J
 	rates.resize(state.size());
 	std::fill(state.begin(), state.end(), 0); 
 	std::fill(rates.begin(), rates.end(), -999); // DEBUG
@@ -93,15 +97,15 @@ void Solver<Model>::resetState(const std::vector<double>& xbreaks){
 	}
 
 	if (method == SOLVER_MMU){
-		for (size_t i=0; i<J; ++i) state[i] = xbreaks[i];  // skip x_J+1 as it is fixed. 
+		for (size_t i=0; i<J; ++i) state[i] = xbreaks[i];  // skip x_J as it is fixed. 
 	}
 
 	if (method == SOLVER_CM){
-		for (size_t i=0; i<J+1; ++i) state[i] = xbreaks[i];
+		for (size_t i=0; i<J; ++i) state[i] = xbreaks[i];
 	}
 
 	if (method == SOLVER_EBT){
-		for (size_t i=0; i<J; ++i) state[1+i] = (xbreaks[i]+xbreaks[i+1])/2.0; // leave [0] for pi0 (= 0)
+		for (size_t i=1; i<J; ++i) state[i] = (xbreaks[i]+xbreaks[i-1])/2.0; // leave [0] for pi0 (= 0)
 	}
    
 	u0_out_history.clear();
@@ -227,23 +231,23 @@ void Solver<Model>::print(){
 template <class Model>
 void Solver<Model>::initialize(){
 	// state vector was initialized to 0 in Constrctor. Set non-zero elements here
-	vector<double> X0(J), h(J);
-	for (int i=0; i<X0.size(); ++i) X0[i] = (x[i]+x[i+1])/2;
-	for (int i=0; i<h.size(); ++i) h[i] = x[i+1]-x[i];
+	//vector<double> X0(J), h(J);
+	//for (int i=0; i<X0.size(); ++i) X0[i] = (x[i]+x[i+1])/2;
+	//for (int i=0; i<h.size(); ++i) h[i] = x[i+1]-x[i];
 	
 
 	if (method == SOLVER_FMU){
-		for (size_t i=0; i<J; ++i)  state[i] = mod->initDensity(X0[i]);
+		for (size_t i=0; i<J; ++i)  state[i] = mod->initDensity((x[i]+x[i+1])/2);
 	}
 	if (method == SOLVER_MMU){
-		for (size_t i=0; i<J; ++i)  state[J + i] = mod->initDensity(X0[i]);
+		for (size_t i=0; i<J; ++i)  state[J + i] = mod->initDensity((x[i]+x[i+1])/2);
 		//for (size_t i=0; i<J+1; ++i) uprev[i] = initDensity(x[i]);
 	}
 	if (method == SOLVER_CM){
-		for (size_t i=0; i<J+1; ++i)  state[J+1 + i] = log(mod->initDensity(x[i]));
+		for (size_t i=0; i<J; ++i)  state[J + i] = log(mod->initDensity(x[i]));
 	}
 	if (method == SOLVER_EBT){
-		for (size_t i=0; i<J; ++i)  state[J+1 + 1+i] = mod->initDensity(X0[i])*h[i];	// state[J+1+0]=0 (N0)
+		for (size_t i=1; i<J; ++i)  state[J + i] = mod->initDensity((x[i]+x[i-1])/2)*(x[i]-x[i-1]);	// state[J+1+0]=0 (N0)
 	}
 
 	if (varnames_extra.size() > 0){  // If extra state variables have been requested, initialize them
