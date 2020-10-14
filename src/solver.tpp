@@ -23,22 +23,22 @@ std::vector <double> logseq(double from, double to, int len){
 }
 // ~~~~~~~~~~~ SOLVER ~~~~~~~~~~~~~~~~~~~~~
 
-//template<class Model>
-//const int Solver<Model>::xsize(){
+//template<class Model, class Environment>
+//const int Solver<Model,Environment>::xsize(){
 //    if (method == SOLVER_FMU) return J;	
 //    if (method == SOLVER_MMU) return J;  
 //    if (method == SOLVER_CM ) return J;
 //    if (method == SOLVER_EBT) return J;
 //}
 
-template<class Model>
-Solver<Model>::Solver(PSPM_SolverType _method) : odeStepper(0, 1e-6, 1e-6) {
+template<class Model, class Environment>
+Solver<Model,Environment>::Solver(PSPM_SolverType _method) : odeStepper(0, 1e-6, 1e-6) {
 	method = _method;
 }
 
 
-template<class Model>
-int Solver<Model>::setupLayout(Species<Model> &s){
+template<class Model, class Environment>
+int Solver<Model,Environment>::setupLayout(Species<Model> &s){
 	// Set up layout of state vector, for e.g.
 	//  ------------------------------------------------------------
 	// | x | x | x : u | u | u : a | b | c | a | b | c | a | b | c |
@@ -65,8 +65,8 @@ int Solver<Model>::setupLayout(Species<Model> &s){
 }
 
 
-template<class Model>
-void Solver<Model>::addSpecies(std::vector<double> xbreaks, Model* _mod, 
+template<class Model, class Environment>
+void Solver<Model,Environment>::addSpecies(std::vector<double> xbreaks, Model* _mod, 
 							   std::vector<std::string> extra_vars, double input_birth_flux){
 	Species<Model> s;
 	s.mod = _mod;
@@ -93,8 +93,8 @@ void Solver<Model>::addSpecies(std::vector<double> xbreaks, Model* _mod,
 }
 
 
-template<class Model>
-void Solver<Model>::addSpecies(int _J, double _xb, double _xm, bool log_breaks, Model* _mod,
+template<class Model, class Environment>
+void Solver<Model,Environment>::addSpecies(int _J, double _xb, double _xm, bool log_breaks, Model* _mod,
 							   std::vector<std::string> extra_vars, double input_birth_flux){
 	vector<double> xbreaks;
 	if (log_breaks) xbreaks = logseq(_xb, _xm, _J+1);
@@ -104,8 +104,8 @@ void Solver<Model>::addSpecies(int _J, double _xb, double _xm, bool log_breaks, 
 }
 
 
-template<class Model>
-void Solver<Model>::resetState(){
+template<class Model, class Environment>
+void Solver<Model,Environment>::resetState(){
    	current_time = 0;
 	odeStepper = RKCK45<vector<double>> (0, control.ode_eps, control.ode_initial_step_size);  // this is a cheap operation, but this will empty the internal containers, which will then be (automatically) resized at next 1st ODE step. Maybe add a reset function to the ODE stepper? 
 
@@ -146,8 +146,8 @@ void Solver<Model>::resetState(){
 
 
 
-template<class Model>
-void Solver<Model>::print(){
+template<class Model, class Environment>
+void Solver<Model,Environment>::print(){
 	std::cout << ">> SOLVER \n";
 	string types[] = {"FMU", "MMU", "CM", "EBT"};
 	std::cout << "+ Type: " << types[method] << std::endl;
@@ -163,8 +163,8 @@ void Solver<Model>::print(){
 }
 
 
-template <class Model>
-void Solver<Model>::initialize(){
+template<class Model, class Environment>
+void Solver<Model,Environment>::initialize(){
 
 	for (int k=0; k<species_vec.size(); ++k){
 		Species<Model> &s = species_vec[k];
@@ -197,8 +197,8 @@ void Solver<Model>::initialize(){
 }
 
 /*
-template<class Model>
-void Solver<Model>::calcRates_extra(double t, vector<double>&S, vector<double>& dSdt){
+template<class Model, class Environment>
+void Solver<Model,Environment>::calcRates_extra(double t, vector<double>&S, vector<double>& dSdt){
 	//auto is = createIterators_state(S);
 	//auto ir = createIterators_rates(dSdt);
 	//auto& itx = is.get("X");
@@ -212,8 +212,8 @@ void Solver<Model>::calcRates_extra(double t, vector<double>&S, vector<double>& 
 
 
 // current_time is updated by the ODE solver at every (internal) step
-template<class Model>
-void Solver<Model>::step_to(double tstop){
+template<class Model, class Environment>
+void Solver<Model,Environment>::step_to(double tstop){
 	// do nothing if tstop is <= current_time
 	if (tstop <= current_time) return;
 	
@@ -260,8 +260,8 @@ void Solver<Model>::step_to(double tstop){
 }
 
 
-template<class Model>
-double Solver<Model>::newborns_out(){
+template<class Model, class Environment>
+double Solver<Model,Environment>::newborns_out(){
 	// update Environment from latest state
 	mod->computeEnv(current_time, state, this);
 	// calculate birthflux 
@@ -270,19 +270,19 @@ double Solver<Model>::newborns_out(){
 }
 
 
-template<class Model>
-double Solver<Model>::u0_out(){
+template<class Model, class Environment>
+double Solver<Model,Environment>::u0_out(){
 	return newborns_out()/mod->growthRate(xb, current_time);
 }
 
-template<class Model>
-double Solver<Model>::get_u0_out(){
+template<class Model, class Environment>
+double Solver<Model,Environment>::get_u0_out(){
 	return u0_out_history.back();
 }
 
 
-template<class Model>
-double Solver<Model>::stepToEquilibrium(){
+template<class Model, class Environment>
+double Solver<Model,Environment>::stepToEquilibrium(){
 	for (double t=0.05; ; t=t+0.05) {
 		step_to(t);
 		
@@ -309,8 +309,8 @@ double Solver<Model>::stepToEquilibrium(){
 
 
 
-template<class Model>
-double Solver<Model>::createSizeStructuredVariables(vector<std::string> names){
+template<class Model, class Environment>
+double Solver<Model,Environment>::createSizeStructuredVariables(vector<std::string> names){
 	varnames_extra = names;
 	resetState(x);
 }

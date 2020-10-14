@@ -10,7 +10,7 @@ int main(){
 
 	TestModel M;
 	
-	Solver<TestModel,Environment> S(SOLVER_FMU);
+	Solver<TestModel,Environment> S(SOLVER_EBT);
 	S.addSpecies(25, 0, 1, false, &M);
 	S.resetState();
 	S.initialize();

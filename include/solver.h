@@ -11,13 +11,14 @@
 
 enum PSPM_SolverType {SOLVER_FMU, SOLVER_MMU, SOLVER_CM, SOLVER_EBT};
 
-template <class Model>
+template <class Model, class Environment>
 class Solver{
 	private:
 	PSPM_SolverType method;
 	RKCK45<vector<double>> odeStepper;
 	
 	std::vector<Species<Model>> species_vec;	
+	Environment * env;
 
 	public:
 	// The current state of the system, {t, S, dS/dt} 
@@ -80,10 +81,10 @@ class Solver{
 	
 	// integrals over size and density
 	template<typename wFunc>
-	double integrate_x(wFunc w, double t, vector<double>&S, int power);
+	double integrate_x(wFunc w, double t, vector<double>&S, int species_id);
 
-	//template<typename wFunc>
-	//double integrate_wudx_above(wFunc w, double t, double xlow, vector<double>&S);
+	template<typename wFunc>
+	double integrate_wudx_above(wFunc w, double t, double xlow, vector<double>&S, int species_id);
 	
 };
 
@@ -91,7 +92,7 @@ class Solver{
 //#include "../src/mu.tpp"
 //#include "../src/ebt.tpp"
 //#include "../src/cm.tpp"
-//#include "../src/size_integrals.tpp"
+#include "../src/size_integrals.tpp"
 
 
 #endif

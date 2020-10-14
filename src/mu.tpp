@@ -6,8 +6,8 @@ double phi(double r){
 }
 
 
-template <class Model>
-void Solver<Model>::calcRates_FMU(double t, vector<double> &S, vector<double> &dSdt){
+template<class Model, class Environment>
+void Solver<Model,Environment>::calcRates_FMU(double t, vector<double> &S, vector<double> &dSdt){
 
 	double *U = &S[0];			// offset for species
 	double *dUdt = &dSdt[0];	// offset for species

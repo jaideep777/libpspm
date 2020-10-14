@@ -8,13 +8,15 @@
 #include "iterator_set.h"
 
 // forward declaration of Solver so Species can befriend it
-template <class Model>
+template <class Model, class Environment>
 class Solver;
 
 template <class Model>
 class Species{
-	
-	friend class Solver<Model>;
+
+	// All kinds of Solvers should be friends of Species
+	template<class,class>
+	friend class Solver;
 
 	private: // private members
 	Model * mod = nullptr;
