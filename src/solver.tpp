@@ -23,17 +23,22 @@ std::vector <double> logseq(double from, double to, int len){
 }
 // ~~~~~~~~~~~ SOLVER ~~~~~~~~~~~~~~~~~~~~~
 
+//template<class Model>
+//const int Solver<Model>::xsize(){
+//    if (method == SOLVER_FMU) return J;	
+//    if (method == SOLVER_MMU) return J;  
+//    if (method == SOLVER_CM ) return J;
+//    if (method == SOLVER_EBT) return J;
+//}
+
 template<class Model>
-const int Solver<Model>::xsize(){
-	if (method == SOLVER_FMU) return J;	
-	if (method == SOLVER_MMU) return J;  
-	if (method == SOLVER_CM ) return J;
-	if (method == SOLVER_EBT) return J;
+Solver<Model>::Solver(PSPM_SolverType _method) : odeStepper(0, 1e-6, 1e-6) {
+	method = _method;
 }
 
 
 template<class Model>
-void Solver<Model>::setupLayout(){
+int Solver<Model>::setupLayout(Species<Model> &s){
 	// Set up layout of state vector, for e.g.
 	//  ------------------------------------------------------------
 	// | x | x | x : u | u | u : a | b | c | a | b | c | a | b | c |
@@ -44,229 +49,154 @@ void Solver<Model>::setupLayout(){
 	//  1. When calculating integrals, x and u are traversed
 	//  2. When setting rates, typically a,b,c are calculated one 
 	//  after the other for each x.
-	auto addVar = [this](std::string name, int stride, int offset){
-		varnames.push_back(name);
-		strides.push_back(stride);
-		offsets.push_back(offset);
-	};
-	varnames.clear(); strides.clear(); offsets.clear(); 
+	s.clearVars();
 	if (method == SOLVER_FMU){ 
-		addVar("u", 1, xsize());		// uuuuu..
+		s.addVar("u", 1, s.J);		// uuuuu..
 	}
 	else{
-		addVar("X", 1, xsize());		// xxxxx.. uuuuu..
-		addVar("u", 1, xsize());		// 
+		s.addVar("X", 1, s.J);		// xxxxx.. uuuuu..
+		s.addVar("u", 1, s.J);		// 
 	}
-	for (int i=0; i<varnames_extra.size(); ++i){
-		addVar(varnames_extra[i], varnames_extra.size(), 1);  // abc abc abc .. 
+	for (int i=0; i < s.varnames_extra.size(); ++i){
+		s.addVar(s.varnames_extra[i], s.varnames_extra.size(), 1);  // abc abc abc .. 
 	}
+
+	return s.size();
 }
 
 
 template<class Model>
-void Solver<Model>::resetState(const std::vector<double>& xbreaks){
+void Solver<Model>::addSpecies(std::vector<double> xbreaks, Model* _mod, 
+							   std::vector<std::string> extra_vars, double input_birth_flux){
+	Species<Model> s;
+	s.mod = _mod;
+	s.varnames_extra = extra_vars;
+	s.set_inputBirthFlux(input_birth_flux);
+	
+	s.xb = xbreaks[0];
+	s.xm = xbreaks[xbreaks.size()-1];
+
+	if (method == SOLVER_FMU) s.J = xbreaks.size()-1;	
+	if (method == SOLVER_MMU) s.J = xbreaks.size()-1;  
+	if (method == SOLVER_CM ) s.J = xbreaks.size();
+	if (method == SOLVER_EBT) s.J = xbreaks.size();
+
+	s.x = xbreaks;
+
+	int state_size = setupLayout(s);
+
+	s.start_index = state.size();	// New species will be appended to the end of state vector
+	state.resize(state.size()+state_size);  // This will resize state for all species additions, but this in only initialization so its okay.
+	rates.resize(state.size()+state_size);
+
+	species_vec.push_back(s);
+}
+
+
+template<class Model>
+void Solver<Model>::addSpecies(int _J, double _xb, double _xm, bool log_breaks, Model* _mod,
+							   std::vector<std::string> extra_vars, double input_birth_flux){
+	vector<double> xbreaks;
+	if (log_breaks) xbreaks = logseq(_xb, _xm, _J+1);
+	else            xbreaks =    seq(_xb, _xm, _J+1);
+
+	addSpecies(xbreaks, _mod, extra_vars, input_birth_flux);
+}
+
+
+template<class Model>
+void Solver<Model>::resetState(){
    	current_time = 0;
 	odeStepper = RKCK45<vector<double>> (0, control.ode_eps, control.ode_initial_step_size);  // this is a cheap operation, but this will empty the internal containers, which will then be (automatically) resized at next 1st ODE step. Maybe add a reset function to the ODE stepper? 
 
-	xb = xbreaks[0];
-	xm = xbreaks[xbreaks.size()-1];
-
-	if (method == SOLVER_FMU) J = xbreaks.size()-1;	
-	if (method == SOLVER_MMU) J = xbreaks.size()-1;  
-	if (method == SOLVER_CM ) J = xbreaks.size();
-	if (method == SOLVER_EBT) J = xbreaks.size();
-
-	x = xbreaks;
-
-	setupLayout();
-
-	state.resize(varnames.size()*xsize());   // xsize() is size of X/U vectors in state, = J
-	rates.resize(state.size());
+	// state.resize(state_size);   // state will be resized by addSpecies
+	//rates.resize(state.size());
 	std::fill(state.begin(), state.end(), 0); 
 	std::fill(rates.begin(), rates.end(), -999); // DEBUG
 
-	// initialize X
-	if (method == SOLVER_FMU){	
-		X.resize(J);
-		for (size_t i=0; i<J; ++i) X[i] = (xbreaks[i]+xbreaks[i+1])/2.0;
-		
-		h.resize(J);	// This will be used only by FMU
-		for (size_t i=0; i<J; ++i) h[i] = xbreaks[i+1] - xbreaks[i];	
+	// initialize grid/cohorts for each species
+	for (int k=0; k<species_vec.size(); ++k){
+		Species<Model> &s = species_vec[k]; // easy reference 
 
-		// no X in FMU state
+		if (method == SOLVER_FMU){	
+			s.X.resize(s.J);
+			for (size_t i=0; i<s.J; ++i) s.X[i] = (s.x[i]+s.x[i+1])/2.0;
+			
+			s.h.resize(s.J);	// This will be used only by FMU
+			for (size_t i=0; i<s.J; ++i) s.h[i] = s.x[i+1] - s.x[i];	
+
+			// no X in FMU state
+		}
+
+		if (method == SOLVER_MMU){
+			for (size_t i=0; i<s.J; ++i) state[s.start_index + i] = s.x[i];  // skip x_J as it is fixed. 
+		}
+
+		if (method == SOLVER_CM){
+			for (size_t i=0; i<s.J; ++i) state[s.start_index + i] = s.x[i];
+		}
+
+		if (method == SOLVER_EBT){
+			for (size_t i=1; i<s.J; ++i) state[s.start_index + i] = (s.x[i]+s.x[i-1])/2.0; // leave [0] for pi0 (= 0)
+		}
 	}
-
-	if (method == SOLVER_MMU){
-		for (size_t i=0; i<J; ++i) state[i] = xbreaks[i];  // skip x_J as it is fixed. 
-	}
-
-	if (method == SOLVER_CM){
-		for (size_t i=0; i<J; ++i) state[i] = xbreaks[i];
-	}
-
-	if (method == SOLVER_EBT){
-		for (size_t i=1; i<J; ++i) state[i] = (xbreaks[i]+xbreaks[i-1])/2.0; // leave [0] for pi0 (= 0)
-	}
-   
-	u0_out_history.clear();
-}
-
-template<class Model>
-Solver<Model>::Solver(std::vector<double> xbreaks, PSPM_SolverType _method) : odeStepper(0, 1e-6, 1e-6) {
-	method = _method;
-	resetState(xbreaks);	
-}
-
-template<class Model>
-Solver<Model>::Solver(int _J, double _xb, double _xm, PSPM_SolverType _method) 
-	: Solver(seq(_xb, _xm, _J+1), _method){
+	//u0_out_history.clear();
 }
 
 
-template<class Model>
-void Solver<Model>::setModel(Model *M){
-	mod = M;
-}
-
-
-template<class Model>
-void Solver<Model>::setInputNewbornDensity(double input_u0){
-	u0_in = input_u0;
-}
-
-
-template<class Model>
-const int Solver<Model>::size(){
-	return state.size();
-}
-
-
-template<class Model>
-double Solver<Model>::getMaxSize(vector<double>::iterator sbegin){
-	if (method == SOLVER_FMU) return *x.rbegin();
-	else {
-		return *next(sbegin, xsize()-1);
-	}
-}
-
-
-	//for (int i=0; i<J; ++i){
-	//    x[i+1] = exp(log(0.01) + (i)*(log(xm)-log(0.01))/(J-1));
-	//    h[i] = x[i+1]-x[i];
-	//    X[i] = (x[i+1]+x[i])/2;
-	//}
-
-
-
-template<class Model>
-const double * Solver<Model>::getX(){
-	auto iset = getIterators_state();
-	return &(*iset.get("X"));
-}
-
-template<class Model>
-vector<double> Solver<Model>::getx(){
-	return x;
-}
-
-
-template<class Model>
-IteratorSet<vector<double>::iterator> Solver<Model>::getIterators_state(){
-	
-	IteratorSet<vector<double>::iterator> iset(state.begin(), varnames, xsize(), offsets, strides);
-	if (method == SOLVER_FMU) iset.push_back("X", X.begin(), 1);
-	return iset;
-}
-
-
-template<class Model>
-IteratorSet<vector<double>::iterator> Solver<Model>::getIterators_rates(){
-	return IteratorSet<vector<double>::iterator> (rates.begin(), varnames, xsize(), offsets, strides);
-}
-
-
-template<class Model>
-IteratorSet<vector<double>::iterator> Solver<Model>::createIterators_state(vector<double> &v){
-	IteratorSet<vector<double>::iterator> iset(v.begin(), varnames, xsize(), offsets, strides);
-	if (method == SOLVER_FMU) iset.push_back("X", X.begin(), 1);
-	return iset;
-}
-
-template<class Model>
-IteratorSet<vector<double>::iterator> Solver<Model>::createIterators_rates(vector<double> &v){
-	IteratorSet<vector<double>::iterator> iset(v.begin(), varnames, xsize(), offsets, strides);
-	return iset;
-}
 
 
 template<class Model>
 void Solver<Model>::print(){
+	std::cout << ">> SOLVER \n";
 	string types[] = {"FMU", "MMU", "CM", "EBT"};
-	std::cout << "Type: " << types[method] << std::endl;
+	std::cout << "+ Type: " << types[method] << std::endl;
 
-	//IteratorSet<vector<double>::iterator> iset(state.begin(), varnames.size(), vars, xsize());
-	auto iset = getIterators_state();
-
-	if (method == SOLVER_FMU){
-		iset.push_back("_X", X.begin(),1);
-		iset.push_back("_h", h.begin(),1);
-		std::cout << "x (" << x.size() << "): "; 
-		for (auto xx : x) std::cout << xx << " ";
-		std::cout << "\n";
+	std::cout << "+ State size = " << state.size() << "\n";
+	std::cout << "+ Species:\n";
+	for (int i=0; i<species_vec.size(); ++i) {
+		std::cout << "Sp (" << i << "):\n";
+		species_vec[i].print(state, rates);
 	}
-
-	std::cout << "State (" << state.size() << "):\n";
-	iset.print();
-	
-	std::cout << "Rates (" << rates.size() << "):\n";
-	auto irates = getIterators_rates();
-	irates.print();
+	//IteratorSet<vector<double>::iterator> iset(state.begin(), varnames.size(), vars, xsize());
 	
 }
 
 
-
-
-
 template <class Model>
 void Solver<Model>::initialize(){
-	// state vector was initialized to 0 in Constrctor. Set non-zero elements here
-	//vector<double> X0(J), h(J);
-	//for (int i=0; i<X0.size(); ++i) X0[i] = (x[i]+x[i+1])/2;
-	//for (int i=0; i<h.size(); ++i) h[i] = x[i+1]-x[i];
-	
 
-	if (method == SOLVER_FMU){
-		for (size_t i=0; i<J; ++i)  state[i] = mod->initDensity((x[i]+x[i+1])/2);
-	}
-	if (method == SOLVER_MMU){
-		for (size_t i=0; i<J; ++i)  state[J + i] = mod->initDensity((x[i]+x[i+1])/2);
-		//for (size_t i=0; i<J+1; ++i) uprev[i] = initDensity(x[i]);
-	}
-	if (method == SOLVER_CM){
-		for (size_t i=0; i<J; ++i)  state[J + i] = log(mod->initDensity(x[i]));
-	}
-	if (method == SOLVER_EBT){
-		for (size_t i=1; i<J; ++i)  state[J + i] = mod->initDensity((x[i]+x[i-1])/2)*(x[i]-x[i-1]);	// state[J+1+0]=0 (N0)
-	}
+	for (int k=0; k<species_vec.size(); ++k){
+		Species<Model> &s = species_vec[k];
 
-	if (varnames_extra.size() > 0){  // If extra state variables have been requested, initialize them
-		// Initialize extra size-dependent variables
-		auto is = getIterators_state();
-		
-		auto& itx = is.get("X");
-		int id = is.getIndex(varnames_extra[0]); // get index of 1st extra variable
-		for (is.begin(); !is.end(); ++is){
-			vector <double> v = mod->initStateExtra(*itx, current_time);  // returned vector will be `move`d so this is fast 
-			auto it_vec = is.get();
-			for (size_t i = 0; i<varnames_extra.size(); ++i){
-				*it_vec[id+i] = v[i];
+		if (method == SOLVER_FMU){
+			for (size_t i=0; i<s.J; ++i)  state[s.start_index + i] = s.mod->initDensity((s.x[i]+s.x[i+1])/2);
+		}
+		if (method == SOLVER_CM){
+			for (size_t i=0; i<s.J; ++i)  state[s.start_index + s.J + i] = log(s.mod->initDensity(s.x[i]));
+		}
+		if (method == SOLVER_EBT){
+			for (size_t i=1; i<s.J; ++i)  state[s.start_index + s.J + i] = s.mod->initDensity((s.x[i]+s.x[i-1])/2)*(s.x[i]-s.x[i-1]);	// state[J+1+0]=0 (N0)
+		}
+
+		if (s.varnames_extra.size() > 0){  // If extra state variables have been requested, initialize them
+			// Initialize extra size-dependent variables
+			auto is = s.get_iterators(state);
+			
+			auto& itx = is.get("X");
+			int id = is.getIndex(s.varnames_extra[0]); // get index of 1st extra variable
+			for (is.begin(); !is.end(); ++is){
+				vector <double> v = s.mod->initStateExtra(*itx, current_time);  // returned vector will be `move`d so this is fast 
+				auto it_vec = is.get();
+				for (size_t i = 0; i<s.varnames_extra.size(); ++i){
+					*it_vec[id+i] = v[i];
+				}
 			}
 		}
 	}
 }
 
-
+/*
 template<class Model>
 void Solver<Model>::calcRates_extra(double t, vector<double>&S, vector<double>& dSdt){
 	//auto is = createIterators_state(S);
@@ -279,6 +209,7 @@ void Solver<Model>::calcRates_extra(double t, vector<double>&S, vector<double>& 
 	//    assert(distance(itre, it_returned) == varnames_extra.size());
 	//}
 }
+
 
 // current_time is updated by the ODE solver at every (internal) step
 template<class Model>
@@ -385,11 +316,6 @@ double Solver<Model>::createSizeStructuredVariables(vector<std::string> names){
 }
 
 
-#include "mu.tpp"
-#include "ebt.tpp"
-#include "cm.tpp"
-#include "size_integrals.tpp"
-
-
+*/
 
 

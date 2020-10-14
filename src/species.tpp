@@ -42,6 +42,13 @@ int Species<Model>::xsize(){
 
 
 template<class Model>
+int Species<Model>::size(){
+	return varnames.size()*J;
+}
+
+
+
+template<class Model>
 double Species<Model>::get_maxSize(std::vector<double>::iterator state_begin){
 	if (!X.empty()) return *x.rbegin();
 	else {
@@ -55,6 +62,32 @@ IteratorSet<std::vector<double>::iterator> Species<Model>::get_iterators(std::ve
 	IteratorSet<std::vector<double>::iterator> iset(v.begin()+start_index, varnames, J, offsets, strides);
 	if (!X.empty()) iset.push_back("X", X.begin(), 1);
 	return iset;
+}
+
+
+template <class Model>
+void Species<Model>::print(std::vector<double> &sv, std::vector<double> &rv){
+	//std::cout << "~~~~~ Species ~~~~~\n";
+	auto iset = get_iterators(sv);
+	std::cout << "start index = " << start_index <<"\n";
+	std::cout << "Model = " << mod << "\n";
+	std::cout << "Input birth flux = " << birth_flux_in << "\n";
+	if (!X.empty()){
+		iset.push_back("_X", X.begin(),1);
+		iset.push_back("_h", h.begin(),1);
+		std::cout << "x (" << x.size() << "): "; 
+		for (auto xx : x) std::cout << xx << " ";
+		std::cout << "\n";
+	}
+
+	std::cout << "State (" << size() << "):\n";
+	iset.print();
+	
+	std::cout << "Rates (" << size() << "):\n";
+	auto irates = get_iterators(rv);
+	irates.print();
+	std::cout << "-------\n\n";
+
 }
 
 

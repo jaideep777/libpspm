@@ -1,5 +1,5 @@
-#ifndef  PSPM_PSPM_SOLVER_H_
-#define  PSPM_PSPM_SOLVER_H_
+#ifndef  PSPM_PSPM_SPECIES_H_
+#define  PSPM_PSPM_SPECIES_H_
 
 #include <vector>
 #include <list>
@@ -7,10 +7,17 @@
 
 #include "iterator_set.h"
 
+// forward declaration of Solver so Species can befriend it
+template <class Model>
+class Solver;
+
 template <class Model>
 class Species{
+	
+	friend class Solver<Model>;
+
 	private: // private members
-	Model * mod;
+	Model * mod = nullptr;
 		
 	int start_index;
 	int J;	
@@ -38,16 +45,19 @@ class Species{
 
 	public: // public members
 	double xb, xm;
+	bool is_resident;
 
 	public: // public functions
 	IteratorSet<std::vector<double>::iterator> get_iterators(std::vector<double> &v);
 	double get_maxSize(std::vector<double>::iterator state_begin);
 	int xsize();
+	int size();
 
 	void set_model(Model *M);
 	void set_inputBirthFlux(double b);
 	double set_iStateVariables(std::vector<std::string> names);
 
+	void print(std::vector<double> &sv, std::vector<double> &rv);
 };
 
 #include "../src/species.tpp"
