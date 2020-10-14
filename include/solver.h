@@ -39,6 +39,8 @@ class Solver{
 	void addSpecies(int _J, double _xb, double _xm, bool log_breaks, Model* _mod, std::vector<std::string> extra_vars = std::vector<std::string>(), double input_birth_flux = -1);
 	void addSpecies(std::vector<double> xbreaks, Model* _mod, std::vector<std::string> extra_vars = std::vector<std::string>(), double input_birth_flux = -1);
 
+	void setEnvironment(Environment * _env);
+
 	int setupLayout(Species<Model> &s);
 	void resetState(); 	
 
@@ -55,8 +57,7 @@ class Solver{
 
 	//void calcRates_extra(double t, vector<double>&S, vector<double>& dSdt);
 	
-	//void calcRates_FMU(double t, vector<double> &S, vector<double> &dSdt);
-	////void calcRates_FMU(double t);	
+	void calcRates_FMU(double t, vector<double> &S, vector<double> &dSdt);
 	
 	//void calcRates_EBT(double t, vector<double>&S, vector<double> &dSdt);
 	//void addCohort_EBT();
@@ -69,12 +70,12 @@ class Solver{
 	//void removeCohort_CM();
 	
 	
-	//void step_to(double tstop);
+	void step_to(double tstop);
 
 	//double stepToEquilibrium();
 
-	//double newborns_out();  // This is the actual system reproduction (fitness) hence biologically relevant
-	//double u0_out();        // This is used for equilibrium solving, because in general, u0 rather than birthFlux, will approach a constant value
+	std::vector<double> newborns_out();  // This is the actual system reproduction (fitness) hence biologically relevant
+	vector<double> u0_out();        // This is used for equilibrium solving, because in general, u0 rather than birthFlux, will approach a constant value
 	//double get_u0_out();	// just returns from history without recomputing
 
 	void print();
@@ -89,7 +90,7 @@ class Solver{
 };
 
 #include "../src/solver.tpp"
-//#include "../src/mu.tpp"
+#include "../src/mu.tpp"
 //#include "../src/ebt.tpp"
 //#include "../src/cm.tpp"
 #include "../src/size_integrals.tpp"

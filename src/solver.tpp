@@ -87,7 +87,7 @@ void Solver<Model,Environment>::addSpecies(std::vector<double> xbreaks, Model* _
 
 	s.start_index = state.size();	// New species will be appended to the end of state vector
 	state.resize(state.size()+state_size);  // This will resize state for all species additions, but this in only initialization so its okay.
-	rates.resize(state.size()+state_size);
+	rates.resize(rates.size()+state_size);
 
 	species_vec.push_back(s);
 }
@@ -144,6 +144,10 @@ void Solver<Model,Environment>::resetState(){
 }
 
 
+template<class Model, class Environment>
+void Solver<Model,Environment>::setEnvironment(Environment * _env){
+	env = _env;
+}
 
 
 template<class Model, class Environment>
@@ -153,6 +157,7 @@ void Solver<Model,Environment>::print(){
 	std::cout << "+ Type: " << types[method] << std::endl;
 
 	std::cout << "+ State size = " << state.size() << "\n";
+	std::cout << "+ Rates size = " << rates.size() << "\n";
 	std::cout << "+ Species:\n";
 	for (int i=0; i<species_vec.size(); ++i) {
 		std::cout << "Sp (" << i << "):\n";
@@ -196,19 +201,19 @@ void Solver<Model,Environment>::initialize(){
 	}
 }
 
-/*
-template<class Model, class Environment>
-void Solver<Model,Environment>::calcRates_extra(double t, vector<double>&S, vector<double>& dSdt){
-	//auto is = createIterators_state(S);
-	//auto ir = createIterators_rates(dSdt);
-	//auto& itx = is.get("X");
-	//auto& itre = ir.get(varnames_extra[0]);
+
+//template<class Model, class Environment>
+//void Solver<Model,Environment>::calcRates_extra(double t, vector<double>&S, vector<double>& dSdt){
+//    //auto is = createIterators_state(S);
+//    //auto ir = createIterators_rates(dSdt);
+//    //auto& itx = is.get("X");
+//    //auto& itre = ir.get(varnames_extra[0]);
 	
-	//for (is.begin(), ir.begin(); !is.end(); ++is, ++ir){
-	//    auto it_returned = mod->calcRates_extra(t, *itx, itre);
-	//    assert(distance(itre, it_returned) == varnames_extra.size());
-	//}
-}
+//    //for (is.begin(), ir.begin(); !is.end(); ++is, ++ir){
+//    //    auto it_returned = mod->calcRates_extra(t, *itx, itre);
+//    //    assert(distance(itre, it_returned) == varnames_extra.size());
+//    //}
+//}
 
 
 // current_time is updated by the ODE solver at every (internal) step
@@ -219,62 +224,70 @@ void Solver<Model,Environment>::step_to(double tstop){
 	
 	if (method == SOLVER_FMU){	
 		auto derivs = [this](double t, vector<double> &S, vector<double> &dSdt){
-			mod->computeEnv(t, S, this);
+			env->computeEnv(t, S, this);
 			this->calcRates_FMU(t, S, dSdt);
-			if (varnames_extra.size() > 0) this->calcRates_extra(t, S, dSdt);
 		};
 		
 		odeStepper.Step_to(tstop, current_time, state, derivs); // state = [U]
 	}
 	if (method == SOLVER_MMU){
 	}
-	if (method == SOLVER_EBT){
-		auto derivs = [this](double t, vector<double> &S, vector<double> &dSdt){
-			mod->computeEnv(t, S, this);
-			this->calcRates_EBT(t, S, dSdt);
-			if (varnames_extra.size() > 0) this->calcRates_extra(t, S, dSdt);
-		};
+	//if (method == SOLVER_EBT){
+	//    auto derivs = [this](double t, vector<double> &S, vector<double> &dSdt){
+	//        env->computeEnv(t, S, this);
+	//        this->calcRates_EBT(t, S, dSdt);
+	//    };
 		
-		// integrate 
-		odeStepper.Step_to(tstop, current_time, state, derivs); // state = [pi0, Xint, N0, Nint]
+	//    // integrate 
+	//    odeStepper.Step_to(tstop, current_time, state, derivs); // state = [pi0, Xint, N0, Nint]
 		
-		// update cohorts
-		removeDeadCohorts_EBT();
-		if (state[xsize()] > 0) addCohort_EBT();  // Add new cohort if N0 > 0. Add after removing dead ones otherwise this will also be removed. 
-	}
-	if (method == SOLVER_CM){
-		auto derivs = [this](double t, vector<double> &S, vector<double> &dSdt){
-			mod->computeEnv(t, S, this);
-			this->calcRates_CM(t, S, dSdt);
-			//if (varnames_extra.size() > 0) this->calcRates_extra(t, S, dSdt);
-		};
+	//    // update cohorts
+	//    removeDeadCohorts_EBT();
+	//    if (state[xsize()] > 0) addCohort_EBT();  // Add new cohort if N0 > 0. Add after removing dead ones otherwise this will also be removed. 
+	//}
+	//if (method == SOLVER_CM){
+	//    auto derivs = [this](double t, vector<double> &S, vector<double> &dSdt){
+	//        env->computeEnv(t, S, this);
+	//        this->calcRates_CM(t, S, dSdt);
+	//    };
 		
-		// integrate 
-		odeStepper.Step_to(tstop, current_time, state, derivs); // state = [pi0, Xint, N0, Nint]
+	//    // integrate 
+	//    odeStepper.Step_to(tstop, current_time, state, derivs); // state = [pi0, Xint, N0, Nint]
 
-		//// update cohorts
-		addCohort_CM();		// add before so that it becomes boundary cohort and first internal cohort can be (potentially) removed
-		//removeCohort_CM();
-		mod->computeEnv(current_time, state, this); // is required here IF rescaleEnv is used in derivs
-	}
+	//    //// update cohorts
+	//    addCohort_CM();		// add before so that it becomes boundary cohort and first internal cohort can be (potentially) removed
+	//    //removeCohort_CM();
+	//    mod->computeEnv(current_time, state, this); // is required here IF rescaleEnv is used in derivs
+	//}
 }
 
 
 template<class Model, class Environment>
-double Solver<Model,Environment>::newborns_out(){
+vector<double> Solver<Model,Environment>::newborns_out(){
 	// update Environment from latest state
-	mod->computeEnv(current_time, state, this);
-	// calculate birthflux 
-	double birthFlux = integrate_x([this](double z, double t){return mod->birthRate(z,t);}, current_time, state, 1);
-	return birthFlux;
+	env->computeEnv(current_time, state, this);
+
+	vector<double> b_out;
+	for (int k=0; k<species_vec.size(); ++k){	
+		// calculate birthflux 
+		double birthFlux = integrate_x([this, k](double z, double t){return species_vec[k].mod->birthRate(z,t,env);}, current_time, state, k);
+		b_out.push_back(birthFlux);
+	}
+	return b_out;
 }
 
 
 template<class Model, class Environment>
-double Solver<Model,Environment>::u0_out(){
-	return newborns_out()/mod->growthRate(xb, current_time);
+vector<double> Solver<Model,Environment>::u0_out(){
+	vector <double> u0out;
+	vector <double> newbornsout = newborns_out();
+	for (int k=0; k < species_vec.size(); ++k){
+		u0out.push_back(newbornsout[k]/species_vec[k].mod->growthRate(species_vec[k].xb, current_time, env));
+	}
+	return u0out;
 }
 
+/*
 template<class Model, class Environment>
 double Solver<Model,Environment>::get_u0_out(){
 	return u0_out_history.back();
