@@ -20,7 +20,7 @@ void Solver<Model,Environment>::calcRates_CM(double t, vector<double>&S, vector<
 		//auto& itre = (varnames_extra.size()>0)? ir.get(varnames_extra[0]) : dSdt.begin(); 
 		
 		for (is.begin(), ir.begin(); !is.end(); ++is, ++ir){
-			double grad_dx = 1e-6;
+			double grad_dx = control.cm_grad_dx;
 			
 			double gxplus = spp.mod->growthRate(*itx + grad_dx, t, env); 
 			double gx     = spp.mod->growthRate(*itx, t, env); 

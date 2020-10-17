@@ -11,7 +11,9 @@ int main(){
 	TestModel M;
 	
 	Solver<TestModel,Environment> S(SOLVER_CM);
-	S.addSpecies(25, 0, 1-1e-12, false, &M);
+	S.use_log_densities = false;
+	S.control.cm_grad_dx = 0.001;
+	S.addSpecies(25, 0, 1, false, &M);
 	S.resetState();
 	S.initialize();
 	//S.print();
@@ -34,16 +36,10 @@ int main(){
 		 -0.18696499, -0.15116931, -0.12127634, -0.09629670, -0.07541760, -0.05796891, -0.04339629, -0.03123970,
 		 -0.02111622, -0.01270624, -0.00574230, 0.00000000 };
 	
-	for (int i=26; i<S.state.size(); ++i){
-		rates_exp[i] /= exp(S.state[i]);
-		cout << S.state[i] << " ";
-	}
-	cout << endl;
-	S.print();
 
-	for (int i=0; i< S.rates.size()-1; ++i){
-		cout << S.rates[i] << " " << rates_exp[i] << endl;
-		if ( fabs(S.rates[i] - rates_exp[i]) > 5e-4) return 1;
+	for (int i=0; i< S.rates.size(); ++i){
+		//cout << S.rates[i] << " " << rates_exp[i] << endl;
+		if ( fabs(S.rates[i] - rates_exp[i]) > 1e-6) return 1;
 	}
 	
 	return 0;

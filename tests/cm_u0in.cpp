@@ -13,7 +13,8 @@ int main(){
 	Environment E;
 
 	Solver<TestModel,Environment> S(SOLVER_CM);
-	S.use_log_densities = true;
+	S.use_log_densities = false;
+	S.control.cm_grad_dx = 0.001;
 	S.addSpecies(25, 0, 1, false, &M, {}, 2);
 	S.resetState();
 	S.initialize();
@@ -39,7 +40,7 @@ int main(){
 
 	cout << S.u0_out()[0] << endl;
 	// test value is from R code	
-	if (abs(S.u0_out()[0] - 1.556967) < 1e-3) return 0;
+	if (abs(S.u0_out()[0] - 1.556967) < 1e-5) return 0;
 	else return 1;
   
 }
