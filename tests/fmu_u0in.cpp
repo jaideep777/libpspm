@@ -13,6 +13,7 @@ int main(){
 	Environment E;
 
 	Solver<TestModel,Environment> S(SOLVER_FMU);
+	S.control.ode_eps = 1e-4;
 	S.addSpecies(25, 0, 1, false, &M, {}, 2);
 	S.resetState();
 	S.initialize();
@@ -23,8 +24,8 @@ int main(){
 
 	for (double t=0.05; t <= 8; t=t+0.05) {
 		S.step_to(t);
-		fout << S.current_time << "\t" << S.newborns_out()[0] << "\t";
-		//cout << S.current_time << " " << S.u0_out() << "\n";
+		fout << S.current_time << "\t" << 0/*S.u0_out()[0]*/ << "\t";
+		cout << S.current_time << " " /*<< S.u0_out()*/ << "\n";
 		for (auto y : S.state) fout << y << "\t";
 		fout << endl;
 	}
@@ -32,7 +33,7 @@ int main(){
 	fout.close();
 
 	//cout <<S.u0_out()[0] << endl; 
-	if (abs(S.u0_out()[0] - 1.46823) < 1e-5) return 0;
+	if (abs(S.u0_out()[0] - 1.468232) < 1e-5) return 0;
 	else return 1;
 
 }

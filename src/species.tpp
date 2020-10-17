@@ -34,6 +34,11 @@ double Species<Model>::set_iStateVariables(std::vector<std::string> names){
 	varnames_extra = names;
 }
 
+template<class Model>
+void Species<Model>::set_bfin_is_u0in(bool flag){
+	bfin_is_u0in = flag;
+}
+
 
 template<class Model>
 int Species<Model>::xsize(){
@@ -71,6 +76,7 @@ void Species<Model>::print(std::vector<double> &sv, std::vector<double> &rv){
 	auto iset = get_iterators(sv);
 	std::cout << "start index = " << start_index <<"\n";
 	std::cout << "Model = " << mod << "\n";
+	std::cout << "xsize = " << J << "\n";
 	std::cout << "Input birth flux = " << birth_flux_in << "\n";
 	if (!X.empty()){
 		iset.push_back("_X", X.begin(),1);

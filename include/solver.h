@@ -39,6 +39,8 @@ class Solver{
 	void addSpecies(int _J, double _xb, double _xm, bool log_breaks, Model* _mod, std::vector<std::string> extra_vars = std::vector<std::string>(), double input_birth_flux = -1);
 	void addSpecies(std::vector<double> xbreaks, Model* _mod, std::vector<std::string> extra_vars = std::vector<std::string>(), double input_birth_flux = -1);
 
+	Species<Model>* get_species(int id);
+
 	void setEnvironment(Environment * _env);
 
 	int setupLayout(Species<Model> &s);
@@ -64,10 +66,10 @@ class Solver{
 	//void removeDeadCohorts_EBT();
 	//vector<double> cohortsToDensity_EBT(vector <double> &breaks);
 
-	//void calcRates_CM(double t, vector<double>&S, vector<double> &dSdt);
-	//double calc_u0_CM();
-	//void addCohort_CM();
-	//void removeCohort_CM();
+	void calcRates_CM(double t, vector<double>&S, vector<double> &dSdt);
+	double calc_u0_CM();
+	void addCohort_CM();
+	void removeCohort_CM();
 	
 	
 	void step_to(double tstop);
@@ -92,7 +94,7 @@ class Solver{
 #include "../src/solver.tpp"
 #include "../src/mu.tpp"
 //#include "../src/ebt.tpp"
-//#include "../src/cm.tpp"
+#include "../src/cm.tpp"
 #include "../src/size_integrals.tpp"
 
 

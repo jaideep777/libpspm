@@ -41,6 +41,9 @@ class Species{
 	std::vector <double> h;
 	std::vector <double> schedule; // used only by CM/EBT
 
+	//debug only
+	bool bfin_is_u0in = false;
+
 	private: // private functions
 	int addVar(std::string name, int stride, int offset);
 	void clearVars();
@@ -58,6 +61,8 @@ class Species{
 	void set_model(Model *M);
 	void set_inputBirthFlux(double b);
 	double set_iStateVariables(std::vector<std::string> names);
+
+	void set_bfin_is_u0in(bool flag);
 
 	void print(std::vector<double> &sv, std::vector<double> &rv);
 };
