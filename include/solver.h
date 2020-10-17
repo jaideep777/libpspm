@@ -32,7 +32,8 @@ class Solver{
 		double convergence_eps = 1e-6;
 	} control;
 	
-	
+	bool use_log_densities = true;
+
 	public:	
 	Solver(PSPM_SolverType _method);
 

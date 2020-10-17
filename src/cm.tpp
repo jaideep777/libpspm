@@ -28,7 +28,8 @@ void Solver<Model,Environment>::calcRates_CM(double t, vector<double>&S, vector<
 			double growthGrad = (gxplus-gx)/grad_dx;
 
 			*itdx =  gx;
-			*itdu = -(spp.mod->mortalityRate(*itx, t, env) + growthGrad); //*(*itu);
+			*itdu = -(spp.mod->mortalityRate(*itx, t, env) + growthGrad); 
+			if (!use_log_densities) *itdu *= *itu;
 			
 			if (spp.varnames_extra.size() > 0){
 				auto it_returned = spp.mod->calcRates_extra(t, *itx, itse, itre);
@@ -109,10 +110,12 @@ void Solver<Model,Environment>::addCohort_CM(){
 			double g = spp.mod->growthRate(spp.xb, current_time, env);
 			// --- debug ---
 			if (spp.bfin_is_u0in)
-				state[spp.start_index + spp.J] = log(spp.birth_flux_in);
-			else
+				state[spp.start_index + spp.J] = (use_log_densities)? log(spp.birth_flux_in) : spp.birth_flux_in;
+			else{
 			// -------------
-				state[spp.start_index + spp.J] = (g>0)? log(spp.birth_flux_in * spp.mod->establishmentProbability(current_time)/g)  :  log(0); 
+				double d = (g>0)? spp.birth_flux_in * spp.mod->establishmentProbability(current_time)/g  : 0;
+				state[spp.start_index + spp.J] = (use_log_densities)? log(d) : d; 
+			}
 		}
 	}
 }

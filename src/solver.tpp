@@ -185,7 +185,10 @@ void Solver<Model,Environment>::initialize(){
 			for (size_t i=0; i<s.J; ++i)  state[s.start_index + i] = s.mod->initDensity((s.x[i]+s.x[i+1])/2);
 		}
 		if (method == SOLVER_CM){
-			for (size_t i=0; i<s.J; ++i)  state[s.start_index + s.J + i] = log(s.mod->initDensity(s.x[i]));
+			for (size_t i=0; i<s.J; ++i){
+				double d = s.mod->initDensity(s.x[i]); 
+				state[s.start_index + s.J + i] = (use_log_densities)? log(d) : d;
+			}
 		}
 		if (method == SOLVER_EBT){
 			for (size_t i=1; i<s.J; ++i)  state[s.start_index + s.J + i] = s.mod->initDensity((s.x[i]+s.x[i-1])/2)*(s.x[i]-s.x[i-1]);	// state[J+1+0]=0 (N0)

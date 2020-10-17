@@ -16,13 +16,15 @@ double Solver<Model, Environment>::integrate_wudx_above(wFunc w, double t, doubl
 		// integrate using trapezoidal rule 
 		// Note, new cohorts are inserted at the beginning, so x will be ascending
 		double I = 0;
+		double u = (use_log_densities)? exp(*itu) : *itu;
 		double x_hi = *itx;
-		double f_hi = w(*itx, t)*exp(*itu);
+		double f_hi = w(*itx, t)*u;
 		//if (xlow < 0.01) cout << "x/w/u/f = " << x_hi << " " <<  w(*itx,t) <<  " " << exp(*itu)  << " " << f_hi << "\n";
 		--itx; --itu;
 		for (int i=0; i<spp.J-1; ++i){
+			double u = (use_log_densities)? exp(*itu) : *itu;
 			double x_lo = *itx;
-			double f_lo = w(*itx,t)*exp(*itu);
+			double f_lo = w(*itx,t)*u;
 			//if (xlow < 0.01) cout << "x/w/u/f = " << x_lo << " " <<  w(*itx,t) <<  " " << exp(*itu)  << " " << f_lo << "\n";
 			--itx; --itu;
 			if (x_lo < xlow){
@@ -94,8 +96,10 @@ double Solver<Model,Environment>::integrate_x(wFunc w, double t, vector<double>&
 	else if (method == SOLVER_CM){
 		// integrate using trapezoidal rule TODO: Modify to avoid double computation of w(x)
 		double I = 0;
-		for (iset.begin(); !iset.end(); ++iset){
-			I += (*(itx+1)-*itx)*(w(*(itx+1), t)*exp(*(itu+1)) + w(*itx, t)*exp(*itu));
+		for (iset.begin(); iset.dist < iset.size-1; ++iset){
+			double unext = (use_log_densities)? exp(*(itu+1)) : *(itu+1);
+			double unow  = (use_log_densities)? exp(*itu) : *itu;
+			I += (*(itx+1)-*itx)*(w(*(itx+1), t)*unext + w(*itx, t)*unow);
 		}
 		return I*0.5;
 	}

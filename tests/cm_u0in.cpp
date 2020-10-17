@@ -13,7 +13,7 @@ int main(){
 	Environment E;
 
 	Solver<TestModel,Environment> S(SOLVER_CM);
-	S.control.ode_eps = 1e-4;
+	S.use_log_densities = false;
 	S.addSpecies(25, 0, 1, false, &M, {}, 2);
 	S.resetState();
 	S.initialize();
@@ -38,7 +38,7 @@ int main(){
 	fout.close();
 
 	// test value is from R code	
-	if (abs(S.u0_out()[0] - 1.556967) < 2e-2) return 0;
+	if (abs(S.u0_out()[0] - 1.556967) < 1e-3) return 0;
 	else return 1;
   
 }
