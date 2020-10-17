@@ -30,14 +30,18 @@ class Solver{
 		double ode_eps = 1e-6;	// FIXME: Need a function to set these params, so ODE solver can be reset
 		double ode_initial_step_size = 1e-6;
 		double convergence_eps = 1e-6;
+		double cm_grad_dx = 1e-6;
 	} control;
 	
-	
+	bool use_log_densities = true;
+
 	public:	
 	Solver(PSPM_SolverType _method);
 
 	void addSpecies(int _J, double _xb, double _xm, bool log_breaks, Model* _mod, std::vector<std::string> extra_vars = std::vector<std::string>(), double input_birth_flux = -1);
 	void addSpecies(std::vector<double> xbreaks, Model* _mod, std::vector<std::string> extra_vars = std::vector<std::string>(), double input_birth_flux = -1);
+
+	Species<Model>* get_species(int id);
 
 	void setEnvironment(Environment * _env);
 
@@ -64,10 +68,10 @@ class Solver{
 	//void removeDeadCohorts_EBT();
 	//vector<double> cohortsToDensity_EBT(vector <double> &breaks);
 
-	//void calcRates_CM(double t, vector<double>&S, vector<double> &dSdt);
-	//double calc_u0_CM();
-	//void addCohort_CM();
-	//void removeCohort_CM();
+	void calcRates_CM(double t, vector<double>&S, vector<double> &dSdt);
+	double calc_u0_CM();
+	void addCohort_CM();
+	void removeCohort_CM();
 	
 	
 	void step_to(double tstop);
@@ -92,7 +96,7 @@ class Solver{
 #include "../src/solver.tpp"
 #include "../src/mu.tpp"
 //#include "../src/ebt.tpp"
-//#include "../src/cm.tpp"
+#include "../src/cm.tpp"
 #include "../src/size_integrals.tpp"
 
 

@@ -151,6 +151,13 @@ void Solver<Model,Environment>::setEnvironment(Environment * _env){
 
 
 template<class Model, class Environment>
+Species<Model>* Solver<Model,Environment>::get_species(int id){
+	return &species_vec[id];
+}
+
+
+
+template<class Model, class Environment>
 void Solver<Model,Environment>::print(){
 	std::cout << ">> SOLVER \n";
 	string types[] = {"FMU", "MMU", "CM", "EBT"};
@@ -178,7 +185,10 @@ void Solver<Model,Environment>::initialize(){
 			for (size_t i=0; i<s.J; ++i)  state[s.start_index + i] = s.mod->initDensity((s.x[i]+s.x[i+1])/2);
 		}
 		if (method == SOLVER_CM){
-			for (size_t i=0; i<s.J; ++i)  state[s.start_index + s.J + i] = log(s.mod->initDensity(s.x[i]));
+			for (size_t i=0; i<s.J; ++i){
+				double d = s.mod->initDensity(s.x[i]); 
+				state[s.start_index + s.J + i] = (use_log_densities)? log(d) : d;
+			}
 		}
 		if (method == SOLVER_EBT){
 			for (size_t i=1; i<s.J; ++i)  state[s.start_index + s.J + i] = s.mod->initDensity((s.x[i]+s.x[i-1])/2)*(s.x[i]-s.x[i-1]);	// state[J+1+0]=0 (N0)
@@ -245,20 +255,20 @@ void Solver<Model,Environment>::step_to(double tstop){
 	//    removeDeadCohorts_EBT();
 	//    if (state[xsize()] > 0) addCohort_EBT();  // Add new cohort if N0 > 0. Add after removing dead ones otherwise this will also be removed. 
 	//}
-	//if (method == SOLVER_CM){
-	//    auto derivs = [this](double t, vector<double> &S, vector<double> &dSdt){
-	//        env->computeEnv(t, S, this);
-	//        this->calcRates_CM(t, S, dSdt);
-	//    };
+	if (method == SOLVER_CM){
+		auto derivs = [this](double t, vector<double> &S, vector<double> &dSdt){
+			env->computeEnv(t, S, this);
+			this->calcRates_CM(t, S, dSdt);
+		};
 		
-	//    // integrate 
-	//    odeStepper.Step_to(tstop, current_time, state, derivs); // state = [pi0, Xint, N0, Nint]
+		// integrate 
+		odeStepper.Step_to(tstop, current_time, state, derivs); // state = [pi0, Xint, N0, Nint]
 
-	//    //// update cohorts
-	//    addCohort_CM();		// add before so that it becomes boundary cohort and first internal cohort can be (potentially) removed
-	//    //removeCohort_CM();
-	//    mod->computeEnv(current_time, state, this); // is required here IF rescaleEnv is used in derivs
-	//}
+		// update cohorts
+		addCohort_CM();		// add before so that it becomes boundary cohort and first internal cohort can be (potentially) removed
+		removeCohort_CM();
+		env->computeEnv(current_time, state, this); // is required here IF rescaleEnv is used in derivs
+	}
 }
 
 

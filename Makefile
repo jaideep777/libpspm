@@ -15,8 +15,8 @@ INC_PATH := -I./include
 LIB_PATH := -L./lib 
 
 # flags
-CPPFLAGS = -O3 -std=c++11 -Wno-sign-compare -Wno-unused-variable -Wno-unused-but-set-variable
-LDFLAGS =  
+CPPFLAGS = -O3 -g -pg -std=c++11 -Wno-sign-compare -Wno-unused-variable -Wno-unused-but-set-variable
+LDFLAGS =  -g -pg
 
 # libs
 LIBS = 	 #-lgsl -lgslcblas 	# additional libs
