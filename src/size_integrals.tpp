@@ -11,7 +11,9 @@ double Solver<Model, Environment>::integrate_wudx_above(wFunc w, double t, doubl
 	auto iset = spp.get_iterators(S);
 	auto &itx = iset.get("X");
 	auto &itu = iset.get("u");
-	
+	iset.rbegin();
+	//std::cout << "J = " << spp.J << ", dist = " << iset.dist << std::endl; 
+
 	if (method == SOLVER_CM){
 		// integrate using trapezoidal rule 
 		// Note, new cohorts are inserted at the beginning, so x will be ascending
@@ -20,13 +22,13 @@ double Solver<Model, Environment>::integrate_wudx_above(wFunc w, double t, doubl
 		double x_hi = *itx;
 		double f_hi = w(*itx, t)*u;
 		//if (xlow < 0.01) cout << "x/w/u/f = " << x_hi << " " <<  w(*itx,t) <<  " " << exp(*itu)  << " " << f_hi << "\n";
-		--itx; --itu;
+		--iset; //--itx; --itu;
 		for (int i=0; i<spp.J-1; ++i){
 			double u = (use_log_densities)? exp(*itu) : *itu;
 			double x_lo = *itx;
 			double f_lo = w(*itx,t)*u;
 			//if (xlow < 0.01) cout << "x/w/u/f = " << x_lo << " " <<  w(*itx,t) <<  " " << exp(*itu)  << " " << f_lo << "\n";
-			--itx; --itu;
+			--iset; //--itx; --itu;
 			if (x_lo < xlow){
 				double f = f_lo; //f_lo + (f_hi-f_lo)/(x_hi-x_lo)*(xlow - x_lo);  // FIXME: these should stop at the interpolating point
 				double x = x_lo; //xlow;

@@ -266,7 +266,7 @@ void Solver<Model,Environment>::step_to(double tstop){
 
 		// update cohorts
 		addCohort_CM();		// add before so that it becomes boundary cohort and first internal cohort can be (potentially) removed
-		removeCohort_CM();
+		//removeCohort_CM();
 		env->computeEnv(current_time, state, this); // is required here IF rescaleEnv is used in derivs
 	}
 }

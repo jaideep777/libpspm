@@ -7,39 +7,19 @@ using namespace std;
 #include "plant/environment.h"
 #include "plant/plant.h"
 
-class PlantModel{
-	public:
 
-	double input_seed_rain = 200;	
-	plant::Environment env;
-
-	plant::Plant seed; // prototype to be inserted
-
-	int nrc = 0; // number of evals of compute_vars_phys() - derivative computations actually done by plant
-	int ndc = 0; // number of evals of mortality_rate() - derivative computations requested by solver
-
-	// use this to store one-shot rates for each individual and supply through the rate functions
-	plant::Plant p;
-	
-	PlantModel() : env(1) {
-		
-	}
-
-	double initDensity(double x){
-		if (x == seed.vars.height){
-			seed.set_height(x);
-			seed.compute_vars_phys(env);
-			double u0 = input_seed_rain*p.germination_probability(env)/growthRate(p.vars.height, 0);
-			return u0;
-		}
-		else return 0;
-	}
-
-
+class LightEnvironment : public plant::Environment{
 	//double evalEnv(double x, double t){
 	//    env.light_profile.eval(x); // return 1;
 	//}
+	private:
+	plant::Plant p;   // dummy instance of plant for leaf area calculations
 	
+
+	public:
+	LightEnvironment(double openness) : Environment(openness){
+	}
+
 	// This function must do any necessary precomputations to facilitate evalEnv()
 	// Therefore, this should calculate env for all X when it is a function of X
 	// In such a case, the solver's SubdivisionSpline can be ussed
@@ -52,7 +32,8 @@ class PlantModel{
 	// TODO: In Solver, add a add_iAttribute() function, that will calculate some individual 
 	// level attributes from x, which can be reused if required. E.g., in Plant, we can add leaf_area
 	// as an iAttribute. iAttributes can be mapped to integers, say using enums
-	void computeEnv(double t, vector<double> &state_vec, Solver<PlantModel> * S){
+	template <class Model>
+	void computeEnv(double t, vector<double> &state_vec, Solver<Model, LightEnvironment> * S){
 		//            _xm 
 		// Calculate / w(z,t)u(z,t)dz
 		//        xb`
@@ -60,53 +41,85 @@ class PlantModel{
 			double kI = 0.5;
 
 			auto la_above = [z, this](double x, double t){
-				p.set_height(x);
+				p.set_height(x);	// sets height and leaf-area
 				double a = p.area_leaf_above(z, p.vars.height, p.vars.area_leaf);
 				return a;	
 			};
-			double leaf_area_above = S->integrate_wudx_above(la_above, t, z, state_vec);
+			double leaf_area_above = S->integrate_wudx_above(la_above, t, z, state_vec, 0);
 			//cout << "la = " << leaf_area_above << "\n";
 			return exp(-kI*leaf_area_above);
 		};	
 	
 		//cout << S->xb << " " << S->getMaxSize() << endl;	
-		env.time = t;
-		env.light_profile.construct(canopy_openness, 0, S->getMaxSize(state_vec.begin()));
+		time = t;
+		light_profile.construct(canopy_openness, 0, S->get_species(0)->get_maxSize(state_vec.begin()));
 	}
 
 
-	double establishmentProbability(double t){
-		seed.compute_vars_phys(env);
-		return seed.germination_probability(env);
+};
+
+
+class PlantModel{
+	public:
+
+	double input_seed_rain = 200;	
+
+	plant::Plant seed; // prototype to be inserted
+
+	int nrc = 0; // number of evals of compute_vars_phys() - derivative computations actually done by plant
+	int ndc = 0; // number of evals of mortality_rate() - derivative computations requested by solver
+
+	// use this to store one-shot rates for each individual and supply through the rate functions
+	plant::Plant p;
+	
+	PlantModel() {
+		
 	}
 
-	double growthRate(double x, double t){
+	double initDensity(double x, LightEnvironment * env){
+		if (x == seed.vars.height){
+			seed.set_height(x);
+			seed.compute_vars_phys(*env);
+			double u0 = input_seed_rain*p.germination_probability(*env)/growthRate(p.vars.height, 0, env);
+			return u0;
+		}
+		else return 0;
+	}
+
+
+
+	double establishmentProbability(double t, LightEnvironment * env){
+		seed.compute_vars_phys(*env);
+		return seed.germination_probability(*env);
+	}
+
+	double growthRate(double x, double t, LightEnvironment * env){
 		//if (p.vars.height != x){
 			p.set_height(x);
-			p.compute_vars_phys(env);
+			p.compute_vars_phys(*env);
 			++nrc;
 		//}
 		return p.vars.height_dt;
 			
 	}
 
-	double mortalityRate(double x, double t){
+	double mortalityRate(double x, double t, LightEnvironment * env){
 		assert(p.vars.height == x);
 		++ndc;
 		return p.vars.mortality_dt;
 	}
 
-	double birthRate(double x, double t){
+	double birthRate(double x, double t, LightEnvironment * env){
 		assert(p.vars.height == x);
 		return p.vars.fecundity_dt;
 	}
 
 	
 	// optional functions, if extra size-structured variables are desired
-	vector<double> initStateExtra(double x, double t){
+	vector<double> initStateExtra(double x, double t, LightEnvironment * env){
 		vector<double> sv;
 		sv.reserve(4);	
-		sv.push_back(-log(seed.germination_probability(env)/env.patch_survival(t))); // mortality 
+		sv.push_back(-log(seed.germination_probability(*env)/env->patch_survival(t))); // mortality 
 		sv.push_back(0); // viable_seeds
 		sv.push_back(0); // heartwood area
 		sv.push_back(0); // heartwood mass
@@ -114,14 +127,15 @@ class PlantModel{
 	}
 
 
-	vector<double>::iterator calcRates_extra(double t, double x, vector<double>::iterator istate_ex, vector<double>::iterator irates_ex){
+	vector<double>::iterator calcRates_extra(double x, double t, LightEnvironment * env,
+										     vector<double>::iterator istate_ex, vector<double>::iterator irates_ex){
 		
 		assert(p.vars.height == x);
 		
 		double p_plant_survival = exp(-(*istate_ex));
 
 		*irates_ex++ = p.vars.mortality_dt;	// mortality
-		*irates_ex++ = p.vars.fecundity_dt * env.patch_survival(t) * p_plant_survival; // viable_seeds
+		*irates_ex++ = p.vars.fecundity_dt * env->patch_survival(t) * p_plant_survival; // viable_seeds
 		*irates_ex++ = p.vars.area_heartwood_dt; // heartwood area
 		*irates_ex++ = p.vars.mass_heartwood_dt; // heartwood mass
 
@@ -130,9 +144,9 @@ class PlantModel{
 	}
 
 	// For output only
-	void setState(Solver<PlantModel> *S){
+	void setState(Solver<PlantModel, LightEnvironment> *S){
 		
-		auto iset = S->getIterators_state();
+		auto iset = S->get_species(0)->get_iterators(S->state);
 
 		p.vars.mortality      = *iset.get("mort");
 		p.vars.fecundity      = *iset.get("fec");
@@ -178,6 +192,9 @@ int main(){
 	
 	initPlantParameters(plant::par);
 	
+	LightEnvironment env(1);	
+	env.light_profile.print();	
+	
 	//plant::Environment env(1);
 
 	plant::Plant p;
@@ -189,23 +206,27 @@ int main(){
 
 	cout << p << endl;
 
-	Solver<PlantModel> S(vector<double> (1,p.vars.height), SOLVER_CM);
+    Solver<PlantModel, LightEnvironment> S(SOLVER_CM);
+    S.use_log_densities = true;
 	S.control.ode_eps = 1e-4;
-	S.createSizeStructuredVariables({"mort", "fec", "heart_area", "heart_mass"});
+	S.setEnvironment(&env);
+	//    S.createSizeStructuredVariables({"mort", "fec", "heart_area", "heart_mass"});
 
-	PlantModel M;
-	M.p = p;
-	S.setModel(&M);
-	//S.createSizeStructuredVariables({"mort", "fec", "heart", "sap"});
+    PlantModel M;
+    //M.p = p;
+    cout << "HT === " << M.p.vars.height << endl;
+	S.addSpecies(vector<double>(1, M.p.vars.height), &M, {"mort", "fec", "heart", "sap"}, M.input_seed_rain);
+//    //S.createSizeStructuredVariables({"mort", "fec", "heart", "sap"});
 	//S.print();
-	S.setInputNewbornDensity(M.input_seed_rain);
+//    S.setInputNewbornDensity(M.input_seed_rain);
+	S.resetState();
+    S.initialize();
+//    //M.computeEnv(0, S.state, &S);
+//    //S.calcRates_CM(1, S.state, S.rates);
 
-	S.initialize();
-	//M.computeEnv(0, S.state, &S);
-	//S.calcRates_CM(1, S.state, S.rates);
-	//S.calcRates_extra(1, S.state, S.rates);
-	S.print();
-	cout << "state: "; for (auto s :S.state) cout << s << " "; cout << "\n";
+//    //S.calcRates_extra(1, S.state, S.rates);
+    S.print();
+//    cout << "state: "; for (auto s :S.state) cout << s << " "; cout << "\n";
 
 
 	//S.addCohort_CM();
@@ -237,11 +258,11 @@ int main(){
 		S.step_to(times[i]);		
 
 #ifdef OUTPUT_TEXT
-		cout << times[i] << " " << S.xsize() << " " << M.env.light_profile.npoints << " | " << M.nrc << " " << M.ndc << "\n";
+		cout << times[i] << " " << S.get_species(0)->xsize() << " " << env.light_profile.npoints << " | " << M.nrc << " " << M.ndc << "\n";
 		//S.print();
 
 		vector<double> xl = seq(0, 20, 200);
-		for (auto h : xl) fli << M.env.canopy_openness(h) << "\t";
+		for (auto h : xl) fli << env.canopy_openness(h) << "\t";
 		fli << endl;
 
 		fout << times[i] << "\t";
@@ -251,7 +272,7 @@ int main(){
 		fout_ha << times[i] << "\t";
 		fout_hm << times[i] << "\t";
 		//fout_ha << times[i] << "\t";
-		auto iset = S.getIterators_state();
+		auto iset = S.get_species(0)->get_iterators(S.state);
 		auto& itx = iset.get("X");
 		auto& itu = iset.get("u");
 		auto& ite = iset.get("mort");
@@ -284,13 +305,13 @@ int main(){
 #endif
 	cout << "derivative computations requested/done: " << M.nrc << " " << M.ndc << endl;
 
-	auto iset = S.getIterators_state();
+	auto iset = S.get_species(0)->get_iterators(S.state);
 	auto& itf = iset.get("fec");
 	vector <double> fec_vec;
-	fec_vec.reserve(S.xsize());
+	fec_vec.reserve(S.get_species(0)->xsize());
 	iset.rbegin();
 	for (int i=0; !iset.rend(); --iset, ++i){
-		double patch_age_density = M.env.patch_age_density(times[i]);
+		double patch_age_density = env.patch_age_density(times[i]);
 		double S_D = 0.25;
 		double output_seeds = M.input_seed_rain * S_D * patch_age_density * (*itf);
 		cout << times[i] << " " << M.input_seed_rain << " " << S_D << " " << patch_age_density << " " << (*itf) << " | " << output_seeds << endl;
