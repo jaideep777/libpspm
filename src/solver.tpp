@@ -182,16 +182,16 @@ void Solver<Model,Environment>::initialize(){
 		Species<Model> &s = species_vec[k];
 
 		if (method == SOLVER_FMU){
-			for (size_t i=0; i<s.J; ++i)  state[s.start_index + i] = s.mod->initDensity((s.x[i]+s.x[i+1])/2);
+			for (size_t i=0; i<s.J; ++i)  state[s.start_index + i] = s.mod->initDensity((s.x[i]+s.x[i+1])/2, env);
 		}
 		if (method == SOLVER_CM){
 			for (size_t i=0; i<s.J; ++i){
-				double d = s.mod->initDensity(s.x[i]); 
+				double d = s.mod->initDensity(s.x[i], env); 
 				state[s.start_index + s.J + i] = (use_log_densities)? log(d) : d;
 			}
 		}
 		if (method == SOLVER_EBT){
-			for (size_t i=1; i<s.J; ++i)  state[s.start_index + s.J + i] = s.mod->initDensity((s.x[i]+s.x[i-1])/2)*(s.x[i]-s.x[i-1]);	// state[J+1+0]=0 (N0)
+			for (size_t i=1; i<s.J; ++i)  state[s.start_index + s.J + i] = s.mod->initDensity((s.x[i]+s.x[i-1])/2, env)*(s.x[i]-s.x[i-1]);	// state[J+1+0]=0 (N0)
 		}
 
 		if (s.varnames_extra.size() > 0){  // If extra state variables have been requested, initialize them
@@ -201,7 +201,7 @@ void Solver<Model,Environment>::initialize(){
 			auto& itx = is.get("X");
 			int id = is.getIndex(s.varnames_extra[0]); // get index of 1st extra variable
 			for (is.begin(); !is.end(); ++is){
-				vector <double> v = s.mod->initStateExtra(*itx, current_time);  // returned vector will be `move`d so this is fast 
+				vector <double> v = s.mod->initStateExtra(*itx, current_time, env);  // returned vector will be `move`d so this is fast 
 				auto it_vec = is.get();
 				for (size_t i = 0; i<s.varnames_extra.size(); ++i){
 					*it_vec[id+i] = v[i];

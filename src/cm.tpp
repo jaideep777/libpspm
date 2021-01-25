@@ -32,7 +32,7 @@ void Solver<Model,Environment>::calcRates_CM(double t, vector<double>&S, vector<
 			if (!use_log_densities) *itdu *= *itu;
 			
 			if (spp.varnames_extra.size() > 0){
-				auto it_returned = spp.mod->calcRates_extra(t, *itx, itse, itre);
+				auto it_returned = spp.mod->calcRates_extra(*itx, t, env, itse, itre);
 				assert(distance(itre, it_returned) == spp.varnames_extra.size());
 			}
 		}
@@ -85,7 +85,7 @@ void Solver<Model,Environment>::addCohort_CM(){
 		vals.push_back(spp.xb);
 		vals.push_back(-100);
 		n_insertions += 2;
-		vector <double> ex = spp.mod->initStateExtra(spp.xb, current_time);
+		vector <double> ex = spp.mod->initStateExtra(spp.xb, current_time, env);
 		for (int i=0; i<spp.varnames_extra.size(); ++i){
 			at.push_back(spp.start_index + 2*spp.J);
 			vals.push_back(ex[i]);
@@ -113,7 +113,7 @@ void Solver<Model,Environment>::addCohort_CM(){
 				state[spp.start_index + spp.J] = (use_log_densities)? log(spp.birth_flux_in) : spp.birth_flux_in;
 			else{
 			// -------------
-				double d = (g>0)? spp.birth_flux_in * spp.mod->establishmentProbability(current_time)/g  : 0;
+				double d = (g>0)? spp.birth_flux_in * spp.mod->establishmentProbability(current_time, env)/g  : 0;
 				state[spp.start_index + spp.J] = (use_log_densities)? log(d) : d; 
 			}
 		}

@@ -17,9 +17,9 @@ class Environment{
 	// Hence, explicitly pass the state to this function.
 	template<class Model>
 	void computeEnv(double t, vector<double> &state_vec, Solver<Model,Environment> * S){
-		//            _xm 
-		// Calculate / w(z,t)u(z,t)dz
-		//        xb`
+		//             _xm 
+		// Calculate _/ w(z,t)u(z,t)dz
+		//         xb
 		auto w = [](double z, double t) -> double {
 			if (z <= 1.0/3) 
 				return 1;
@@ -72,7 +72,7 @@ class TestModel{
 	public:
 	double sc = 10;
 	
-	double initDensity(double x){
+	double initDensity(double x, Environment * env){
 		return pow(1-x,2)/pow(1+x,4) + (1-x)/pow(1+x,3);
 	}
 	
@@ -97,12 +97,12 @@ class TestModel{
 		return n1*n2;
 	}
 
-	double establishmentProbability(double t){
+	double establishmentProbability(double t, Environment * env){
 		return 1;
 	}
 	
 	// optional functions, if extra size-structured variables are desired
-	vector<double> initStateExtra(double x, double t){
+	vector<double> initStateExtra(double x, double t, Environment * env){
 		Plant p(x);
 		p.init_state();
 		vector<double> sv;
@@ -114,7 +114,7 @@ class TestModel{
 		return sv;
 	}
 
-	vector<double>::iterator calcRates_extra(double t, double x, 
+	vector<double>::iterator calcRates_extra(double x, double t, Environment * env, 
 											vector<double>::iterator istate, vector<double>::iterator irates){
 		
 		Plant p(x);

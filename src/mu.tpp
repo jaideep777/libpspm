@@ -72,7 +72,7 @@ void Solver<Model,Environment>::calcRates_FMU(double t, vector<double> &S, vecto
 			dUdt[i] = -spp.mod->mortalityRate(X[i], t, env)*U[i] - (growth(i+1)*u[i+1] - growth(i)*u[i])/h[i];
 			
 			if (spp.varnames_extra.size() > 0){
-				auto it_returned = spp.mod->calcRates_extra(t, *itx, itse, itre);
+				auto it_returned = spp.mod->calcRates_extra(*itx, t, env, itse, itre);
 				assert(distance(itre, it_returned) == spp.varnames_extra.size());
 			}
 			
