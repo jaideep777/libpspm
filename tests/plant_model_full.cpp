@@ -3,6 +3,8 @@
 #include <fstream>
 using namespace std;
 #include "solver.h"
+
+#include "plant/environment.h"
 #include "plant/plant.h"
 
 class PlantModel{

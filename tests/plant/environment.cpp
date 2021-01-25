@@ -1,7 +1,7 @@
 #include "environment.h"
 
 #include <vector>
-
+#include <iostream>
 
 //#include <plant/parameters.h>
 
@@ -15,12 +15,12 @@ Environment::Environment(double openness){
 	scale = pow(tgamma(1.0/shape)/shape/mean_interval, shape);
 	p0 = shape*pow(scale, 1.0 / shape) / tgamma(1.0 / shape);
 
-
 	// By default, construct an empty environment with constant light profile
 	std::vector <double> x = {0,10,50,100,1000};
 	std::vector <double> y = {openness, openness, openness, openness, openness};
 
-	light_profile.constructAndReset(x,y);	// create a fixed empty environment by default
+	auto f = [](double x){return 1;}; 
+   	light_profile.construct(f, 0, 1000);	// create a fixed empty environment by default
 }
 
 

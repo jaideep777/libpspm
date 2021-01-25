@@ -10,7 +10,7 @@
 #include <iostream>
 #include <vector>
 
-#include "environment.h"
+//#include "environment.h"
 #include "pn_integrator.h"
 
 namespace plant {
@@ -152,19 +152,21 @@ class Plant {
   double mass_above_ground(double mass_leaf, double mass_bark,
                            double mass_sapwood, double mass_root) const;
 
-  void compute_vars_phys(const Environment& environment, bool reuse_intervals=false);
+  template <class Environment>
+	  void compute_vars_phys(const Environment& environment, bool reuse_intervals=false);
 
   // * Mass production
   // [eqn 12] Gross annual CO2 assimilation
-  double assimilation(const Environment& environment, double height,
+  template <class Environment>
+	  double assimilation(const Environment& environment, double height,
                       double area_leaf, bool reuse_intervals);
   // Used internally, corresponding to the inner term in [eqn 12]
-  double compute_assimilation_x(double x, double height,
-                                const Environment& environment) const;
-  double compute_assimilation_h(double h, double height,
-                                const Environment& environment) const;
-  double compute_assimilation_p(double p, double height,
-                                const Environment& environment) const;
+  //double compute_assimilation_x(double x, double height,
+  //                              const Environment& environment) const;
+  //double compute_assimilation_h(double h, double height,
+  //                              const Environment& environment) const;
+  //double compute_assimilation_p(double p, double height,
+  //                              const Environment& environment) const;
   // [Appendix S6] Per-leaf photosynthetic rate.
   double assimilation_leaf(double x) const;
 
@@ -190,7 +192,8 @@ class Plant {
   // [eqn 15] Net production
   double net_mass_production_dt_A(double assimilation, double respiration,
                                   double turnover) const;
-  double net_mass_production_dt(const Environment& environment,
+  template <class Environment>
+	  double net_mass_production_dt(const Environment& environment,
                                 double height, double area_leaf_,
                                 bool reuse_intervals=false);
 
@@ -246,7 +249,8 @@ class Plant {
   double mortality_growth_independent_dt()const ;
   double mortality_growth_dependent_dt(double productivity_area) const;
   // [eqn 20] Survival of seedlings during germination
-  double germination_probability(const Environment& environment);
+  template <class Environment>
+	  double germination_probability(const Environment& environment);
 
   // * Competitive environment
   // [eqn 11] total leaf area above height above height `z` for given plant
@@ -270,7 +274,7 @@ class Plant {
 
 };
 
-
+#include "plant.tpp"
 
 }
 
