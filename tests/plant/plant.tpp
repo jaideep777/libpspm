@@ -86,7 +86,8 @@ double Plant::net_mass_production_dt(const Environment& environment,
   const double respiration_  = respiration(mass_leaf_, mass_sapwood_, mass_bark_, mass_root_);
   const double turnover_     = turnover(mass_leaf_, mass_sapwood_, mass_bark_, mass_root_);
 
-  return net_mass_production_dt_A(assimilation_, respiration_, turnover_);
+  //return net_mass_production_dt_A(assimilation_, respiration_, turnover_);
+  return par.a_bio * par.a_y * (assimilation_ - respiration_) - turnover_;
 }
 
 

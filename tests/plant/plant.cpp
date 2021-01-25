@@ -273,14 +273,14 @@ double Plant::turnover_root(double mass) const {
   return par.k_r * mass;
 }
 
-// [eqn 15] Net production
-//
-// NOTE: Translation of variable names from the Falster 2011.  Everything
-// before the minus sign is SCM's N, our `net_mass_production_dt` is SCM's P.
-double Plant::net_mass_production_dt_A(double assimilation, double respiration,
-                                double turnover) const {
-  return par.a_bio * par.a_y * (assimilation - respiration) - turnover;
-}
+//// [eqn 15] Net production
+////
+//// NOTE: Translation of variable names from the Falster 2011.  Everything
+//// before the minus sign is SCM's N, our `net_mass_production_dt` is SCM's P.
+//double Plant::net_mass_production_dt_A(double assimilation, double respiration,
+//                                double turnover) const {
+//  return par.a_bio * par.a_y * (assimilation - respiration) - turnover;
+//}
 
 // [eqn 16] Fraction of production allocated to reproduction
 double Plant::fraction_allocation_reproduction(double height) const {
@@ -487,7 +487,7 @@ double Plant::height_seed(void) const {
 //  // values for LMA or height-leaf area scaling. Could instead use some
 //  // absolute maximum height for new seedling, e.g. 1m?
 	
-	return 0.3920458; // JAI: Setting this from sample run, for now.
+	return 0.3920458; // FIXME: JAI: Setting this from sample run, for now.
 //  const double
 //    h0 = height_given_mass_leaf(std::numeric_limits<double>::min()),
 //    h1 = height_given_mass_leaf(omega);

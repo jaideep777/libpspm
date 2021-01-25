@@ -190,8 +190,8 @@ class Plant {
   double turnover_root(double mass) const;
 
   // [eqn 15] Net production
-  double net_mass_production_dt_A(double assimilation, double respiration,
-                                  double turnover) const;
+  //double net_mass_production_dt_A(double assimilation, double respiration,
+  //                                double turnover) const;
   template <class Environment>
 	  double net_mass_production_dt(const Environment& environment,
                                 double height, double area_leaf_,
