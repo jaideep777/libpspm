@@ -156,6 +156,19 @@ Species<Model>* Solver<Model,Environment>::get_species(int id){
 }
 
 
+template<class Model, class Environment>
+double Solver<Model,Environment>::maxSize(std::vector<double>::iterator state_begin){
+	double maxsize = 0;
+	for (auto& spp : species_vec) maxsize = std::max(maxsize, spp.get_maxSize(state_begin));
+	return maxsize;
+}
+
+
+template<class Model, class Environment>
+int Solver<Model,Environment>::n_species(){
+	return species_vec.size();
+}
+
 
 template<class Model, class Environment>
 void Solver<Model,Environment>::print(){

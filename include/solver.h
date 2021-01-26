@@ -55,7 +55,8 @@ class Solver{
 	//const double* getX();
 	//vector<double> getx();
 	//double getMaxSize(vector<double>::iterator sbegin);
-	
+	double maxSize(std::vector<double>::iterator state_begin);
+	int n_species();	
 	
 
 

@@ -55,8 +55,8 @@ int Species<Model>::size(){
 
 template<class Model>
 double Species<Model>::get_maxSize(std::vector<double>::iterator state_begin){
-	if (!X.empty()) return *x.rbegin();
-	else {
+	if (!X.empty()) return *x.rbegin();	// for FMU, get this from X
+	else {								// else get from state vector
 		return *next(state_begin, start_index + J-1);
 	}
 }

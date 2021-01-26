@@ -19,8 +19,6 @@ class Species{
 	friend class Solver;
 
 	private: // private members
-	Model * mod = nullptr;
-		
 	int start_index;
 	int J;	
 	
@@ -49,8 +47,10 @@ class Species{
 	void clearVars();
 
 	public: // public members
-	double xb, xm;
+	double xb, xm;  // FIXME. Dangerous because xm is never updated
 	bool is_resident;
+	
+	Model * mod = nullptr;
 
 	public: // public functions
 	IteratorSet<std::vector<double>::iterator> get_iterators(std::vector<double> &v);

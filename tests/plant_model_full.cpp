@@ -12,9 +12,6 @@ class LightEnvironment : public plant::Environment{
 	//double evalEnv(double x, double t){
 	//    env.light_profile.eval(x); // return 1;
 	//}
-	private:
-	plant::Plant p;   // dummy instance of plant for leaf area calculations
-	
 
 	public:
 	LightEnvironment(double openness) : Environment(openness){
@@ -40,19 +37,26 @@ class LightEnvironment : public plant::Environment{
 		auto canopy_openness = [S, t, &state_vec, this](double z){
 			double kI = 0.5;
 
-			auto la_above = [z, this](double x, double t){
-				p.set_height(x);	// sets height and leaf-area
-				double a = p.area_leaf_above(z, p.vars.height, p.vars.area_leaf);
-				return a;	
-			};
-			double leaf_area_above = S->integrate_wudx_above(la_above, t, z, state_vec, 0);
+			double leaf_area_above_z = 0;
+			
+			// Loop over resident species --->
+			for (int i=0; i<S->n_species(); ++i){
+				plant::Plant * p = &(S->get_species(i)->mod->p);
+				auto la_above = [z, p](double x, double t){
+					p->set_height(x);	// sets height and leaf-area
+					double a = p->area_leaf_above(z, p->vars.height, p->vars.area_leaf);
+					return a;	
+				};
+				leaf_area_above_z += S->integrate_wudx_above(la_above, t, z, state_vec, i);
+			}
+
 			//cout << "la = " << leaf_area_above << "\n";
-			return exp(-kI*leaf_area_above);
+			return exp(-kI*leaf_area_above_z);
 		};	
 	
 		//cout << S->xb << " " << S->getMaxSize() << endl;	
 		time = t;
-		light_profile.construct(canopy_openness, 0, S->get_species(0)->get_maxSize(state_vec.begin()));
+		light_profile.construct(canopy_openness, 0, S->maxSize(state_vec.begin()));
 	}
 
 
@@ -78,8 +82,8 @@ class PlantModel{
 
 	double initDensity(double x, LightEnvironment * env){
 		if (x == seed.vars.height){
-			seed.set_height(x);
-			seed.compute_vars_phys(*env);
+			p.set_height(x);
+			p.compute_vars_phys(*env);
 			double u0 = input_seed_rain*p.germination_probability(*env)/growthRate(p.vars.height, 0, env);
 			return u0;
 		}
