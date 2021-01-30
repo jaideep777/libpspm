@@ -129,7 +129,7 @@ void Plant::compute_vars_phys(const Environment& environment,
 // [eqn 20] Survival of seedlings during germination
 template <class Environment>
 double Plant::germination_probability(const Environment& environment) {
-	double height_0 = height_seed(); //0.344;	// JAI: 0.344 was Temporary provision. // better to pre-compute if height_seed() uses root-finding
+	double height_0 = par.height_0; //height_seed(); //0.344;	// JAI: 0.344 was Temporary provision. // better to pre-compute if height_seed() uses root-finding
   const double net_mass_production_dt_ = net_mass_production_dt(environment, height_0, area_leaf(height_0));
   //std::cout << "net mass = " << height_0 << " " << environment.canopy_openness(0) << " " << net_mass_production_dt_ << std::endl;
   if (net_mass_production_dt_ > 0) {

@@ -13,9 +13,9 @@ namespace plant {
 
 pn::Integrator Plant::plantIntegrator;
 
-PlantParameters par;
+//PlantParameters par;
 
-void initPlantParameters(PlantParameters &par){
+void Plant::initParameters(){
 	// * Individual allometry
 	// Canopy shape parameter (extra calculation here later)
 	par.eta    = 12.0; // [dimensionless]
@@ -35,13 +35,13 @@ void initPlantParameters(PlantParameters &par){
 	//    / [kg(leaf) / m2 ]   |    / (0.1978791)           | lma
 	// Hard coded in value of lma here so that this value doesn't change
 	// if that trait changes above.
-	par.r_l   = 476; //39.27 / 0.1978791; // JAI: Should be 39.27/lma; 
+	par.r_l   = 21000*0.00187 / lma; // JAI: Should be 39.27/lma; 
 	// Root respiration per mass [mol CO2 / yr / kg]
 	par.r_r   = 217.0;
 	// Sapwood respiration per stem mass  [mol CO2 / yr / kg]
 	// = respiration per volume [mol CO2 / m3 / yr]
 	// /  wood density [kg/m3]
-	par.r_s   = 4012.0 / 608.0;
+	par.r_s   = 4012.0 / rho;
 	// Bark respiration per stem mass
 	// assumed to be twice rate of sapwood
 	// (NOTE that there is a re-parametrisation here relative to the paper
@@ -54,7 +54,7 @@ void initPlantParameters(PlantParameters &par){
 	// (12E-3 / 0.49)
 	par.a_bio  = 2.45e-2;
 	// Leaf turnover [/yr]
-	par.k_l    = 2.03812; // 0.4565855;	// JAI: Changes with LAI
+	par.k_l    = 0.4565855*pow(lma/0.1978791, -1.71); // 0.4565855;	// JAI: Changes with LAI
 	// Bark turnover [/yr]
 	par.k_b    = 0.2;
 	// Sapwood turnover [/yr]
@@ -67,7 +67,7 @@ void initPlantParameters(PlantParameters &par){
 
 	// * Seed production
 	// Accessory cost of reproduction
-	par.a_f3  = 3.0 *  3.8e-5; // [kg per seed]
+	par.a_f3  = 3.0 *  omega; // [kg per seed]
 
 	// Maximum allocation to reproduction
 	par.a_f1  = 1.0; //[dimensionless]
@@ -88,15 +88,17 @@ void initPlantParameters(PlantParameters &par){
 
 	par.eta_c = 1 - 2/(1 + par.eta) + 1/(1 + 2*par.eta);
 	// NOTE: Also pre-computing, though less trivial
-//		height_0    = std::numeric_limits<double>::quiet_NaN();    // TODO: height_seed();
-//		area_leaf_0 = std::numeric_limits<double>::quiet_NaN();    // TODO: area_leaf(height_0);
+	par.height_0    = height_seed();
+	par.area_leaf_0 = area_leaf(par.height_0);
 }
 
 
 
 Plant::Plant(){
-	vars.height = 0.3920458; //0.3441948;
-	vars.area_leaf = area_leaf(vars.height);
+	initParameters();
+
+	vars.height = par.height_0; //0.3257146; //0.3920458; //0.3441948;
+	vars.area_leaf = par.area_leaf_0; 
 }
 
 
@@ -477,6 +479,32 @@ double Plant::Qp(double x, double height) const { // x in [0,1], unchecked.   //
   return pow(1 - sqrt(x), (1/par.eta)) * height;
 }
 
+
+
+// Prints root of func(x) with error of EPSILON 
+template <typename Function>
+double bisection(Function func, double a, double b) { 
+    if (func(a) * func(b) >= 0){ 
+		std::cout << "You have not assumed right a and b\n"; 
+        return 0; 
+    } 
+  
+    double c = a; 
+    while ((b-a) >= 1e-6) { 
+        // Find middle point 
+        c = (a+b)/2; 
+  
+        // Check if middle point is root 
+        if (func(c) == 0.0) break; 
+        // Decide the side to repeat the steps 
+        else if (func(c)*func(a) < 0)   b = c; 
+        else a = c; 
+    } 
+    cout << "The value of root is : " << c << "\n"; 
+	return c;
+} 
+
+
 //// The aim is to find a plant height that gives the correct seed mass.
 double Plant::height_seed(void) const {
 
@@ -487,17 +515,19 @@ double Plant::height_seed(void) const {
 //  // values for LMA or height-leaf area scaling. Could instead use some
 //  // absolute maximum height for new seedling, e.g. 1m?
 	
-	return 0.3920458; // FIXME: JAI: Setting this from sample run, for now.
-//  const double
-//    h0 = height_given_mass_leaf(std::numeric_limits<double>::min()),
-//    h1 = height_given_mass_leaf(omega);
+	//return 0.3257146; //0.3920458; // FIXME: JAI: Setting this from sample run, for now.
+  const double
+    h0 = height_given_mass_leaf(std::numeric_limits<double>::min()),
+    h1 = height_given_mass_leaf(omega);
 
-//  const double tol = control.plant_seed_tol;
-//  const size_t max_iterations = control.plant_seed_iterations;
+  const double tol = 1e-6; //control.plant_seed_tol;
+  const size_t max_iterations = 100; //control.plant_seed_iterations;
 
-//  auto target = [&] (double x) mutable -> double {
-//    return mass_live_given_height(x) - omega;
-//  };
+  auto target = [&] (double x) mutable -> double {
+    return mass_live_given_height(x) - omega;
+  };
+
+  return bisection(target, h0, h1);
 
 //  return util::uniroot(target, h0, h1, tol, max_iterations);
 }

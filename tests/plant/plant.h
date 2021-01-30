@@ -59,14 +59,14 @@ struct PlantParameters{
 	double a_dG2;
 
 	//  // Height and leaf area of a (germinated) seed
-	//  double height_0;
-	//  double area_leaf_0;
+	double height_0;
+	double area_leaf_0;
 };
-void initPlantParameters(PlantParameters &par);
+//void initPlantParameters(PlantParameters &par);
 
 
 
-extern PlantParameters par;	// need this as global variable because in GPU implementation this will be __constant__
+//extern PlantParameters par;	// need this as global variable because in GPU implementation this will be __constant__
 
 class Plant {
 	public:
@@ -76,6 +76,8 @@ class Plant {
 	double rho       = 608.0;      // Wood density [kg/m3]
 	double hmat      = 16.5958691; // Height at maturation [m]
 	double omega     = 3.8e-5;     // Seed mass [kg]
+
+	PlantParameters par;	// JAI: making this class member again for multispecies version
 
 	struct{
 		double height            = std::numeric_limits<double>::quiet_NaN(); 
@@ -96,6 +98,8 @@ class Plant {
 	public:
 	
 	Plant();
+
+	void initParameters();
 
 	friend std::ostream& operator<<(std::ostream& os, const Plant& p);
 

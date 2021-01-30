@@ -194,7 +194,7 @@ vector<double> generateDefaultCohortSchedule(double max_time){
 
 int main(){
 	
-	initPlantParameters(plant::par);
+	//initPlantParameters(plant::par);
 	
 	LightEnvironment env(1);	
 	env.light_profile.print();	
@@ -202,13 +202,18 @@ int main(){
 	//plant::Environment env(1);
 
 	plant::Plant p;
-	//p.lma = 0.1978791; // 0.0825;
+	p.lma = 0.2625;
+	p.initParameters();
+	p.vars.height = p.par.height_0; //0.3257146; //0.3920458; //0.3441948;
+	p.vars.area_leaf = p.par.area_leaf_0; 
 	//plant::par.r_l   = 198.4545; //39.27 / 0.1978791; // JAI: Should be 39.27/lma;
 	//plant::par.k_l = 0.4565855;
 	//p.set_height(0.3441948);
 	//for (int i=0; i<10000; ++i) p.compute_vars_phys(env);
 
 	cout << p << endl;
+
+	//exit(1);
 
     Solver<PlantModel, LightEnvironment> S(SOLVER_CM);
     S.use_log_densities = true;
@@ -217,8 +222,9 @@ int main(){
 	//    S.createSizeStructuredVariables({"mort", "fec", "heart_area", "heart_mass"});
 
     PlantModel M;
-    //M.p = p;
+    M.p = M.seed = p;
     cout << "HT === " << M.p.vars.height << endl;
+	
 	S.addSpecies(vector<double>(1, M.p.vars.height), &M, {"mort", "fec", "heart", "sap"}, M.input_seed_rain);
 //    //S.createSizeStructuredVariables({"mort", "fec", "heart", "sap"});
 	//S.print();
