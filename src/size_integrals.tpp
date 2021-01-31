@@ -17,6 +17,7 @@ double Solver<Model, Environment>::integrate_wudx_above(wFunc w, double t, doubl
 	if (method == SOLVER_CM){
 		// integrate using trapezoidal rule 
 		// Note, new cohorts are inserted at the beginning, so x will be ascending
+		bool converged = false;
 		double I = 0;
 		double u = (use_log_densities)? exp(*itu) : *itu;
 		double x_hi = *itx;
@@ -33,6 +34,7 @@ double Solver<Model, Environment>::integrate_wudx_above(wFunc w, double t, doubl
 				double f = f_lo; //f_lo + (f_hi-f_lo)/(x_hi-x_lo)*(xlow - x_lo);  // FIXME: these should stop at the interpolating point
 				double x = x_lo; //xlow;
 				I += (x_hi-x) * (f_hi + f);
+				converged = true;
 				break;
 			}
 			else{
@@ -42,15 +44,14 @@ double Solver<Model, Environment>::integrate_wudx_above(wFunc w, double t, doubl
 			f_hi = f_lo;
 		}
 		
-		//if (xsize() == 1 || f_hi > 0){
-		//    double x_lo = xb;
-		//    double g = mod->growthRate(xb, t);
-		//    double u0 = (g>0)? u0_in*mod->establishmentProbability(t)/g  :  0; //FIXME: as of now, this does not work. To be fixed and discussed with Ake/Ulf
-		//    double f_lo =  w(xb, t)*u0;
+		//if (spp.J == 1 || (f_hi > 0 && !converged)){  // f_hi condition causes interpolator to break. Need to check
+		//    double x_lo = spp.xb;	// FIXME: should be max(spp.xb, xlow)
+		//    double g = spp.mod->growthRate(spp.xb, t, env);
+		//    double u0 = (g>0)? spp.birth_flux_in * spp.mod->establishmentProbability(t, env)/g  :  0; 
+		//    double f_lo =  w(spp.xb, t)*u0;
+		//    //double f_lo = f_hi*2;
 		//    I += (x_hi-x_lo)*(f_hi+f_lo);
 		//}
-		// for now, ignoring the case of single cohort - 0 will be returned, and 
-		// that's probably okay.
 		return I*0.5;
 	}
 	else{
@@ -76,7 +77,7 @@ double Solver<Model,Environment>::integrate_x(wFunc w, double t, vector<double>&
 	if (method == SOLVER_FMU){
 		// integrate using midpoint quadrature rule
 		double I=0;
-		double * U = S.data();
+		double * U = &(*itu);
 		for (unsigned int i=0; i<spp.J; ++i){
 			I += spp.h[i]*w(spp.X[i], t)*U[i];  // TODO: Replace with std::transform after profiling
 		}
