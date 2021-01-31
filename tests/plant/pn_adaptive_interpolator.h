@@ -6,6 +6,7 @@
 #include <vector>
 #include <algorithm>
 #include <cmath>
+#include <fstream>
 
 //#include "cubic_spline.h"
 #include "hashtable3_dh_class.h"
@@ -58,7 +59,7 @@ class SubdivisionSpline : public Spline{
 	double rel_tol = 1e-4;
 	double abs_tol = 1e-4;
 	
-	int npoints;
+	//int npoints;
 	int depth;
 	int npoints_max;
 	
@@ -78,7 +79,8 @@ class SubdivisionSpline : public Spline{
 
 	SubdivisionSpline(int _n0, int _max_depth){
 		npoints0 = _n0;
-		depth = max_depth = _max_depth;
+		depth = 0;
+		max_depth = _max_depth;
 		
 		npoints_max = (npoints0-1)*exp2i(max_depth);
 		dx_min = 1;
@@ -141,10 +143,10 @@ class SubdivisionSpline : public Spline{
 		depth = 0;
 		dx_min = (b-a)/npoints_max;
 		
-		double dx = (b - a)/(npoints - 1);
+		double dx = (b - a)/(npoints0 - 1);
 		
 		xx.clear(); yy.clear(); zz.clear(); indices.clear();
-		for (int i = 0; i < npoints; ++i) {
+		for (int i = 0; i < npoints0; ++i) {
 			const double xi = a + i*dx;
 			xx.push_back(xi);
 			yy.push_back(f(xi));
@@ -205,12 +207,22 @@ class SubdivisionSpline : public Spline{
 		__DEBUG_AI_ std::cout << "refine... " << std::endl; 
 		bool flag_refine = false;
 
+		++depth;
 		if (depth > max_depth){
 			std::cout << "Maximum refinement reached" << std::endl;
+			print();
+
+			//std::ofstream fout("interpolator_dump.txt");
+			//for (int i=0; i<1000; ++i){
+			//    double x = 0.09985 + 0.0001*i/1000.0;
+			//    fout << x << " " << eval(x) << " " << f(x) << "\n";
+			//}
+			//fout.close();
+			
 			assert(false);
 		}
-		++depth;
-		double dx = (b - a)/((npoints - 1)*exp2i(depth)); 
+		
+		double dx = (b - a)/((npoints0 - 1)*exp2i(depth)); 
 	
 		auto xi = ++xx.begin(), yi = ++yy.begin();
 		auto zi = ++zz.begin();
@@ -221,7 +233,7 @@ class SubdivisionSpline : public Spline{
 				const double x_mid = *xi - dx;
 				const double y_mid = f(x_mid);
 				const double p_mid = eval(x_mid);
-				__DEBUG_AI_ std::cout << "adding " << x_mid << std::endl; 
+				__DEBUG_AI_ std::cout << "adding " << x_mid << ": f(x)/i(x) = (" << y_mid << " / " << p_mid << ")" << std::endl; 
 
 				// Always insert the new points (why waste the expensively computed true values!).
 				xx.insert(xi, x_mid);
