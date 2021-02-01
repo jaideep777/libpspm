@@ -21,7 +21,8 @@ void Solver<Model,Environment>::calcRates_CM(double t, vector<double>&S, vector<
 		
 		for (is.begin(), ir.begin(); !is.end(); ++is, ++ir){
 			double grad_dx = control.cm_grad_dx;
-			
+		
+			// TODO: Should option be added for gradient direction?	
 			double gxplus = spp.mod->growthRate(*itx + grad_dx, t, env); 
 			double gx     = spp.mod->growthRate(*itx, t, env); 
 			
