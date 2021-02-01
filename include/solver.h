@@ -42,6 +42,7 @@ class Solver{
 	void addSpecies(std::vector<double> xbreaks, Model* _mod, std::vector<std::string> extra_vars = std::vector<std::string>(), double input_birth_flux = -1);
 
 	Species<Model>* get_species(int id);
+	int n_species();
 
 	void setEnvironment(Environment * _env);
 
@@ -56,7 +57,6 @@ class Solver{
 	//vector<double> getx();
 	//double getMaxSize(vector<double>::iterator sbegin);
 	double maxSize(std::vector<double>::iterator state_begin);
-	int n_species();	
 	
 
 

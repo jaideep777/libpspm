@@ -6,6 +6,7 @@ inst/website
 .Rproj.user
 *.png
 *.pdf 
+*.xlsx
 
 *~
 

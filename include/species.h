@@ -55,6 +55,7 @@ class Species{
 	public: // public functions
 	IteratorSet<std::vector<double>::iterator> get_iterators(std::vector<double> &v);
 	double get_maxSize(std::vector<double>::iterator state_begin);
+	vector<string> get_varnames();
 	int xsize();
 	int size();
 

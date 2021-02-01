@@ -1,6 +1,7 @@
 #include <vector>
 #include <iostream>
 #include <fstream>
+#include <sstream>
 using namespace std;
 #include "solver.h"
 
@@ -29,6 +30,7 @@ class LightEnvironment : public plant::Environment{
 	// TODO: In Solver, add a add_iAttribute() function, that will calculate some individual 
 	// level attributes from x, which can be reused if required. E.g., in Plant, we can add leaf_area
 	// as an iAttribute. iAttributes can be mapped to integers, say using enums
+	// Alternatively, switch to Indiviudual class as a template parameter for solver
 	template <class Model>
 	void computeEnv(double t, vector<double> &state_vec, Solver<Model, LightEnvironment> * S){
 		//            _xm 
@@ -147,17 +149,17 @@ class PlantModel{
 	
 	}
 
-	// For output only
-	void setState(Solver<PlantModel, LightEnvironment> *S){
+	//// For output only
+	//void setState(Solver<PlantModel, LightEnvironment> *S){
 		
-		auto iset = S->get_species(0)->get_iterators(S->state);
+	//    auto iset = S->get_species(0)->get_iterators(S->state);
 
-		p.vars.mortality      = *iset.get("mort");
-		p.vars.fecundity      = *iset.get("fec");
-		p.vars.area_heartwood = *iset.get("heart_area");
-		p.vars.mass_heartwood = *iset.get("heart_mass");
+	//    p.vars.mortality      = *iset.get("mort");
+	//    p.vars.fecundity      = *iset.get("fec");
+	//    p.vars.area_heartwood = *iset.get("heart_area");
+	//    p.vars.mass_heartwood = *iset.get("heart_mass");
 
-	}
+	//}
 
 
 };
@@ -189,7 +191,56 @@ vector<double> generateDefaultCohortSchedule(double max_time){
 }
 
 
+template<class Model, class Environment>
+class SolverIO{
+	public:
+	int nspecies;
+	Solver<Model, Environment> * S;
 
+	vector <vector<ofstream>> streams;
+
+	void openStreams(){
+		for (int s=0; s < S->n_species(); ++s){
+			auto spp = S->get_species(s);
+			vector<string> varnames = spp->get_varnames();
+			vector<ofstream> spp_streams;
+			for (string name : varnames){
+				stringstream sout;
+				sout << "species_" << s << "_" << name + ".txt";
+				cout << sout.str() << endl;
+				ofstream fout(sout.str().c_str());
+				spp_streams.push_back(std::move(fout));
+			}
+			streams.push_back(std::move(spp_streams));
+		}
+	}
+
+	void closeStreams(){
+		for (int s=0; s<streams.size(); ++s){
+			for (int j=0; j<streams[s].size(); ++j){
+				streams[s][j].close();
+			}
+		}
+	}
+
+	void writeState(){
+		for (int s=0; s < S->n_species(); ++s){
+			auto spp = S->get_species(s);
+			auto iset = spp->get_iterators(S->state);
+			auto& ivec = iset.get();
+
+			for (int i=0; i<streams[s].size(); ++i) streams[s][i] << S->current_time << "\t";
+
+			for (iset.rbegin(); !iset.rend(); --iset){
+				for (int i=0; i<ivec.size(); ++i){
+					streams[s][i] << *ivec[i] << "\t"; 
+				}
+			}
+			
+			for (int i=0; i<streams[s].size(); ++i) streams[s][i] << "\n";
+		}
+	}
+};
 
 
 int main(){
@@ -200,17 +251,23 @@ int main(){
 	env.light_profile.print();	
 	
 	//plant::Environment env(1);
+	plant::Plant p1;
 
 	plant::Plant p;
 	p.lma = 0.2625;
 	p.initParameters();
 	p.vars.height = p.par.height_0; //0.3257146; //0.3920458; //0.3441948;
 	p.vars.area_leaf = p.par.area_leaf_0; 
-	//plant::par.r_l   = 198.4545; //39.27 / 0.1978791; // JAI: Should be 39.27/lma;
-	//plant::par.k_l = 0.4565855;
-	//p.set_height(0.3441948);
-	//for (int i=0; i<10000; ++i) p.compute_vars_phys(env);
 
+
+	plant::Plant p3;
+	p3.lma = 0.4625;
+	p3.initParameters();
+	p3.vars.height = p3.par.height_0; //0.3257146; //0.3920458; //0.3441948;
+	p3.vars.area_leaf = p3.par.area_leaf_0; 
+
+	
+	cout << p1 << endl;
 	cout << p << endl;
 
 	//exit(1);
@@ -220,54 +277,44 @@ int main(){
 	S.control.ode_eps = 1e-4;
 	S.setEnvironment(&env);
 	//    S.createSizeStructuredVariables({"mort", "fec", "heart_area", "heart_mass"});
+    
+	PlantModel M1;
+	M1.p = M1.seed = p1;
+    cout << "HT1 === " << M1.p.vars.height << endl;
+	
 
     PlantModel M;
     M.p = M.seed = p;
     cout << "HT === " << M.p.vars.height << endl;
-	
+
+
+    PlantModel M3;
+    M3.p = M3.seed = p3;
+    cout << "HT === " << M3.p.vars.height << endl;
+
+	S.addSpecies(vector<double>(1, M1.p.vars.height), &M1, {"mort", "fec", "heart", "sap"}, M1.input_seed_rain);
 	S.addSpecies(vector<double>(1, M.p.vars.height), &M, {"mort", "fec", "heart", "sap"}, M.input_seed_rain);
-//    //S.createSizeStructuredVariables({"mort", "fec", "heart", "sap"});
-	//S.print();
-//    S.setInputNewbornDensity(M.input_seed_rain);
+	S.addSpecies(vector<double>(1, M3.p.vars.height), &M3, {"mort", "fec", "heart", "sap"}, M3.input_seed_rain);
+	
 	S.resetState();
     S.initialize();
-//    //M.computeEnv(0, S.state, &S);
-//    //S.calcRates_CM(1, S.state, S.rates);
 
-//    //S.calcRates_extra(1, S.state, S.rates);
     S.print();
-//    cout << "state: "; for (auto s :S.state) cout << s << " "; cout << "\n";
-
-
-	//S.addCohort_CM();
-	//S.print();
-	//cout << "state: "; for (auto s :S.state) cout << s << " "; cout << "\n";
-
-
-
-//    double t0 = 0, tf = 50, dt = 1;
-//    size_t nsteps = (tf-t0)/dt;
-////	vector <double> heights;// = {p.vars.height};
 
 	vector <double> times = generateDefaultCohortSchedule(105.32);
 	for (auto t : times) cout << t << " "; cout << endl;
 
-#define OUTPUT_TEXT
+	
+	SolverIO<PlantModel, LightEnvironment> sio;
+	sio.S = &S;
+	sio.openStreams();
 
-#ifdef OUTPUT_TEXT
-	ofstream fout("patch_full_hts.txt");
-	ofstream fout_ld("patch_full_lds.txt");
-	ofstream fout_m("patch_full_m.txt");
-	ofstream fout_vs("patch_full_vs.txt");
-	ofstream fout_ha("patch_full_ha.txt");
-	ofstream fout_hm("patch_full_hm.txt");
 	ofstream fli("light_profile_ind_plant.txt");
-#endif
+	
 	for (size_t i=0; i < times.size(); ++i){
 
 		S.step_to(times[i]);		
 
-#ifdef OUTPUT_TEXT
 		cout << times[i] << " " << S.get_species(0)->xsize() << " " << env.light_profile.npoints << " | " << M.nrc << " " << M.ndc << "\n";
 		//S.print();
 
@@ -275,60 +322,30 @@ int main(){
 		for (auto h : xl) fli << env.canopy_openness(h) << "\t";
 		fli << endl;
 
-		fout << times[i] << "\t";
-		fout_ld << times[i] << "\t";
-		fout_m << times[i] << "\t";
-		fout_vs << times[i] << "\t";
-		fout_ha << times[i] << "\t";
-		fout_hm << times[i] << "\t";
-		//fout_ha << times[i] << "\t";
-		auto iset = S.get_species(0)->get_iterators(S.state);
-		auto& itx = iset.get("X");
-		auto& itu = iset.get("u");
-		auto& ite = iset.get("mort");
-		for (iset.rbegin(); !iset.rend(); --iset){
-			fout << *itx << "\t";
-			fout_ld << *itu << "\t";
-			fout_m << *ite << "\t";
-			fout_vs << *next(ite,1) << "\t";
-			fout_ha << *next(ite,2) << "\t";
-			fout_hm << *next(ite,3) << "\t";
-			
-		}
-		fout << "\n";
-		fout_ld << "\n";
-		fout_m << "\n";
-		fout_vs << "\n";
-		fout_ha << "\n";
-		fout_hm << "\n";
-#endif
+		sio.writeState();
+
 	}
 	
-#ifdef OUTPUT_TEXT
 	fli.close();
-	fout.close();
-	fout_ld.close();
-	fout_m.close();
-	fout_vs.close();
-	fout_ha.close();
-	fout_hm.close();
-#endif
+	sio.closeStreams();
 	cout << "derivative computations requested/done: " << M.nrc << " " << M.ndc << endl;
 
-	auto iset = S.get_species(0)->get_iterators(S.state);
-	auto& itf = iset.get("fec");
-	vector <double> fec_vec;
-	fec_vec.reserve(S.get_species(0)->xsize());
-	iset.rbegin();
-	for (int i=0; !iset.rend(); --iset, ++i){
-		double patch_age_density = env.patch_age_density(times[i]);
-		double S_D = 0.25;
-		double output_seeds = M.input_seed_rain * S_D * patch_age_density * (*itf);
-		cout << times[i] << " " << M.input_seed_rain << " " << S_D << " " << patch_age_density << " " << (*itf) << " | " << output_seeds << endl;
-		fec_vec.push_back(output_seeds);
+	for (int s=0; s< S.n_species(); ++s){
+		auto spp = S.get_species(s);
+		auto iset = spp->get_iterators(S.state);
+		auto& itf = iset.get("fec");
+		vector <double> fec_vec;
+		fec_vec.reserve(spp->xsize());
+		iset.rbegin();
+		for (int i=0; !iset.rend(); --iset, ++i){
+			double patch_age_density = env.patch_age_density(times[i]);
+			double S_D = 0.25;
+			double output_seeds = spp->mod->input_seed_rain * S_D * patch_age_density * (*itf);
+			//cout << times[i] << " " << M.input_seed_rain << " " << S_D << " " << patch_age_density << " " << (*itf) << " | " << output_seeds << endl;
+			fec_vec.push_back(output_seeds);
+		}
+		cout << "Seed rain for Species " << s << " = " << pn::integrate_trapezium(times, fec_vec) << endl;
 	}
-	cout << "Seed rain out = " << pn::integrate_trapezium(times, fec_vec) << endl;
-		
 
 }
 
