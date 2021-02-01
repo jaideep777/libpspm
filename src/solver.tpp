@@ -292,7 +292,8 @@ vector<double> Solver<Model,Environment>::newborns_out(){
 
 	vector<double> b_out;
 	for (int k=0; k<species_vec.size(); ++k){	
-		// calculate birthflux 
+		// calculate birthflux
+		// FIXME: wudx doesnt work here. Why?? 
 		double birthFlux = integrate_x([this, k](double z, double t){return species_vec[k].mod->birthRate(z,t,env);}, current_time, state, k);
 		b_out.push_back(birthFlux);
 	}

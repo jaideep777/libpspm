@@ -68,12 +68,13 @@ class LightEnvironment : public plant::Environment{
 class PlantModel{
 	public:
 
-	double input_seed_rain = 200;	
+	double input_seed_rain = 1;	
 
 	plant::Plant seed; // prototype to be inserted
 
 	int nrc = 0; // number of evals of compute_vars_phys() - derivative computations actually done by plant
 	int ndc = 0; // number of evals of mortality_rate() - derivative computations requested by solver
+	int nbc = 0;
 
 	// use this to store one-shot rates for each individual and supply through the rate functions
 	plant::Plant p;
@@ -116,7 +117,15 @@ class PlantModel{
 	}
 
 	double birthRate(double x, double t, LightEnvironment * env){
-		assert(p.vars.height == x);
+		// Need this here because birthRate is not called in order, and only called rarely,
+		// after completion of step_to.
+		if (p.vars.height != x){
+			++nbc;
+			p.set_height(x);
+			p.compute_vars_phys(*env);
+			++nrc;
+		}
+		//assert(p.vars.height == x);
 		return p.vars.fecundity_dt;
 	}
 
@@ -311,12 +320,19 @@ int main(){
 
 	ofstream fli("light_profile_ind_plant.txt");
 	
+	vector <vector<double>> seeds_out(S.n_species());
+
 	for (size_t i=0; i < times.size(); ++i){
 
 		S.step_to(times[i]);		
+		
+		vector<double> seeds = S.newborns_out();
+		for (int s=0; s< S.n_species(); ++s){
+			double S_D = 0.25;
+			seeds_out[s].push_back(seeds[s] * S_D * env.patch_age_density(times[i]));
+		}
 
-		cout << times[i] << " " << S.get_species(0)->xsize() << " " << env.light_profile.npoints << " | " << M.nrc << " " << M.ndc << "\n";
-		//S.print();
+		cout << times[i] << " " << S.get_species(0)->xsize() << " " << env.light_profile.npoints << " | " << M.nrc << " " << M.ndc << " | " << M.nbc <<"\n";
 
 		vector<double> xl = seq(0, 20, 200);
 		for (auto h : xl) fli << env.canopy_openness(h) << "\t";
@@ -345,6 +361,8 @@ int main(){
 			fec_vec.push_back(output_seeds);
 		}
 		cout << "Seed rain for Species " << s << " = " << pn::integrate_trapezium(times, fec_vec) << endl;
+		cout << "Seed rain for Species " << s << " (new method) = " << pn::integrate_trapezium(times, seeds_out[s]) << endl;
+
 	}
 
 }
