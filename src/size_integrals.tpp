@@ -2,19 +2,18 @@ template<class Model, class Environment>
 template<typename wFunc>
 double Solver<Model, Environment>::integrate_wudx_above(wFunc w, double t, double xlow, vector<double>&S, int species_id){
 	//cout << " | " <<  t << " " << mod->evalEnv(0,t) << " ";
-	//if (method == SOLVER_FMU){
-	//}
 	//else if (method == SOLVER_EBT){
 	//}
 	//cout << "Begin integrate: xsize = " << xsize() << "(" << S[0] << ", " << S[xsize()-1] << "), xlow = " << xlow << endl;
 	Species<Model> &spp = species_vec[species_id];
-	auto iset = spp.get_iterators(S);
-	auto &itx = iset.get("X");
-	auto &itu = iset.get("u");
-	iset.rbegin();
-	//std::cout << "J = " << spp.J << ", dist = " << iset.dist << std::endl; 
 
 	if (method == SOLVER_CM){
+		auto iset = spp.get_iterators(S);
+		auto &itx = iset.get("X");
+		auto &itu = iset.get("u");
+		iset.rbegin();
+
+		//std::cout << "J = " << spp.J << ", dist = " << iset.dist << std::endl; 
 		// integrate using trapezoidal rule 
 		// Note, new cohorts are inserted at the beginning, so x will be ascending
 		bool converged = false;
@@ -54,6 +53,32 @@ double Solver<Model, Environment>::integrate_wudx_above(wFunc w, double t, doubl
 		//}
 		return I*0.5;
 	}
+	else if (method == SOLVER_FMU){
+		// integrate using midpoint quadrature rule
+		double I=0;
+		auto iset = spp.get_iterators(S);
+		auto &itu = iset.get("u");
+		iset.begin();
+		double * U = &(*itu);
+
+		for (int i=spp.J-1; i>=0; --i){
+			//cout << "Enter: " << i << endl;
+			//I += spp.h[i]*w(spp.X[i], t)*U[i];  // TODO: Replace with std::transform after profiling
+			double f = w(spp.X[i],t)*U[i];
+			//std::cout << "f = " << f << " " << spp.x[i] << " " << xlow << " " << spp.h[i] << std::endl;
+			if (spp.x[i] < xlow){
+				I += (spp.x[i+1]-spp.x[i]) * f; // FIXME: shoulld be spp.x[i+1]-xlow
+				break;
+			}
+			else{
+				I += spp.h[i] * f;
+				//std::cout << "Here: " << i << std::endl;
+			}
+		}
+		//std::cout << "Here" << std::endl;
+		return I;
+	}
+	
 	else{
 		std::cout << "Only CM is implemented\n";
 		return 0;
