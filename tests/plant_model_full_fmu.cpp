@@ -261,6 +261,11 @@ vector<double> log_seq(double x0, double xf, int N){
 	return grid;
 }
 
+vector<double> my_seq(double x0, double xf, int N){
+	vector<double> grid;
+	for (int i=0; i<N; ++i) grid.push_back(x0 + (double(i)/(N-1))*(xf-x0));
+	return grid;
+}
 
 int main(){
 	
@@ -312,9 +317,9 @@ int main(){
     cout << "HT === " << M3.p.vars.height << endl;
 
 
-	S.addSpecies(log_seq(M1.p.vars.height, 20, 201), &M1, {"mort", "fec", "heart", "sap"}, M1.input_seed_rain);
-	S.addSpecies(log_seq(M.p.vars.height,  20, 201), &M, {"mort", "fec", "heart", "sap"}, M.input_seed_rain);
-	S.addSpecies(log_seq(M3.p.vars.height, 20, 201), &M3, {"mort", "fec", "heart", "sap"}, M3.input_seed_rain);
+	S.addSpecies(my_seq(M1.p.vars.height, 20, 51), &M1, {"mort", "fec", "heart", "sap"}, M1.input_seed_rain);
+	S.addSpecies(my_seq(M.p.vars.height,  20, 51), &M, {"mort", "fec", "heart", "sap"}, M.input_seed_rain);
+	S.addSpecies(my_seq(M3.p.vars.height, 20, 51), &M3, {"mort", "fec", "heart", "sap"}, M3.input_seed_rain);
 	
 	S.resetState();
     S.initialize();
