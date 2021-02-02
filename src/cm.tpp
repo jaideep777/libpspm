@@ -135,6 +135,8 @@ void Solver<Model,Environment>::removeCohort_CM(){
 
 	int n_removals = 0;
 	for (auto& spp : species_vec){
+		if (spp.J < 500) continue;   // remove a cohort if number of cohorts in the species exceeds a threshold
+
 		int spp_start_index_new = spp.start_index - n_removals;
 		auto iset = spp.get_iterators(state);
 		auto iset_f = spp.get_iterators(flags);
