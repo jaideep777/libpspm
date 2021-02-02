@@ -63,7 +63,7 @@ double Species<Model>::get_maxSize(std::vector<double>::iterator state_begin){
 
 
 template<class Model>
-vector<string> Species<Model>::get_varnames(){
+std::vector<std::string> Species<Model>::get_varnames(){
 	return varnames;
 }
 

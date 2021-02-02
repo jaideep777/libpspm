@@ -14,6 +14,7 @@ int main(){
 
 	Solver<TestModel,Environment> S(SOLVER_FMU);
 	S.addSpecies(25, 0, 1, false, &M, {}, 2);
+	S.get_species(0)->set_bfin_is_u0in(true);	// say that input_birth_flux is u0
 	S.resetState();
 	S.initialize();
 	S.setEnvironment(&E);

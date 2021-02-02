@@ -111,8 +111,12 @@ class PlantModel{
 	}
 
 	double mortalityRate(double x, double t, LightEnvironment * env){
-		assert(p.vars.height == x);
-		++ndc;
+		//assert(p.vars.height == x);
+		if (p.vars.height != x){
+			p.set_height(x);
+			p.compute_vars_phys(*env);
+			++ndc;
+		}
 		return p.vars.mortality_dt;
 	}
 
@@ -123,7 +127,6 @@ class PlantModel{
 			++nbc;
 			p.set_height(x);
 			p.compute_vars_phys(*env);
-			++nrc;
 		}
 		//assert(p.vars.height == x);
 		return p.vars.fecundity_dt;
@@ -332,7 +335,7 @@ int main(){
 			seeds_out[s].push_back(seeds[s] * S_D * env.patch_age_density(times[i]));
 		}
 
-		cout << times[i] << " " << S.get_species(0)->xsize() << " " << env.light_profile.npoints << " | " << M.nrc << " " << M.ndc << " | " << M.nbc <<"\n";
+		cout << times[i] << " " << S.get_species(0)->xsize() << " " << env.light_profile.npoints << " | " << M.nrc << " " << M.ndc << " " << M.nbc <<"\n";
 
 		vector<double> xl = seq(0, 20, 200);
 		for (auto h : xl) fli << env.canopy_openness(h) << "\t";
@@ -344,7 +347,7 @@ int main(){
 	
 	fli.close();
 	sio.closeStreams();
-	cout << "derivative computations requested/done: " << M.nrc << " " << M.ndc << endl;
+	cout << "derivative computations in g/m/f functions: " << M.nrc << " " << M.ndc << " " << M.nbc << endl;
 
 	for (int s=0; s< S.n_species(); ++s){
 		//auto spp = S.get_species(s);
