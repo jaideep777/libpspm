@@ -317,9 +317,9 @@ int main(){
     cout << "HT === " << M3.p.vars.height << endl;
 
 
-	S.addSpecies(my_seq(M1.p.vars.height, 20, 51), &M1, {"mort", "fec", "heart", "sap"}, M1.input_seed_rain);
-	S.addSpecies(my_seq(M.p.vars.height,  20, 51), &M, {"mort", "fec", "heart", "sap"}, M.input_seed_rain);
-	S.addSpecies(my_seq(M3.p.vars.height, 20, 51), &M3, {"mort", "fec", "heart", "sap"}, M3.input_seed_rain);
+	S.addSpecies(log_seq(M1.p.vars.height, 20, 401), &M1, {"mort", "fec", "heart", "sap"}, M1.input_seed_rain);
+	S.addSpecies(log_seq(M.p.vars.height,  20, 401), &M, {"mort", "fec", "heart", "sap"}, M.input_seed_rain);
+	S.addSpecies(log_seq(M3.p.vars.height, 20, 401), &M3, {"mort", "fec", "heart", "sap"}, M3.input_seed_rain);
 	
 	S.resetState();
     S.initialize();
