@@ -52,7 +52,7 @@ class LightEnvironment : public plant::Environment{
 				leaf_area_above_z += S->integrate_wudx_above(la_above, t, z, state_vec, i);
 			}
 
-			//cout << "la = " << leaf_area_above << "\n";
+			//cout << "la = " << leaf_area_above_z << "\n";
 			return exp(-kI*leaf_area_above_z);
 		};	
 	
@@ -214,7 +214,7 @@ class SolverIO{
 	void openStreams(){
 		for (int s=0; s < S->n_species(); ++s){
 			auto spp = S->get_species(s);
-			vector<string> varnames = spp->get_varnames();
+			vector<string> varnames = spp->get_iterators(S->state).names; //spp->get_varnames();
 			vector<ofstream> spp_streams;
 			for (string name : varnames){
 				stringstream sout;
@@ -255,6 +255,18 @@ class SolverIO{
 };
 
 
+vector<double> log_seq(double x0, double xf, int N){
+	vector<double> grid;
+	for (int i=0; i<N; ++i) grid.push_back(exp(log(x0) + (double(i)/(N-1))*(log(xf)-log(x0))));
+	return grid;
+}
+
+vector<double> my_seq(double x0, double xf, int N){
+	vector<double> grid;
+	for (int i=0; i<N; ++i) grid.push_back(x0 + (double(i)/(N-1))*(xf-x0));
+	return grid;
+}
+
 int main(){
 	
 	//initPlantParameters(plant::par);
@@ -284,7 +296,7 @@ int main(){
 
 	//exit(1);
 
-    Solver<PlantModel, LightEnvironment> S(SOLVER_CM);
+    Solver<PlantModel, LightEnvironment> S(SOLVER_FMU);
     S.use_log_densities = true;
 	S.control.ode_eps = 1e-4;
 	S.setEnvironment(&env);
@@ -304,9 +316,10 @@ int main(){
     M3.p = M3.seed = p3;
     cout << "HT === " << M3.p.vars.height << endl;
 
-	S.addSpecies(vector<double>(1, M1.p.vars.height), &M1, {"mort", "fec", "heart", "sap"}, M1.input_seed_rain);
-	S.addSpecies(vector<double>(1, M.p.vars.height), &M, {"mort", "fec", "heart", "sap"}, M.input_seed_rain);
-	S.addSpecies(vector<double>(1, M3.p.vars.height), &M3, {"mort", "fec", "heart", "sap"}, M3.input_seed_rain);
+
+	S.addSpecies(log_seq(M1.p.vars.height, 20, 401), &M1, {"mort", "fec", "heart", "sap"}, M1.input_seed_rain);
+	S.addSpecies(log_seq(M.p.vars.height,  20, 401), &M, {"mort", "fec", "heart", "sap"}, M.input_seed_rain);
+	S.addSpecies(log_seq(M3.p.vars.height, 20, 401), &M3, {"mort", "fec", "heart", "sap"}, M3.input_seed_rain);
 	
 	S.resetState();
     S.initialize();
@@ -342,7 +355,6 @@ int main(){
 		fli << endl;
 
 		sio.writeState();
-
 	}
 	
 	fli.close();
@@ -369,4 +381,6 @@ int main(){
 	}
 
 }
+
+
 

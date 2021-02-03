@@ -12,9 +12,21 @@ void Solver<Model,Environment>::calcRates_FMU(double t, vector<double> &S, vecto
 	for (int species_id=0; species_id < species_vec.size(); ++species_id){
 		Species<Model> &spp = species_vec[species_id];
 
+		auto is = spp.get_iterators(S);
+		auto ir = spp.get_iterators(dSdt);
+		auto& itx = is.get("X");
+		auto& itu = is.get("u");
+		auto& itse = is.get((spp.varnames_extra.size()>0)? spp.varnames_extra[0] : "X");	// dummy init //FIXME: commented line below does not work. Explore why
+		//auto& itse = (varnames_extra.size()>0)? is.get(varnames_extra[0]) : S.begin(); 
+		
+		auto& itdu = ir.get("u");
+		auto& itre = ir.get((spp.varnames_extra.size()>0)? spp.varnames_extra[0] : "X");	// dummy init
+		//auto& itre = (varnames_extra.size()>0)? ir.get(varnames_extra[0]) : dSdt.begin(); 
 		//cout << spp.start_index << endl;
-		double *U = &S[spp.start_index];		// offset for species
-		double *dUdt = &dSdt[spp.start_index];	// offset for species
+		
+		
+		double *U = &(*itu); //&S[spp.start_index];		// offset for species
+		double *dUdt = &(*itdu); //&dSdt[spp.start_index];	// offset for species
 		int J = spp.J;			// xsize of species.
 		vector<double> &x = spp.x;
 		vector<double> &X = spp.X;
@@ -36,7 +48,16 @@ void Solver<Model,Environment>::calcRates_FMU(double t, vector<double> &S, vecto
 			u[0] = birthFlux/(growth(0)+1e-12); // Q: is this correct? or g(X0,env)? - A: It is g(xb,env) - growth() indexes x, so (0) is xb. Hence correct. 
 		}
 		else{
-			u[0] = spp.birth_flux_in;  // FIXME: for now, using birth_flux_in as u0_in for test_model
+			double g = spp.mod->growthRate(spp.xb, current_time, env);
+			// --- debug ---
+			if (spp.bfin_is_u0in)
+				u[0] = spp.birth_flux_in;
+			else{
+			// -------------
+				double d = (g>0)? spp.birth_flux_in * spp.mod->establishmentProbability(current_time, env)/g  : 0;
+				u[0] = d; 
+				//u[0] = spp.birth_flux_in;  // FIXME: for now, using birth_flux_in as u0_in for test_model
+			}
 		}
 
 		// i=1 (calc u1 assuming linear u(x) in first interval)
@@ -56,16 +77,6 @@ void Solver<Model,Environment>::calcRates_FMU(double t, vector<double> &S, vecto
 		u[J-1] = 2*U[J-2] - u[J-2];	// NOTE: for g(x) > 0 This can be calc with upwind scheme
 		u[J] = 2*U[J-1] - u[J-1];
 
-		auto is = spp.get_iterators(S);
-		auto ir = spp.get_iterators(dSdt);
-		auto& itx = is.get("X");
-		auto& itu = is.get("u");
-		auto& itse = is.get((spp.varnames_extra.size()>0)? spp.varnames_extra[0] : "X");	// dummy init //FIXME: commented line below does not work. Explore why
-		//auto& itse = (varnames_extra.size()>0)? is.get(varnames_extra[0]) : S.begin(); 
-		
-		auto& itdu = ir.get("u");
-		auto& itre = ir.get((spp.varnames_extra.size()>0)? spp.varnames_extra[0] : "X");	// dummy init
-		//auto& itre = (varnames_extra.size()>0)? ir.get(varnames_extra[0]) : dSdt.begin(); 
 		
 		is.begin(), ir.begin();
 		for (int i=0; !is.end(); ++i, ++is, ++ir){ // dU[i] ~ u[i+1] <-- U[i],U[i-1], u[i] <-- U[i-1],U[i-2]
