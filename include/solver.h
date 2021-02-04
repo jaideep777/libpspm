@@ -64,9 +64,9 @@ class Solver{
 	
 	void calcRates_FMU(double t, vector<double> &S, vector<double> &dSdt);
 	
-	//void calcRates_EBT(double t, vector<double>&S, vector<double> &dSdt);
-	//void addCohort_EBT();
-	//void removeDeadCohorts_EBT();
+	void calcRates_EBT(double t, vector<double>&S, vector<double> &dSdt);
+	void addCohort_EBT();
+	void removeDeadCohorts_EBT();
 	//vector<double> cohortsToDensity_EBT(vector <double> &breaks);
 
 	void calcRates_CM(double t, vector<double>&S, vector<double> &dSdt);
@@ -96,7 +96,7 @@ class Solver{
 
 #include "../src/solver.tpp"
 #include "../src/mu.tpp"
-//#include "../src/ebt.tpp"
+#include "../src/ebt.tpp"
 #include "../src/cm.tpp"
 #include "../src/size_integrals.tpp"
 

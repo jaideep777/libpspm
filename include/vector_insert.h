@@ -3,6 +3,8 @@
 
 #include <vector>
 
+
+// FIXME NOTE: ins_at must be sorted ascending. 
 template <class T>
 void vector_insert(std::vector<T> &x, std::vector<int>& ins_at, std::vector<T>& ins_vals){
 	

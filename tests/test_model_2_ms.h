@@ -48,10 +48,10 @@ class Plant{
 	}
 
 	void init_state(){
-		mortality = 3*exp(-height);	
+		mortality = 0.1*height; //exp(-height);	
 		viable_seeds = 100*height;
-		heart_mass = 1000*height*height*height;
-		sap_mass = 10*sqrt(height);
+		heart_mass = 1000*height;
+		sap_mass = 10*height;
 	}
 
 	vector<double> calcRates(){

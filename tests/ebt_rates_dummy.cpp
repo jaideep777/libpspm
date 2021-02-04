@@ -31,8 +31,10 @@ int main(){
 		 -0.0067489372, -0.0054771977, -0.0043937710, -0.0034696703, -0.0026807389, -0.0020067756,
 		 -0.0014308302, -0.0009386365, -0.0005181508, -0.0001591773
 	    };
+
+
 	for (int i=0; i< S.rates.size(); ++i){
-		//cout << S.rates[i] << " " << endl; //rates_exp[i] << endl;
+		cout << S.rates[i] << " " << endl; //rates_exp[i] << endl;
 		if ( fabs(S.rates[i] - rates_exp[i]) > 1e-5) return 1;
 	}
 	
