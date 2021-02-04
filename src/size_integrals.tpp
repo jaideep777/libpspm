@@ -53,6 +53,7 @@ double Solver<Model, Environment>::integrate_wudx_above(wFunc w, double t, doubl
 		//}
 		return I*0.5;
 	}
+
 	else if (method == SOLVER_FMU){
 		// integrate using midpoint quadrature rule
 		double I=0;
@@ -67,7 +68,7 @@ double Solver<Model, Environment>::integrate_wudx_above(wFunc w, double t, doubl
 			double f = w(spp.X[i],t)*U[i];
 			//std::cout << "f = " << f << " " << spp.x[i] << " " << xlow << " " << spp.h[i] << std::endl;
 			if (spp.x[i] < xlow){
-				I += (spp.x[i+1]-spp.x[i]) * f; // FIXME: shoulld be spp.x[i+1]-xlow
+				I += (spp.x[i+1]-spp.x[i]) * f; // FIXME: shoulld be spp.x[i+1]-xlow. Interpolator fails if this point is excluded
 				break;
 			}
 			else{
@@ -79,6 +80,34 @@ double Solver<Model, Environment>::integrate_wudx_above(wFunc w, double t, doubl
 		return I;
 	}
 	
+	else if (method == SOLVER_EBT){
+		// integrate using midpoint quadrature rule
+		double I=0;
+		auto iset = spp.get_iterators(S);
+		auto &itu = iset.get("u");
+		auto &itx = iset.get("X");
+		
+		double pi0 = *itx;
+		double N0  = *itu;
+
+		iset.rbegin();
+
+		for (int i=spp.J-1; i>=1; --i, --iset){  // iterate over cohorts except boundary cohort
+			//cout << "Enter: " << i << endl;
+			//I += spp.h[i]*w(spp.X[i], t)*U[i];  // TODO: Replace with std::transform after profiling
+			double f = w(*itx,t) * (*itu);
+			//std::cout << "f = " << f << " " << spp.x[i] << " " << xlow << " " << spp.h[i] << std::endl;
+			if (*itx < xlow) break;
+			
+			I += f;
+		}
+		
+		double x0 = spp.xb + pi0/(N0+1e-12); 
+		if (xlow < x0) I += w(x0, t)*N0;	 
+		
+		//std::cout << "Here" << std::endl;
+		return I;
+	}
 	else{
 		std::cout << "Only CM is implemented\n";
 		return 0;
@@ -113,7 +142,7 @@ double Solver<Model,Environment>::integrate_x(wFunc w, double t, vector<double>&
 		iset.begin();
 		double   pi0  =  *itx;
 		double   N0   =  *itu;
-		++iset;
+		++iset; // skip boundary cohort
 
 		double x0 = spp.xb + pi0/(N0+1e-12); 
 		double I = w(x0, t)*N0;

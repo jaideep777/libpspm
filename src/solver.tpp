@@ -213,6 +213,7 @@ void Solver<Model,Environment>::initialize(){
 			
 			auto& itx = is.get("X");
 			int id = is.getIndex(s.varnames_extra[0]); // get index of 1st extra variable
+			// TODO: Should condition be added to skip boundary cohort in EBT?
 			for (is.begin(); !is.end(); ++is){
 				vector <double> v = s.mod->initStateExtra(*itx, current_time, env);  // returned vector will be `move`d so this is fast 
 				auto it_vec = is.get();
@@ -253,21 +254,27 @@ void Solver<Model,Environment>::step_to(double tstop){
 		
 		odeStepper.Step_to(tstop, current_time, state, derivs); // state = [U]
 	}
+	
+	
 	if (method == SOLVER_MMU){
 	}
-	//if (method == SOLVER_EBT){
-	//    auto derivs = [this](double t, vector<double> &S, vector<double> &dSdt){
-	//        env->computeEnv(t, S, this);
-	//        this->calcRates_EBT(t, S, dSdt);
-	//    };
+	
+	
+	if (method == SOLVER_EBT){
+		auto derivs = [this](double t, vector<double> &S, vector<double> &dSdt){
+			env->computeEnv(t, S, this);
+			this->calcRates_EBT(t, S, dSdt);
+		};
 		
-	//    // integrate 
-	//    odeStepper.Step_to(tstop, current_time, state, derivs); // state = [pi0, Xint, N0, Nint]
+		// integrate 
+		odeStepper.Step_to(tstop, current_time, state, derivs); // state = [pi0, Xint, N0, Nint]
 		
-	//    // update cohorts
-	//    removeDeadCohorts_EBT();
-	//    if (state[xsize()] > 0) addCohort_EBT();  // Add new cohort if N0 > 0. Add after removing dead ones otherwise this will also be removed. 
-	//}
+		// update cohorts
+		removeDeadCohorts_EBT();
+		addCohort_EBT();  // Add new cohort if N0 > 0. Add after removing dead ones otherwise this will also be removed. 
+	}
+	
+	
 	if (method == SOLVER_CM){
 		auto derivs = [this](double t, vector<double> &S, vector<double> &dSdt){
 			env->computeEnv(t, S, this);
