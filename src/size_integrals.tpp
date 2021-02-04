@@ -68,7 +68,7 @@ double Solver<Model, Environment>::integrate_wudx_above(wFunc w, double t, doubl
 			double f = w(spp.X[i],t)*U[i];
 			//std::cout << "f = " << f << " " << spp.x[i] << " " << xlow << " " << spp.h[i] << std::endl;
 			if (spp.x[i] < xlow){
-				I += (spp.x[i+1]-spp.x[i]) * f; // FIXME: shoulld be spp.x[i+1]-xlow
+				I += (spp.x[i+1]-spp.x[i]) * f; // FIXME: shoulld be spp.x[i+1]-xlow. Interpolator fails if this point is excluded
 				break;
 			}
 			else{

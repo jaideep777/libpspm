@@ -48,13 +48,6 @@ void Solver<Model, Environment>::calcRates_EBT(double t, vector<double>&S, vecto
 			}
 		}
 
-		//if (u0_in < 0){	
-		//    birthFlux = integrate_x([this](double z, double t){return mod->birthRate(z,t);}, t, S, 1);
-		//}
-		//else{
-		//    birthFlux = u0_in*mod->growthRate(xb,t);
-		//}
-
 		*itdu = -mb*N0 - mortGrad*pi0 + birthFlux;
 		*itdx =  gb*N0 + growthGrad*pi0 - mb*pi0;
 		// TODO: Should other rates of boundary cohort be explicitly set to zero?
