@@ -3,6 +3,7 @@
 
 #include <vector>
 #include <cassert>
+#include <iomanip>
 
 typedef double Float;
 
@@ -121,6 +122,10 @@ class Spline{
 	public:
 	int npoints;
 	
+	enum Type{LINEAR, CUBIC, CONSTRAINED_CUBIC};
+	Type splineType = CUBIC;
+	bool extrapolate_constant = true;
+
 	protected:
 	std::vector <Float> m_a, m_b, m_c;
 	std::vector <Float> m_x, m_y;		// Need random-access containers here
@@ -132,19 +137,43 @@ class Spline{
 	   m_x.assign(x.begin(), x.end());
 	   m_y.assign(y.begin(), y.end());
 	   
-	   int n=x.size();
-	    npoints = n;
-		m_a.resize(n);
-		m_b.resize(n);
-		m_c.resize(n);
+	    npoints = x.size();
+		m_a.resize(npoints);
+		m_b.resize(npoints);
+		m_c.resize(npoints);
 
 	   // Check that x is in increasing order
-	   for(int i=0; i<n-1; i++) {
+	   for(int i=0; i<npoints-1; i++) {
 		  assert(m_x[i]<m_x[i+1]);
 	   }
 
-		bool cubic_spline = true; 
-	   if(cubic_spline==true) { // cubic spline interpolation
+	   if( splineType == CUBIC) { // cubic spline interpolation
+			solve_coeffs_cubic();
+	   } 
+	   else if (splineType == LINEAR) { // linear interpolation
+			solve_coeffs_linear();
+	   }
+	   else if (splineType == CONSTRAINED_CUBIC){
+			solve_coeffs_constrained_cubic();	
+	   }
+
+	}
+
+
+	void solve_coeffs_linear(){
+		int n = npoints;  
+		for(int i=0; i<n-1; i++) {
+		     m_a[i]=0.0;
+		     m_b[i]=0.0;
+		     m_c[i]=(m_y[i+1]-m_y[i])/(m_x[i+1]-m_x[i]);
+		}
+		m_a[n-1] = m_b[n-1] = 0.0;
+		m_c[n-1] = m_c[n-2];	// fn-1 is same as fn-2 - same line extends right for extrapolation
+	}
+
+
+	void solve_coeffs_cubic(){
+		int n = npoints;  
 		  // setting up the matrix and right hand side of the equation system
 		  // for the parameters b[]
 		  //band_matrix A(n,1,1);
@@ -165,39 +194,49 @@ class Spline{
 		  rhs[n-1] = 0.0;	
 
 		  // solve the equation system to obtain the parameters b[]
-	      //m_b=A.lu_solve(rhs);
-//			BandMatrix M(a,b,c);
-//			M.solve(rhs);
 		  thomas_solve(l.data(),m.data(),u.data(),rhs.data(),n);
 			m_b = rhs;
 
 		  // calculate parameters a[] and c[] based on b[]
-		  m_a.resize(n);
-		  m_c.resize(n);
 		  for(int i=0; i<n-1; i++) {
 		     m_a[i]=1.0/3.0*(m_b[i+1]-m_b[i])/(m_x[i+1]-m_x[i]);
 		     m_c[i]=(m_y[i+1]-m_y[i])/(m_x[i+1]-m_x[i])
 		            - 1.0/3.0*(2.0*m_b[i]+m_b[i+1])*(m_x[i+1]-m_x[i]);
 		  }
-	   } 
-	   else { // linear interpolation
-		  m_a.resize(n);
-		  m_b.resize(n);
-		  m_c.resize(n);
-		  for(int i=0; i<n-1; i++) {
-		     m_a[i]=0.0;
-		     m_b[i]=0.0;
-		     m_c[i]=(m_y[i+1]-m_y[i])/(m_x[i+1]-m_x[i]);
-		  }
-	   }
-
-	   // for the right boundary we define
-	   // f_{n-1}(x) = b*(x-x_{n-1})^2 + c*(x-x_{n-1}) + y_{n-1}
-	   double h=m_x[n-1]-m_x[n-2];
-	   // m_b[n-1] is determined by the boundary condition
-	   m_a[n-1]=0.0;
-	   m_c[n-1]=3.0*m_a[n-2]*h*h+2.0*m_b[n-2]*h+m_c[n-2];   // = f'_{n-2}(x_{n-1})
+		   // for the right boundary we define
+		   // f_{n-1}(x) = b*(x-x_{n-1})^2 + c*(x-x_{n-1}) + y_{n-1}
+		   double h=m_x[n-1]-m_x[n-2];
+		   // m_b[n-1] is determined by the boundary condition (turns out to be 0; = 0 for 0 curvature at xn-1)
+		   m_a[n-1] = 0.0;
+		   m_c[n-1]=3.0*m_a[n-2]*h*h+2.0*m_b[n-2]*h+m_c[n-2];   // = f'_{n-2}(x_{n-1})
 	}
+
+
+	void solve_coeffs_constrained_cubic(){
+		int n = npoints;  
+
+		std::vector <double> m(n);
+		for (int i=1; i<n-1; ++i){
+			double fplus  = (m_y[i+1]-m_y[i])/(m_x[i+1]-m_x[i]);
+			double fminus = (m_y[i]-m_y[i-1])/(m_x[i]-m_x[i-1]);
+			if (fplus*fminus < 0) m[i] = 0;
+			else m[i] = 2/(1/fplus + 1/fminus);  // harmonic mean will tend towards smaller derivative
+			//else m[i] = (fplus+fminus)/2; 
+		}
+		// Boundary conditions: zero curvature at x0 and xN-1 
+		m[0] = 3*(m_y[1]-m_y[0])/(m_x[1]-m_x[0])/2 - m[1]/2;
+		m[n-1] = 3*(m_y[n-1]-m_y[n-2])/(m_x[n-1]-m_x[n-2])/2 - m[n-2]/2;
+
+		for (int i=0; i<n-1; ++i){
+			m_c[i] = m[i];
+			double hi = m_x[i+1]-m_x[i];
+			m_b[i] = ( 3*(m_y[i+1]-m_y[i] - m[i]*hi) - hi*(m[i+1]-m[i]))/hi/hi;
+			m_a[i] = (-2*(m_y[i+1]-m_y[i] - m[i]*hi) + hi*(m[i+1]-m[i]))/hi/hi/hi;
+		}
+		m_b[n-1] = 0;
+		m_c[n-1] = m[n-1];
+	}
+
 
 	template <typename Container>
 	void constructAndReset(const Container &x, const Container &y){	// construct should be able to take any containers, as the points will be copied to the Spline's own storage anyway
@@ -207,16 +246,16 @@ class Spline{
 	inline Float extrapolate_left(double x) const{
 		  double h=x-m_x[0];
 		  // extrapolation to the left
-		  return m_y[0];	// constant
-		  // return ((m_b[0])*h + m_c[0])*h + m_y[0];  // quadratic
+		  if (extrapolate_constant) return m_y[0];	// constant
+		  else return ((m_b[0])*h + m_c[0])*h + m_y[0];  // quadratic
 	}
 	
 	inline Float extrapolate_right(double x) const{
 			size_t n=m_x.size();
 			double h=x-m_x[n-1];
 		  // extrapolation to the right
-			return m_y[n-1]; // constant
-			// return ((m_b[n-1])*h + m_c[n-1])*h + m_y[n-1];  // quadratic
+			if (extrapolate_constant) return m_y[n-1]; // constant
+			else return ((m_b[n-1])*h + m_c[n-1])*h + m_y[n-1];  // quadratic
 	
 	}
 	
@@ -245,7 +284,18 @@ class Spline{
 		return  ((m_a[idx]*h + m_b[idx])*h + m_c[idx])*h + m_y[idx];
 	}
 
-
+	void print(){
+		std::cout << "Spline: \n";
+		for (int i=0; i<npoints; ++i){
+			std::cout << std::right << std::setw(10) << std::setfill(' ') << m_x[i] << " " 
+					  << std::right << std::setw(10) << std::setfill(' ') << m_y[i] << " "
+					  << std::right << std::setw(10) << std::setfill(' ') << m_a[i] << " "
+					  << std::right << std::setw(10) << std::setfill(' ') << m_b[i] << " "
+					  << std::right << std::setw(10) << std::setfill(' ') << m_c[i] << " " 
+					  << "\n";
+		}
+		std:: cout << std::endl;
+	}
 };
 
 

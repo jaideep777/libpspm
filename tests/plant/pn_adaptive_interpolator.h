@@ -124,7 +124,7 @@ class SubdivisionSpline : public Spline{
 		auto ii = indices.begin();
 		auto mxi = m_x.begin(), myi = m_y.begin();
 		for (; xi != xx.end(); ++xi, ++yi, ++zi, ++ii, ++mxi, ++myi) {
-			std::cout << *ii << " (" << (b-a)*(*ii)/npoints_max << ") " << *xi << " " << *mxi << " " << *yi << " " << *myi << std::endl;
+			std::cout << *ii << " (" << (b-a)*(*ii)/npoints_max << ") " << *xi << " " << *mxi << " " << *yi << " " << *myi << " | " << eval(*xi) << std::endl;
 			assert(fabs((b-a)*(*ii)/npoints_max - *xi) < 1e-6);
 		}
 		std::cout << "~~~~~~~~~~~~~~~~~~~\n" << std::endl;
@@ -209,12 +209,35 @@ class SubdivisionSpline : public Spline{
 
 		++depth;
 		if (depth > max_depth){
-			std::cout << "Maximum refinement reached" << std::endl;
+			std::cout << "Maximum refinement reached around:" << std::endl;
+			
+		   	auto itx = std::next(xx.begin()), ity = std::next(yy.begin());
+			for (auto it  = std::next(indices.begin());
+					  it != std::prev(indices.end()); 
+					  ++it, ++itx, ++ity){
+				if ((*std::next(it) - *it) == 1 && (*it - *std::prev(it)) == 1){
+					std::advance(it, -5);
+					std::advance(itx, -5);
+					std::advance(ity, -5);
+					for (int i=0; i<10; ++i){
+						std::cout << std::setw(10) << *it << " "
+								  << std::setw(10) << *itx << " "
+								  << std::setw(10) << *ity << "\n";
+						++it; ++itx; ++ity;
+					}
+					std::cout << "---\n";
+					std::advance(it, -5);
+					std::advance(itx, -5);
+					std::advance(ity, -5);
+				}
+			}
 			print();
 
 			//std::ofstream fout("interpolator_dump.txt");
 			//for (int i=0; i<1000; ++i){
-			//    double x = 0.09985 + 0.0001*i/1000.0;
+			//      double xm = 0.0998653;
+			//      double xM = 0.0998729;
+			//    double x = xm + (xM-xm)*i/1000.0;
 			//    fout << x << " " << eval(x) << " " << f(x) << "\n";
 			//}
 			//fout.close();
@@ -233,7 +256,16 @@ class SubdivisionSpline : public Spline{
 				const double x_mid = *xi - dx;
 				const double y_mid = f(x_mid);
 				const double p_mid = eval(x_mid);
-				__DEBUG_AI_ std::cout << "adding " << x_mid << ": f(x)/i(x) = (" << y_mid << " / " << p_mid << ")" << std::endl; 
+				__DEBUG_AI_ std::cout << "adding " << x_mid << ":\n"
+									  << "   x:  " << std::setw(10) << *std::prev(xi)
+									  << "       " << std::setw(10) << *xi - dx
+									  << "       " << std::setw(10) << *(xi) << "\n"
+									  << " f(x): " << std::setw(10) << f(*std::prev(xi))
+									  << "       " << std::setw(10) << f(*xi - dx)
+									  << "       " << std::setw(10) << f(*(xi))  << "\n"
+									  << " i(x): " << std::setw(10) << eval(*std::prev(xi))
+									  << "       " << std::setw(10) << eval(*xi - dx)
+									  << "       " << std::setw(10) << eval(*(xi)) << "\n";
 
 				// Always insert the new points (why waste the expensively computed true values!).
 				xx.insert(xi, x_mid);
