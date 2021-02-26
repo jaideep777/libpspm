@@ -68,7 +68,7 @@ class LightEnvironment : public plant::Environment{
 class PlantModel{
 	public:
 
-	double input_seed_rain = 1;	
+	double input_seed_rain = 200;	
 
 	plant::Plant seed; // prototype to be inserted
 
@@ -177,6 +177,17 @@ class PlantModel{
 };
 
 
+vector<double> fmu_create_grid(double xmin, double xmax, double dxmin = 1e-2, double dxmax=0.15, double multiplier=1.1){
+	vector <double> xvec;
+	double x = xmin, dx = dxmin;
+	while(x<xmax){
+		xvec.push_back(x);	
+		dx = std::min(dx*multiplier, dxmax);
+		x += dx;
+	}
+	xvec.push_back(xmax);
+	return xvec; 
+}
 
 
 vector<double> generateDefaultCohortSchedule(double max_time){
@@ -317,9 +328,9 @@ int main(){
     cout << "HT === " << M3.p.vars.height << endl;
 
 
-	S.addSpecies(log_seq(M1.p.vars.height, 20, 401), &M1, {"mort", "fec", "heart", "sap"}, M1.input_seed_rain);
-	S.addSpecies(log_seq(M.p.vars.height,  20, 401), &M, {"mort", "fec", "heart", "sap"}, M.input_seed_rain);
-	S.addSpecies(log_seq(M3.p.vars.height, 20, 401), &M3, {"mort", "fec", "heart", "sap"}, M3.input_seed_rain);
+	S.addSpecies(fmu_create_grid(M1.p.vars.height, 20), &M1, {"mort", "fec", "heart", "sap"}, M1.input_seed_rain);
+	S.addSpecies(fmu_create_grid(M.p.vars.height,  20), &M, {"mort", "fec", "heart", "sap"}, M.input_seed_rain);
+	S.addSpecies(fmu_create_grid(M3.p.vars.height, 20), &M3, {"mort", "fec", "heart", "sap"}, M3.input_seed_rain);
 	
 	S.resetState();
     S.initialize();
