@@ -285,6 +285,9 @@ void Solver<Model,Environment>::step_to(double tstop){
 	
 	if (method == SOLVER_CM){
 		auto derivs = [this](double t, vector<double> &S, vector<double> &dSdt){
+			// update u0 for boundary condition of size integral
+			for (int s=0; s<species_vec.size(); ++s) species_vec[s].u0_save = get_u0(t, s);
+			
 			env->computeEnv(t, S, this);
 			this->calcRates_CM(t, S, dSdt);
 		};

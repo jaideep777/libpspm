@@ -59,7 +59,7 @@ class LightEnvironment : public plant::Environment{
 	
 		//cout << S->xb << " " << S->getMaxSize() << endl;	
 		time = t;
-		for (int s=0; s<S->n_species(); ++s) S->get_species(s)->u0_save = S->get_u0(t, s);
+		//for (int s=0; s<S->n_species(); ++s) S->get_species(s)->u0_save = S->get_u0(t, s);
 		light_profile.construct(canopy_openness, 0, S->maxSize(state_vec.begin()));
 	}
 
