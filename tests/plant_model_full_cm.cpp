@@ -50,14 +50,16 @@ class LightEnvironment : public plant::Environment{
 					return a;	
 				};
 				leaf_area_above_z += S->integrate_wudx_above(la_above, t, z, state_vec, i);
+				//leaf_area_above_z += S->integrate_x(la_above, t, state_vec, i);
 			}
 
-			//cout << "la = " << leaf_area_above << "\n";
+			//cout << "LA(" << z << ") = " << exp(-kI*leaf_area_above_z) << "\n";
 			return exp(-kI*leaf_area_above_z);
 		};	
 	
 		//cout << S->xb << " " << S->getMaxSize() << endl;	
 		time = t;
+		//for (int s=0; s<S->n_species(); ++s) S->get_species(s)->u0_save = S->get_u0(t, s);
 		light_profile.construct(canopy_openness, 0, S->maxSize(state_vec.begin()));
 	}
 
@@ -68,7 +70,7 @@ class LightEnvironment : public plant::Environment{
 class PlantModel{
 	public:
 
-	double input_seed_rain = 1;	
+	double input_seed_rain = 200;	
 
 	plant::Plant seed; // prototype to be inserted
 
@@ -367,6 +369,24 @@ int main(){
 		cout << "Seed rain for Species " << s << " (new method) = " << pn::integrate_trapezium(times, seeds_out[s]) << endl;
 
 	}
+
+	for (int s=0; s< S.n_species(); ++s){
+		auto spp = S.get_species(s);
+		auto iset = spp->get_iterators(S.state);
+		auto& itf = iset.get("fec");
+		vector <double> fec_vec;
+		fec_vec.reserve(spp->xsize());
+		iset.rbegin();
+		for (int i=0; !iset.rend(); --iset, ++i){
+			double patch_age_density = env.patch_age_density(times[i]);
+			double S_D = 0.25;
+			double output_seeds = spp->mod->input_seed_rain * S_D * patch_age_density * (*itf);
+			//cout << times[i] << " " << M.input_seed_rain << " " << S_D << " " << patch_age_density << " " << (*itf) << " | " << output_seeds << endl;
+			fec_vec.push_back(output_seeds);
+		}
+		cout << "Seed rain for Species (Falster 17) " << s << " = " << pn::integrate_trapezium(times, fec_vec) << endl;
+	}
+	
 
 }
 

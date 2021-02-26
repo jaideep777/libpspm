@@ -171,6 +171,14 @@ double Solver<Model,Environment>::maxSize(std::vector<double>::iterator state_be
 
 
 template<class Model, class Environment>
+double Solver<Model,Environment>::get_u0(double t, int s){
+	auto& spp = species_vec[s];
+	double g = spp.mod->growthRate(spp.xb, t, env);
+	double u0 = (g>0)? spp.birth_flux_in * spp.mod->establishmentProbability(t, env)/g  :  0; 
+}
+
+
+template<class Model, class Environment>
 void Solver<Model,Environment>::print(){
 	std::cout << ">> SOLVER \n";
 	string types[] = {"FMU", "MMU", "CM", "EBT"};
@@ -277,6 +285,9 @@ void Solver<Model,Environment>::step_to(double tstop){
 	
 	if (method == SOLVER_CM){
 		auto derivs = [this](double t, vector<double> &S, vector<double> &dSdt){
+			// update u0 for boundary condition of size integral
+			for (int s=0; s<species_vec.size(); ++s) species_vec[s].u0_save = get_u0(t, s);
+			
 			env->computeEnv(t, S, this);
 			this->calcRates_CM(t, S, dSdt);
 		};

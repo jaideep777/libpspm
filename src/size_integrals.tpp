@@ -16,41 +16,63 @@ double Solver<Model, Environment>::integrate_wudx_above(wFunc w, double t, doubl
 		//std::cout << "J = " << spp.J << ", dist = " << iset.dist << std::endl; 
 		// integrate using trapezoidal rule 
 		// Note, new cohorts are inserted at the beginning, so x will be ascending
-		bool converged = false;
+		bool integration_completed = false;
 		double I = 0;
 		double u = (use_log_densities)? exp(*itu) : *itu;
 		double x_hi = *itx;
 		double f_hi = w(*itx, t)*u;
 		//if (xlow < 0.01) cout << "x/w/u/f = " << x_hi << " " <<  w(*itx,t) <<  " " << exp(*itu)  << " " << f_hi << "\n";
 		--iset; //--itx; --itu;
-		for (int i=0; i<spp.J-1; ++i){
+		for (int i=0; i<spp.J-1; ++i, --iset){
 			double u = (use_log_densities)? exp(*itu) : *itu;
 			double x_lo = *itx;
 			double f_lo = w(*itx,t)*u;
+	
+			//// implementation from orig plant model	
+			//I += (x_hi - x_lo) * (f_hi + f_lo);
+			//x_hi = x_lo;
+			//f_hi = f_lo;
+			//if (x_lo < xlow) break;
+			// ---- 
+
+			// This implementation allows stopping the integration exactly at xlow. FIXME: Need to check if that actually makes sense
 			//if (xlow < 0.01) cout << "x/w/u/f = " << x_lo << " " <<  w(*itx,t) <<  " " << exp(*itu)  << " " << f_lo << "\n";
-			--iset; //--itx; --itu;
 			if (x_lo < xlow){
-				double f = f_lo; //f_lo + (f_hi-f_lo)/(x_hi-x_lo)*(xlow - x_lo);  // FIXME: these should stop at the interpolating point
-				double x = x_lo; //xlow;
-				I += (x_hi-x) * (f_hi + f);
-				converged = true;
+				// * interpolate to stop at xlow
+				//double f = f_lo + (f_hi-f_lo)/(x_hi-x_lo)*(xlow - x_lo);  // FIXME: these should stop at the interpolating point
+				//double x = xlow;
+				// * include integration up to next cohort
+				double f = f_lo;
+				double x = x_lo;
+
+				I += (x_hi - x) * (f_hi + f);
+				x_hi = x_lo;  // - these two probably not needed
+				f_hi = f_lo;  // - 
+				integration_completed = true;
 				break;
 			}
 			else{
 				I += (x_hi - x_lo) * (f_hi + f_lo);
+				x_hi = x_lo;
+				f_hi = f_lo;
 			}
-			x_hi = x_lo;
-			f_hi = f_lo;
 		}
 		
-		//if (spp.J == 1 || (f_hi > 0 && !converged)){  // f_hi condition causes interpolator to break. Need to check
-		//    double x_lo = spp.xb;	// FIXME: should be max(spp.xb, xlow)
-		//    double g = spp.mod->growthRate(spp.xb, t, env);
-		//    double u0 = (g>0)? spp.birth_flux_in * spp.mod->establishmentProbability(t, env)/g  :  0; 
-		//    double f_lo =  w(spp.xb, t)*u0;
-		//    //double f_lo = f_hi*2;
-		//    I += (x_hi-x_lo)*(f_hi+f_lo);
-		//}
+		//if (integration_completed) assert(x_hi < xlow);
+		//if (!integration_completed) assert(x_hi >= xlow || spp.J == 1);
+			
+		// if (spp.J == 1 || (f_hi > 0)){  // <-- this is from original plant model
+		// .. (f_hi > 0) condition works for plant model but may not work generically. 
+		// Instead use an explicit flag to mark completion 
+		if (spp.J == 1 || !integration_completed){  
+			//double g = spp.mod->growthRate(spp.xb, t, env);
+			//double u0 = (g>0)? spp.birth_flux_in * spp.mod->establishmentProbability(t, env)/g  :  0; 
+			double u0 = spp.u0_save;
+			double x_lo = spp.xb;	// FIXME: should be max(spp.xb, xlow)
+			double f_lo =  w(x_lo, t)*u0;
+			I += (x_hi-x_lo)*(f_hi+f_lo);
+		}
+		
 		return I*0.5;
 	}
 
@@ -102,12 +124,13 @@ double Solver<Model, Environment>::integrate_wudx_above(wFunc w, double t, doubl
 			I += f;
 		}
 		
-		double x0 = spp.xb + pi0/(N0+1e-12); 
+		double x0 = spp.xb + pi0/(N0+1e-12); // FIXME: This should be added only if integration was incomplete 
 		if (xlow < x0) I += w(x0, t)*N0;	 
 		
 		//std::cout << "Here" << std::endl;
 		return I;
 	}
+	
 	else{
 		std::cout << "Only CM is implemented\n";
 		return 0;
@@ -151,7 +174,7 @@ double Solver<Model,Environment>::integrate_x(wFunc w, double t, vector<double>&
 		return I;
 	}
 	else if (method == SOLVER_CM){
-		// integrate using trapezoidal rule TODO: Modify to avoid double computation of w(x)
+		// integrate using trapezoidal rule FIXME: Modify to avoid double computation of w(x)
 		double I = 0;
 		for (iset.begin(); iset.dist < iset.size-1; ++iset){
 			double unext = (use_log_densities)? exp(*(itu+1)) : *(itu+1);

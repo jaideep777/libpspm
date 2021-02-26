@@ -10,7 +10,8 @@ namespace plant {
 
 Environment::Environment(double openness){
 	fixed_canopy_openness = openness;
-	
+	//light_profile.splineType = Spline::CONSTRAINED_CUBIC;
+
 	// set up disturbance regime
 	scale = pow(tgamma(1.0/shape)/shape/mean_interval, shape);
 	p0 = shape*pow(scale, 1.0 / shape) / tgamma(1.0 / shape);
