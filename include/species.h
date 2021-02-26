@@ -39,8 +39,11 @@ class Species{
 	std::vector <double> h;
 	std::vector <double> schedule; // used only by CM/EBT
 
+	public:
 	//debug only
 	bool bfin_is_u0in = false;
+	double u0_save;
+	// ---
 
 	private: // private functions
 	int addVar(std::string name, int stride, int offset);
