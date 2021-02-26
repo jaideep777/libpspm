@@ -1,10 +1,7 @@
 template<class Model, class Environment>
 template<typename wFunc>
 double Solver<Model, Environment>::integrate_wudx_above(wFunc w, double t, double xlow, vector<double>&S, int species_id){
-	//cout << " | " <<  t << " " << mod->evalEnv(0,t) << " ";
-	//else if (method == SOLVER_EBT){
-	//}
-	//cout << "Begin integrate: xsize = " << xsize() << "(" << S[0] << ", " << S[xsize()-1] << "), xlow = " << xlow << endl;
+
 	Species<Model> &spp = species_vec[species_id];
 
 	if (method == SOLVER_CM){
@@ -115,16 +112,14 @@ double Solver<Model, Environment>::integrate_wudx_above(wFunc w, double t, doubl
 		iset.rbegin();
 
 		for (int i=spp.J-1; i>=1; --i, --iset){  // iterate over cohorts except boundary cohort
-			//cout << "Enter: " << i << endl;
-			//I += spp.h[i]*w(spp.X[i], t)*U[i];  // TODO: Replace with std::transform after profiling
-			double f = w(*itx,t) * (*itu);
-			//std::cout << "f = " << f << " " << spp.x[i] << " " << xlow << " " << spp.h[i] << std::endl;
 			if (*itx < xlow) break;
 			
+			double f = w(*itx,t) * (*itu);
+			//std::cout << "f = " << f << " " << spp.x[i] << " " << xlow << " " << spp.h[i] << std::endl;
 			I += f;
 		}
 		
-		double x0 = spp.xb + pi0/(N0+1e-12); // FIXME: This should be added only if integration was incomplete 
+		double x0 = spp.xb + pi0/(N0+1e-12);  
 		if (xlow < x0) I += w(x0, t)*N0;	 
 		
 		//std::cout << "Here" << std::endl;
@@ -150,7 +145,6 @@ double Solver<Model,Environment>::integrate_x(wFunc w, double t, vector<double>&
 	auto &itx = iset.get("X");
 	auto &itu = iset.get("u");
 
-	//cout << " | " <<  t << " " << mod->evalEnv(0,t) << " ";
 	if (method == SOLVER_FMU){
 		// integrate using midpoint quadrature rule
 		double I=0;
@@ -160,6 +154,7 @@ double Solver<Model,Environment>::integrate_x(wFunc w, double t, vector<double>&
 		}
 		return I;
 	}
+	
 	else if (method == SOLVER_EBT){
 		// integrate using EBT rule (sum over cohorts)
 		iset.begin();
@@ -173,16 +168,45 @@ double Solver<Model,Environment>::integrate_x(wFunc w, double t, vector<double>&
 		
 		return I;
 	}
+	
 	else if (method == SOLVER_CM){
-		// integrate using trapezoidal rule FIXME: Modify to avoid double computation of w(x)
+		// integrate using trapezoidal rule. Below modified to avoid double computation of w(x)
+		//double I = 0;
+		//for (iset.begin(); iset.dist < iset.size-1; ++iset){
+		//    double unext = (use_log_densities)? exp(*(itu+1)) : *(itu+1);
+		//    double unow  = (use_log_densities)? exp(*itu) : *itu;
+		//    I += (*(itx+1)-*itx)*(w(*(itx+1), t)*unext + w(*itx, t)*unow);
+		//}
+		//return I*0.5;
+		
+		// integrate using trapezoidal rule 
+		// Note, new cohorts are inserted at the beginning, so x will be ascending
+		iset.rbegin();
 		double I = 0;
-		for (iset.begin(); iset.dist < iset.size-1; ++iset){
-			double unext = (use_log_densities)? exp(*(itu+1)) : *(itu+1);
-			double unow  = (use_log_densities)? exp(*itu) : *itu;
-			I += (*(itx+1)-*itx)*(w(*(itx+1), t)*unext + w(*itx, t)*unow);
+		double u = (use_log_densities)? exp(*itu) : *itu;
+		double x_hi = *itx;
+		double f_hi = w(*itx, t)*u;
+		//if (xlow < 0.01) cout << "x/w/u/f = " << x_hi << " " <<  w(*itx,t) <<  " " << exp(*itu)  << " " << f_hi << "\n";
+		--iset; //--itx; --itu;
+		for (int i=0; i<spp.J-1; ++i, --iset){
+			double u = (use_log_densities)? exp(*itu) : *itu;
+			double x_lo = *itx;
+			double f_lo = w(*itx,t)*u;
+	
+			I += (x_hi - x_lo) * (f_hi + f_lo);
+			x_hi = x_lo;
+			f_hi = f_lo;
 		}
+		
+		// boundary at xb
+		double u0 = spp.u0_save;
+		double x_lo = spp.xb;
+		double f_lo =  w(x_lo, t)*u0;
+		I += (x_hi-x_lo)*(f_hi+f_lo);
+		
 		return I*0.5;
 	}
+	
 	else{
 		std::cout << "Only FMU and MMU are implemented\n";
 		return 0;
