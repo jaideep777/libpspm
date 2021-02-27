@@ -32,7 +32,7 @@ class TestModel{
 			else 
 				return 0;
 		};
-		env = S->integrate_x(w, t, state_vec, 1);
+		//env = S->integrate_x(w, t, state_vec, 1);
 	}
 
 	double growthRate(double x, double t){
@@ -61,7 +61,7 @@ class TestModel{
 	}
 
 	vector<double> initStateExtra(double x, double t){
-	
+		
 	}
 
 

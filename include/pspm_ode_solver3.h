@@ -108,7 +108,7 @@ class RKCK45{
 	//           2) y      -- current solution (dependent variable)
 	//           3) derivs -- function which evaluates derivatives
 	template <class functor>
-	void Step(double& x, container& y, functor& derivs, double hmax=1e20){
+	void Step(double& x, container& y, functor& derivs, double hmax=1e20, double hmin=1e-6){
 		
 		// resize the container if necessary
 		if (y.size() != sys_size) resize(y.size());
@@ -123,6 +123,7 @@ class RKCK45{
 		// takes: y -- dependent variable, dydx -- derivative at the beginning
 		//        ht -- trial setpsize, hdid -- 
 		ht = std::min(ht, hmax);
+		ht = std::max(ht, hmin);
 		RKStep(y, dydx, xt, ht, hdid, hnext, derivs); // Make one RK step
 		if (hdid == ht) ++nok; else ++nbad; // good or bad step
 		ht = hnext;

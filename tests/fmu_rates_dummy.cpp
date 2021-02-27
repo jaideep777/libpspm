@@ -4,21 +4,26 @@
 #include "solver.h"
 using namespace std;
 
-#include "test_model.h"
+#include "test_model_2_ms.h"
 
 int main(){
 
-	Solver<TestModel> S(25, 0,1, SOLVER_FMU);
-	
 	TestModel M;
 	
-	S.setModel(&M);
+	Solver<TestModel,Environment> S(SOLVER_FMU);
+	S.addSpecies(25, 0, 1, false, &M);
+	S.resetState();
 	S.initialize();
-	S.print();	
+	//S.print();
+	
+	Environment E;
+	E.computeEnv(0,S.state,&S);
+	//cout << E.evalEnv(0,0) << endl;
 
-	M.computeEnv(0,S.state, &S);	
+	S.setEnvironment(&E);
 	S.calcRates_FMU(1, S.state, S.rates);  // dummy rates calc rates(X=X0, U=U0, t=1, E=E(U0))
-//	S.step_to(1);
+	//S.print();
+	//	S.step_to(1);
 
 	vector <double> rates_exp = {
 		-0.355862928, -0.450926505, -0.417535387, -0.354046196, 
@@ -30,7 +35,7 @@ int main(){
 	    -0.001250216};
 	for (int i=0; i< S.rates.size(); ++i){
 		//cout << S.rates[i] << " " << rates_exp[i] << endl;
-		if ( fabs(S.rates[i] - rates_exp[i]) > 1e-4) return 1;
+		if ( fabs(S.rates[i] - rates_exp[i]) > 1e-5) return 1;
 	}
 	
 	return 0;
