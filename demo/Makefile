@@ -1,63 +1,52 @@
-# MAKEFILE FOR CUDA
-
 #-------------------------------------------------------------------------------
 # executable name
-TARGET := 
+FILE = 
+TARGET = $(patsubst %.cpp, %.exec, $(FILE)) 
 
 # files
-CCFILES  :=  $(filter-out ../src/main.cpp, $(wildcard ../src/*.cpp))
-
+SRCFILES  :=  $(wildcard ../src/*.cpp plant/*.cpp)
+SRCFILES += $(FILE)
+HEADERS := $(wildcard ../src/*.tpp) $(wildcard ../include/*.h) 
 # ------------------------------------------------------------------------------
 
 # paths
 #CUDA_INSTALL_PATH ?= /usr/local/cuda#-5.0
 
-# compilers
-
 # include and lib dirs (esp for cuda)
-INC_PATH := -I../include #-I/home/jaideep/codes/quickGL/include
-LIB_PATH := #-L/home/jaideep/codes/quickGL/lib
-GLLIB_PATH := 
+INC_PATH := -I../include 
+LIB_PATH := -L../lib 
 
 # flags
-COMMONFLAGS = 
-CPPFLAGS = -O3 -std=c++11 -g -pg -Wno-c++11narrowing # -Wall -Wno-unused-variable  #-fno-inline-functions -fno-optimize-sibling-calls  
-LINKFLAGS += -pg $(COMMONFLAGS) 
+CPPFLAGS = -O3 -g -pg -std=c++11 -Wno-sign-compare -Wno-unused-variable -Wno-unused-but-set-variable
+LDFLAGS =  -g -pg
 
 # libs
-#LIBS = -lcudart 					# cuda libs 		-lcutil_x86_64 -lshrutil_x86_64
-GLLIBS = #-lquickgl -lglut 				# openGL libs       -lGL -lGLEW  #-lX11 -lXi -lXmu 		
-LIBS = 	 -lgsl -lgslcblas 	# additional libs
+LIBS = 	 #-lgsl -lgslcblas 	# additional libs
+#LIBS = -lcudart 			# cuda libs 		
 
 # files
-OBJECTS = $(patsubst ../src/%.cpp, ../build/%.o, $(CCFILES))
-TARGET_OBJ = build/$(TARGET).o
+OBJECTS = $(patsubst %.cpp, %.o, $(SRCFILES))
 
 
-all: dir $(TARGET)
+all: dir $(TARGET)	
 
-dir:	
-	mkdir -p build
-	rm -f $(TARGET_OBJ)
+dir: 
+	mkdir -p build 
 
-$(TARGET): $(TARGET_OBJ) $(OBJECTS) 
-	g++ $(LINKFLAGS) -o exec_$(TARGET) $(LIB_PATH) $(GLLIB_PATH) $(OBJECTS) $(TARGET_OBJ) $(LIBS) $(GLLIBS)
+$(TARGET): $(OBJECTS)	
+	g++ $(LDFLAGS) -o $(TARGET) $(LIB_PATH) $(OBJECTS) $(LIBS) 
 
-$(OBJECTS): ../build/%.o : ../src/%.cpp 
+$(OBJECTS): %.o : %.cpp $(HEADERS)
 	g++ -c $(CPPFLAGS) $(INC_PATH) $< -o $@ 
 
-$(TARGET_OBJ):
-	g++ -c $(CPPFLAGS) $(INC_PATH) $(TARGET).cpp -o $(TARGET_OBJ)
-
-superclean:
-	rm -f exec_$(TARGET) ../build/*.o build/*.o 
-
-clean: 
-	rm -f exec_$(TARGET) build/*.o
-
+clean:
+	rm -f $(TARGET) $(OBJECTS) 
+	
 re: clean all
 
-# ------------------------------------------------------------------------------
+
+
+
 
 
 

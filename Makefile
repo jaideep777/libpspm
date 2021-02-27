@@ -58,7 +58,7 @@ check: compile_tests clean_log run_tests
 compile_tests: $(TEST_TARGETS)
 	
 clean_log:
-	@rm log.txt
+	@rm -f log.txt
 
 run_tests: $(TEST_RUNS) 
 	
