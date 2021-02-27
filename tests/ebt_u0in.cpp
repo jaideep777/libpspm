@@ -66,7 +66,7 @@ int main(){
 	
 		//vector<double> v = S.cohortsToDensity_EBT(x);
 		
-		cout << S.current_time << " " << S.get_species(0)->xsize() << " " << S.u0_out()[0] << endl;
+		//cout << S.current_time << " " << S.get_species(0)->xsize() << " " << S.u0_out()[0] << endl;
 		for (auto y : S.state) fout << y << "\t";
 		fout << endl;
 	}

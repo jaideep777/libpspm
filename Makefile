@@ -53,14 +53,18 @@ TEST_TARGETS = $(patsubst tests/%.cpp, tests/%.test, $(TEST_FILES))
 TEST_RUNS = $(patsubst tests/%.cpp, tests/%.run, $(TEST_FILES))
 ADD_OBJECTS = 
 
-check: compile_tests run_tests
+check: compile_tests clean_log run_tests
 
 compile_tests: $(TEST_TARGETS)
 	
+clean_log:
+	@rm log.txt
+
 run_tests: $(TEST_RUNS) 
 	
 $(TEST_RUNS): tests/%.run : tests/%.test	
-	@./$< && \
+	@echo "~~~~~~~~~~~~~~~ $< ~~~~~~~~~~~~~~~~" >> log.txt
+	@./$< >> log.txt && \
 		printf "%b" "\033[0;32m[PASS]\033[m" ": $* \n"  || \
 		printf "%b" "\033[1;31m[FAIL]\033[m" ": $* \n"
 

@@ -38,7 +38,8 @@ class Species{
 	std::vector <double> x;
 	std::vector <double> h;
 	std::vector <double> schedule; // used only by CM/EBT
-	
+
+	public:
 	double u0_save;
 
 	public:

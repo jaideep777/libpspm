@@ -4,19 +4,25 @@
 #include "solver.h"
 using namespace std;
 
-#include "test_model.h"
+#include "test_model_2_ms.h"
 
 int main(){
 
-	Solver<TestModel> S(25, 0,1, SOLVER_EBT);
-	
 	TestModel M;
 	
-	S.setModel(&M);
+	Solver<TestModel,Environment> S(SOLVER_EBT);
+	//S.use_log_densities = false;
+	//S.control.cm_grad_dx = 0.001;
+	S.addSpecies(25, 0, 1, false, &M);
+	S.resetState();
 	S.initialize();
-	S.print();	
+	//S.print();
+	
+	Environment E;
+	E.computeEnv(0,S.state,&S);
+	//cout << E.evalEnv(0,0) << endl;
 
-	M.computeEnv(0,S.state, &S);	
+	S.setEnvironment(&E);
 	S.calcRates_EBT(1, S.state, S.rates);  // dummy rates calc rates(X=X0, U=U0, t=1, E=E(U0))
 //	S.step_to(1);
 
@@ -34,7 +40,7 @@ int main(){
 
 
 	for (int i=0; i< S.rates.size(); ++i){
-		cout << S.rates[i] << " " << endl; //rates_exp[i] << endl;
+		//cout << S.rates[i] << " " << rates_exp[i] << endl;
 		if ( fabs(S.rates[i] - rates_exp[i]) > 1e-5) return 1;
 	}
 	
