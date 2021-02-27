@@ -4,6 +4,10 @@ inst/website
 *.Rhistory*
 ^plant.Rcheck$
 .Rproj.user
+*.png
+*.pdf 
+*.xlsx
+gprof2dot.py
 
 *~
 
@@ -11,6 +15,7 @@ inst*
 *.cppx
 *.hx
 *.hppx
+*.tppx
 *.cux
 *.cuhx
 
@@ -23,8 +28,11 @@ exec_*
 *.txt
 *.out
 *.test
+*.exec
 
 *.swp
+*.swo
+*.swn
 
 tags
 1

@@ -24,6 +24,9 @@ int main(){
 	S.addCohort_CM();
 	S.print();
 
+	S.removeCohort_CM();
+	S.print();
+
 	return 0;
 }
 

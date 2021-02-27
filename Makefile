@@ -4,6 +4,7 @@ TARGET := 1
 
 # files
 SRCFILES  :=  $(wildcard src/*.cpp) 
+HEADERS := $(wildcard src/*.tpp) $(wildcard include/*.h) $(wildcard tests/*.h)
 # ------------------------------------------------------------------------------
 
 # paths
@@ -14,11 +15,11 @@ INC_PATH := -I./include
 LIB_PATH := -L./lib 
 
 # flags
-CPPFLAGS = -O3 -std=c++11 -g -pg -Wno-sign-compare -Wno-unused-variable -Wno-unused-but-set-variable
-LDFLAGS =  
+CPPFLAGS = -O3 -g -pg -std=c++11 -Wno-sign-compare -Wno-unused-variable -Wno-unused-but-set-variable
+LDFLAGS =  -g -pg
 
 # libs
-LIBS = 	 -lgsl -lgslcblas 	# additional libs
+LIBS = 	 #-lgsl -lgslcblas 	# additional libs
 #LIBS = -lcudart 			# cuda libs 		
 
 # files
@@ -33,7 +34,7 @@ dir:
 $(TARGET): $(OBJECTS) 
 	g++ $(LDFLAGS) -o $(TARGET) $(LIB_PATH) $(OBJECTS) $(LIBS) 
 
-$(OBJECTS): build/%.o : src/%.cpp
+$(OBJECTS): build/%.o : src/%.cpp $(HEADERS)
 	g++ -c $(CPPFLAGS) $(INC_PATH) $< -o $@ 
 
 clean:
@@ -50,23 +51,28 @@ TEST_FILES = $(wildcard tests/*.cpp)
 TEST_OBJECTS = $(patsubst tests/%.cpp, tests/%.o, $(TEST_FILES))
 TEST_TARGETS = $(patsubst tests/%.cpp, tests/%.test, $(TEST_FILES))
 TEST_RUNS = $(patsubst tests/%.cpp, tests/%.run, $(TEST_FILES))
+ADD_OBJECTS = 
 
-check: compile_tests run_tests
+check: compile_tests clean_log run_tests
 
 compile_tests: $(TEST_TARGETS)
 	
+clean_log:
+	@rm -f log.txt
+
 run_tests: $(TEST_RUNS) 
 	
 $(TEST_RUNS): tests/%.run : tests/%.test	
-	@./$< && \
+	@echo "~~~~~~~~~~~~~~~ $< ~~~~~~~~~~~~~~~~" >> log.txt
+	@./$< >> log.txt && \
 		printf "%b" "\033[0;32m[PASS]\033[m" ": $* \n"  || \
 		printf "%b" "\033[1;31m[FAIL]\033[m" ": $* \n"
 
-$(TEST_OBJECTS): tests/%.o : tests/%.cpp 
+$(TEST_OBJECTS): tests/%.o : tests/%.cpp $(HEADERS) 
 	g++ -c $(CPPFLAGS) $(INC_PATH) $< -o $@
 
 $(TEST_TARGETS): tests/%.test : tests/%.o
-	g++ $(LDFLAGS) -o $@ $(LIB_PATH) $(OBJECTS) $< $(LIBS) 
+	g++ $(LDFLAGS) -o $@ $(LIB_PATH) $(OBJECTS) $(ADD_OBJECTS) $< $(LIBS) 
 
 testclean: 
 	rm -f tests/*.o tests/*.test
