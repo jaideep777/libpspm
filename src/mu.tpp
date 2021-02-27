@@ -56,7 +56,6 @@ void Solver<Model,Environment>::calcRates_FMU(double t, vector<double> &S, vecto
 			// -------------
 				double d = (g>0)? spp.birth_flux_in * spp.mod->establishmentProbability(current_time, env)/g  : 0;
 				u[0] = d; 
-				//u[0] = spp.birth_flux_in;  // FIXME: for now, using birth_flux_in as u0_in for test_model
 			}
 		}
 

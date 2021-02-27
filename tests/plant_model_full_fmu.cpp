@@ -68,7 +68,7 @@ class LightEnvironment : public plant::Environment{
 class PlantModel{
 	public:
 
-	double input_seed_rain = 200;	
+	double input_seed_rain = 1;	
 
 	plant::Plant seed; // prototype to be inserted
 
@@ -177,7 +177,7 @@ class PlantModel{
 };
 
 
-vector<double> fmu_create_grid(double xmin, double xmax, double dxmin = 1e-2, double dxmax=0.15, double multiplier=1.1){
+vector<double> fmu_create_grid(double xmin, double xmax, double dxmin = 1e-2, double dxmax=0.2, double multiplier=1.1){
 	vector <double> xvec;
 	double x = xmin, dx = dxmin;
 	while(x<xmax){

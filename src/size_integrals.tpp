@@ -32,11 +32,11 @@ double Solver<Model, Environment>::integrate_wudx_above(wFunc w, double t, doubl
 			//if (x_lo < xlow) break;
 			// ---- 
 
-			// This implementation allows stopping the integration exactly at xlow. FIXME: Need to check if that actually makes sense
+			// This implementation allows stopping the integration exactly at xlow. TODO: Need to check if that actually makes sense
 			//if (xlow < 0.01) cout << "x/w/u/f = " << x_lo << " " <<  w(*itx,t) <<  " " << exp(*itu)  << " " << f_lo << "\n";
 			if (x_lo < xlow){
-				// * interpolate to stop at xlow
-				//double f = f_lo + (f_hi-f_lo)/(x_hi-x_lo)*(xlow - x_lo);  // FIXME: these should stop at the interpolating point
+				// * interpolate to stop exactly at xlow
+				//double f = f_lo + (f_hi-f_lo)/(x_hi-x_lo)*(xlow - x_lo);  
 				//double x = xlow;
 				// * include integration up to next cohort
 				double f = f_lo;
@@ -64,8 +64,9 @@ double Solver<Model, Environment>::integrate_wudx_above(wFunc w, double t, doubl
 		if (spp.J == 1 || !integration_completed){  
 			//double g = spp.mod->growthRate(spp.xb, t, env);
 			//double u0 = (g>0)? spp.birth_flux_in * spp.mod->establishmentProbability(t, env)/g  :  0; 
+			// if (x_b < xlow){ // interpolate. FIXME: Need the interpolation condition here too. 
 			double u0 = spp.u0_save;
-			double x_lo = spp.xb;	// FIXME: should be max(spp.xb, xlow)
+			double x_lo = spp.xb;	
 			double f_lo =  w(x_lo, t)*u0;
 			I += (x_hi-x_lo)*(f_hi+f_lo);
 		}
@@ -87,7 +88,8 @@ double Solver<Model, Environment>::integrate_wudx_above(wFunc w, double t, doubl
 			double f = w(spp.X[i],t)*U[i];
 			//std::cout << "f = " << f << " " << spp.x[i] << " " << xlow << " " << spp.h[i] << std::endl;
 			if (spp.x[i] < xlow){
-				I += (spp.x[i+1]-spp.x[i]) * f; // FIXME: shoulld be spp.x[i+1]-xlow. Interpolator fails if this point is excluded
+				//I += (spp.x[i+1]-xlow) * f; // interpolating the last interval
+				I += spp.h[i] * f; // including full last interval
 				break;
 			}
 			else{

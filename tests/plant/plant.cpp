@@ -515,7 +515,6 @@ double Plant::height_seed(void) const {
 //  // values for LMA or height-leaf area scaling. Could instead use some
 //  // absolute maximum height for new seedling, e.g. 1m?
 	
-	//return 0.3257146; //0.3920458; // FIXME: JAI: Setting this from sample run, for now.
   const double
     h0 = height_given_mass_leaf(std::numeric_limits<double>::min()),
     h1 = height_given_mass_leaf(omega);
