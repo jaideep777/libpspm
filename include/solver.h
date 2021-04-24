@@ -31,6 +31,8 @@ class Solver{
 		double ode_initial_step_size = 1e-6;
 		double convergence_eps = 1e-6;
 		double cm_grad_dx = 1e-6;
+
+		bool update_cohorts = true;
 	} control;
 	
 	bool use_log_densities = true;
@@ -73,6 +75,7 @@ class Solver{
 	double calc_u0_CM();
 	void addCohort_CM();
 	void removeCohort_CM();
+	void removeDenseCohorts_CM();
 	
 	
 	void step_to(double tstop);

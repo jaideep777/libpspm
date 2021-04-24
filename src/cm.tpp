@@ -178,4 +178,58 @@ void Solver<Model,Environment>::removeCohort_CM(){
 }
 
 
+template<class Model, class Environment>
+void Solver<Model,Environment>::removeDenseCohorts_CM(){
+	// TODO: this should be made truely generic - maybe after making of indexset
+	//// cohorts are x0, x1, ...xJ-1,  u0, u1, .... uJ-1, a0,b0,c0,..., a1,b1,c1,...,aJ-1,bJ-1,cJ-1
+	//auto px = state.begin(); advance(px, 1); // point at x1
+	//auto pu = state.begin(); advance(pu, xsize()+1); // point at u1
+	//auto last = state.begin(); advance(last, xsize()-1); // point at xJ (1 past the last value to be considered)
+
+	////cout << *px << " " << *last << " " << *pu << endl;
+	vector<double> flags(state.size(), 0.0);
+
+	int n_removals = 0;
+	for (auto& spp : species_vec){
+		//if (spp.J < 500) continue;   // remove a cohort if number of cohorts in the species exceeds a threshold
+
+		int spp_start_index_new = spp.start_index - n_removals;  // start_index must be shifted left by number of elements removed so far
+		auto iset = spp.get_iterators(state);
+		auto iset_f = spp.get_iterators(flags);
+		
+		auto& itx = iset.get("X");
+		
+		iset.begin(); iset_f.begin();
+		++iset; ++iset_f; // point to second element (skip boundary cohort)
+
+		//int n_cohorts_removed = 0;
+		for (; iset.dist < iset.size-1; ++++iset, ++++iset_f){	// go till second-last element
+			double dist = std::min(abs(*std::next(itx) - *itx), abs(*itx - *std::prev(itx)));
+			if (dist < 1e-4){
+				--spp.J; //++n_cohorts_removed;
+				// mark flags to remove
+				auto iset_vec_f = iset_f.get();  // vector of iterators to remove. FIXME: How to ensure that extra variables dont come up in this vector which are not part of state?
+				for (int i=0; i<iset_vec_f.size(); ++i){
+					*iset_vec_f[i] = 1.0;
+					++n_removals;
+				}
+			}
+		}
+	
+		spp.start_index = spp_start_index_new;
+		//spp.J -= n_cohorts_removed; // reduce species size
+		setupLayout(spp);	
+	}
+	
+	// remove all flagged elements from state
+	auto pred = [this, &flags](const double& s) -> bool {
+		return flags[&s - (const double*)&this->state[0]] == 1.0; 
+	};
+
+	auto pend = std::remove_if(state.begin(), state.end(), pred);
+	state.erase(pend, state.end());
+	////for (auto z : state) cout << z << " "; cout << endl;
+
+}
+
 

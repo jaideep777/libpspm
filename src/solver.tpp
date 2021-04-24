@@ -303,8 +303,11 @@ void Solver<Model,Environment>::step_to(double tstop){
 		odeStepper.Step_to(tstop, current_time, state, derivs); // state = [pi0, Xint, N0, Nint]
 
 		// update cohorts
-		addCohort_CM();		// add before so that it becomes boundary cohort and first internal cohort can be (potentially) removed
-		removeCohort_CM();
+		if (control.update_cohorts){
+			addCohort_CM();		// add before so that it becomes boundary cohort and first internal cohort can be (potentially) removed
+			removeCohort_CM();
+		}
+		//removeDenseCohorts_CM();
 		env->computeEnv(current_time, state, this); // is required here IF rescaleEnv is used in derivs
 	}
 }
