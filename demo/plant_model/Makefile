@@ -4,17 +4,17 @@ FILE =
 TARGET = $(patsubst %.cpp, %.exec, $(FILE)) 
 
 # files
-SRCFILES  :=  $(wildcard ../src/*.cpp plant/*.cpp)
+SRCFILES  :=  $(wildcard ../../src/*.cpp plant/*.cpp)
 SRCFILES += $(FILE)
-HEADERS := $(wildcard ../src/*.tpp) $(wildcard ../include/*.h) 
+HEADERS := $(wildcard ../../src/*.tpp) $(wildcard ../../include/*.h) 
 # ------------------------------------------------------------------------------
 
 # paths
 #CUDA_INSTALL_PATH ?= /usr/local/cuda#-5.0
 
 # include and lib dirs (esp for cuda)
-INC_PATH := -I../include 
-LIB_PATH := -L../lib 
+INC_PATH := -I../../include 
+LIB_PATH := -L../../lib 
 
 # flags
 CPPFLAGS = -O3 -g -pg -std=c++11 -Wno-sign-compare -Wno-unused-variable -Wno-unused-but-set-variable
