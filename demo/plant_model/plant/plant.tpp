@@ -33,6 +33,7 @@ double Plant::assimilation(const Environment& environment,
 
 //		steady_clock::time_point t1 = steady_clock::now();
 	  A = plantIntegrator.integrate(f, x_min, x_max);
+	  //A = assimilation_leaf(environment.canopy_openness(height)); // JAI: Big leaf model
 //		steady_clock::time_point t2 = steady_clock::now();
 //	cout << "plant::assimilation [" << duration_cast<duration<double>>(t2 - t1).count() << " sec]" << endl;
 		

@@ -88,9 +88,6 @@ int main(){
 	
 	//initPlantParameters(plant::par);
 	
-	LightEnvironment env(1);	
-	env.light_profile.print();	
-	
 	//plant::Environment env(1);
 	plant::Plant p1;
 	p1.lma = 0.0825;
@@ -120,26 +117,37 @@ int main(){
 
 	//exit(1);
 
-    Solver<PlantModel, LightEnvironment> S(SOLVER_CM);
-    S.use_log_densities = true;
-	S.control.ode_eps = 1e-4;
-	S.setEnvironment(&env);
-	//    S.createSizeStructuredVariables({"mort", "fec", "heart_area", "heart_mass"});
-    
 	PlantModel M1;
 	M1.p = M1.seed = p1;
+	M1.input_seed_rain = 3.34e-14;
     cout << "HT1 === " << M1.p.vars.height << endl;
 	
 
     PlantModel M;
     M.p = M.seed = p;
+	M.input_seed_rain = 146.308;
     cout << "HT === " << M.p.vars.height << endl;
 
 
     PlantModel M3;
     M3.p = M3.seed = p3;
+	M3.input_seed_rain = 2996.29;
     cout << "HT === " << M3.p.vars.height << endl;
 
+    
+	for (int iter=0; iter <5; ++iter){	
+
+	cout << "~~~~~~~~~~~~ ITER = " << iter << " ~~~~~~~~~~~~~~~~\n";
+
+	LightEnvironment env(1);	
+	env.light_profile.print();	
+	
+	Solver<PlantModel, LightEnvironment> S(SOLVER_CM);
+    S.use_log_densities = true;
+	S.control.ode_eps = 1e-4;
+	S.setEnvironment(&env);
+	//    S.createSizeStructuredVariables({"mort", "fec", "heart_area", "heart_mass"});
+    
 	S.addSpecies(vector<double>(1, M1.p.vars.height), &M1, {"mort", "fec", "heart", "sap"}, M1.input_seed_rain);
 	S.addSpecies(vector<double>(1, M.p.vars.height), &M, {"mort", "fec", "heart", "sap"}, M.input_seed_rain);
 	S.addSpecies(vector<double>(1, M3.p.vars.height), &M3, {"mort", "fec", "heart", "sap"}, M3.input_seed_rain);
@@ -161,12 +169,12 @@ int main(){
 	ofstream bfout("seed_rain.txt");
 
 	vector <vector<double>> seeds_out(S.n_species());
-
+	vector <double> seeds;
 	for (size_t i=0; i < times.size(); ++i){
 
 		S.step_to(times[i]);		
 		
-		vector<double> seeds = S.newborns_out();
+		seeds = S.newborns_out();
 		for (int s=0; s< S.n_species(); ++s){
 			double S_D = 0.25;
 			seeds_out[s].push_back(seeds[s] * S_D * env.patch_age_density(times[i]));
@@ -193,42 +201,54 @@ int main(){
 	bfout.close();
 	sio.closeStreams();
 	cout << "derivative computations in g/m/f functions: " << M.nrc << " " << M.ndc << " " << M.nbc << endl;
+	
+	cout << "Seed rains: input/output\n" 
+		 << M1.input_seed_rain << " ---> " << seeds[0] << "\n"
+		 <<  M.input_seed_rain << " ---> " << seeds[1] << "\n"
+		 << M3.input_seed_rain << " ---> " << seeds[2] << "\n";
+		 
+	 M1.input_seed_rain = seeds[0];
+	 M.input_seed_rain  = seeds[1];
+	 M3.input_seed_rain = seeds[2];
 
-	for (int s=0; s< S.n_species(); ++s){
-		//auto spp = S.get_species(s);
-		//auto iset = spp->get_iterators(S.state);
-		//auto& itf = iset.get("fec");
-		//vector <double> fec_vec;
-		//fec_vec.reserve(spp->xsize());
-		//iset.rbegin();
-		//for (int i=0; !iset.rend(); --iset, ++i){
-		//    double patch_age_density = env.patch_age_density(times[i]);
-		//    double S_D = 0.25;
-		//    double output_seeds = spp->mod->input_seed_rain * S_D * patch_age_density * (*itf);
-		//    //cout << times[i] << " " << M.input_seed_rain << " " << S_D << " " << patch_age_density << " " << (*itf) << " | " << output_seeds << endl;
-		//    fec_vec.push_back(output_seeds);
-		//}
-		//cout << "Seed rain for Species " << s << " = " << pn::integrate_trapezium(times, fec_vec) << endl;
-		cout << "Seed rain for Species " << s << " (new method) = " << pn::integrate_trapezium(times, seeds_out[s]) << endl;
+	} // iterations over
 
-	}
 
-	for (int s=0; s< S.n_species(); ++s){
-		auto spp = S.get_species(s);
-		auto iset = spp->get_iterators(S.state);
-		auto& itf = iset.get("fec");
-		vector <double> fec_vec;
-		fec_vec.reserve(spp->xsize());
-		iset.rbegin();
-		for (int i=0; !iset.rend(); --iset, ++i){
-			double patch_age_density = env.patch_age_density(times[i]);
-			double S_D = 0.25;
-			double output_seeds = spp->mod->input_seed_rain * S_D * patch_age_density * (*itf);
-			//cout << times[i] << " " << M.input_seed_rain << " " << S_D << " " << patch_age_density << " " << (*itf) << " | " << output_seeds << endl;
-			fec_vec.push_back(output_seeds);
-		}
-		cout << "Seed rain for Species (Falster 17) " << s << " = " << pn::integrate_trapezium(times, fec_vec) << endl;
-	}
+	//for (int s=0; s< S.n_species(); ++s){
+	//    //auto spp = S.get_species(s);
+	//    //auto iset = spp->get_iterators(S.state);
+	//    //auto& itf = iset.get("fec");
+	//    //vector <double> fec_vec;
+	//    //fec_vec.reserve(spp->xsize());
+	//    //iset.rbegin();
+	//    //for (int i=0; !iset.rend(); --iset, ++i){
+	//    //    double patch_age_density = env.patch_age_density(times[i]);
+	//    //    double S_D = 0.25;
+	//    //    double output_seeds = spp->mod->input_seed_rain * S_D * patch_age_density * (*itf);
+	//    //    //cout << times[i] << " " << M.input_seed_rain << " " << S_D << " " << patch_age_density << " " << (*itf) << " | " << output_seeds << endl;
+	//    //    fec_vec.push_back(output_seeds);
+	//    //}
+	//    //cout << "Seed rain for Species " << s << " = " << pn::integrate_trapezium(times, fec_vec) << endl;
+	//    cout << "Seed rain for Species " << s << " (new method) = " << pn::integrate_trapezium(times, seeds_out[s]) << endl;
+
+	//}
+
+	//for (int s=0; s< S.n_species(); ++s){
+	//    auto spp = S.get_species(s);
+	//    auto iset = spp->get_iterators(S.state);
+	//    auto& itf = iset.get("fec");
+	//    vector <double> fec_vec;
+	//    fec_vec.reserve(spp->xsize());
+	//    iset.rbegin();
+	//    for (int i=0; !iset.rend(); --iset, ++i){
+	//        double patch_age_density = env.patch_age_density(times[i]);
+	//        double S_D = 0.25;
+	//        double output_seeds = spp->mod->input_seed_rain * S_D * patch_age_density * (*itf);
+	//        //cout << times[i] << " " << M.input_seed_rain << " " << S_D << " " << patch_age_density << " " << (*itf) << " | " << output_seeds << endl;
+	//        fec_vec.push_back(output_seeds);
+	//    }
+	//    cout << "Seed rain for Species (Falster 17) " << s << " = " << pn::integrate_trapezium(times, fec_vec) << endl;
+	//}
 	
 
 }

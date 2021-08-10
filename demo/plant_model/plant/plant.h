@@ -53,6 +53,8 @@ struct PlantParameters{
 	double a_d0;
 	// Baseline structural mortality rate
 	double d_I;
+	double c_d0;
+	double c_d1;
 	// Baseline for growth mortality rate
 	double a_dG1;
 	// Coefficient for dry mass production in mortality function

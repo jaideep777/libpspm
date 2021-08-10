@@ -93,30 +93,23 @@ int main(){
 	
 	//plant::Environment env(1);
 	plant::Plant p1;
-	p1.lma = 0.0825;
-	p1.rho = 350;
-	p1.initParameters();
-	p1.vars.height = p1.par.height_0; //0.3257146; //0.3920458; //0.3441948;
-	p1.vars.area_leaf = p1.par.area_leaf_0; 
 
-	plant::Plant p;
-	p.lma = 0.2625;
-	p.rho = 350;
-	p.initParameters();
-	p.vars.height = p.par.height_0; //0.3257146; //0.3920458; //0.3441948;
-	p.vars.area_leaf = p.par.area_leaf_0; 
+	//plant::Plant p;
+	//p.lma = 0.2625;
+	//p.initParameters();
+	//p.vars.height = p.par.height_0; //0.3257146; //0.3920458; //0.3441948;
+	//p.vars.area_leaf = p.par.area_leaf_0; 
 
 
-	plant::Plant p3;
-	p3.lma = 0.4625;
-	p3.rho = 350;
-	p3.initParameters();
-	p3.vars.height = p3.par.height_0; //0.3257146; //0.3920458; //0.3441948;
-	p3.vars.area_leaf = p3.par.area_leaf_0; 
+	//plant::Plant p3;
+	//p3.lma = 0.4625;
+	//p3.initParameters();
+	//p3.vars.height = p3.par.height_0; //0.3257146; //0.3920458; //0.3441948;
+	//p3.vars.area_leaf = p3.par.area_leaf_0; 
 
 	
 	cout << p1 << endl;
-	cout << p << endl;
+	//cout << p << endl;
 
 	//exit(1);
 
@@ -131,25 +124,25 @@ int main(){
     cout << "HT1 === " << M1.p.vars.height << endl;
 	
 
-    PlantModel M;
-    M.p = M.seed = p;
-    cout << "HT === " << M.p.vars.height << endl;
+    //PlantModel M;
+    //M.p = M.seed = p;
+    //cout << "HT === " << M.p.vars.height << endl;
 
 
-    PlantModel M3;
-    M3.p = M3.seed = p3;
-    cout << "HT === " << M3.p.vars.height << endl;
+    //PlantModel M3;
+    //M3.p = M3.seed = p3;
+    //cout << "HT === " << M3.p.vars.height << endl;
 
 	S.addSpecies(vector<double>(1, M1.p.vars.height), &M1, {"mort", "fec", "heart", "sap"}, M1.input_seed_rain);
-	S.addSpecies(vector<double>(1, M.p.vars.height), &M, {"mort", "fec", "heart", "sap"}, M.input_seed_rain);
-	S.addSpecies(vector<double>(1, M3.p.vars.height), &M3, {"mort", "fec", "heart", "sap"}, M3.input_seed_rain);
+	//S.addSpecies(vector<double>(1, M.p.vars.height), &M, {"mort", "fec", "heart", "sap"}, M.input_seed_rain);
+	//S.addSpecies(vector<double>(1, M3.p.vars.height), &M3, {"mort", "fec", "heart", "sap"}, M3.input_seed_rain);
 	
 	S.resetState();
     S.initialize();
 
     S.print();
 
-	vector <double> times = generateDefaultCohortSchedule(205.32);
+	vector <double> times = generateDefaultCohortSchedule(105.32);
 	for (auto t : times) cout << t << " "; cout << endl;
 
 	
@@ -158,8 +151,7 @@ int main(){
 	sio.openStreams();
 
 	ofstream fli("light_profile_ind_plant.txt");
-	ofstream bfout("seed_rain.txt");
-
+	
 	vector <vector<double>> seeds_out(S.n_species());
 
 	for (size_t i=0; i < times.size(); ++i){
@@ -172,14 +164,7 @@ int main(){
 			seeds_out[s].push_back(seeds[s] * S_D * env.patch_age_density(times[i]));
 		}
 
-		bfout << times[i] << "\t";
-		for (int s=0; s< S.n_species(); ++s){
-			//bfout << *seeds_out[s].rbegin() << "\t";
-			bfout << seeds[s] << "\t";
-		}
-		bfout << "\n";
-
-		cout << times[i] << " " << S.get_species(0)->xsize() << " " << seeds[0] << " " << env.light_profile.npoints << " | " << M.nrc << " " << M.ndc << " " << M.nbc <<"\n";
+		cout << times[i] << " " << S.get_species(0)->xsize() << " " << seeds[0] << " " << env.light_profile.npoints << " | " << M1.nrc << " " << M1.ndc << " " << M1.nbc <<"\n";
 
 		vector<double> xl = seq(0, 20, 200);
 		for (auto h : xl) fli << env.canopy_openness(h) << "\t";
@@ -190,9 +175,8 @@ int main(){
 	}
 	
 	fli.close();
-	bfout.close();
 	sio.closeStreams();
-	cout << "derivative computations in g/m/f functions: " << M.nrc << " " << M.ndc << " " << M.nbc << endl;
+	cout << "derivative computations in g/m/f functions: " << M1.nrc << " " << M1.ndc << " " << M1.nbc << endl;
 
 	for (int s=0; s< S.n_species(); ++s){
 		//auto spp = S.get_species(s);
