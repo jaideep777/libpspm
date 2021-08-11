@@ -5,7 +5,8 @@
 #include <list>
 #include <string>
 
-#include "iterator_set.h"
+//#include "iterator_set.h"
+#include "cohort.h"
 
 // forward declaration of Solver so Species can befriend it
 template <class Model, class Environment>
@@ -19,13 +20,13 @@ class Species{
 	friend class Solver;
 
 	private: // private members
-	int start_index;
+	//int start_index;
 	int J;	
 	
-	std::vector<std::string> varnames;			// state has internal variables (x, u) and possibly extra variables 
-	std::vector<std::string> varnames_extra;		//   +-- which will be created in the state in this order (for each species)
-	std::vector<int> strides;				// defines how the variables are packed into the state vector
-	std::vector<int> offsets;				// 
+	//std::vector<std::string> varnames;			// state has internal variables (x, u) and possibly extra variables 
+	//std::vector<std::string> varnames_extra;		//   +-- which will be created in the state in this order (for each species)
+	//std::vector<int> strides;				// defines how the variables are packed into the state vector
+	//std::vector<int> offsets;				// 
 	
 	double birth_flux_in;
 
@@ -47,25 +48,26 @@ class Species{
 	bool bfin_is_u0in = false;
 	
 	private: // private functions
-	int addVar(std::string name, int stride, int offset);
-	void clearVars();
+	//int addVar(std::string name, int stride, int offset);
+	//void clearVars();
 
 	public: // public members
 	double xb, xm;  // FIXME. Dangerous because xm is never updated
 	bool is_resident;
 	
-	Model * mod = nullptr;
+	//Model * mod = nullptr;
+	std::vector<Cohort<Model>> cohorts;
 
 	public: // public functions
-	IteratorSet<std::vector<double>::iterator> get_iterators(std::vector<double> &v);
-	double get_maxSize(std::vector<double>::iterator state_begin);
-	std::vector<std::string> get_varnames();
+	//IteratorSet<std::vector<double>::iterator> get_iterators(std::vector<double> &v);
+	double get_maxSize(typename std::vector<Cohort<Model>>::iterator cohorts_begin);
+	//std::vector<std::string> get_varnames();
 	int xsize();
 	int size();
 
-	void set_model(Model *M);
+	//void set_model(Model *M);
 	void set_inputBirthFlux(double b);
-	double set_iStateVariables(std::vector<std::string> names);
+	//double set_iStateVariables(std::vector<std::string> names);
 
 	void set_bfin_is_u0in(bool flag);
 
