@@ -1,4 +1,10 @@
 
+template<class Model>
+Species<Model>::Species(std::vector<double> breaks){
+	J = breaks.size(); // changes with 
+	cohorts.resize(J);
+	for (int i=0; i<J; ++i) cohorts[i].x = breaks[i];	
+}
 
 
 //template<class Model>
@@ -23,8 +29,7 @@
 //}
 
 
-template<class Model>
-void Species<Model>::set_inputBirthFlux(double b){
+void Species_Base::set_inputBirthFlux(double b){
 	birth_flux_in = b;
 }
 
@@ -34,14 +39,12 @@ void Species<Model>::set_inputBirthFlux(double b){
 //    varnames_extra = names;
 //}
 
-template<class Model>
-void Species<Model>::set_bfin_is_u0in(bool flag){
+void Species_Base::set_bfin_is_u0in(bool flag){
 	bfin_is_u0in = flag;
 }
 
 
-template<class Model>
-int Species<Model>::xsize(){
+int Species_Base::xsize(){
 	return J;
 }
 
@@ -54,10 +57,10 @@ int Species<Model>::xsize(){
 
 
 template<class Model>
-double Species<Model>::get_maxSize(typename std::vector<Cohort<Model>>::iterator cohorts_begin){
+double Species<Model>::get_maxSize(){ // TODO ALERT: make sure this sees the latest state
 	if (!X.empty()) return *x.rbegin();	// for FMU, get this from X
 	else {								// else get from state vector
-		return next(cohorts_begin, J-1)->x;
+		return cohorts[J-1].x;
 	}
 }
 
@@ -77,13 +80,13 @@ double Species<Model>::get_maxSize(typename std::vector<Cohort<Model>>::iterator
 
 
 template <class Model>
-void Species<Model>::print(std::vector<double> &sv, std::vector<double> &rv){
-	////std::cout << "~~~~~ Species ~~~~~\n";
+void Species<Model>::print(){
+	std::cout << "~~~~~ Species ~~~~~\n";
 	//auto iset = get_iterators(sv);
 	//std::cout << "start index = " << start_index <<"\n";
 	//std::cout << "Model = " << mod << "\n";
-	//std::cout << "xsize = " << J << "\n";
-	//std::cout << "Input birth flux = " << birth_flux_in << "\n";
+	std::cout << "xsize = " << J << "\n";
+	std::cout << "Input birth flux = " << birth_flux_in << "\n";
 	//if (!X.empty()){
 	//    iset.push_back("_X", X.begin(),1);
 	//    iset.push_back("_h", h.begin(),1);
@@ -92,13 +95,17 @@ void Species<Model>::print(std::vector<double> &sv, std::vector<double> &rv){
 	//    std::cout << "\n";
 	//}
 
+	std::cout << "Cohorts:\n";
+	for (auto& c : cohorts) std::cout << c.x << " ";
+	std::cout << "\n";
+	std::cout << "Max size = " << get_maxSize() << "\n";
 	//std::cout << "State (" << size() << "):\n";
 	//iset.print();
 	
 	//std::cout << "Rates (" << size() << "):\n";
 	//auto irates = get_iterators(rv);
 	//irates.print();
-	//std::cout << "-------\n\n";
+	std::cout << "-------\n\n";
 
 }
 

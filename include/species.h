@@ -12,14 +12,13 @@
 template <class Model, class Environment>
 class Solver;
 
-template <class Model>
-class Species{
 
+class Species_Base{
 	// All kinds of Solvers should be friends of Species
 	template<class,class>
 	friend class Solver;
 
-	private: // private members
+	protected: // private members
 	//int start_index;
 	int J;	
 	
@@ -40,14 +39,14 @@ class Species{
 	std::vector <double> h;
 	std::vector <double> schedule; // used only by CM/EBT
 
-	public:
+	protected:
 	double u0_save;
 
 	public:
 	//debug only
 	bool bfin_is_u0in = false;
 	
-	private: // private functions
+	//private: // private functions
 	//int addVar(std::string name, int stride, int offset);
 	//void clearVars();
 
@@ -56,23 +55,35 @@ class Species{
 	bool is_resident;
 	
 	//Model * mod = nullptr;
-	std::vector<Cohort<Model>> cohorts;
 
 	public: // public functions
+
+	
 	//IteratorSet<std::vector<double>::iterator> get_iterators(std::vector<double> &v);
-	double get_maxSize(typename std::vector<Cohort<Model>>::iterator cohorts_begin);
 	//std::vector<std::string> get_varnames();
 	int xsize();
 	int size();
 
-	//void set_model(Model *M);
 	void set_inputBirthFlux(double b);
-	//double set_iStateVariables(std::vector<std::string> names);
-
 	void set_bfin_is_u0in(bool flag);
 
-	void print(std::vector<double> &sv, std::vector<double> &rv);
+	public:
+	virtual double get_maxSize() = 0;
+	virtual void print() = 0;
 };
+
+
+template <class Model>
+class Species : public Species_Base{
+	public:
+	std::vector<Cohort<Model>> cohorts;
+
+	public:
+	Species(std::vector<double> breaks);
+	double get_maxSize();
+	void print();
+};
+
 
 #include "../src/species.tpp"
 

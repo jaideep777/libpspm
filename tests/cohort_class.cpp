@@ -5,7 +5,7 @@
 using namespace std;
 
 
-class Individual {
+class Plant {
 	public:
 	double lma = 30;
 
@@ -31,8 +31,27 @@ class Individual {
 	}
 };
 
+
+class Insect {
+	public: 
+};
+
+
 int main(){
-	Cohort<Individual> C;
+	Cohort<Plant> C;
+	
+	Species<Plant> S(vector<double> {1,2,3,4,5});
+	S.print();
+
+	Species<Insect> I(vector<double> {1.1,2.1,3.1});
+
+	Species_Base * S1 = &S;
+	S1->print();
+	cout << "S size: " << S1->get_maxSize() << "\n";
+
+	Species_Base * S2 = &I;
+	S2->print();
+	cout << "I size: " << S2->get_maxSize() << "\n";
 
 	std::cout << " " << C.lma << " " << C.x << " " << C.u << " " << C.id << "\n";
 }
