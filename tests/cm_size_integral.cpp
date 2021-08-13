@@ -5,8 +5,9 @@ int main(){
 	TestModel M;
 	Environment E;
 
-	Solver<Environment> S(SOLVER_CM);
+	Solver S(SOLVER_CM);
 	S.use_log_densities = true;
+	S.setEnvironment(&E);
 
 	Species<TestModel> spp;
 

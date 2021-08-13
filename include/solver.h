@@ -5,18 +5,19 @@
 #include <list>
 #include <map>
 
+#include "environment.h"
 #include "species.h"
 #include "pspm_ode_solver3.h"
 
 enum PSPM_SolverType {SOLVER_FMU, SOLVER_MMU, SOLVER_CM, SOLVER_EBT};
 
-template <class Environment>
 class Solver{
 	private:
 	PSPM_SolverType method;
 	RKCK45<vector<double>> odeStepper;
-	
-	Environment * env;
+
+	public:	
+	EnvironmentBase * env;
 	
 	public:
 	// The current state of the system, {t, S, dS/dt} 
@@ -46,7 +47,7 @@ class Solver{
 	//Species<Model>* get_species(int id);
 	//int n_species();
 
-	void setEnvironment(Environment * _env);
+	void setEnvironment(EnvironmentBase * _env);
 
 	//int setupLayout(Species<Model> &s);
 	void resetState(); 	

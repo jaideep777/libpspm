@@ -9,13 +9,11 @@
 #include "cohort.h"
 
 // forward declaration of Solver so Species can befriend it
-template <class Environment>
 class Solver;
 
 
 class Species_Base{
 	// All kinds of Solvers should be friends of Species
-	template<class>
 	friend class Solver;
 
 	protected: // private members
@@ -83,6 +81,7 @@ class Species_Base{
 	virtual double init_density(int i, double x) = 0;
 
 	virtual void copyExtraStateToCohorts(std::vector<double>::iterator &it) = 0;
+
 };
 
 

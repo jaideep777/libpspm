@@ -1,7 +1,9 @@
 #ifndef __PSPM_TEST_TEST_TEST_MODEL_H_
 #define __PSPM_TEST_TEST_TEST_MODEL_H_
 
-class Environment{
+
+
+class Environment : public EnvironmentBase{
 	
 	double E = 0;
 
@@ -15,7 +17,7 @@ class Environment{
 	// In such a case, the solver's SubdivisionSpline can be ussed
 	// Note: The state vector in the solver will not be updated until the RK step is completed. 
 	// Hence, explicitly pass the state to this function.
-	void computeEnv(double t, vector<double> &state_vec, Solver<Environment> * S){
+	void computeEnv(double t, Solver * S){
 		//             _xm 
 		// Calculate _/ w(z,t)u(z,t)dz
 		//         xb
@@ -72,19 +74,22 @@ class TestModel : public Plant{
 		return pow(1-x,2)/pow(1+x,4) + (1-x)/pow(1+x,3);
 	}
 	
-	double growthRate(double x, double t, Environment* env){
+	double growthRate(double x, double t, void * _env){
+		Environment* env = (Environment*)_env;
 		double E = env->evalEnv(x,t);
 		double a = 0.16+0.22*exp(-0.225*t*t);
 		return 0.225*(1-x*x)*(E/(1+E*E))*t*(1+a*a)/a;
 	}
 
-	double mortalityRate(double x, double t, Environment* env){
+	double mortalityRate(double x, double t, void * _env){
+		Environment* env = (Environment*)_env;
 		double E = env->evalEnv(x,t);
 		double a = 0.16+0.22*exp(-0.225*t*t);
 		return 1.35*t*E/a;
 	}
 
-	double birthRate(double x, double t, Environment* env){
+	double birthRate(double x, double t, void * _env){
+		Environment* env = (Environment*)_env;
 		double E = env->evalEnv(x,t);
 		double oneplusa = 1.16+0.22*exp(-0.225*t*t);
 		double a = 0.16+0.22*exp(-0.225*t*t);
@@ -93,7 +98,7 @@ class TestModel : public Plant{
 		return n1*n2;
 	}
 
-	double establishmentProbability(double t, Environment * env){
+	double establishmentProbability(double t, void  * _env){
 		return 1;
 	}
 	

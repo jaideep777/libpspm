@@ -1,6 +1,5 @@
-template<class Environment>
 template<typename wFunc>
-double Solver<Environment>::integrate_wudx_above(wFunc w, double t, double xlow, int species_id){
+double Solver::integrate_wudx_above(wFunc w, double t, double xlow, int species_id){
 
 	Species_Base* spp = species_vec[species_id];
 
@@ -135,9 +134,8 @@ double Solver<Environment>::integrate_wudx_above(wFunc w, double t, double xlow,
 
 
 
-template<class Environment>
 template<typename wFunc>
-double Solver<Environment>::integrate_x(wFunc w, double t, int species_id){
+double Solver::integrate_x(wFunc w, double t, int species_id){
 	Species_Base* spp = species_vec[species_id];
 
 	//if (method == SOLVER_FMU){

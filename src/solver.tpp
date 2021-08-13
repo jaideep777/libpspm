@@ -31,14 +31,12 @@ std::vector <double> logseq(double from, double to, int len){
 //    if (method == SOLVER_EBT) return J;
 //}
 
-template<class Environment>
-Solver<Environment>::Solver(PSPM_SolverType _method) : odeStepper(0, 1e-6, 1e-6) {
+Solver::Solver(PSPM_SolverType _method) : odeStepper(0, 1e-6, 1e-6) {
 	method = _method;
 }
 
 
-//template<class Environment>
-//int Solver<Model,Environment>::setupLayout(Species<Model> &s){
+////int Solver<Model,Environment>::setupLayout(Species<Model> &s){
 //    // Set up layout of state vector, for e.g.
 //    //  ------------------------------------------------------------
 //    // | x | x | x : u | u | u : a | b | c | a | b | c | a | b | c |
@@ -65,8 +63,7 @@ Solver<Environment>::Solver(PSPM_SolverType _method) : odeStepper(0, 1e-6, 1e-6)
 //}
 
 
-template<class Environment>
-void Solver<Environment>::addSpecies(std::vector<double> xbreaks, Species_Base* s, int n_extra_vars, double input_birth_flux){
+void Solver::addSpecies(std::vector<double> xbreaks, Species_Base* s, int n_extra_vars, double input_birth_flux){
 	s->set_inputBirthFlux(input_birth_flux);
 	s->n_extra_statevars = n_extra_vars;
 
@@ -93,8 +90,7 @@ void Solver<Environment>::addSpecies(std::vector<double> xbreaks, Species_Base* 
 }
 
 
-template<class Environment>
-void Solver<Environment>::addSpecies(int _J, double _xb, double _xm, bool log_breaks, Species_Base* s,
+void Solver::addSpecies(int _J, double _xb, double _xm, bool log_breaks, Species_Base* s,
 							   int n_extra_vars, double input_birth_flux){
 	vector<double> xbreaks;
 	if (log_breaks) xbreaks = logseq(_xb, _xm, _J+1);
@@ -104,8 +100,7 @@ void Solver<Environment>::addSpecies(int _J, double _xb, double _xm, bool log_br
 }
 
 
-template<class Environment>
-void Solver<Environment>::resetState(){
+void Solver::resetState(){
 	current_time = 0;
 	odeStepper = RKCK45<vector<double>> (0, control.ode_eps, control.ode_initial_step_size);  // this is a cheap operation, but this will empty the internal containers, which will then be (automatically) resized at next 1st ODE step. Maybe add a reset function to the ODE stepper? 
 
@@ -131,14 +126,12 @@ void Solver<Environment>::resetState(){
 }
 
 
-template<class Environment>
-void Solver<Environment>::setEnvironment(Environment * _env){
+void Solver::setEnvironment(EnvironmentBase * _env){
 	env = _env;
 }
 
 
-//template<class Environment>
-//Species<Model>* Solver<Model,Environment>::get_species(int id){
+////Species<Model>* Solver<Model,Environment>::get_species(int id){
 //    return &species_vec[id];
 //}
 
@@ -157,8 +150,7 @@ void Solver<Environment>::setEnvironment(Environment * _env){
 //}
 
 
-template<class Environment>
-double Solver<Model,Environment>::get_u0(double t, int s){
+double Solver::get_u0(double t, int s){
 	Species_Base * spp = species_vec[s];
 	
 	if (spp->bfin_is_u0in){
@@ -173,8 +165,7 @@ double Solver<Model,Environment>::get_u0(double t, int s){
 }
 
 
-template<class Environment>
-void Solver<Environment>::print(){
+void Solver::print(){
 	std::cout << ">> SOLVER \n";
 	string types[] = {"FMU", "MMU", "CM", "EBT"};
 	std::cout << "+ Type: " << types[method] << std::endl;
@@ -191,8 +182,7 @@ void Solver<Environment>::print(){
 }
 
 
-template<class Environment>
-void Solver<Environment>::initialize(){
+void Solver::initialize(){
 	
 	for (int k=0; k<species_vec.size(); ++k){
 		Species_Base* s = species_vec[k];
@@ -241,8 +231,7 @@ void Solver<Environment>::initialize(){
 }
 
 
-template<class Environment>
-void Solver<Environment>::copyStateToCohorts(){
+void Solver::copyStateToCohorts(){
 
 	for (int k=0; k<species_vec.size(); ++k){
 		Species_Base* s = species_vec[k];
@@ -281,8 +270,7 @@ void Solver<Environment>::copyStateToCohorts(){
 }
 
 
-//template<class Environment>
-//void Solver<Environment>::getRatesFromCohorts(){
+////void Solver::getRatesFromCohorts(){
 
 	//for (int k=0; k<species_vec.size(); ++k){
 		//Species_Base* s = species_vec[k];
