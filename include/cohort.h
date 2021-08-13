@@ -10,8 +10,8 @@ class Cohort : public Ind {
 	double u = 2;
 	int id = 0;	
 
-	void print(){
-		std::cout << "id = " << id << ", x = " << x << ", u = " << u << "\n"; 
+	void print_xu(){
+		std::cout << id << "\t" << x << "\t" << u << "\t"; 
 	}	
 };
 

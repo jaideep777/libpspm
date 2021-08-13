@@ -15,8 +15,7 @@ class Environment{
 	// In such a case, the solver's SubdivisionSpline can be ussed
 	// Note: The state vector in the solver will not be updated until the RK step is completed. 
 	// Hence, explicitly pass the state to this function.
-	template<class Model>
-	void computeEnv(double t, vector<double> &state_vec, Solver<Model,Environment> * S){
+	void computeEnv(double t, vector<double> &state_vec, Solver<Environment> * S){
 		//             _xm 
 		// Calculate _/ w(z,t)u(z,t)dz
 		//         xb
@@ -28,7 +27,7 @@ class Environment{
 			else 
 				return 0;
 		};
-		E = S->integrate_x(w, t, state_vec, 0);
+		E = S->integrate_x(w, t, 0);
 	}
 
 };
@@ -42,16 +41,11 @@ class Plant{
 	double viable_seeds;
 	double heart_mass;
 	double sap_mass;
-	
+
+	vector<string> varnames = {"mort", "vs", "heart", "sap"};
+
 	Plant(double h){
 		height = h;
-	}
-
-	void init_state(){
-		mortality = 0.1*height; //exp(-height);	
-		viable_seeds = 100*height;
-		heart_mass = 1000*height;
-		sap_mass = 10*height;
 	}
 
 	vector<double> calcRates(){
@@ -68,11 +62,13 @@ class Plant{
 
 
 
-class TestModel{
+class TestModel : public Plant{
 	public:
 	double sc = 10;
-	
-	double initDensity(double x, Environment * env){
+
+	TestModel() : Plant(0) {}
+
+	double init_density(double x){
 		return pow(1-x,2)/pow(1+x,4) + (1-x)/pow(1+x,3);
 	}
 	
@@ -101,36 +97,42 @@ class TestModel{
 		return 1;
 	}
 	
-	// optional functions, if extra size-structured variables are desired
-	vector<double> initStateExtra(double x, double t, Environment * env){
-		Plant p(x);
-		p.init_state();
-		vector<double> sv;
-	    sv.reserve(4);	
-		sv.push_back(p.mortality); 
-		sv.push_back(p.viable_seeds); 
-		sv.push_back(p.heart_mass); 
-		sv.push_back(p.sap_mass);
-		return sv;
-	}
-
-	vector<double>::iterator calcRates_extra(double x, double t, Environment * env, 
-											vector<double>::iterator istate, vector<double>::iterator irates){
+	vector<double>::iterator init_state(double x, vector<double>::iterator &it){
+		height = x;
+		mortality = 0.1*height; //exp(-height);	
+		viable_seeds = 100*height;
+		heart_mass = 1000*height;
+		sap_mass = 10*height;
 		
-		Plant p(x);
-		p.init_state();
-		vector<double> r = p.calcRates();
-		*irates++ = r[0];
-		*irates++ = r[1];
-		*irates++ = r[2];
-		*irates++ = r[3];
-
-		return irates;
-	
+		*it++ = mortality;
+		*it++ = viable_seeds;
+		*it++ = heart_mass;
+		*it++ = sap_mass;
+		return it;
 	}
 
-	//void computeEnv(double t, vector<double> &state_vec, Solver<TestModel> * S){
-	//}
+	vector<double>::iterator set_state(vector<double>::iterator &it){
+		mortality = *it++;
+		viable_seeds = *it++;
+		heart_mass = *it++;
+		sap_mass = *it++;
+		return it;
+	}
+
+	vector<double>::iterator get_rates(vector<double>::iterator &it){
+		vector<double> r = calcRates();
+		*it++ = r[0];
+		*it++ = r[1];
+		*it++ = r[2];
+		*it++ = r[3];
+		return it;
+	}
+
+	void print(){
+		cout << mortality << "\t" << viable_seeds << "\t" << heart_mass << "\t" << sap_mass << "\t";
+	}
+
+
 };
 
 

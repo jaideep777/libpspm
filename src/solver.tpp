@@ -31,61 +31,61 @@ std::vector <double> logseq(double from, double to, int len){
 //    if (method == SOLVER_EBT) return J;
 //}
 
-template<class Model, class Environment>
-Solver<Model,Environment>::Solver(PSPM_SolverType _method) : odeStepper(0, 1e-6, 1e-6) {
+template<class Environment>
+Solver<Environment>::Solver(PSPM_SolverType _method) : odeStepper(0, 1e-6, 1e-6) {
 	method = _method;
 }
 
 
-template<class Model, class Environment>
-int Solver<Model,Environment>::setupLayout(Species<Model> &s){
-	// Set up layout of state vector, for e.g.
-	//  ------------------------------------------------------------
-	// | x | x | x : u | u | u : a | b | c | a | b | c | a | b | c |
-	//  ------------------------------------------------------------
-	//  In above layout, the internal variables x and u are tightly
-	//  packed, and the extra variables a, b, c are interleaved. 
-	//  This arrangement is cache friendly because:
-	//  1. When calculating integrals, x and u are traversed
-	//  2. When setting rates, typically a,b,c are calculated one 
-	//  after the other for each x.
-	s.clearVars();
-	if (method == SOLVER_FMU){ 
-		s.addVar("u", 1, s.J);		// uuuuu..
-	}
-	else{
-		s.addVar("X", 1, s.J);		// xxxxx.. uuuuu..
-		s.addVar("u", 1, s.J);		// 
-	}
-	for (int i=0; i < s.varnames_extra.size(); ++i){
-		s.addVar(s.varnames_extra[i], s.varnames_extra.size(), 1);  // abc abc abc .. 
-	}
+//template<class Environment>
+//int Solver<Model,Environment>::setupLayout(Species<Model> &s){
+//    // Set up layout of state vector, for e.g.
+//    //  ------------------------------------------------------------
+//    // | x | x | x : u | u | u : a | b | c | a | b | c | a | b | c |
+//    //  ------------------------------------------------------------
+//    //  In above layout, the internal variables x and u are tightly
+//    //  packed, and the extra variables a, b, c are interleaved. 
+//    //  This arrangement is cache friendly because:
+//    //  1. When calculating integrals, x and u are traversed
+//    //  2. When setting rates, typically a,b,c are calculated one 
+//    //  after the other for each x.
+//    s.clearVars();
+//    if (method == SOLVER_FMU){ 
+//        s.addVar("u", 1, s.J);		// uuuuu..
+//    }
+//    else{
+//        s.addVar("X", 1, s.J);		// xxxxx.. uuuuu..
+//        s.addVar("u", 1, s.J);		// 
+//    }
+//    for (int i=0; i < s.varnames_extra.size(); ++i){
+//        s.addVar(s.varnames_extra[i], s.varnames_extra.size(), 1);  // abc abc abc .. 
+//    }
 
-	return s.size();
-}
+//    return s.size();
+//}
 
 
-template<class Model, class Environment>
-void Solver<Model,Environment>::addSpecies(std::vector<double> xbreaks, Model* _mod, 
-							   std::vector<std::string> extra_vars, double input_birth_flux){
-	Species<Model> s;
-	s.mod = _mod;
-	s.varnames_extra = extra_vars;
-	s.set_inputBirthFlux(input_birth_flux);
-	
-	s.xb = xbreaks[0];
-	s.xm = xbreaks[xbreaks.size()-1];
+template<class Environment>
+void Solver<Environment>::addSpecies(std::vector<double> xbreaks, Species_Base* s, int n_extra_vars, double input_birth_flux){
+	s->set_inputBirthFlux(input_birth_flux);
+	s->n_extra_statevars = n_extra_vars;
 
-	if (method == SOLVER_FMU) s.J = xbreaks.size()-1;	
-	if (method == SOLVER_MMU) s.J = xbreaks.size()-1;  
-	if (method == SOLVER_CM ) s.J = xbreaks.size();
-	if (method == SOLVER_EBT) s.J = xbreaks.size();
+	s->set_xb(xbreaks[0]);
+	//s->xm = xbreaks[xbreaks.size()-1];
 
-	s.x = xbreaks;
+	int J;
+	if (method == SOLVER_FMU) J = xbreaks.size()-1;	
+	if (method == SOLVER_MMU) J = xbreaks.size()-1;  
+	if (method == SOLVER_CM ) J = xbreaks.size();
+	if (method == SOLVER_EBT) J = xbreaks.size();
 
-	int state_size = setupLayout(s);
+	s->x = xbreaks;
+	s->resize(J);
 
-	s.start_index = state.size();	// New species will be appended to the end of state vector
+	int state_size = s->J + s->J*n_extra_vars;    // u and extra vars
+	if (method != SOLVER_FMU) state_size += s->J; // x for solvers other than FMU
+
+	s->start_index = state.size();	// New species will be appended to the end of state vector
 	state.resize(state.size()+state_size);  // This will resize state for all species additions, but this in only initialization so its okay.
 	rates.resize(rates.size()+state_size);
 
@@ -93,20 +93,20 @@ void Solver<Model,Environment>::addSpecies(std::vector<double> xbreaks, Model* _
 }
 
 
-template<class Model, class Environment>
-void Solver<Model,Environment>::addSpecies(int _J, double _xb, double _xm, bool log_breaks, Model* _mod,
-							   std::vector<std::string> extra_vars, double input_birth_flux){
+template<class Environment>
+void Solver<Environment>::addSpecies(int _J, double _xb, double _xm, bool log_breaks, Species_Base* s,
+							   int n_extra_vars, double input_birth_flux){
 	vector<double> xbreaks;
 	if (log_breaks) xbreaks = logseq(_xb, _xm, _J+1);
 	else            xbreaks =    seq(_xb, _xm, _J+1);
 
-	addSpecies(xbreaks, _mod, extra_vars, input_birth_flux);
+	addSpecies(xbreaks, s, n_extra_vars, input_birth_flux);
 }
 
 
-template<class Model, class Environment>
-void Solver<Model,Environment>::resetState(){
-   	current_time = 0;
+template<class Environment>
+void Solver<Environment>::resetState(){
+	current_time = 0;
 	odeStepper = RKCK45<vector<double>> (0, control.ode_eps, control.ode_initial_step_size);  // this is a cheap operation, but this will empty the internal containers, which will then be (automatically) resized at next 1st ODE step. Maybe add a reset function to the ODE stepper? 
 
 	// state.resize(state_size);   // state will be resized by addSpecies
@@ -116,77 +116,65 @@ void Solver<Model,Environment>::resetState(){
 
 	// initialize grid/cohorts for each species
 	for (int k=0; k<species_vec.size(); ++k){
-		Species<Model> &s = species_vec[k]; // easy reference 
+		Species_Base* s = species_vec[k]; // easy reference 
 
 		if (method == SOLVER_FMU){	
-			s.X.resize(s.J);
-			for (size_t i=0; i<s.J; ++i) s.X[i] = (s.x[i]+s.x[i+1])/2.0;
+			s->X.resize(s->J);
+			for (size_t i=0; i<s->J; ++i) s->X[i] = (s->x[i]+s->x[i+1])/2.0;
 			
-			s.h.resize(s.J);	// This will be used only by FMU
-			for (size_t i=0; i<s.J; ++i) s.h[i] = s.x[i+1] - s.x[i];	
-
-			// no X in FMU state
+			s->h.resize(s->J);	// This will be used only by FMU
+			for (size_t i=0; i<s->J; ++i) s->h[i] = s->x[i+1] - s->x[i];	
 		}
 
-		if (method == SOLVER_MMU){
-			for (size_t i=0; i<s.J; ++i) state[s.start_index + i] = s.x[i];  // skip x_J as it is fixed. 
-		}
-
-		if (method == SOLVER_CM){
-			for (size_t i=0; i<s.J; ++i) state[s.start_index + i] = s.x[i];
-		}
-
-		if (method == SOLVER_EBT){
-			for (size_t i=1; i<s.J; ++i) state[s.start_index + i] = (s.x[i]+s.x[i-1])/2.0; // leave [0] for pi0 (= 0)
-		}
 	}
 	//u0_out_history.clear();
 }
 
 
-template<class Model, class Environment>
-void Solver<Model,Environment>::setEnvironment(Environment * _env){
+template<class Environment>
+void Solver<Environment>::setEnvironment(Environment * _env){
 	env = _env;
 }
 
 
-template<class Model, class Environment>
-Species<Model>* Solver<Model,Environment>::get_species(int id){
-	return &species_vec[id];
-}
+//template<class Environment>
+//Species<Model>* Solver<Model,Environment>::get_species(int id){
+//    return &species_vec[id];
+//}
 
 
-template<class Model, class Environment>
-int Solver<Model,Environment>::n_species(){
-	return species_vec.size();
-}
+//template<class Model, class Environment>
+//int Solver<Model,Environment>::n_species(){
+//    return species_vec.size();
+//}
 
 
-template<class Model, class Environment>
-double Solver<Model,Environment>::maxSize(std::vector<double>::iterator state_begin){
-	double maxsize = 0;
-	for (auto& spp : species_vec) maxsize = std::max(maxsize, spp.get_maxSize(state_begin));
-	return maxsize;
-}
+//template<class Model, class Environment>
+//double Solver<Model,Environment>::maxSize(std::vector<double>::iterator state_begin){
+//    double maxsize = 0;
+//    for (auto& spp : species_vec) maxsize = std::max(maxsize, spp.get_maxSize(state_begin));
+//    return maxsize;
+//}
 
 
-template<class Model, class Environment>
+template<class Environment>
 double Solver<Model,Environment>::get_u0(double t, int s){
-	auto& spp = species_vec[s];
+	Species_Base * spp = species_vec[s];
 	
-	if (spp.bfin_is_u0in){
-		return spp.birth_flux_in;
+	if (spp->bfin_is_u0in){
+		return spp->birth_flux_in;
 	}
 	else {	
-		double g = spp.mod->growthRate(spp.xb, t, env);
-		double u0 = (g>0)? spp.birth_flux_in * spp.mod->establishmentProbability(t, env)/g  :  0; 
-		return u0;
+		//double g = spp.mod->growthRate(spp.xb, t, env); // TODO: Move this computation to species
+		//double u0 = (g>0)? spp.birth_flux_in * spp.mod->establishmentProbability(t, env)/g  :  0; 
+		//return u0;
+		return 0;
 	}
 }
 
 
-template<class Model, class Environment>
-void Solver<Model,Environment>::print(){
+template<class Environment>
+void Solver<Environment>::print(){
 	std::cout << ">> SOLVER \n";
 	string types[] = {"FMU", "MMU", "CM", "EBT"};
 	std::cout << "+ Type: " << types[method] << std::endl;
@@ -196,195 +184,289 @@ void Solver<Model,Environment>::print(){
 	std::cout << "+ Species:\n";
 	for (int i=0; i<species_vec.size(); ++i) {
 		std::cout << "Sp (" << i << "):\n";
-		species_vec[i].print(state, rates);
+		species_vec[i]->print();
 	}
 	//IteratorSet<vector<double>::iterator> iset(state.begin(), varnames.size(), vars, xsize());
 	
 }
 
 
-template<class Model, class Environment>
-void Solver<Model,Environment>::initialize(){
-
+template<class Environment>
+void Solver<Environment>::initialize(){
+	
 	for (int k=0; k<species_vec.size(); ++k){
-		Species<Model> &s = species_vec[k];
-
+		Species_Base* s = species_vec[k];
+		
+		vector<double>::iterator it = state.begin() + s->start_index;
 		if (method == SOLVER_FMU){
-			for (size_t i=0; i<s.J; ++i)  state[s.start_index + i] = s.mod->initDensity((s.x[i]+s.x[i+1])/2, env);
+			for (size_t i=0; i<s->J; ++i){
+				double X = (s->x[i]+s->x[i+1])/2;
+				double U = s->init_density(i, X); //, env); 
+				s->setX(i,X); 
+				s->setU(i,U);
+				*it++ = U;		// u in state (only)
+			}
 		}
 		if (method == SOLVER_CM){
-			for (size_t i=0; i<s.J; ++i){
-				double d = s.mod->initDensity(s.x[i], env); 
-				state[s.start_index + s.J + i] = (use_log_densities)? log(d) : d;
+			for (size_t i=0; i<s->J; ++i){
+				double X = s->x[i];
+				double U = s->init_density(i, X); //, env); 
+				s->setX(i,X); 
+				s->setU(i,U);
+				*it++ = X;									// x in state
+				*it++ = (use_log_densities)? log(U) : U;	// u in state 
 			}
 		}
 		if (method == SOLVER_EBT){
-			for (size_t i=1; i<s.J; ++i)  state[s.start_index + s.J + i] = s.mod->initDensity((s.x[i]+s.x[i-1])/2, env)*(s.x[i]-s.x[i-1]);	// state[J+1+0]=0 (N0)
+			// xb, ub for boundary cohort in state and in cohorts
+			*it++ = 0; *it++ = 0;
+			s->setX(0,0); s->setU(0,0); 
+			// x, u for internal cohorts in state and it cohorts
+			for (size_t i=1; i<s->J; ++i){
+				double X = (s->x[i]+s->x[i-1])/2.0;
+				double U = s->init_density(i, X)*(s->x[i]-s->x[i-1]); 
+				s->setX(i,X); 
+				s->setU(i,U);
+				*it++ = X;	// x in state
+				*it++ = U;	// u in state 
+			}
 		}
 
-		if (s.varnames_extra.size() > 0){  // If extra state variables have been requested, initialize them
-			// Initialize extra size-dependent variables
-			auto is = s.get_iterators(state);
-			
-			auto& itx = is.get("X");
-			int id = is.getIndex(s.varnames_extra[0]); // get index of 1st extra variable
-			// TODO: Should condition be added to skip boundary cohort in EBT?
-			for (is.begin(); !is.end(); ++is){
-				vector <double> v = s.mod->initStateExtra(*itx, current_time, env);  // returned vector will be `move`d so this is fast 
-				auto it_vec = is.get();
-				for (size_t i = 0; i<s.varnames_extra.size(); ++i){
-					*it_vec[id+i] = v[i];
-				}
-			}
+		if (s->n_extra_statevars > 0){  // FIXME: maybe redundant
+			auto it_prev = it;
+			s->init_ExtraState(it);
+			assert(distance(it_prev, it) == s->n_extra_statevars*s->J); 
 		}
 	}
 }
 
 
-//template<class Model, class Environment>
-//void Solver<Model,Environment>::calcRates_extra(double t, vector<double>&S, vector<double>& dSdt){
-//    //auto is = createIterators_state(S);
-//    //auto ir = createIterators_rates(dSdt);
-//    //auto& itx = is.get("X");
-//    //auto& itre = ir.get(varnames_extra[0]);
-	
-//    //for (is.begin(), ir.begin(); !is.end(); ++is, ++ir){
-//    //    auto it_returned = mod->calcRates_extra(t, *itx, itre);
-//    //    assert(distance(itre, it_returned) == varnames_extra.size());
-//    //}
+template<class Environment>
+void Solver<Environment>::copyStateToCohorts(){
+
+	for (int k=0; k<species_vec.size(); ++k){
+		Species_Base* s = species_vec[k];
+		
+		vector<double>::iterator it = state.begin() + s->start_index;
+		if (method == SOLVER_FMU){
+			for (size_t i=0; i<s->J; ++i){
+				s->setU(i,*it++);
+			}
+		}
+		if (method == SOLVER_CM){
+			for (size_t i=0; i<s->J; ++i){
+				double X = *it++;	// get x from state
+				double U = *it++;	// get u from state
+			    U = (use_log_densities)? exp(U) : U;	// u in state 
+				s->setX(i,X); 
+				s->setU(i,U);
+			}
+		}
+		if (method == SOLVER_EBT){
+			// x, u for boundary and internal cohorts
+			for (size_t i=0; i<s->J; ++i){
+				double X = *it++; 
+				double U = *it++;
+				s->setX(i,X); 
+				s->setU(i,U);
+			}
+		}
+
+		if (s->n_extra_statevars > 0){  // If extra state variables have been requested, initialize them
+			auto it_prev = it;
+			s->copyExtraStateToCohorts(it);
+			assert(distance(it_prev, it) == s->n_extra_statevars*s->J); 
+		}
+	}
+}
+
+
+//template<class Environment>
+//void Solver<Environment>::getRatesFromCohorts(){
+
+	//for (int k=0; k<species_vec.size(); ++k){
+		//Species_Base* s = species_vec[k];
+		
+		//vector<double>::iterator it = rates.begin() + s->start_index;
+		//if (method == SOLVER_FMU){
+			//for (size_t i=0; i<s->J; ++i){
+				//*it++ = s->getU(i);
+			//}
+		//}
+		//if (method == SOLVER_CM){
+			//for (size_t i=0; i<s->J; ++i){
+				//double X = s->getX(i); 
+				//double U = s->getU(i);
+				//U = (use_log_densities)? exp(U) : U;	// u in state 
+				//*it++ = X;
+				//*it++ = U;
+			//}
+		//}
+		//if (method == SOLVER_EBT){
+			//// x, u for boundary and internal cohorts
+			//for (size_t i=0; i<s->J; ++i){
+				//double X = *it++; 
+				//double U = *it++;
+				//s->setX(i,X); 
+				//s->setU(i,U);
+			//}
+		//}
+
+		//if (s->n_extra_statevars > 0){  // If extra state variables have been requested, initialize them
+			//auto it_prev = it;
+			//s->copyExtraStateToCohorts(it);
+			//assert(distance(it_prev, it) == s->n_extra_statevars*s->J); 
+		//}
+	//}
 //}
 
 
-// current_time is updated by the ODE solver at every (internal) step
-template<class Model, class Environment>
-void Solver<Model,Environment>::step_to(double tstop){
-	// do nothing if tstop is <= current_time
-	if (tstop <= current_time) return;
+
+
+////template<class Model, class Environment>
+////void Solver<Model,Environment>::calcRates_extra(double t, vector<double>&S, vector<double>& dSdt){
+////    //auto is = createIterators_state(S);
+////    //auto ir = createIterators_rates(dSdt);
+////    //auto& itx = is.get("X");
+////    //auto& itre = ir.get(varnames_extra[0]);
 	
-	if (method == SOLVER_FMU){	
-		auto derivs = [this](double t, vector<double> &S, vector<double> &dSdt){
-			env->computeEnv(t, S, this);
-			this->calcRates_FMU(t, S, dSdt);
-		};
+////    //for (is.begin(), ir.begin(); !is.end(); ++is, ++ir){
+////    //    auto it_returned = mod->calcRates_extra(t, *itx, itre);
+////    //    assert(distance(itre, it_returned) == varnames_extra.size());
+////    //}
+////}
+
+
+//// current_time is updated by the ODE solver at every (internal) step
+//template<class Model, class Environment>
+//void Solver<Model,Environment>::step_to(double tstop){
+//    // do nothing if tstop is <= current_time
+//    if (tstop <= current_time) return;
+	
+//    if (method == SOLVER_FMU){	
+//        auto derivs = [this](double t, vector<double> &S, vector<double> &dSdt){
+//            env->computeEnv(t, S, this);
+//            this->calcRates_FMU(t, S, dSdt);
+//        };
 		
-		odeStepper.Step_to(tstop, current_time, state, derivs); // state = [U]
-	}
+//        odeStepper.Step_to(tstop, current_time, state, derivs); // state = [U]
+//    }
 	
 	
-	if (method == SOLVER_MMU){
-	}
+//    if (method == SOLVER_MMU){
+//    }
 	
 	
-	if (method == SOLVER_EBT){
-		auto derivs = [this](double t, vector<double> &S, vector<double> &dSdt){
-			env->computeEnv(t, S, this);
-			this->calcRates_EBT(t, S, dSdt);
-		};
+//    if (method == SOLVER_EBT){
+//        auto derivs = [this](double t, vector<double> &S, vector<double> &dSdt){
+//            env->computeEnv(t, S, this);
+//            this->calcRates_EBT(t, S, dSdt);
+//        };
 		
-		// integrate 
-		odeStepper.Step_to(tstop, current_time, state, derivs); // state = [pi0, Xint, N0, Nint]
+//        // integrate 
+//        odeStepper.Step_to(tstop, current_time, state, derivs); // state = [pi0, Xint, N0, Nint]
 		
-		// update cohorts
-		removeDeadCohorts_EBT();
-		addCohort_EBT();  // Add new cohort if N0 > 0. Add after removing dead ones otherwise this will also be removed. 
-	}
+//        // update cohorts
+//        removeDeadCohorts_EBT();
+//        addCohort_EBT();  // Add new cohort if N0 > 0. Add after removing dead ones otherwise this will also be removed. 
+//    }
 	
 	
-	if (method == SOLVER_CM){
-		auto derivs = [this](double t, vector<double> &S, vector<double> &dSdt){
-			// update u0 for boundary condition of size integral
-			for (int s=0; s<species_vec.size(); ++s) species_vec[s].u0_save = get_u0(t, s);
+//    if (method == SOLVER_CM){
+//        auto derivs = [this](double t, vector<double> &S, vector<double> &dSdt){
+//            // update u0 for boundary condition of size integral
+//            for (int s=0; s<species_vec.size(); ++s) species_vec[s].u0_save = get_u0(t, s);
 			
-			env->computeEnv(t, S, this);
-			this->calcRates_CM(t, S, dSdt);
-		};
+//            env->computeEnv(t, S, this);
+//            this->calcRates_CM(t, S, dSdt);
+//        };
 		
-		// integrate 
-		odeStepper.Step_to(tstop, current_time, state, derivs); // state = [pi0, Xint, N0, Nint]
+//        // integrate 
+//        odeStepper.Step_to(tstop, current_time, state, derivs); // state = [pi0, Xint, N0, Nint]
 
-		// update cohorts
-		if (control.update_cohorts){
-			addCohort_CM();		// add before so that it becomes boundary cohort and first internal cohort can be (potentially) removed
-			removeCohort_CM();
-		}
-		//removeDenseCohorts_CM();
-		env->computeEnv(current_time, state, this); // is required here IF rescaleEnv is used in derivs
-	}
-}
-
-
-template<class Model, class Environment>
-vector<double> Solver<Model,Environment>::newborns_out(){
-	// update Environment from latest state
-	env->computeEnv(current_time, state, this);
-
-	vector<double> b_out;
-	for (int k=0; k<species_vec.size(); ++k){	
-		// calculate birthflux
-		// [solved] wudx doesnt work here. Why?? - works now, no idea why it was not working earlier!
-		auto newborns_production = [this, k](double z, double t){
-			return species_vec[k].mod->birthRate(z,t,env);
-		}; 
-		double birthFlux = integrate_x(newborns_production, current_time, state, k);
-		//double birthFlux = integrate_wudx_above(newborns_production, current_time, 0, state, k);
-		b_out.push_back(birthFlux);
-	}
-	return b_out;
-}
+//        // update cohorts
+//        if (control.update_cohorts){
+//            addCohort_CM();		// add before so that it becomes boundary cohort and first internal cohort can be (potentially) removed
+//            removeCohort_CM();
+//        }
+//        //removeDenseCohorts_CM();
+//        env->computeEnv(current_time, state, this); // is required here IF rescaleEnv is used in derivs
+//    }
+//}
 
 
-template<class Model, class Environment>
-vector<double> Solver<Model,Environment>::u0_out(){
-	vector <double> u0out;
-	vector <double> newbornsout = newborns_out();
-	for (int k=0; k < species_vec.size(); ++k){
-		u0out.push_back(newbornsout[k]/species_vec[k].mod->growthRate(species_vec[k].xb, current_time, env));
-	}
-	return u0out;
-}
+//template<class Model, class Environment>
+//vector<double> Solver<Model,Environment>::newborns_out(){
+//    // update Environment from latest state
+//    env->computeEnv(current_time, state, this);
 
-/*
-template<class Model, class Environment>
-double Solver<Model,Environment>::get_u0_out(){
-	return u0_out_history.back();
-}
+//    vector<double> b_out;
+//    for (int k=0; k<species_vec.size(); ++k){	
+//        // calculate birthflux
+//        // [solved] wudx doesnt work here. Why?? - works now, no idea why it was not working earlier!
+//        auto newborns_production = [this, k](double z, double t){
+//            return species_vec[k].mod->birthRate(z,t,env);
+//        }; 
+//        double birthFlux = integrate_x(newborns_production, current_time, state, k);
+//        //double birthFlux = integrate_wudx_above(newborns_production, current_time, 0, state, k);
+//        b_out.push_back(birthFlux);
+//    }
+//    return b_out;
+//}
 
 
-template<class Model, class Environment>
-double Solver<Model,Environment>::stepToEquilibrium(){
-	for (double t=0.05; ; t=t+0.05) {
-		step_to(t);
+//template<class Model, class Environment>
+//vector<double> Solver<Model,Environment>::u0_out(){
+//    vector <double> u0out;
+//    vector <double> newbornsout = newborns_out();
+//    for (int k=0; k < species_vec.size(); ++k){
+//        u0out.push_back(newbornsout[k]/species_vec[k].mod->growthRate(species_vec[k].xb, current_time, env));
+//    }
+//    return u0out;
+//}
+
+//[>
+//template<class Model, class Environment>
+//double Solver<Model,Environment>::get_u0_out(){
+//    return u0_out_history.back();
+//}
+
+
+//template<class Model, class Environment>
+//double Solver<Model,Environment>::stepToEquilibrium(){
+//    for (double t=0.05; ; t=t+0.05) {
+//        step_to(t);
 		
-		u0_out_history.push_back(u0_out());
-		if (u0_out_history.size() > 5) u0_out_history.pop_front();
-		//cout << t << " | ";  
-		//for (auto u : u0_out_history) cout << u << " "; // cout << "\n";
-		double max_err = -1e20;
-		//cout << u0_out_history.size() << endl; 
-		for (auto it = ++u0_out_history.begin(); it != u0_out_history.end(); ++it){
-			double err = *it - *(prev(it)); 
-			max_err = std::max(max_err, abs(err));
-			//cout << err << " ";
-		}
-		//cout << " | " << max_err << endl;
+//        u0_out_history.push_back(u0_out());
+//        if (u0_out_history.size() > 5) u0_out_history.pop_front();
+//        //cout << t << " | ";  
+//        //for (auto u : u0_out_history) cout << u << " "; // cout << "\n";
+//        double max_err = -1e20;
+//        //cout << u0_out_history.size() << endl; 
+//        for (auto it = ++u0_out_history.begin(); it != u0_out_history.end(); ++it){
+//            double err = *it - *(prev(it)); 
+//            max_err = std::max(max_err, abs(err));
+//            //cout << err << " ";
+//        }
+//        //cout << " | " << max_err << endl;
 		
-		if (abs(max_err) < control.convergence_eps){
-			cout << t << " | " << J << " | "; for (auto u : u0_out_history) cout << u << " "; cout << "|" << max_err << endl;
-			break;
-		}	
-	}
+//        if (abs(max_err) < control.convergence_eps){
+//            cout << t << " | " << J << " | "; for (auto u : u0_out_history) cout << u << " "; cout << "|" << max_err << endl;
+//            break;
+//        }	
+//    }
 	
-}
+//}
 
 
 
-template<class Model, class Environment>
-double Solver<Model,Environment>::createSizeStructuredVariables(vector<std::string> names){
-	varnames_extra = names;
-	resetState(x);
-}
+//template<class Model, class Environment>
+//double Solver<Model,Environment>::createSizeStructuredVariables(vector<std::string> names){
+//    varnames_extra = names;
+//    resetState(x);
+//}
 
 
-*/
+//*/
 
 
