@@ -191,10 +191,10 @@ double Solver::integrate_x(wFunc w, double t, int species_id){
 		}
 		
 		// boundary at xb
-		//double u0 = spp.u0_save;
-		//double x_lo = spp.xb;
-		//double f_lo =  w(x_lo, t)*u0;
-		//I += (x_hi-x_lo)*(f_hi+f_lo);
+		double u0 = spp->u0_save;
+		double x_lo = spp->xb;
+		double f_lo =  w(x_lo, t)*u0;
+		I += (x_hi-x_lo)*(f_hi+f_lo);
 		
 		return I*0.5;
 	}

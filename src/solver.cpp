@@ -1,4 +1,4 @@
-//#include "solver.h"
+#include "solver.h"
 
 #include <iostream>
 #include <cmath>
@@ -150,19 +150,19 @@ void Solver::setEnvironment(EnvironmentBase * _env){
 //}
 
 
-double Solver::get_u0(double t, int s){
-	Species_Base * spp = species_vec[s];
+//double Solver::get_u0(double t, int s){
+	//Species_Base * spp = species_vec[s];
 	
-	if (spp->bfin_is_u0in){
-		return spp->birth_flux_in;
-	}
-	else {	
-		//double g = spp.mod->growthRate(spp.xb, t, env); // TODO: Move this computation to species
-		//double u0 = (g>0)? spp.birth_flux_in * spp.mod->establishmentProbability(t, env)/g  :  0; 
-		//return u0;
-		return 0;
-	}
-}
+	//if (spp->bfin_is_u0in){
+		//return spp->birth_flux_in;
+	//}
+	//else {	
+		////double g = spp.mod->growthRate(spp.xb, t, env); // TODO: Move this computation to species
+		////double u0 = (g>0)? spp.birth_flux_in * spp.mod->establishmentProbability(t, env)/g  :  0; 
+		////return u0;
+		//return 0;
+	//}
+//}
 
 
 void Solver::print(){
@@ -182,6 +182,16 @@ void Solver::print(){
 }
 
 
+// Layout of the state vector is as follows:
+//  ------------------------------------------------------------
+// | x : u | x : u | x : u | a : b : c | a : b : c | a : b : c |
+//  ------------------------------------------------------------
+//  In above layout, the internal variables x and u are tightly
+//  packed first, followed by user variables a, b, c. 
+//  This arrangement is cache friendly because:
+//  1. When calculating integrals, x and u are traversed
+//  2. When setting rates, typically a,b,c are calculated one 
+//  after the other for each x.
 void Solver::initialize(){
 	
 	for (int k=0; k<species_vec.size(); ++k){

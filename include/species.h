@@ -37,7 +37,7 @@ class Species_Base{
 	std::vector <double> h;
 	std::vector <double> schedule; // used only by CM/EBT
 
-	protected:
+	public:
 	double u0_save;
 
 	public:
@@ -81,6 +81,8 @@ class Species_Base{
 	virtual double init_density(int i, double x) = 0;
 
 	virtual void copyExtraStateToCohorts(std::vector<double>::iterator &it) = 0;
+	
+	virtual double get_u0(double t, void * env) = 0;
 
 };
 
@@ -110,6 +112,7 @@ class Species : public Species_Base{
 	
 	void copyExtraStateToCohorts(std::vector<double>::iterator &it);
 
+	double get_u0(double t, void * env);
 	
 };
 

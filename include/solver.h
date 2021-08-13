@@ -60,7 +60,7 @@ class Solver{
 	////vector<double> getx();
 	////double getMaxSize(vector<double>::iterator sbegin);
 	//double maxSize(std::vector<double>::iterator state_begin);
-	double get_u0(double t, int s);	
+	//double get_u0(double t, int s);	
 
 
 	////void calcRates_extra(double t, vector<double>&S, vector<double>& dSdt);
@@ -98,7 +98,7 @@ class Solver{
 	
 };
 
-#include "../src/solver.tpp"
+//#include "../src/solver.tpp"
 //#include "../src/mu.tpp"
 //#include "../src/ebt.tpp"
 //#include "../src/cm.tpp"
