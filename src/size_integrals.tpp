@@ -12,13 +12,13 @@ double Solver::integrate_wudx_above(wFunc w, double t, double xlow, int species_
 		double I = 0;
 		double u_hi = spp->getU(0); //(use_log_densities)? exp(spp->getU(0)) : spp->getU(0);
 		double x_hi = spp->getX(0);
-		double f_hi = w(x_hi, t)*u_hi;
+		double f_hi = w(0, x_hi, t)*u_hi;
 		//if (xlow < 0.01) cout << "x/w/u/f = " << x_hi << " " <<  w(*itx,t) <<  " " << exp(*itu)  << " " << f_hi << "\n";
 		//--itx; --itu;
 		for (int i=1; i<spp->J; ++i){
 			double u_lo = spp->getU(i); //(use_log_densities)? exp(spp->getU(i)) : spp->getU(i);
 			double x_lo = spp->getX(i);
-			double f_lo = w(x_lo, t)*u_lo;
+			double f_lo = w(i, x_lo, t)*u_lo;
 	
 			//// implementation from orig plant model	
 			//I += (x_hi - x_lo) * (f_hi + f_lo);
@@ -177,13 +177,13 @@ double Solver::integrate_x(wFunc w, double t, int species_id){
 		double I = 0;
 		double u_hi = spp->getU(0); //(use_log_densities)? exp(spp->getU(0)) : spp->getU(0);
 		double x_hi = spp->getX(0);
-		double f_hi = w(x_hi, t)*u_hi;
+		double f_hi = w(0, x_hi, t)*u_hi;
 		//if (xlow < 0.01) cout << "x/w/u/f = " << x_hi << " " <<  w(*itx,t) <<  " " << exp(*itu)  << " " << f_hi << "\n";
 		//--itx; --itu;
 		for (int i=1; i<spp->J; ++i){
 			double u_lo = spp->getU(i); //(use_log_densities)? exp(spp->getU(i)) : spp->getU(i);
 			double x_lo = spp->getX(i);
-			double f_lo = w(x_lo, t)*u_lo;
+			double f_lo = w(i, x_lo, t)*u_lo;
 	
 			I += (x_hi - x_lo) * (f_hi + f_lo);
 			x_hi = x_lo;
@@ -191,9 +191,9 @@ double Solver::integrate_x(wFunc w, double t, int species_id){
 		}
 		
 		// boundary at xb
-		double u0 = spp->u0_save;
+		double u0 = spp->get_boundary_u();
 		double x_lo = spp->xb;
-		double f_lo =  w(x_lo, t)*u0;
+		double f_lo =  w(spp->J, x_lo, t)*u0; // FIXME: spp->J is incorrect, how to specify boundary cohort?
 		I += (x_hi-x_lo)*(f_hi+f_lo);
 		
 		return I*0.5;

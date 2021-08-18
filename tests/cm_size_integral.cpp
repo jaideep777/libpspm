@@ -34,11 +34,11 @@ int main(){
 	//     +-----------------------> u
 
 	S.state = {3,log(8), 2,log(4), 1,log(2), 0,log(1), 0,0,0,0,1,1,1,1,2,2,2,2,3,3,3,3};
-	S.species_vec[0]->u0_save = S.species_vec[0]->get_u0(0,0);
+	S.species_vec[0]->get_u0(0,0);
 	S.copyStateToCohorts();
 	S.print();
 
-	auto w = [](double x, double t){return 1;};
+	auto w = [](int i, double x, double t){return 1;};
 
 	cout << S.integrate_x(w, 0, 0) << " " << S.integrate_wudx_above(w, 0, 0, 0) << endl;
 	

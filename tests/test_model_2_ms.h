@@ -21,7 +21,7 @@ class Environment : public EnvironmentBase{
 		//             _xm 
 		// Calculate _/ w(z,t)u(z,t)dz
 		//         xb
-		auto w = [](double z, double t) -> double {
+		auto w = [](int i, double z, double t) -> double {
 			if (z <= 1.0/3) 
 				return 1;
 			else if (z > 1.0/3 && z <= 2.0/3) 
@@ -101,14 +101,18 @@ class TestModel : public Plant{
 	double establishmentProbability(double t, void  * _env){
 		return 1;
 	}
-	
+
+
+	void set_size(double _x){
+		height = _x;
+		mortality = 0.1*height + 1e-12; //exp(-height);	
+		viable_seeds = 100*height + 1e-13;
+		heart_mass = 1000*height + 1e-14;
+		sap_mass = 10*height + 1e-15;
+	}
+
 	vector<double>::iterator init_state(double x, vector<double>::iterator &it){
-		height = x;
-		mortality = 0.1*height; //exp(-height);	
-		viable_seeds = 100*height;
-		heart_mass = 1000*height;
-		sap_mass = 10*height;
-		
+		set_size(x);	
 		*it++ = mortality;
 		*it++ = viable_seeds;
 		*it++ = heart_mass;
@@ -121,6 +125,13 @@ class TestModel : public Plant{
 		viable_seeds = *it++;
 		heart_mass = *it++;
 		sap_mass = *it++;
+		return it;
+	}
+	vector<double>::iterator get_state(vector<double>::iterator &it){
+		*it++ = mortality;
+		*it++ = viable_seeds;
+		*it++ = heart_mass;
+		*it++ = sap_mass;
 		return it;
 	}
 

@@ -1,4 +1,10 @@
 
+template<class T>
+void Species_Base::addCohort(T bc){
+	(dynamic_cast<Species<T>>(*this)).addCohort(bc);
+}
+
+
 template<class Model>
 void Species<Model>::resize(int _J){
 	J = _J;
@@ -43,7 +49,7 @@ template <class Model>
 void Species<Model>::print(){
 	std::cout << "~~~~~ Species ~~~~~\n";
 	//auto iset = get_iterators(sv);
-	std::cout << "start index = " << start_index <<"\n";
+	//std::cout << "start index = " << start_index <<"\n";
 	//std::cout << "Model = " << mod << "\n";
 	std::cout << "xb = " << boundaryCohort.x << " / " << xb << "\n";
 	std::cout << "xsize = " << J << "\n";
@@ -68,6 +74,9 @@ void Species<Model>::print(){
 		c.print();
 		std::cout << "\n";
 	}
+	std::cout << "- - - - - - - - - - - - - - - - - - - - - - - \n";
+	boundaryCohort.print_xu(); //std::cout << c.x << "\t" << c.u << "\t";
+	boundaryCohort.print();
 	std::cout << "\n";
 	std::cout << "Max size = " << get_maxSize() << "\n";
 	//std::cout << "State (" << size() << "):\n";
@@ -97,12 +106,14 @@ template <class Model>
 void Species<Model>::set_xb(double _xb){
 	xb = _xb;
 	boundaryCohort.x = _xb;
+	boundaryCohort.set_size(_xb);
 }
 
 
 template <class Model>
 void Species<Model>::setX(int i, double _x){
 	cohorts[i].x = _x;
+	cohorts[i].set_size(_x);
 }
 
 
@@ -131,6 +142,12 @@ void Species<Model>::copyExtraStateToCohorts(std::vector<double>::iterator &it){
 
 
 template <class Model>
+void Species<Model>::copyCohortsExtraToState(std::vector<double>::iterator &it){
+	for (auto& c : cohorts) c.get_state(it);
+}
+
+
+template <class Model>
 double Species<Model>::get_u0(double t, void * env){
 	
 	if (bfin_is_u0in){
@@ -142,4 +159,110 @@ double Species<Model>::get_u0(double t, void * env){
 	}
 	return boundaryCohort.u;
 }
+
+
+template <class Model>
+double Species<Model>::get_boundary_u(){
+	return boundaryCohort.u;
+}
+
+
+template <class Model>
+double Species<Model>::growthRate(int i, double x, double t, void * env){
+	return cohorts[i].growthRate(x,t,env);
+}
+
+
+template <class Model>
+std::vector<double> Species<Model>::growthRateGradient(int i, double x, double t, void * env, double grad_dx){
+	Cohort<Model> cplus = cohorts[i];
+	cplus.set_size(x + grad_dx);
+	
+	double g = cohorts[i].growthRate(x,t,env);
+	double gplus = cplus.growthRate(x+grad_dx, t, env);
+	
+	return {g, (gplus-g)/grad_dx};
+}
+
+
+template <class Model>
+std::vector<double> Species<Model>::growthRateGradientCentered(int i, double xplus, double xminus, double t, void * env){
+	Cohort<Model> cplus = cohorts[i];
+	cplus.set_size(xplus);
+	
+	Cohort<Model> cminus = cohorts[i];
+	cminus.set_size(xminus);
+	
+	double gplus  = cplus.growthRate(xplus, t, env);
+	double gminus = cminus.growthRate(xminus, t, env);
+	
+	return {gplus, gminus};
+}
+
+
+template <class Model>
+double Species<Model>::mortalityRate(int i, double x, double t, void * env){
+	return cohorts[i].mortalityRate(x,t,env);
+}
+	
+	
+template <class Model>
+double Species<Model>::birthRate(int i, double x, double t, void * env){
+	return cohorts[i].birthRate(x,t,env);
+}
+	
+
+template <class Model>
+void Species<Model>::getExtraRates(std::vector<double>::iterator &it){
+	for (auto& c : cohorts) c.get_rates(it);
+}
+
+
+template <class Model>
+void Species<Model>::addCohort(){
+	cohorts.push_back(boundaryCohort);
+	++J;
+}
+
+
+
+// This function allows a user to add a custom cohort to the species any time.
+// However, Solver->resizeStateFromSpecies() must be called after calling this function.
+template <class Model>
+void Species<Model>::addCohort(Cohort<Model> bc){
+	cohorts.push_back(bc);
+	++J;
+	// FIXME: sort cohorts here
+}
+
+
+template <class Model>
+void Species<Model>::removeDensestCohort(){
+	int i_min = 1;
+	double dx_min = cohorts[0].x - cohorts[2].x;  
+	for (int i=1; i<J-1; ++i){
+		double dx = cohorts[i-1].x - cohorts[i+1].x;
+		if (dx < dx_min){
+			dx_min = dx;
+			i_min = i;
+		}
+	}
+
+	cohorts.erase(cohorts.begin()+i_min);
+	--J;
+}
+
+
+template <class Model>
+void Species<Model>::removeDenseCohorts(double dxcut){
+
+}
+
+
+template <class Model>
+void Species<Model>::removeDeadCohorts(double ucut){
+
+}
+
+
 

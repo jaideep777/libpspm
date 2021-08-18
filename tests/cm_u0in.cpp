@@ -9,18 +9,18 @@ using namespace std;
 
 int main(){
 
-	TestModel M;
+	Species<TestModel> spp;
 	Environment E;
 
-	Solver<TestModel,Environment> S(SOLVER_CM);
+	Solver S(SOLVER_CM);
 	S.use_log_densities = false;
 	S.control.cm_grad_dx = 0.001;
-	S.addSpecies(25, 0, 1, false, &M, {}, 2);
+	S.addSpecies(25, 0, 1, false, &spp, 4, 2);
 	S.resetState();
 	S.initialize();
 	S.setEnvironment(&E);
-	S.get_species(0)->set_bfin_is_u0in(true);	// say that input_birth_flux is u0
-	//S.print();
+	S.species_vec[0]->set_bfin_is_u0in(true);	// say that input_birth_flux is u0
+	S.print();
 	//for (auto s : S.state) cout << s << " "; cout << endl;
 
 	ofstream fout("cm_testmodel.txt");

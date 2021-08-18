@@ -17,7 +17,7 @@ class Species_Base{
 	friend class Solver;
 
 	protected: // private members
-	int start_index;
+	//int start_index;
 	int J;	
 	int n_extra_statevars = 0;
 	//std::vector<std::string> varnames;			// state has internal variables (x, u) and possibly extra variables 
@@ -37,8 +37,8 @@ class Species_Base{
 	std::vector <double> h;
 	std::vector <double> schedule; // used only by CM/EBT
 
-	public:
-	double u0_save;
+	//public:
+	//double u0_save;
 
 	public:
 	//debug only
@@ -81,10 +81,27 @@ class Species_Base{
 	virtual double init_density(int i, double x) = 0;
 
 	virtual void copyExtraStateToCohorts(std::vector<double>::iterator &it) = 0;
+	virtual void copyCohortsExtraToState(std::vector<double>::iterator &it) = 0;
 	
 	virtual double get_u0(double t, void * env) = 0;
+	virtual double get_boundary_u() = 0;
 
+	// TODO: argument x can probably be removed from these functions
+	virtual double growthRate(int i, double x, double t, void * env) = 0;
+	virtual std::vector<double> growthRateGradient(int i, double x, double t, void * env, double grad_dx) = 0;
+	virtual std::vector<double> growthRateGradientCentered(int i, double xplus, double xminus, double t, void * env) = 0;
+	virtual double mortalityRate(int i, double x, double t, void * env) = 0;
+	virtual double birthRate(int i, double x, double t, void * env) = 0;
+	virtual void getExtraRates(std::vector<double>::iterator &it) = 0;
+
+	virtual void addCohort() = 0;
+	template<class T> void addCohort(T bc);
+
+	virtual void removeDensestCohort() = 0;
+	virtual void removeDenseCohorts(double dxcut) = 0;
+	virtual void removeDeadCohorts(double ucut) = 0;
 };
+
 
 
 template <class Model>
@@ -111,9 +128,24 @@ class Species : public Species_Base{
 	double init_density(int i, double x);
 	
 	void copyExtraStateToCohorts(std::vector<double>::iterator &it);
+	void copyCohortsExtraToState(std::vector<double>::iterator &it);
 
 	double get_u0(double t, void * env);
+	double get_boundary_u();
 	
+	double growthRate(int i, double x, double t, void * env);
+	std::vector<double> growthRateGradient(int i, double x, double t, void * env, double grad_dx);
+	std::vector<double> growthRateGradientCentered(int i, double xplus, double xminus, double t, void * env);
+	double mortalityRate(int i, double x, double t, void * env);
+	double birthRate(int i, double x, double t, void * env);
+	void getExtraRates(std::vector<double>::iterator &it);
+
+	void addCohort();
+	void addCohort(Cohort<Model> bc);
+
+	void removeDensestCohort();
+	void removeDenseCohorts(double dxcut);
+	void removeDeadCohorts(double ucut);
 };
 
 
