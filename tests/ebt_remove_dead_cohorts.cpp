@@ -14,26 +14,26 @@ bool almostEqual(const vector<T> &a, const vector <T> &b){
 
 
 int main(){
-	TestModel M;
+	Species<TestModel> s1;
+	Species<TestModel> s2;
 	Environment E;
 
-	Solver<TestModel,Environment> S(SOLVER_EBT);
-	S.use_log_densities = false;
-	//S.control.cm_grad_dx = 0.001;
-	S.addSpecies(5, 0, 1, false, &M, {"mort", "vs", "ha", "sa"}, 2);
-	S.addSpecies(8, 0, 1, false, &M, {"mort", "vs", "ha", "sa"}, 2);
+	Solver S(SOLVER_EBT);
+	S.addSpecies(5, 0, 1, false, &s1, 4, 2);
+	S.addSpecies(8, 0, 1, false, &s2, 4, 2);
 	S.resetState();
 	S.initialize();
 	S.setEnvironment(&E);
-	S.get_species(0)->set_bfin_is_u0in(true);	// say that input_birth_flux is u0
 	S.print();
 	//for (auto s : S.state) cout << s << " "; cout << endl;
 	
-	auto itu1 = S.get_species(0)->get_iterators(S.state).get("u");	
-	auto itu2 = S.get_species(1)->get_iterators(S.state).get("u");
+	auto spp1 = S.species_vec[0];	
+	auto spp2 = S.species_vec[1];	
 
-	*(itu1+2) = *(itu1+3) = 1e-11;
-	*(itu2+4) = *(itu2+6) = *(itu2+7) = 1e-11;
+	spp1->setU(1,1e-11); 
+	spp1->setU(2,1e-11); 
+	spp2->setU(4,1e-11); 
+	spp2->setU(5,1e-11); 
 
 	S.print();
 

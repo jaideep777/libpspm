@@ -23,9 +23,9 @@ class Plant {
 	public:
 	double lma = 30;
 
-	double height;
-	double crown_area;
-	double root_mass;
+	double height = -99;
+	double crown_area = -99;
+	double root_mass = -99;
 
 	vector<string> varnames = {"ht", "cr", "root"};
 
@@ -34,7 +34,6 @@ class Plant {
 		crown_area = x*x;
 	}
 
-	
 	double growthRate(double x, double t, void * env){
 		cout << "in g: " << x << " " << t << " " << ((LightEnv*)env)->E << "\n";
 		return x*((LightEnv*)env)->E;
@@ -149,7 +148,7 @@ int main(){
 	cout << "I size: " << S2->get_maxSize() << "\n";
 
 
-	Solver sol(SOLVER_FMU);
+	Solver sol(SOLVER_EBT);
 	sol.addSpecies(vector<double> {1,2,3,4,5}, &S, 1, 1);
 	sol.addSpecies(vector<double> {1.1,2.1,3.1}, &I, 0, 1);
 	sol.resetState();
@@ -160,6 +159,7 @@ int main(){
 	sol.setEnvironment(&env);
 
 	Cohort<Plant> C;
+	C.print(); cout << "\n";
 	C.set_size(10);
 	C.print(); cout << "\n";
 	cout << C.growthRate(C.height, 0, sol.env) << "\n";

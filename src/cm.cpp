@@ -6,6 +6,10 @@
 
 // state must be copied to cohorts before calling this function
 void Solver::calcRates_CM(double t, vector<double>&S, vector<double> &dSdt){
+
+	//auto ss = species_vec[0];	
+	//cout << "svec: " << t << " " << S[0] << " " << S[1] << " " << S[2] << " " << S[3] << "\n";
+	//cout << "coho: " << t << " " << ss->getX(0) << " " << ss->getU(0) << " " << ss->getX(1) << " " << ss->getU(1) << "\n";
 	
 	vector<double>::iterator its = S.begin()    + n_statevars_system; // Skip system variables
 	vector<double>::iterator itr = dSdt.begin() + n_statevars_system;
@@ -14,18 +18,21 @@ void Solver::calcRates_CM(double t, vector<double>&S, vector<double> &dSdt){
 
 		for (int i=0; i<spp->J; ++i){
 			double x = spp->getX(i);
-			vector<double> g_gx = spp->growthRateGradient(i, x, t, env, control.cm_grad_dx);
+			vector<double> g_gx = spp->growthRateGradient(i, x, t, env, control.cm_grad_dx);  // FIXME: x can go
 			double dx =  g_gx[0];
 			double du = -(spp->mortalityRate(i, x, t, env) + g_gx[1]); 
 			if (!use_log_densities) du *= spp->getU(i);
 		
 			*itr++ = dx;
 			*itr++ = du;	
+			
+			its+=2;
 		}
 		if (spp->n_extra_statevars > 0){
 			auto itr_prev = itr;
 			spp->getExtraRates(itr);
 			assert(distance(itr_prev, itr) == spp->n_extra_statevars*spp->J); 
+			its += spp->n_extra_statevars*spp->J; 	
 		}
 	}
 }
@@ -62,7 +69,8 @@ void Solver::calcRates_CM(double t, vector<double>&S, vector<double> &dSdt){
 
 
 void Solver::addCohort_CM(){
-
+	
+	//copyStateToCohorts(state.begin());
 	//int state_size_new = n_statevars_system;
 	for (auto& spp : species_vec){
 		spp->get_u0(current_time, env);
@@ -132,10 +140,11 @@ void Solver::removeCohort_CM(){
 	////cout << *px << " " << *last << " " << *pu << endl;
 	//vector<double> flags(state.size(), 0.0);
 
+	//copyStateToCohorts(state.begin());
 	//int n_removals = 0;
 	for (auto& spp : species_vec){
-		if (spp->J < control.max_cohorts) continue;   // remove a cohort if number of cohorts in the species exceeds a threshold
-		else spp->removeDensestCohort();
+		if (spp->J > control.max_cohorts) // remove a cohort if number of cohorts in the species exceeds a threshold
+			spp->removeDensestCohort();
 	}
 	
 	resizeStateFromSpecies();

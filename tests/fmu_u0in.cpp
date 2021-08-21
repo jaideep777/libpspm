@@ -9,23 +9,23 @@ using namespace std;
 
 int main(){
 
-	TestModel M;
+	Species<TestModel> spp;
 	Environment E;
 
-	Solver<TestModel,Environment> S(SOLVER_FMU);
-	S.addSpecies(25, 0, 1, false, &M, {}, 2);
-	S.get_species(0)->set_bfin_is_u0in(true);	// say that input_birth_flux is u0
+	Solver S(SOLVER_FMU);
+	S.addSpecies(25, 0, 1, false, &spp, 4, 2);
+	S.species_vec[0]->set_bfin_is_u0in(true);	// say that input_birth_flux is u0
 	S.resetState();
 	S.initialize();
 	S.setEnvironment(&E);
-	//S.print();
+	S.print();
 	
 	ofstream fout("fmu_testmodel.txt");
 
 	for (double t=0.05; t <= 8; t=t+0.05) {
 		S.step_to(t);
 		fout << S.current_time << "\t" << S.u0_out()[0] << "\t";
-		//cout << S.current_time << " " [><< S.u0_out()<] << "\n";
+		cout << S.current_time << " " << S.u0_out()[0] << "\n";
 		for (auto y : S.state) fout << y << "\t";
 		fout << endl;
 	}

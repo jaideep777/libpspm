@@ -60,7 +60,7 @@ class Solver{
 
 	void initialize();
 
-	void copyStateToCohorts();		////const int size();
+	void copyStateToCohorts(std::vector<double>::iterator state_begin);		////const int size();
 	void copyCohortsToState();
 	
 	////const int xsize();
@@ -73,11 +73,11 @@ class Solver{
 
 	////void calcRates_extra(double t, vector<double>&S, vector<double>& dSdt);
 	
-	//void calcRates_FMU(double t, vector<double> &S, vector<double> &dSdt);
+	void calcRates_FMU(double t, vector<double> &S, vector<double> &dSdt);
 	
-	//void calcRates_EBT(double t, vector<double>&S, vector<double> &dSdt);
-	//void addCohort_EBT();
-	//void removeDeadCohorts_EBT();
+	void calcRates_EBT(double t, vector<double>&S, vector<double> &dSdt);
+	void addCohort_EBT();
+	void removeDeadCohorts_EBT();
 	////vector<double> cohortsToDensity_EBT(vector <double> &breaks);
 
 	void calcRates_CM(double t, vector<double>&S, vector<double> &dSdt);

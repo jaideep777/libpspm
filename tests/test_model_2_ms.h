@@ -21,7 +21,8 @@ class Environment : public EnvironmentBase{
 		//             _xm 
 		// Calculate _/ w(z,t)u(z,t)dz
 		//         xb
-		auto w = [](int i, double z, double t) -> double {
+		auto w = [S](int i, double t) -> double {
+			double z = S->species_vec[0]->getX(i);
 			if (z <= 1.0/3) 
 				return 1;
 			else if (z > 1.0/3 && z <= 2.0/3) 
@@ -121,10 +122,10 @@ class TestModel : public Plant{
 	}
 
 	vector<double>::iterator set_state(vector<double>::iterator &it){
-		mortality = *it++;
+		mortality    = *it++;
 		viable_seeds = *it++;
-		heart_mass = *it++;
-		sap_mass = *it++;
+		heart_mass   = *it++;
+		sap_mass     = *it++;
 		return it;
 	}
 	vector<double>::iterator get_state(vector<double>::iterator &it){

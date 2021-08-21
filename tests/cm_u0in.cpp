@@ -13,8 +13,9 @@ int main(){
 	Environment E;
 
 	Solver S(SOLVER_CM);
-	S.use_log_densities = false;
+	S.use_log_densities = true;
 	S.control.cm_grad_dx = 0.001;
+	S.control.max_cohorts = 26;
 	S.addSpecies(25, 0, 1, false, &spp, 4, 2);
 	S.resetState();
 	S.initialize();
@@ -30,7 +31,7 @@ int main(){
 	for (double t=0.05; t <= 8; t=t+0.05) {
 		S.step_to(t);
 		fout << S.current_time << "\t" << S.u0_out()[0] << "\t";
-		//cout << S.current_time << "\t" << S.get_species(0)->size() << " " << S.u0_out()[0] << "\n";
+		//cout << S.current_time << "\t" << S.species_vec[0]->xsize() << " " << S.u0_out()[0] << "\t" << S.species_vec[0]->get_boundary_u() << "\n";
 		//cout << S.u0_out() << "\n";
 		for (auto y : S.state) fout << y << "\t";
 		fout << endl;

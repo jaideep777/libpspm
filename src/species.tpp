@@ -1,3 +1,5 @@
+#include <cassert>
+#include <algorithm>
 
 template<class T>
 void Species_Base::addCohort(T bc){
@@ -17,7 +19,7 @@ double Species<Model>::get_maxSize(){ // TODO ALERT: make sure this sees the lat
 	if (!X.empty()) return *x.rbegin();	// for FMU, get this from X
 	else if (cohorts.empty()) return 0;
 	else {								// else get from state vector
-		return cohorts[J-1].x;
+		return cohorts[0].x;			// cohorts are sorted descending
 	}
 }
 
@@ -92,7 +94,8 @@ void Species<Model>::print(){
 
 template <class Model>
 double Species<Model>::getX(int i){
-	return cohorts[i].x;
+	if (i == -1) return boundaryCohort.x;
+	else return cohorts[i].x;
 }
 
 
@@ -126,6 +129,10 @@ void Species<Model>::setU(int i, double _u){
 template <class Model>
 void Species<Model>::init_ExtraState(std::vector<double>::iterator &it){
 	for (auto& c : cohorts) c.init_state(c.x, it);
+
+	std::vector<double> dummy(n_extra_statevars);
+	std::vector<double>::iterator it_dummy = dummy.begin();
+	boundaryCohort.init_state(boundaryCohort.x, it_dummy);
 }
 
 
@@ -169,17 +176,28 @@ double Species<Model>::get_boundary_u(){
 
 template <class Model>
 double Species<Model>::growthRate(int i, double x, double t, void * env){
-	return cohorts[i].growthRate(x,t,env);
+	Cohort<Model> &c = (i<0)? boundaryCohort : cohorts[i];
+	return c.growthRate(c.x,t,env);
+}
+
+
+template <class Model>
+double Species<Model>::growthRateOffset(int i, double x, double t, void * env){
+	Cohort<Model> coff = (i<0)? boundaryCohort : cohorts[i];
+	coff.set_size(x);
+	return coff.growthRate(coff.x,t,env);
 }
 
 
 template <class Model>
 std::vector<double> Species<Model>::growthRateGradient(int i, double x, double t, void * env, double grad_dx){
-	Cohort<Model> cplus = cohorts[i];
-	cplus.set_size(x + grad_dx);
+	Cohort<Model> &c = (i<0)? boundaryCohort : cohorts[i];
+
+	Cohort<Model> cplus = c;
+	cplus.set_size(c.x + grad_dx);
 	
-	double g = cohorts[i].growthRate(x,t,env);
-	double gplus = cplus.growthRate(x+grad_dx, t, env);
+	double g = c.growthRate(c.x,t,env);
+	double gplus = cplus.growthRate(cplus.x, t, env);
 	
 	return {g, (gplus-g)/grad_dx};
 }
@@ -187,14 +205,16 @@ std::vector<double> Species<Model>::growthRateGradient(int i, double x, double t
 
 template <class Model>
 std::vector<double> Species<Model>::growthRateGradientCentered(int i, double xplus, double xminus, double t, void * env){
+	assert(i>=0);
+
 	Cohort<Model> cplus = cohorts[i];
 	cplus.set_size(xplus);
 	
 	Cohort<Model> cminus = cohorts[i];
 	cminus.set_size(xminus);
 	
-	double gplus  = cplus.growthRate(xplus, t, env);
-	double gminus = cminus.growthRate(xminus, t, env);
+	double gplus  = cplus.growthRate(cplus.x, t, env);
+	double gminus = cminus.growthRate(cminus.x, t, env);
 	
 	return {gplus, gminus};
 }
@@ -202,13 +222,29 @@ std::vector<double> Species<Model>::growthRateGradientCentered(int i, double xpl
 
 template <class Model>
 double Species<Model>::mortalityRate(int i, double x, double t, void * env){
-	return cohorts[i].mortalityRate(x,t,env);
+	assert(i>=0);
+	return cohorts[i].mortalityRate(cohorts[i].x,t,env);
 }
 	
+
+template <class Model>
+std::vector<double> Species<Model>::mortalityRateGradient(int i, double x, double t, void * env, double grad_dx){
+	Cohort<Model> &c = (i<0)? boundaryCohort : cohorts[i];
+
+	Cohort<Model> cplus = c;
+	cplus.set_size(x + grad_dx);
 	
+	double g = c.mortalityRate(c.x,t,env);
+	double gplus = cplus.mortalityRate(cplus.x, t, env);
+	
+	return {g, (gplus-g)/grad_dx};
+}
+	
+
 template <class Model>
 double Species<Model>::birthRate(int i, double x, double t, void * env){
-	return cohorts[i].birthRate(x,t,env);
+	Cohort<Model> &c = (i<0)? boundaryCohort : cohorts[i];
+	return c.birthRate(c.x,t,env);
 }
 	
 
@@ -240,7 +276,7 @@ template <class Model>
 void Species<Model>::removeDensestCohort(){
 	int i_min = 1;
 	double dx_min = cohorts[0].x - cohorts[2].x;  
-	for (int i=1; i<J-1; ++i){
+	for (int i=1; i<J-1; ++i){ // skip first and last cohorts
 		double dx = cohorts[i-1].x - cohorts[i+1].x;
 		if (dx < dx_min){
 			dx_min = dx;
@@ -255,14 +291,62 @@ void Species<Model>::removeDensestCohort(){
 
 template <class Model>
 void Species<Model>::removeDenseCohorts(double dxcut){
+	// mark cohorts to remove; skip 1st and last cohort
+	for (int i=1; i<J-1; i+=2){
+		double dx_lo = cohorts[i-1].x-cohorts[i].x;
+		double dx_hi = cohorts[i].x-cohorts[i+1].x;
 
+		if (dx_lo < dxcut || dx_hi < dxcut) cohorts[i].remove = true;
+	}
+
+	// remove marked cohorts
+	auto it_end = std::remove_if(cohorts.begin(), cohorts.end(), [](Cohort<Model> &c){return c.remove;});
+	cohorts.erase(it_end, cohorts.end());
+
+	// reset size
+	J = cohorts.size();
 }
 
 
 template <class Model>
 void Species<Model>::removeDeadCohorts(double ucut){
+	// mark cohorts to remove; skip pi0-cohort
+	for (int i=0; i<J-1; ++i){
+		if (cohorts[i].u < ucut) cohorts[i].remove = true;
+	}
 
+	// remove marked cohorts
+	auto it_end = std::remove_if(cohorts.begin(), cohorts.end(), [](Cohort<Model> &c){return c.remove;});
+	cohorts.erase(it_end, cohorts.end());
+
+	// reset size
+	J = cohorts.size();
 }
 
+
+template <class Model>
+void Species<Model>::backupCohort(int j){
+	savedCohort = cohorts[j];
+}
+
+template <class Model>
+void Species<Model>::restoreCohort(int j){
+	cohorts[j] = savedCohort;
+}
+
+template <class Model>
+void Species<Model>::copyBoundaryCohortTo(int j){
+	cohorts[j] = boundaryCohort;
+}
+
+//template <class Model>
+//void Species<Model>::backupBoundaryCohort(){
+	//boundaryCohort_backup = boundaryCohort;
+//}
+
+//template <class Model>
+//void Species<Model>::restoreBoundaryCohort(){
+	//boundaryCohort = boundaryCohort_backup;
+//}
 
 

@@ -12,13 +12,13 @@ double Solver::integrate_wudx_above(wFunc w, double t, double xlow, int species_
 		double I = 0;
 		double u_hi = spp->getU(0); //(use_log_densities)? exp(spp->getU(0)) : spp->getU(0);
 		double x_hi = spp->getX(0);
-		double f_hi = w(0, x_hi, t)*u_hi;
+		double f_hi = w(0, t)*u_hi;
 		//if (xlow < 0.01) cout << "x/w/u/f = " << x_hi << " " <<  w(*itx,t) <<  " " << exp(*itu)  << " " << f_hi << "\n";
 		//--itx; --itu;
 		for (int i=1; i<spp->J; ++i){
 			double u_lo = spp->getU(i); //(use_log_densities)? exp(spp->getU(i)) : spp->getU(i);
 			double x_lo = spp->getX(i);
-			double f_lo = w(i, x_lo, t)*u_lo;
+			double f_lo = w(i, t)*u_lo;
 	
 			//// implementation from orig plant model	
 			//I += (x_hi - x_lo) * (f_hi + f_lo);
@@ -138,29 +138,42 @@ template<typename wFunc>
 double Solver::integrate_x(wFunc w, double t, int species_id){
 	Species_Base* spp = species_vec[species_id];
 
-	//if (method == SOLVER_FMU){
-		//// integrate using midpoint quadrature rule
-		//double I=0;
-		//double * U = &(*itu);
-		//for (unsigned int i=0; i<spp.J; ++i){
-			//I += spp.h[i]*w(spp.X[i], t)*U[i];  // TODO: Replace with std::transform after profiling
-		//}
-		//return I;
-	//}
+	if (method == SOLVER_FMU){
+		// integrate using midpoint quadrature rule
+		double I=0;
+		for (unsigned int i=0; i<spp->J; ++i){
+			I += spp->h[i]*w(i, t)*spp->getU(i);  // TODO: Replace with std::transform after profiling
+		}
+		return I;
+	}
 	
-	//else if (method == SOLVER_EBT){
-		//// integrate using EBT rule (sum over cohorts)
-		//iset.begin();
-		//double   pi0  =  *itx;
-		//double   N0   =  *itu;
-		//++iset; // skip boundary cohort
-
-		//double x0 = spp.xb + pi0/(N0+1e-12); 
-		//double I = w(x0, t)*N0;
-		//for (; !iset.end(); ++iset) I += w(*itx, t)*(*itu);
+	else if (method == SOLVER_EBT){
+		// integrate using EBT rule (sum over cohorts)
 		
-		//return I;
-	//}
+		// get pi0, N0 from last cohort
+		double   pi0  =  spp->getX(spp->J-1);
+		double   N0   =  spp->getU(spp->J-1);
+
+		//cout << "pi0 = " << pi0 << ", N0 = " << N0 << "\n";
+		// backup the cohort containing pi0 and N0
+		spp->backupCohort(spp->J-1);
+		// replace pi0-cohort with boundary cohort
+		spp->copyBoundaryCohortTo(spp->J-1);
+
+		// update pi0-cohort with actual x0 value
+		double x0 = spp->xb + pi0/(N0+1e-12);
+		spp->setX(spp->J-1, x0);
+		spp->setU(spp->J-1, N0);
+
+		// calculate integral
+		double I = 0;
+		for (int i=0; i<spp->J; ++i) I += w(i, t)*spp->getU(i);
+		
+		// restore the original pi0-cohort
+		spp->restoreCohort(spp->J-1);
+
+		return I;
+	}
 	
 	if (method == SOLVER_CM){
 		// integrate using trapezoidal rule. Below modified to avoid double computation of w(x)
@@ -177,13 +190,13 @@ double Solver::integrate_x(wFunc w, double t, int species_id){
 		double I = 0;
 		double u_hi = spp->getU(0); //(use_log_densities)? exp(spp->getU(0)) : spp->getU(0);
 		double x_hi = spp->getX(0);
-		double f_hi = w(0, x_hi, t)*u_hi;
+		double f_hi = w(0, t)*u_hi;
 		//if (xlow < 0.01) cout << "x/w/u/f = " << x_hi << " " <<  w(*itx,t) <<  " " << exp(*itu)  << " " << f_hi << "\n";
 		//--itx; --itu;
 		for (int i=1; i<spp->J; ++i){
 			double u_lo = spp->getU(i); //(use_log_densities)? exp(spp->getU(i)) : spp->getU(i);
 			double x_lo = spp->getX(i);
-			double f_lo = w(i, x_lo, t)*u_lo;
+			double f_lo = w(i, t)*u_lo;
 	
 			I += (x_hi - x_lo) * (f_hi + f_lo);
 			x_hi = x_lo;
@@ -193,7 +206,7 @@ double Solver::integrate_x(wFunc w, double t, int species_id){
 		// boundary at xb
 		double u0 = spp->get_boundary_u();
 		double x_lo = spp->xb;
-		double f_lo =  w(spp->J, x_lo, t)*u0; // FIXME: spp->J is incorrect, how to specify boundary cohort?
+		double f_lo =  w(-1, t)*u0; // -1 is boundary cohort
 		I += (x_hi-x_lo)*(f_hi+f_lo);
 		
 		return I*0.5;

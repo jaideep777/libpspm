@@ -6,15 +6,20 @@
 template<class Ind>
 class Cohort : public Ind {
 	public:
-	double x = 1;
-	double u = 2;
+	double x = -999;
+	double u = -999;
 	int id = 0;	
 
 	double birth_time;
-	bool remove;
+	bool remove = false;
 
 	void print_xu(){
 		std::cout << id << "\t" << x << "\t" << u << "\t"; 
+	}
+
+	void set_size(double _x){
+		x = _x;
+		Ind::set_size(x);
 	}	
 };
 

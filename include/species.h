@@ -88,9 +88,11 @@ class Species_Base{
 
 	// TODO: argument x can probably be removed from these functions
 	virtual double growthRate(int i, double x, double t, void * env) = 0;
+	virtual double growthRateOffset(int i, double x, double t, void * env) = 0;
 	virtual std::vector<double> growthRateGradient(int i, double x, double t, void * env, double grad_dx) = 0;
 	virtual std::vector<double> growthRateGradientCentered(int i, double xplus, double xminus, double t, void * env) = 0;
 	virtual double mortalityRate(int i, double x, double t, void * env) = 0;
+	virtual std::vector<double> mortalityRateGradient(int i, double x, double t, void * env, double grad_dx) = 0;
 	virtual double birthRate(int i, double x, double t, void * env) = 0;
 	virtual void getExtraRates(std::vector<double>::iterator &it) = 0;
 
@@ -100,6 +102,10 @@ class Species_Base{
 	virtual void removeDensestCohort() = 0;
 	virtual void removeDenseCohorts(double dxcut) = 0;
 	virtual void removeDeadCohorts(double ucut) = 0;
+
+	virtual void backupCohort(int j) = 0;
+	virtual void restoreCohort(int j) = 0;
+	virtual void copyBoundaryCohortTo(int j) = 0;
 };
 
 
@@ -109,8 +115,11 @@ class Species : public Species_Base{
 	public:
 	std::vector<Cohort<Model>> cohorts;
 	Cohort<Model> boundaryCohort;
+	
+	Cohort<Model> savedCohort; // a cohort to save backups of any other cohorts
 
 	public:
+	// TODO: make these virtual?
 	Species(std::vector<double> breaks = std::vector<double>());
 	void resize(int _J);
 	double get_maxSize();
@@ -134,9 +143,11 @@ class Species : public Species_Base{
 	double get_boundary_u();
 	
 	double growthRate(int i, double x, double t, void * env);
+	double growthRateOffset(int i, double x, double t, void * env);
 	std::vector<double> growthRateGradient(int i, double x, double t, void * env, double grad_dx);
 	std::vector<double> growthRateGradientCentered(int i, double xplus, double xminus, double t, void * env);
 	double mortalityRate(int i, double x, double t, void * env);
+	std::vector<double> mortalityRateGradient(int i, double x, double t, void * env, double grad_dx);
 	double birthRate(int i, double x, double t, void * env);
 	void getExtraRates(std::vector<double>::iterator &it);
 
@@ -146,6 +157,10 @@ class Species : public Species_Base{
 	void removeDensestCohort();
 	void removeDenseCohorts(double dxcut);
 	void removeDeadCohorts(double ucut);
+	
+	void backupCohort(int j);
+	void restoreCohort(int j);
+	void copyBoundaryCohortTo(int j);
 };
 
 
