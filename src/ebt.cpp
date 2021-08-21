@@ -178,7 +178,7 @@ void Solver::addCohort_EBT(){
 void Solver::removeDeadCohorts_EBT(){
 
 	for (auto spp : species_vec){
-		spp->removeDeadCohorts(1e-10);	
+		spp->removeDeadCohorts(control.ebt_ucut);	
 	}
 
 	resizeStateFromSpecies();

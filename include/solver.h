@@ -38,6 +38,7 @@ class Solver{
 		double cm_grad_dx = 1e-6;
 		bool update_cohorts = true;
 		int  max_cohorts = 500;
+		double ebt_ucut = 1e-10;
 	} control;
 	
 	bool use_log_densities = true;

@@ -31,9 +31,9 @@ void Solver::calcRates_FMU(double t, vector<double> &S, vector<double> &dSdt){
 	//	#define growth(i) growthRate(x[i], mod->evalEnv(x[i],t))
 		//#define growth(i) growthArray[i]
 
-		for (int i=0; i<J+1; ++i){
-			std::cout << x[i] << " " << growthArray[i] << "\n";
-		}
+		//for (int i=0; i<J+1; ++i){
+			//std::cout << x[i] << " " << growthArray[i] << "\n";
+		//}
 
 		vector <double> u(J+1);
 		

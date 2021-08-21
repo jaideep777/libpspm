@@ -72,7 +72,7 @@ double Solver::integrate_wudx_above(wFunc w, double t, double xlow, int species_
 		// integrate using midpoint quadrature rule
 		double I=0;
 		for (unsigned int i=0; i<spp->J; ++i){
-			if (spp.x[i] < xlow){
+			if (spp->getX(i) < xlow){
 				//I += (spp->getX(i+1)-xlow) * w(i,t) * spp->getU(i); // interpolating the last interval
 				I += spp->h[i] * w(i,t) * spp->getU(i); // including full last interval
 				break;
