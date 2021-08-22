@@ -66,7 +66,7 @@ void Species<Model>::print(){
 	//}
 
 	std::cout << "Cohorts:\n";
-	std::cout << "id" << "\tx" << "\t" << "u" << "\t";
+	std::cout << "t0" << "\tx" << "\t" << "u" << "\t";
 	if (!cohorts.empty()){
 		for (auto s : cohorts[1].varnames) std::cout << s << "\t";
 	}
@@ -120,6 +120,12 @@ void Species<Model>::set_xb(double _xb){
 
 
 template <class Model>
+void Species<Model>::set_birthTime(int i, double t0){
+	cohorts[i].birth_time = t0;
+}
+
+
+template <class Model>
 void Species<Model>::setX(int i, double _x){
 	cohorts[i].x = _x;
 	cohorts[i].set_size(_x);
@@ -133,21 +139,29 @@ void Species<Model>::setU(int i, double _u){
 
 
 template <class Model>
-void Species<Model>::init_ExtraState(std::vector<double>::iterator &it){
-	for (auto& c : cohorts) c.init_state(c.x, it);
-
-	std::vector<double> dummy(n_extra_statevars);
-	std::vector<double>::iterator it_dummy = dummy.begin();
-	boundaryCohort.init_state(boundaryCohort.x, it_dummy);
+void Species<Model>::initAndCopyExtraState(double t, void * env, std::vector<double>::iterator &it){
+	for (auto& c : cohorts){
+		c.init_state(t, env);	// init state
+		auto it_prev = it;		
+		it = c.get_state(it);	// copy the initialized state into state vector
+		assert(distance(it_prev, it) == n_extra_statevars);
+	}
 }
 
 
 template <class Model>
-double Species<Model>::init_density(int i, double _x){
-	return cohorts[i].init_density(_x);
+void Species<Model>::initBoundaryCohort(double t, void * env){
+	boundaryCohort.birth_time = t;
+	boundaryCohort.init_state(t, env);
 }
 
 
+template <class Model>
+double Species<Model>::init_density(int i, double _x, void * _env){
+	return cohorts[i].init_density(_x, _env);
+}
+
+// TODO: check increment here itself
 template <class Model>
 void Species<Model>::copyExtraStateToCohorts(std::vector<double>::iterator &it){
 	for (auto& c : cohorts) c.set_state(it);

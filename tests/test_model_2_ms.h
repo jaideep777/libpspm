@@ -71,11 +71,11 @@ class TestModel : public Plant{
 
 	TestModel() : Plant(0) {}
 
-	double init_density(double x){
+	double init_density(double x, void * _env){
 		return pow(1-x,2)/pow(1+x,4) + (1-x)/pow(1+x,3);
 	}
 
-	void preCompute(double x, double t, void * env){
+	void preCompute(double x, double t, void * _env){
 	}
 
 	double growthRate(double x, double t, void * _env){
@@ -115,13 +115,7 @@ class TestModel : public Plant{
 		sap_mass = 10*height + 1e-15;
 	}
 
-	vector<double>::iterator init_state(double x, vector<double>::iterator &it){
-		set_size(x);	
-		*it++ = mortality;
-		*it++ = viable_seeds;
-		*it++ = heart_mass;
-		*it++ = sap_mass;
-		return it;
+	void init_state(double t, void * env){
 	}
 
 	vector<double>::iterator set_state(vector<double>::iterator &it){

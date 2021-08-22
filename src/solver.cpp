@@ -228,9 +228,9 @@ void Solver::print(){
 //  In above layout, the internal variables x and u are tightly
 //  packed first, followed by user variables a, b, c. 
 //  This arrangement is cache friendly because:
-//  1. When calculating integrals, x and u are traversed
-//  2. When setting rates, typically a,b,c are calculated one 
+//  When setting rates, typically a,b,c are calculated one 
 //  after the other for each x.
+// TODO: should this take t0 as an argument, instead of setting to 0? 
 void Solver::initialize(){
 	
 	vector<double>::iterator it = state.begin() + n_statevars_system; // TODO: replace with init_sState() 
@@ -241,11 +241,14 @@ void Solver::initialize(){
 		// set x for boundary cohort (BC is not in state, but used as a reference).	
 		s->set_xb(s->xb);
 		
+		// set birth time for each cohort to current_time
+		for (int i=0; i<s->J; ++i) s->set_birthTime(i, current_time);
+
 		// set x, u for all cohorts
 		if (method == SOLVER_FMU){
 			for (size_t i=0; i<s->J; ++i){
-				double X = (s->x[i]+s->x[i+1])/2;
-				double U = s->init_density(i, X); //, env); 
+				double X = (s->x[i]+s->x[i+1])/2;			// for FMU, X is the midpoint of the cell edges
+				double U = s->init_density(i, X, env); 
 				s->setX(i,X); 
 				s->setU(i,U);
 				*it++ = U;		// u in state (only)
@@ -254,7 +257,7 @@ void Solver::initialize(){
 		if (method == SOLVER_CM){
 			for (size_t i=0; i<s->J; ++i){
 				double X = s->x[i];
-				double U = s->init_density(i, X); //, env); 
+				double U = s->init_density(i, X, env); 
 				s->setX(i,X); 
 				s->setU(i,U);
 				*it++ = X;									// x in state
@@ -264,8 +267,8 @@ void Solver::initialize(){
 		if (method == SOLVER_EBT){
 			// x, u for internal cohorts in state and it cohorts
 			for (size_t i=0; i<s->J-1; ++i){
-				double X = (s->x[i]+s->x[i+1])/2.0;
-				double U = s->init_density(i, X)*(s->x[i]-s->x[i+1]); 
+				double X = (s->x[i]+s->x[i+1])/2.0;			
+				double U = s->init_density(i, X, env)*(s->x[i]-s->x[i+1]); 
 				s->setX(i,X); 
 				s->setU(i,U);
 				*it++ = X;	// x in state
@@ -273,16 +276,17 @@ void Solver::initialize(){
 			}
 			// set pi0, N0 as x, u for the last cohort. This scheme allows using this last cohort with xb+pi0 in integrals etc 
 			*it++ = 0; *it++ = 0;
-			s->setX(s->J-1,0); // TODO: CHECK if need to: first set this to xb, after initExtraState, set this back to 0?
+			s->setX(s->J-1,0); 
 			s->setU(s->J-1,0); 		
 		}
 
-
-		if (s->n_extra_statevars > 0){  // FIXME: maybe redundant
-			auto it_prev = it;
-			s->init_ExtraState(it);  // this also inits the extra state of boundary cohort, but without advancing the iterator
-			assert(distance(it_prev, it) == s->n_extra_statevars*s->J); 
-		}
+		// initialize extra state for each cohort and copy it to state
+		s->initAndCopyExtraState(current_time, env, it);
+		//if (s->n_extra_statevars > 0){  // FIXME: maybe redundant
+			//auto it_prev = it;
+			//s->init_ExtraState(it);  // this also inits the extra state of boundary cohort, but without advancing the iterator
+			//assert(distance(it_prev, it) == s->n_extra_statevars*s->J); 
+		//}
 
 	}
 }

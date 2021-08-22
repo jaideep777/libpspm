@@ -52,14 +52,12 @@ class Plant {
 		return 1;
 	}
 
-	double init_density(double x){
+	double init_density(double x, void * _env){
 		return 5/(x+0.5);
 	}
 
-	vector<double>::iterator init_state(double x, vector<double>::iterator &it){
+	void init_state(double t, void * env){
 		root_mass = 10;
-		*it++ = root_mass;
-		return it;
 	}
 
 	vector<double>::iterator set_state(vector<double>::iterator &it){
@@ -88,12 +86,11 @@ class Insect {
 
 	vector<string> varnames = {};
 	
-	double init_density(double x){
+	double init_density(double x, void * _env){
 		return x/10;
 	}
 
-	vector<double>::iterator init_state(double x, vector<double>::iterator &it){
-		return it;
+	void init_state(double t, void * env){
 	}
 
 	void set_size(double x){

@@ -41,7 +41,8 @@ int main(){
 	}
 
 	fout.close();
-	
+
+	S.print();	
 	cout << S.u0_out()[0] << endl;
 	if (abs(S.u0_out()[0]-1.436407) < 2e-5) return 0;
 	else return 1;

@@ -97,29 +97,27 @@ void Solver::calcRates_EBT(double t, vector<double>&S, vector<double> &dSdt){
 void Solver::addCohort_EBT(){
 	
 	for (auto spp : species_vec){
-		// 1. internalize the pi0-cohort
-		//   get pi0, N0 from last cohort
+		// 1. internalize the pi0-cohort (this cohort's birth time would have been already set when it was inserted)
+		// - get pi0, N0 from last cohort
 		double   pi0  =  spp->getX(spp->J-1);
 		double   N0   =  spp->getU(spp->J-1);
 
-		//   replace pi0-cohort with boundary cohort
-		spp->copyBoundaryCohortTo(spp->J-1);
-
-		//   update (new) pi0-cohort with actual x0 value
+		// - update the recently internalized pi0-cohort with actual x0 value
 		double x0 = spp->xb + pi0/(N0+1e-12);
 		spp->setX(spp->J-1, x0);
 		spp->setU(spp->J-1, N0);
 
-		// 2. insert a new cohort
-		spp->addCohort(); // this will add a copy of boundary cohort
+		// 2. insert a new cohort (copy of boundary cohort, to be the new pi0-cohort)
+		spp->initBoundaryCohort(current_time, env);	// update initial extra state and birth-time of boundary cohort
+		spp->addCohort(); // introduce copy of boundary cohort into species
 
-		// 3. set the new cohort as the pi0-cohort
-		spp->setX(spp->J-1, 0); // set pi0 and N0 to 0
+		// 3. set x,u of the new cohort to 0,0, thus marking it as the new pi0-cohort
+		spp->setX(spp->J-1, 0); 
 		spp->setU(spp->J-1, 0);
 	}
 
 	// 4. reset state from cohorts
-	resizeStateFromSpecies();
+	resizeStateFromSpecies(); 
 	copyCohortsToState();
 	
 	//// Create index and value vectors to insert into state

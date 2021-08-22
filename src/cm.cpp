@@ -75,8 +75,9 @@ void Solver::addCohort_CM(){
 	//copyStateToCohorts(state.begin());
 	//int state_size_new = n_statevars_system;
 	for (auto& spp : species_vec){
-		spp->get_u0(current_time, env);
-		spp->addCohort();
+		spp->get_u0(current_time, env);  // init density of boundary cohort
+		spp->initBoundaryCohort(current_time, env); // init extra state variables and birth time of the boundary cohort
+		spp->addCohort();	// introduce copy of boundary cohort in system
 		//state_size_new += spp->J*(n_statevars_internal + spp->n_extra_statevars);
 	}
 	

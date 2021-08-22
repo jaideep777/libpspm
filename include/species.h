@@ -71,14 +71,16 @@ class Species_Base{
 	virtual void print() = 0;
 
 	virtual void set_xb(double _xb) = 0;
+	virtual void set_birthTime(int i, double t0) = 0;
 	virtual void setX(int i, double _x) = 0;
 	virtual void setU(int i, double _u) = 0;
 
 	virtual double getX(int i) = 0;
 	virtual double getU(int i) = 0;
 
-	virtual void init_ExtraState(std::vector<double>::iterator &it) = 0;
-	virtual double init_density(int i, double x) = 0;
+	virtual double init_density(int i, double x, void * env) = 0;
+	virtual void initAndCopyExtraState(double t, void * env, std::vector<double>::iterator &it) = 0;
+	virtual void initBoundaryCohort(double t, void * env) = 0;
 
 	virtual void copyExtraStateToCohorts(std::vector<double>::iterator &it) = 0;
 	virtual void copyCohortsExtraToState(std::vector<double>::iterator &it) = 0;
@@ -129,15 +131,17 @@ class Species : public Species_Base{
 	void print();
 	
 	void set_xb(double _xb);
+	void set_birthTime(int i, double t0);
 	void setX(int i, double _x);
 	void setU(int i, double _u);
 	
 	double getX(int i);
 	double getU(int i);
 	
-	void init_ExtraState(std::vector<double>::iterator &it);
-	double init_density(int i, double x);
-	
+	double init_density(int i, double x, void * env);
+	void initAndCopyExtraState(double t, void * env, std::vector<double>::iterator &it);
+	void initBoundaryCohort(double t, void * env);
+
 	void copyExtraStateToCohorts(std::vector<double>::iterator &it);
 	void copyCohortsExtraToState(std::vector<double>::iterator &it);
 

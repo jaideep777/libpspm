@@ -10,11 +10,11 @@ class Cohort : public Ind {
 	double u = -999;
 	int id = 0;	
 
-	double birth_time;
+	double birth_time = 0;
 	bool remove = false;
 
 	void print_xu(){
-		std::cout << id << "\t" << x << "\t" << u << "\t"; 
+		std::cout << birth_time << "\t" << x << "\t" << u << "\t"; 
 	}
 
 	void set_size(double _x){
