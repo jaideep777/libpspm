@@ -106,6 +106,12 @@ double Species<Model>::getU(int i){
 
 
 template <class Model>
+double Species<Model>::get_boundary_u(){
+	return boundaryCohort.u;
+}
+
+
+template <class Model>
 void Species<Model>::set_xb(double _xb){
 	xb = _xb;
 	boundaryCohort.x = _xb;
@@ -155,21 +161,30 @@ void Species<Model>::copyCohortsExtraToState(std::vector<double>::iterator &it){
 
 
 template <class Model>
+void Species<Model>::preCompute(int i, double t, void * env){
+	Cohort<Model> &c = (i<0)? boundaryCohort : cohorts[i];
+	c.preCompute(c.x,t,env);	
+}
+
+
+template <class Model>
+void Species<Model>::preComputeAllCohorts(double t, void * env){
+	for (auto& c : cohorts) c.preCompute(c.x, t, env);
+	boundaryCohort.preCompute(boundaryCohort.x, t, env);
+}
+
+
+template <class Model>
 double Species<Model>::get_u0(double t, void * env){
 	
 	if (bfin_is_u0in){
 		boundaryCohort.u = birth_flux_in;
 	}
-	else {	
+	else {
+		//boundaryCohort.preCompute(boundaryCohort.x, t, env);
 		double g = boundaryCohort.growthRate(boundaryCohort.x, t, env); 
 		boundaryCohort.u = (g>0)? birth_flux_in * boundaryCohort.establishmentProbability(t, env)/g  :  0; 
 	}
-	return boundaryCohort.u;
-}
-
-
-template <class Model>
-double Species<Model>::get_boundary_u(){
 	return boundaryCohort.u;
 }
 
@@ -185,6 +200,7 @@ template <class Model>
 double Species<Model>::growthRateOffset(int i, double x, double t, void * env){
 	Cohort<Model> coff = (i<0)? boundaryCohort : cohorts[i];
 	coff.set_size(x);
+	coff.preCompute(coff.x,t,env);
 	return coff.growthRate(coff.x,t,env);
 }
 
@@ -195,6 +211,7 @@ std::vector<double> Species<Model>::growthRateGradient(int i, double x, double t
 
 	Cohort<Model> cplus = c;
 	cplus.set_size(c.x + grad_dx);
+	cplus.preCompute(cplus.x,t,env);
 	
 	double g = c.growthRate(c.x,t,env);
 	double gplus = cplus.growthRate(cplus.x, t, env);
@@ -209,9 +226,11 @@ std::vector<double> Species<Model>::growthRateGradientCentered(int i, double xpl
 
 	Cohort<Model> cplus = cohorts[i];
 	cplus.set_size(xplus);
-	
+	cplus.preCompute(cplus.x,t,env);
+
 	Cohort<Model> cminus = cohorts[i];
 	cminus.set_size(xminus);
+	cminus.preCompute(cminus.x,t,env);
 	
 	double gplus  = cplus.growthRate(cplus.x, t, env);
 	double gminus = cminus.growthRate(cminus.x, t, env);
@@ -223,7 +242,8 @@ std::vector<double> Species<Model>::growthRateGradientCentered(int i, double xpl
 template <class Model>
 double Species<Model>::mortalityRate(int i, double x, double t, void * env){
 	assert(i>=0);
-	return cohorts[i].mortalityRate(cohorts[i].x,t,env);
+	Cohort<Model> &c = cohorts[i];
+	return c.mortalityRate(c.x,t,env);
 }
 	
 
@@ -233,6 +253,7 @@ std::vector<double> Species<Model>::mortalityRateGradient(int i, double x, doubl
 
 	Cohort<Model> cplus = c;
 	cplus.set_size(x + grad_dx);
+	cplus.preCompute(cplus.x,t,env);
 	
 	double g = c.mortalityRate(c.x,t,env);
 	double gplus = cplus.mortalityRate(cplus.x, t, env);
@@ -244,6 +265,7 @@ std::vector<double> Species<Model>::mortalityRateGradient(int i, double x, doubl
 template <class Model>
 double Species<Model>::birthRate(int i, double x, double t, void * env){
 	Cohort<Model> &c = (i<0)? boundaryCohort : cohorts[i];
+	if (precomp) c.preCompute(c.x,t,env);
 	return c.birthRate(c.x,t,env);
 }
 	

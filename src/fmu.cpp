@@ -24,6 +24,8 @@ void Solver::calcRates_FMU(double t, vector<double> &S, vector<double> &dSdt){
 		vector<double> &X = spp->X;
 		vector<double> &h = spp->h;
 
+		spp->preComputeAllCohorts(t,env);
+		
 		vector <double> growthArray(J+1);
 		growthArray[0] = spp->growthRate(-1, x[0], t, env);
 		for (int i=1; i<J+1; ++i) growthArray[i] = spp->growthRateOffset(i-1, x[i], t, env);

@@ -87,6 +87,8 @@ class Species_Base{
 	virtual double get_boundary_u() = 0;
 
 	// TODO: argument x can probably be removed from these functions
+	virtual void preComputeAllCohorts(double t, void * env) = 0;
+	virtual void preCompute(int i, double t, void * env) = 0;
 	virtual double growthRate(int i, double x, double t, void * env) = 0;
 	virtual double growthRateOffset(int i, double x, double t, void * env) = 0;
 	virtual std::vector<double> growthRateGradient(int i, double x, double t, void * env, double grad_dx) = 0;
@@ -142,6 +144,8 @@ class Species : public Species_Base{
 	double get_u0(double t, void * env);
 	double get_boundary_u();
 	
+	void preComputeAllCohorts(double t, void * env);
+	void preCompute(int i, double t, void * env);
 	double growthRate(int i, double x, double t, void * env);
 	double growthRateOffset(int i, double x, double t, void * env);
 	std::vector<double> growthRateGradient(int i, double x, double t, void * env, double grad_dx);

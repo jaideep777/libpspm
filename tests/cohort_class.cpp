@@ -34,6 +34,9 @@ class Plant {
 		crown_area = x*x;
 	}
 
+	void preCompute(double x, double t, void * env){
+	}
+
 	double growthRate(double x, double t, void * env){
 		cout << "in g: " << x << " " << t << " " << ((LightEnv*)env)->E << "\n";
 		return x*((LightEnv*)env)->E;
@@ -95,6 +98,9 @@ class Insect {
 
 	void set_size(double x){
 		
+	}
+
+	void preCompute(double x, double t, void * env){
 	}
 
 	vector<double>::iterator set_state(vector<double>::iterator &it){

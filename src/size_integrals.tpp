@@ -103,6 +103,7 @@ double Solver::integrate_wudx_above(wFunc w, double t, double xlow, int species_
 		double x0 = spp->xb + pi0/(N0+1e-12);
 		spp->setX(spp->J-1, x0);
 		spp->setU(spp->J-1, N0);
+		spp->preCompute(spp->J-1,t,env);
 
 		// calculate integral
 		double I = 0;
@@ -184,6 +185,7 @@ double Solver::integrate_x(wFunc w, double t, int species_id){
 		double x0 = spp->xb + pi0/(N0+1e-12);
 		spp->setX(spp->J-1, x0);
 		spp->setU(spp->J-1, N0);
+		spp->preCompute(spp->J-1,t,env);
 
 		// calculate integral
 		double I = 0;

@@ -7,10 +7,12 @@ void Solver::calcRates_EBT(double t, vector<double>&S, vector<double> &dSdt){
 
 	vector<double>::iterator its = S.begin()    + n_statevars_system; // Skip system variables
 	vector<double>::iterator itr = dSdt.begin() + n_statevars_system;
-	
+
 	for (int s = 0; s < species_vec.size(); ++s){
 		Species_Base * spp = species_vec[s];
 
+		spp->preComputeAllCohorts(t,env);
+		
 		double   pi0  =  spp->getX(spp->J-1);	 // last cohort is pi0, N0
 		double   N0   =  spp->getU(spp->J-1);
 		//std::cout << "pi = " << pi0 << ", N0 = " << N0 << "\n";

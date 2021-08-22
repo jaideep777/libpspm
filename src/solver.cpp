@@ -516,6 +516,7 @@ vector<double> Solver::newborns_out(){
 		// [solved] wudx doesnt work here. Why?? - works now, no idea why it was not working earlier!
 		auto newborns_production = [this, k](int i, double t){
 			double z = species_vec[k]->getX(i);
+			species_vec[k]->preCompute(i,t,env);	
 			double b = species_vec[k]->birthRate(i,z,t,env);	
 			//cout << "newborns of " << i << " = " << b << "\n"; 
 			return b; 
@@ -532,6 +533,7 @@ vector<double> Solver::u0_out(){
 	vector <double> u0out;
 	vector <double> newbornsout = newborns_out();
 	for (int k=0; k < species_vec.size(); ++k){
+		species_vec[k]->preCompute(-1, current_time, env);	
 		u0out.push_back(newbornsout[k]/species_vec[k]->growthRate(-1, species_vec[k]->xb, current_time, env));
 	}
 	return u0out;

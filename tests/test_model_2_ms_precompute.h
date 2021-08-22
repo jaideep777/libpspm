@@ -69,41 +69,48 @@ class TestModel : public Plant{
 	public:
 	double sc = 10;
 
+	// precomputed demographic rates
+	double g,m,f,se;
+	
 	TestModel() : Plant(0) {}
 
 	double init_density(double x){
 		return pow(1-x,2)/pow(1+x,4) + (1-x)/pow(1+x,3);
 	}
-
-	void preCompute(double x, double t, void * env){
-	}
-
-	double growthRate(double x, double t, void * _env){
+	
+	double preCompute(double x, double t, void * _env){
 		Environment* env = (Environment*)_env;
+	
+		// growth rate
 		double E = env->evalEnv(x,t);
 		double a = 0.16+0.22*exp(-0.225*t*t);
-		return 0.225*(1-x*x)*(E/(1+E*E))*t*(1+a*a)/a;
+		g = 0.225*(1-x*x)*(E/(1+E*E))*t*(1+a*a)/a;
+
+		m = 1.35*t*E/a;
+		
+		double oneplusa = 1+a;
+		double n1 = 0.225*t*x*x*(1-x)*(1-x)*E/(1+E)/(1+E)*oneplusa*oneplusa/a;
+		double n2 = (1+exp(-0.225*t*t))/(61-88*log(2)+(38*log(2)-79.0/3)*exp(-0.225*t*t));
+		f = n1*n2;
+
+		se = 1;
+
+	}
+	
+	double growthRate(double x, double t, void * _env){
+		return g;
 	}
 
 	double mortalityRate(double x, double t, void * _env){
-		Environment* env = (Environment*)_env;
-		double E = env->evalEnv(x,t);
-		double a = 0.16+0.22*exp(-0.225*t*t);
-		return 1.35*t*E/a;
+		return m;
 	}
 
 	double birthRate(double x, double t, void * _env){
-		Environment* env = (Environment*)_env;
-		double E = env->evalEnv(x,t);
-		double oneplusa = 1.16+0.22*exp(-0.225*t*t);
-		double a = 0.16+0.22*exp(-0.225*t*t);
-		double n1 = 0.225*t*x*x*(1-x)*(1-x)*E/(1+E)/(1+E)*oneplusa*oneplusa/a;
-		double n2 = (1+exp(-0.225*t*t))/(61-88*log(2)+(38*log(2)-79.0/3)*exp(-0.225*t*t));
-		return n1*n2;
+		return f;
 	}
 
 	double establishmentProbability(double t, void  * _env){
-		return 1;
+		return se;
 	}
 
 
