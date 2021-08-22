@@ -265,7 +265,6 @@ std::vector<double> Species<Model>::mortalityRateGradient(int i, double x, doubl
 template <class Model>
 double Species<Model>::birthRate(int i, double x, double t, void * env){
 	Cohort<Model> &c = (i<0)? boundaryCohort : cohorts[i];
-	if (precomp) c.preCompute(c.x,t,env);
 	return c.birthRate(c.x,t,env);
 }
 	
