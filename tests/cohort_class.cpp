@@ -27,8 +27,16 @@ class Plant {
 	double crown_area = -99;
 	double root_mass = -99;
 
-	vector<string> varnames = {"ht", "cr", "root"};
+	vector<string> varnames = {"lma|", "ht", "cr", "root"};
 
+	Plant(){
+		lma = 10;
+	}
+
+	Plant(double _lma){
+		lma = _lma;
+	}
+	
 	void set_size(double x){
 		height = x;
 		crown_area = x*x;
@@ -75,7 +83,7 @@ class Plant {
 	}
 
 	void print(){
-		cout << height << "\t" << crown_area << "\t" << root_mass << "\t";
+		cout << lma << "|\t" << height << "\t" << crown_area << "\t" << root_mass << "\t";
 	}
 };
 
@@ -134,11 +142,21 @@ class Insect {
 
 int main(){
 
-	
-	Species<Plant> S(vector<double> {1,2,3,4,5});
-	S.setX(0, 1.5);
-	S.setX(2, 3.5);
-	//S.print();
+	Plant P;
+	cout << "P: "; P.print(); cout << "\n";
+
+	P.lma = 70;
+	Cohort<Plant> C1;
+	C1 = Cohort<Plant> (P);
+	cout << "C1: "; C1.print(); cout << "\n";
+
+
+	Species<Plant> Sv(vector<double> {1,2,3,4,5});
+	Sv.setX(0, 1.5);
+	Sv.setX(2, 3.5);
+	Sv.print();
+
+	Species<Plant> S(P);  // create species S with prototype P
 
 	Species<Insect> I(vector<double> {1.1,2.1,3.1});
 
@@ -156,7 +174,9 @@ int main(){
 	sol.addSpecies(vector<double> {1.1,2.1,3.1}, &I, 0, 1);
 	sol.resetState();
 	sol.initialize();
+	sol.addCohort_EBT();
 	sol.print();	
+
 
 	LightEnv env;
 	sol.setEnvironment(&env);

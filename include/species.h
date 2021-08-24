@@ -120,11 +120,12 @@ class Species : public Species_Base{
 	std::vector<Cohort<Model>> cohorts;
 	Cohort<Model> boundaryCohort;
 	
-	Cohort<Model> savedCohort; // a cohort to save backups of any other cohorts
+	Cohort<Model> savedCohort; // a cohort to save a backup of any other cohort
 
 	public:
 	// TODO: make these virtual?
 	Species(std::vector<double> breaks = std::vector<double>());
+	Species(Model M);
 	void resize(int _J);
 	double get_maxSize();
 	

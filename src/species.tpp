@@ -1,16 +1,19 @@
 #include <cassert>
 #include <algorithm>
 
+// *************** Species_Base   ***************  
+
 template<class T>
 void Species_Base::addCohort(T bc){
 	(dynamic_cast<Species<T>>(*this)).addCohort(bc);
 }
 
+// *************** Species<Model> ******************
 
 template<class Model>
 void Species<Model>::resize(int _J){
 	J = _J;
-	cohorts.resize(J);
+	cohorts.resize(J, boundaryCohort);  // when resizing, always insert copies of boundary cohort
 }
 
 
@@ -38,12 +41,18 @@ double Species<Model>::get_maxSize(){ // TODO ALERT: make sure this sees the lat
 //}
 
 
-
+// FIXME: this constructor should  be corrected or removed.
 template<class Model>
 Species<Model>::Species(std::vector<double> breaks){
 	J = breaks.size(); // changes with 
-	cohorts.resize(J);
+	cohorts.resize(J, boundaryCohort);
 	for (int i=0; i<J; ++i) cohorts[i].x = breaks[i];	
+}
+
+
+template<class Model>
+Species<Model>::Species(Model M){
+	boundaryCohort = savedCohort = Cohort<Model>(M); 
 }
 
 
