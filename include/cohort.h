@@ -22,8 +22,13 @@ class Cohort : public Ind {
 	Cohort(const Ind& _ind) : Ind(_ind){
 	}
 
-	void print_xu(){
-		std::cout << birth_time << "\t" << x << "\t" << u << "\t"; 
+	void print_xu(std::ostream &out = std::cout){
+		out << birth_time << "\t" << x << "\t" << u << "\t"; 
+	}
+
+	void print(std::ostream &out = std::cout){
+		print_xu(out);
+		Ind::print(out);
 	}
 
 	void set_size(double _x){

@@ -40,10 +40,11 @@ double Environment::canopy_openness(double z) const {
 //}
 
 // Computes the probability of survival from 0 to time.
-double Environment::patch_survival() const {
-	return exp(-scale * pow(time, shape));
-}
+//double Environment::patch_survival() const {
+	//return exp(-scale * pow(time, shape));
+//}
 
+// Computes the probability of survival from 0 to t.
 double Environment::patch_survival(double t) const {
 	return exp(-scale * pow(t, shape));
 }

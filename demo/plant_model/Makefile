@@ -4,7 +4,7 @@ FILE =
 TARGET = $(patsubst %.cpp, %.exec, $(FILE)) 
 
 # files
-SRCFILES  :=  $(wildcard ../../src/*.cpp plant/*.cpp)
+SRCFILES  :=  $(wildcard ../../src/*.cpp src/*.cpp)
 SRCFILES += $(FILE)
 HEADERS := $(wildcard ../../src/*.tpp) $(wildcard ../../include/*.h) 
 # ------------------------------------------------------------------------------
@@ -13,7 +13,7 @@ HEADERS := $(wildcard ../../src/*.tpp) $(wildcard ../../include/*.h)
 #CUDA_INSTALL_PATH ?= /usr/local/cuda#-5.0
 
 # include and lib dirs (esp for cuda)
-INC_PATH := -I../../include 
+INC_PATH := -I../../include -I./include -I../include
 LIB_PATH := -L../../lib 
 
 # flags

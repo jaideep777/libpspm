@@ -175,18 +175,16 @@ void Solver::setEnvironment(EnvironmentBase * _env){
 //}
 
 
-//template<class Model, class Environment>
-//int Solver<Model,Environment>::n_species(){
-//    return species_vec.size();
-//}
+int Solver::n_species(){
+	return species_vec.size();
+}
 
 
-//template<class Model, class Environment>
-//double Solver<Model,Environment>::maxSize(std::vector<double>::iterator state_begin){
-//    double maxsize = 0;
-//    for (auto& spp : species_vec) maxsize = std::max(maxsize, spp.get_maxSize(state_begin));
-//    return maxsize;
-//}
+double Solver::maxSize(){
+	double maxsize = 0;
+	for (auto spp : species_vec) maxsize = std::max(maxsize, spp->get_maxSize());
+	return maxsize;
+}
 
 
 //double Solver::get_u0(double t, int s){

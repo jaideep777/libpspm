@@ -3,9 +3,10 @@
 #include <fstream>
 #include <sstream>
 using namespace std;
-#include "solver.h"
 
-#include "plant_pspm.h"
+#include <solver.h>
+#include "pspm_environment.h"
+#include "pspm_plant.h"
 
 
 vector<double> generateDefaultCohortSchedule(double max_time){
@@ -32,57 +33,6 @@ vector<double> generateDefaultCohortSchedule(double max_time){
 }
 
 
-template<class Model, class Environment>
-class SolverIO{
-	public:
-	int nspecies;
-	Solver<Model, Environment> * S;
-
-	vector <vector<ofstream>> streams;
-
-	void openStreams(){
-		for (int s=0; s < S->n_species(); ++s){
-			auto spp = S->get_species(s);
-			vector<string> varnames = spp->get_varnames();
-			vector<ofstream> spp_streams;
-			for (string name : varnames){
-				stringstream sout;
-				sout << "species_" << s << "_" << name + ".txt";
-				cout << sout.str() << endl;
-				ofstream fout(sout.str().c_str());
-				spp_streams.push_back(std::move(fout));
-			}
-			streams.push_back(std::move(spp_streams));
-		}
-	}
-
-	void closeStreams(){
-		for (int s=0; s<streams.size(); ++s){
-			for (int j=0; j<streams[s].size(); ++j){
-				streams[s][j].close();
-			}
-		}
-	}
-
-	void writeState(){
-		for (int s=0; s < S->n_species(); ++s){
-			auto spp = S->get_species(s);
-			auto iset = spp->get_iterators(S->state);
-			auto& ivec = iset.get();
-
-			for (int i=0; i<streams[s].size(); ++i) streams[s][i] << S->current_time << "\t";
-
-			for (iset.rbegin(); !iset.rend(); --iset){
-				for (int i=0; i<ivec.size(); ++i){
-					streams[s][i] << *ivec[i] << "\t"; 
-				}
-			}
-			
-			for (int i=0; i<streams[s].size(); ++i) streams[s][i] << "\n";
-		}
-	}
-};
-
 
 int main(){
 	
@@ -90,7 +40,7 @@ int main(){
 	
 	FixedEnvironment env(1);	
 	
-	plant::Plant p;
+	PSPM_Plant p;
 	p.lma = 0.1978791;
 	p.initParameters();
 	p.vars.height = p.par.height_0; //0.3257146; //0.3920458; //0.3441948;
@@ -98,96 +48,38 @@ int main(){
 
 	cout << p << endl;
 
-    Solver<PlantModel, FixedEnvironment> S(SOLVER_CM);
-    S.use_log_densities = true;
+    Species<PSPM_Plant> s1(p);
+    //M.p = M.seed = p;
+	s1.print(); 
+	
+	Solver S(SOLVER_CM);
+	S.use_log_densities = true;
 	S.control.ode_eps = 1e-4;
 	S.control.update_cohorts = false;
 	S.setEnvironment(&env);
-	//    S.createSizeStructuredVariables({"mort", "fec", "heart_area", "heart_mass"});
-    
-    PlantModel M;
-    M.p = M.seed = p;
-    cout << "HT === " << M.p.vars.height << endl;
 
-	S.addSpecies(vector<double>(1, M.p.vars.height), &M, {"mort", "fec", "heart", "sap"}, M.input_seed_rain);
+	S.addSpecies(vector<double>(1, p.vars.height), &s1, 4, 1);
 	
 	S.resetState();
-    S.initialize();
+	S.initialize();
 
-    S.print();
+	S.print();
 
 	vector <double> times = generateDefaultCohortSchedule(105.32);
 	for (auto t : times) cout << t << " "; cout << endl;
 
+	ofstream fout("out_single_plant_cm.txt");
 	
-	SolverIO<PlantModel, FixedEnvironment> sio;
-	sio.S = &S;
-	sio.openStreams();
-
-	ofstream fli("light_profile_ind_plant.txt");
-	
-	vector <vector<double>> seeds_out(S.n_species());
-
 	for (size_t i=0; i < times.size(); ++i){
 
 		S.step_to(times[i]);		
-		
-		//vector<double> seeds = S.newborns_out();
-		//for (int s=0; s< S.n_species(); ++s){
-		//    double S_D = 0.25;
-		//    seeds_out[s].push_back(seeds[s] * S_D * env.patch_age_density(times[i]));
-		//}
-
-		//cout << times[i] << " " << S.get_species(0)->xsize() << " " << seeds[0] << " " << env.light_profile.npoints << " | " << M.nrc << " " << M.ndc << " " << M.nbc <<"\n";
-
-		//vector<double> xl = seq(0, 20, 200);
-		//for (auto h : xl) fli << env.canopy_openness(h) << "\t";
-		//fli << endl;
-
-		sio.writeState();
+		fout << times[i] << "\t"; ((Species<PSPM_Plant>*)S.species_vec[0])->cohorts[0].print(fout); fout << "\n";
 
 	}
-	
-	fli.close();
-	sio.closeStreams();
-	cout << "derivative computations in g/m/f functions: " << M.nrc << " " << M.ndc << " " << M.nbc << endl;
 
-	//for (int s=0; s< S.n_species(); ++s){
-	//    //auto spp = S.get_species(s);
-	//    //auto iset = spp->get_iterators(S.state);
-	//    //auto& itf = iset.get("fec");
-	//    //vector <double> fec_vec;
-	//    //fec_vec.reserve(spp->xsize());
-	//    //iset.rbegin();
-	//    //for (int i=0; !iset.rend(); --iset, ++i){
-	//    //    double patch_age_density = env.patch_age_density(times[i]);
-	//    //    double S_D = 0.25;
-	//    //    double output_seeds = spp->mod->input_seed_rain * S_D * patch_age_density * (*itf);
-	//    //    //cout << times[i] << " " << M.input_seed_rain << " " << S_D << " " << patch_age_density << " " << (*itf) << " | " << output_seeds << endl;
-	//    //    fec_vec.push_back(output_seeds);
-	//    //}
-	//    //cout << "Seed rain for Species " << s << " = " << pn::integrate_trapezium(times, fec_vec) << endl;
-	//    cout << "Seed rain for Species " << s << " (new method) = " << pn::integrate_trapezium(times, seeds_out[s]) << endl;
+	S.print();
 
-	//}
-
-	//for (int s=0; s< S.n_species(); ++s){
-	//    auto spp = S.get_species(s);
-	//    auto iset = spp->get_iterators(S.state);
-	//    auto& itf = iset.get("fec");
-	//    vector <double> fec_vec;
-	//    fec_vec.reserve(spp->xsize());
-	//    iset.rbegin();
-	//    for (int i=0; !iset.rend(); --iset, ++i){
-	//        double patch_age_density = env.patch_age_density(times[i]);
-	//        double S_D = 0.25;
-	//        double output_seeds = spp->mod->input_seed_rain * S_D * patch_age_density * (*itf);
-	//        //cout << times[i] << " " << M.input_seed_rain << " " << S_D << " " << patch_age_density << " " << (*itf) << " | " << output_seeds << endl;
-	//        fec_vec.push_back(output_seeds);
-	//    }
-	//    cout << "Seed rain for Species (Falster 17) " << s << " = " << pn::integrate_trapezium(times, fec_vec) << endl;
-	//}
-	
+	fout.close();
 
 }
 

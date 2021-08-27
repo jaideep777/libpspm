@@ -5,7 +5,7 @@
 #include <list>
 #include <map>
 
-#include "environment.h"
+#include "environment_base.h"
 #include "species.h"
 #include "pspm_ode_solver3.h"
 
@@ -51,7 +51,7 @@ class Solver{
 	void addSpecies(std::vector<double> xbreaks, Species_Base* _mod, int n_extra_vars, double input_birth_flux = -1);
 
 	//Species<Model>* get_species(int id);
-	//int n_species();
+	int n_species();
 
 	void setEnvironment(EnvironmentBase * _env);
 
@@ -68,7 +68,7 @@ class Solver{
 	////const double* getX();
 	////vector<double> getx();
 	////double getMaxSize(vector<double>::iterator sbegin);
-	//double maxSize(std::vector<double>::iterator state_begin);
+	double maxSize();
 	//double get_u0(double t, int s);	
 
 

@@ -25,7 +25,6 @@ class Species_Base{
 	//std::vector<int> strides;				// defines how the variables are packed into the state vector
 	//std::vector<int> offsets;				// 
 	
-	double birth_flux_in;
 
 	std::list<double> birth_flux_out_history;                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    
 	
@@ -41,6 +40,8 @@ class Species_Base{
 	//double u0_save;
 
 	public:
+	double birth_flux_in;
+	
 	//debug only
 	bool bfin_is_u0in = false;
 	
@@ -53,6 +54,9 @@ class Species_Base{
 	bool is_resident;
 	
 	//Model * mod = nullptr;
+	public:
+	int ng = 0, nm = 0, nf = 0, np = 0;
+
 
 	public: // public functions
 
@@ -116,7 +120,7 @@ class Species_Base{
 
 template <class Model>
 class Species : public Species_Base{
-	public:
+	protected:
 	std::vector<Cohort<Model>> cohorts;
 	Cohort<Model> boundaryCohort;
 	
@@ -170,6 +174,9 @@ class Species : public Species_Base{
 	void backupCohort(int j);
 	void restoreCohort(int j);
 	void copyBoundaryCohortTo(int j);
+
+	public:
+	Cohort<Model>& getCohort(int i);
 };
 
 
