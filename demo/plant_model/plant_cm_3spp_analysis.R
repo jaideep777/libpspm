@@ -203,7 +203,7 @@ hmean3 = hmean(hp3[,-1], ldp3[,-1])
 hmean_all = cbind(hp[,1], hmean1, hmean2, hmean3)
 matplot(hmean_all[,1], hmean_all[,-1], type="l", lty=1, lwd=2, 
         ylab="Mean height", xlab="time")
-
+  # 
 matplot(y=cbind(as.numeric(ldp[191,-1]), 
                 as.numeric(ldp2[191,-1]), 
                 as.numeric(ldp3[191,-1])), x=200-ldp[,1],type="l", lty=1, lwd=2,
