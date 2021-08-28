@@ -53,7 +53,7 @@ TEST_TARGETS = $(patsubst tests/%.cpp, tests/%.test, $(TEST_FILES))
 TEST_RUNS = $(patsubst tests/%.cpp, tests/%.run, $(TEST_FILES))
 ADD_OBJECTS = 
 
-check: compile_tests clean_log run_tests
+check: $(OBJECTS) compile_tests clean_log run_tests
 
 compile_tests: $(TEST_TARGETS)
 	

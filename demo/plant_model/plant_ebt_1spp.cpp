@@ -129,15 +129,15 @@ int main(){
 	
 	//exit(1);
 
-    Solver S(SOLVER_CM);
+    Solver S(SOLVER_EBT);
     S.use_log_densities = true;
 	S.control.ode_eps = 1e-4;
 	S.setEnvironment(&env);
 	//    S.createSizeStructuredVariables({"mort", "fec", "heart_area", "heart_mass"});
-    
-	S.addSpecies(vector<double>(1, p1.vars.height), &s1, 4, 1);
-	S.addSpecies(vector<double>(1, p2.vars.height), &s2, 4, 1);
-	S.addSpecies(vector<double>(1, p3.vars.height), &s3, 4, 1);
+   
+	S.addSpecies(vector<double>(2, p1.vars.height), &s1, 4, 1);
+	S.addSpecies(vector<double>(2, p2.vars.height), &s2, 4, 1);
+	S.addSpecies(vector<double>(2, p3.vars.height), &s3, 4, 1);
 	
 	S.resetState();
 	S.initialize();
@@ -190,20 +190,20 @@ int main(){
 		cout << "Seed rain for Species " << s << " (Lindh 18) = " << pn::integrate_trapezium(times, seeds_out[s]) << endl;
 	}
 
-	for (int s=0; s< S.n_species(); ++s){
-		auto spp = S.species_vec[s];
-		vector <double> fec_vec;
-		fec_vec.reserve(spp->xsize());
-		for (int i=0; i<spp->xsize(); ++i){
-			auto C = ((Species<PSPM_Plant>*)spp)->getCohort(i);
-			double patch_age_density = env.patch_age_density(times[i]);
-			double S_D = 0.25;
-			double output_seeds = spp->birth_flux_in * S_D * patch_age_density * C.viable_seeds;
-			//cout << times[i] << " " << M.input_seed_rain << " " << S_D << " " << patch_age_density << " " << (*itf) << " | " << output_seeds << endl;
-			fec_vec.push_back(output_seeds);
-		}
-		cout << "Seed rain for Species " << s << " (Falster 17) = " << pn::integrate_trapezium(times, fec_vec) << endl;
-	}
+	//for (int s=0; s< S.n_species(); ++s){
+		//auto spp = S.species_vec[s];
+		//vector <double> fec_vec;
+		//fec_vec.reserve(spp->xsize());
+		//for (int i=0; i<spp->xsize(); ++i){
+			//auto C = ((Species<PSPM_Plant>*)spp)->getCohort(i);
+			//double patch_age_density = env.patch_age_density(times[i]);
+			//double S_D = 0.25;
+			//double output_seeds = spp->birth_flux_in * S_D * patch_age_density * C.viable_seeds;
+			////cout << times[i] << " " << M.input_seed_rain << " " << S_D << " " << patch_age_density << " " << (*itf) << " | " << output_seeds << endl;
+			//fec_vec.push_back(output_seeds);
+		//}
+		//cout << "Seed rain for Species " << s << " (Falster 17) = " << pn::integrate_trapezium(times, fec_vec) << endl;
+	//}
 	
 
 }

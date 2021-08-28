@@ -14,34 +14,35 @@ bool almostEqual(const vector<T> &a, const vector <T> &b){
 
 
 int main(){
-	TestModel M;
+	Species<TestModel> s1;
+	Species<TestModel> s2;
 	Environment E;
 
-	Solver<TestModel,Environment> S(SOLVER_CM);
-	S.use_log_densities = false;
-	//S.control.cm_grad_dx = 0.001;
-	S.addSpecies(5, 0, 1, false, &M, {"mort", "vs", "ha", "sa"}, 2);
-	S.addSpecies(8, 0, 1, false, &M, {"mort", "vs", "ha", "sa"}, 2);
+	Solver S(SOLVER_EBT);
+	S.addSpecies(5, 0, 1, false, &s1, 4, 2);
+	S.addSpecies(8, 0, 1, false, &s2, 4, 2);
 	S.resetState();
 	S.initialize();
 	S.setEnvironment(&E);
-	S.get_species(0)->set_bfin_is_u0in(true);	// say that input_birth_flux is u0
 	S.print();
 	//for (auto s : S.state) cout << s << " "; cout << endl;
 	
-	auto itx1 = S.get_species(0)->get_iterators(S.state).get("X");	
-	auto itx2 = S.get_species(1)->get_iterators(S.state).get("X");
+	auto spp1 = S.species_vec[0];	
+	auto spp2 = S.species_vec[1];	
 
-	*(itx1+1) = *itx1+1e-7;
-	*(itx1+2) = *itx1+2e-7;
-	
-	*(itx2+1) = *itx2+1e-7;
-	*(itx2+4) = *(itx2+3)+1e-7;
-	*(itx2+5) = *(itx2+3)+2e-7;
+	spp1->setX(1,spp1->getX(0)+1e-5); 
+	spp1->setX(2,spp1->getX(1)+1e-5); 
+
+	spp2->setX(1,spp2->getX(0)+1e-5); 
+	spp2->setX(4,spp2->getX(3)+1e-5); 
+	spp2->setX(5,spp2->getX(3)+1e-5); 
 
 	S.print();
 
-	S.removeDenseCohorts_CM();
+	spp1->removeDenseCohorts(1e-4);
+	spp2->removeDenseCohorts(1e-4);
+	//S.resizeStateFromSpecies();
+	//S.copyCohortsToState();
 
 	S.print();
 

@@ -441,8 +441,8 @@ double Plant::mortality_dt(double productivity_area,
 }
 
 double Plant::mortality_growth_independent_dt() const {
-  //return par.d_I;
-  return par.c_d0*exp(-par.c_d1*rho);
+  return par.d_I;
+  //return par.c_d0*exp(-par.c_d1*rho);
 }
 
 double Plant::mortality_growth_dependent_dt(double productivity_area) const {

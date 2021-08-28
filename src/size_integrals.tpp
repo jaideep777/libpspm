@@ -1,29 +1,24 @@
-template<class Model, class Environment>
 template<typename wFunc>
-double Solver<Model, Environment>::integrate_wudx_above(wFunc w, double t, double xlow, vector<double>&S, int species_id){
+double Solver::integrate_wudx_above(wFunc w, double t, double xlow, int species_id){
 
-	Species<Model> &spp = species_vec[species_id];
+	Species_Base* spp = species_vec[species_id];
 
+	// cohorts are inserted at the end, hence sorted in descending order - FIXME: should there be an optional "sort_cohorts" control parameter? Maybe some freak models are such that cohorts dont remain in sorted order?
 	if (method == SOLVER_CM){
-		auto iset = spp.get_iterators(S);
-		auto &itx = iset.get("X");
-		auto &itu = iset.get("u");
-		iset.rbegin();
-
 		//std::cout << "J = " << spp.J << ", dist = " << iset.dist << std::endl; 
 		// integrate using trapezoidal rule 
-		// Note, new cohorts are inserted at the beginning, so x will be ascending
+		// Note, new cohorts are inserted at the end, so x will be descending
 		bool integration_completed = false;
 		double I = 0;
-		double u = (use_log_densities)? exp(*itu) : *itu;
-		double x_hi = *itx;
-		double f_hi = w(*itx, t)*u;
+		double u_hi = spp->getU(0); //(use_log_densities)? exp(spp->getU(0)) : spp->getU(0);
+		double x_hi = spp->getX(0);
+		double f_hi = w(0, t)*u_hi;
 		//if (xlow < 0.01) cout << "x/w/u/f = " << x_hi << " " <<  w(*itx,t) <<  " " << exp(*itu)  << " " << f_hi << "\n";
-		--iset; //--itx; --itu;
-		for (int i=0; i<spp.J-1; ++i, --iset){
-			double u = (use_log_densities)? exp(*itu) : *itu;
-			double x_lo = *itx;
-			double f_lo = w(*itx,t)*u;
+		//--itx; --itu;
+		for (int i=1; i<spp->J; ++i){  // going from high ----> low
+			double u_lo = spp->getU(i); //(use_log_densities)? exp(spp->getU(i)) : spp->getU(i);
+			double x_lo = spp->getX(i);
+			double f_lo = w(i, t)*u_lo;
 	
 			//// implementation from orig plant model	
 			//I += (x_hi - x_lo) * (f_hi + f_lo);
@@ -61,13 +56,12 @@ double Solver<Model, Environment>::integrate_wudx_above(wFunc w, double t, doubl
 		// if (spp.J == 1 || (f_hi > 0)){  // <-- this is from original plant model
 		// .. (f_hi > 0) condition works for plant model but may not work generically. 
 		// Instead use an explicit flag to mark completion 
-		if (spp.J == 1 || !integration_completed){  
-			//double g = spp.mod->growthRate(spp.xb, t, env);
-			//double u0 = (g>0)? spp.birth_flux_in * spp.mod->establishmentProbability(t, env)/g  :  0; 
+		if (spp->J == 1 || !integration_completed){  
 			// if (x_b < xlow){ // interpolate. FIXME: Need the interpolation condition here too. 
-			double u0 = spp.u0_save;
-			double x_lo = spp.xb;	
-			double f_lo =  w(x_lo, t)*u0;
+			// boundary at xb
+			double u0 = spp->get_boundary_u();
+			double x_lo = spp->xb;
+			double f_lo =  w(-1, t)*u0; // -1 is boundary cohort
 			I += (x_hi-x_lo)*(f_hi+f_lo);
 		}
 		
@@ -77,61 +71,83 @@ double Solver<Model, Environment>::integrate_wudx_above(wFunc w, double t, doubl
 	else if (method == SOLVER_FMU){
 		// integrate using midpoint quadrature rule
 		double I=0;
-		auto iset = spp.get_iterators(S);
-		auto &itu = iset.get("u");
-		iset.begin();
-		double * U = &(*itu);
-
-		for (int i=spp.J-1; i>=0; --i){
-			//cout << "Enter: " << i << endl;
-			//I += spp.h[i]*w(spp.X[i], t)*U[i];  // TODO: Replace with std::transform after profiling
-			double f = w(spp.X[i],t)*U[i];
-			//std::cout << "f = " << f << " " << spp.x[i] << " " << xlow << " " << spp.h[i] << std::endl;
-			if (spp.x[i] < xlow){
-				//I += (spp.x[i+1]-xlow) * f; // interpolating the last interval
-				I += spp.h[i] * f; // including full last interval
+		for (int i=spp->J-1; i>=0; --i){  // in FMU, cohorts are sorted ascending
+			if (spp->getX(i) < xlow){
+				//I += (spp->getX(i+1)-xlow) * w(i,t) * spp->getU(i); // interpolating the last interval
+				I += spp->h[i] * w(i,t) * spp->getU(i); // including full last interval
 				break;
 			}
 			else{
-				I += spp.h[i] * f;
+				I += spp->h[i] * w(i,t) * spp->getU(i);
 				//std::cout << "Here: " << i << std::endl;
 			}
 		}
+		
 		//std::cout << "Here" << std::endl;
 		return I;
 	}
 	
 	else if (method == SOLVER_EBT){
-		// integrate using midpoint quadrature rule
-		double I=0;
-		auto iset = spp.get_iterators(S);
-		auto &itu = iset.get("u");
-		auto &itx = iset.get("X");
-		
-		double pi0 = *itx;
-		double N0  = *itu;
+		// set up cohorts to integrate
+		// get pi0, N0 from last cohort
+		double   pi0  =  spp->getX(spp->J-1);
+		double   N0   =  spp->getU(spp->J-1);
 
-		iset.rbegin();
+		//cout << "pi0 = " << pi0 << ", N0 = " << N0 << "\n";
+		// backup the cohort containing pi0 and N0
+		spp->backupCohort(spp->J-1);
+		// replace pi0-cohort with boundary cohort
+		spp->copyBoundaryCohortTo(spp->J-1);
 
-		for (int i=spp.J-1; i>=1; --i, --iset){  // iterate over cohorts except boundary cohort
-			if (*itx < xlow) break;
-			
-			double f = w(*itx,t) * (*itu);
-			//std::cout << "f = " << f << " " << spp.x[i] << " " << xlow << " " << spp.h[i] << std::endl;
-			I += f;
+		// update pi0-cohort with actual x0 value
+		double x0 = spp->xb + pi0/(N0+1e-12);
+		spp->setX(spp->J-1, x0);
+		spp->setU(spp->J-1, N0);
+		spp->preCompute(spp->J-1,t,env);
+
+		// calculate integral
+		double I = 0;
+		for (int i=0; i<spp->J; ++i){
+		   	if (spp->getX(i) < xlow) break;
+			else I += w(i, t)*spp->getU(i);
 		}
 		
-		double x0 = spp.xb + pi0/(N0+1e-12);  
-		if (xlow < x0) I += w(x0, t)*N0;	 
-		
-		//std::cout << "Here" << std::endl;
+		// restore the original pi0-cohort
+		spp->restoreCohort(spp->J-1);
+
 		return I;
+		
+		
+		//// integrate using midpoint quadrature rule
+		//double I=0;
+		//auto iset = spp.get_iterators(S);
+		//auto &itu = iset.get("u");
+		//auto &itx = iset.get("X");
+		
+		//double pi0 = *itx;
+		//double N0  = *itu;
+
+		//iset.rbegin();
+
+		//for (int i=spp.J-1; i>=1; --i, --iset){  // iterate over cohorts except boundary cohort
+		//    if (*itx < xlow) break;
+			
+		//    double f = w(*itx,t) * (*itu);
+		//    //std::cout << "f = " << f << " " << spp.x[i] << " " << xlow << " " << spp.h[i] << std::endl;
+		//    I += f;
+		//}
+		
+		//double x0 = spp.xb + pi0/(N0+1e-12);  
+		//if (xlow < x0) I += w(x0, t)*N0;	 
+		
+		////std::cout << "Here" << std::endl;
+		//return I;
 	}
 	
-	else{
-		std::cout << "Only CM is implemented\n";
-		return 0;
-	}
+	//else{
+		//std::cout << "Only CM is implemented\n";
+		//return 0;
+	//}
 }
 
 
@@ -139,39 +155,49 @@ double Solver<Model, Environment>::integrate_wudx_above(wFunc w, double t, doubl
 
 
 
-template<class Model, class Environment>
 template<typename wFunc>
-double Solver<Model,Environment>::integrate_x(wFunc w, double t, vector<double>&S, int species_id){
-	Species<Model> &spp = species_vec[species_id];
-	auto iset = spp.get_iterators(S);
-	auto &itx = iset.get("X");
-	auto &itu = iset.get("u");
+double Solver::integrate_x(wFunc w, double t, int species_id){
+	Species_Base* spp = species_vec[species_id];
 
 	if (method == SOLVER_FMU){
 		// integrate using midpoint quadrature rule
 		double I=0;
-		double * U = &(*itu);
-		for (unsigned int i=0; i<spp.J; ++i){
-			I += spp.h[i]*w(spp.X[i], t)*U[i];  // TODO: Replace with std::transform after profiling
+		for (unsigned int i=0; i<spp->J; ++i){
+			I += spp->h[i]*w(i, t)*spp->getU(i);  // TODO: Replace with std::transform after profiling
 		}
 		return I;
 	}
 	
 	else if (method == SOLVER_EBT){
 		// integrate using EBT rule (sum over cohorts)
-		iset.begin();
-		double   pi0  =  *itx;
-		double   N0   =  *itu;
-		++iset; // skip boundary cohort
-
-		double x0 = spp.xb + pi0/(N0+1e-12); 
-		double I = w(x0, t)*N0;
-		for (; !iset.end(); ++iset) I += w(*itx, t)*(*itu);
 		
+		// get pi0, N0 from last cohort
+		double   pi0  =  spp->getX(spp->J-1);
+		double   N0   =  spp->getU(spp->J-1);
+
+		//cout << "pi0 = " << pi0 << ", N0 = " << N0 << "\n";
+		// backup the cohort containing pi0 and N0
+		spp->backupCohort(spp->J-1);
+		// replace pi0-cohort with boundary cohort
+		spp->copyBoundaryCohortTo(spp->J-1);
+
+		// update pi0-cohort with actual x0 value
+		double x0 = spp->xb + pi0/(N0+1e-12);
+		spp->setX(spp->J-1, x0);
+		spp->setU(spp->J-1, N0);
+		spp->preCompute(spp->J-1,t,env); // the precompute here is useful when w needs a demographic function, e.g. birthrate
+
+		// calculate integral
+		double I = 0;
+		for (int i=0; i<spp->J; ++i) I += w(i, t)*spp->getU(i);
+		
+		// restore the original pi0-cohort
+		spp->restoreCohort(spp->J-1);
+
 		return I;
 	}
 	
-	else if (method == SOLVER_CM){
+	if (method == SOLVER_CM){
 		// integrate using trapezoidal rule. Below modified to avoid double computation of w(x)
 		//double I = 0;
 		//for (iset.begin(); iset.dist < iset.size-1; ++iset){
@@ -183,17 +209,16 @@ double Solver<Model,Environment>::integrate_x(wFunc w, double t, vector<double>&
 		
 		// integrate using trapezoidal rule 
 		// Note, new cohorts are inserted at the beginning, so x will be ascending
-		iset.rbegin();
 		double I = 0;
-		double u = (use_log_densities)? exp(*itu) : *itu;
-		double x_hi = *itx;
-		double f_hi = w(*itx, t)*u;
+		double u_hi = spp->getU(0); //(use_log_densities)? exp(spp->getU(0)) : spp->getU(0);
+		double x_hi = spp->getX(0);
+		double f_hi = w(0, t)*u_hi;
 		//if (xlow < 0.01) cout << "x/w/u/f = " << x_hi << " " <<  w(*itx,t) <<  " " << exp(*itu)  << " " << f_hi << "\n";
-		--iset; //--itx; --itu;
-		for (int i=0; i<spp.J-1; ++i, --iset){
-			double u = (use_log_densities)? exp(*itu) : *itu;
-			double x_lo = *itx;
-			double f_lo = w(*itx,t)*u;
+		//--itx; --itu;
+		for (int i=1; i<spp->J; ++i){
+			double u_lo = spp->getU(i); //(use_log_densities)? exp(spp->getU(i)) : spp->getU(i);
+			double x_lo = spp->getX(i);
+			double f_lo = w(i, t)*u_lo;
 	
 			I += (x_hi - x_lo) * (f_hi + f_lo);
 			x_hi = x_lo;
@@ -201,9 +226,9 @@ double Solver<Model,Environment>::integrate_x(wFunc w, double t, vector<double>&
 		}
 		
 		// boundary at xb
-		double u0 = spp.u0_save;
-		double x_lo = spp.xb;
-		double f_lo =  w(x_lo, t)*u0;
+		double u0 = spp->get_boundary_u();
+		double x_lo = spp->xb;
+		double f_lo =  w(-1, t)*u0; // -1 is boundary cohort
 		I += (x_hi-x_lo)*(f_hi+f_lo);
 		
 		return I*0.5;

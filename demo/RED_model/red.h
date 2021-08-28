@@ -2,7 +2,7 @@
 #define DEMO_RED_MODEL_H
 
 
-class LightEnvironment{
+class LightEnvironment : public EnvironmentBase{
 	
 	double E = 0;
 
@@ -16,26 +16,26 @@ class LightEnvironment{
 	// In such a case, the solver's SubdivisionSpline can be ussed
 	// Note: The state vector in the solver will not be updated until the RK step is completed. 
 	// Hence, explicitly pass the state to this function.
-	template<class Model>
-	void computeEnv(double t, vector<double> &state_vec, Solver<Model,LightEnvironment> * S){
+	void computeEnv(double t, Solver * S){
 		//             _xm 
 		// Calculate _/ w(z,t)u(z,t)dz
 		//         xb
-		auto w = [](double z, double t) -> double {
+		auto w = [S](int i, double t) -> double {
+			double z = S->species_vec[0]->getX(i);
 			return 0.396*pow(z, 0.749)/10000;
 		};
-		E = S->integrate_x(w, t, state_vec, 0);
+		E = S->integrate_x(w, t, 0);
 	}
 
 };
 
 
 
-class REDModel{
+class RED_Plant{
 	public:
 
 	double input_seed_rain = 1;	
-
+	vector <string> varnames;
 
 	int nrc = 0; // number of evals of compute_vars_phys() - derivative computations actually done by plant
 	int ndc = 0; // number of evals of mortality_rate() - derivative computations requested by solver
@@ -50,45 +50,53 @@ class REDModel{
 	double alpha = 0.1;
 	double mu0;
 
-	REDModel() {
+	RED_Plant() {
 		mu0 = mort*m0/g0;
 	}
 
-	double initDensity(double x, LightEnvironment * env){
+
+	void set_size(double _x){
+	}
+
+	double init_density(double x){
 		return 100/pow(x,4);
 	}
 
-
-
-	double establishmentProbability(double t, LightEnvironment * env){
+	double establishmentProbability(double t, void * env){
 		return 1;
 	}
 
-	double growthRate(double x, double t, LightEnvironment * env){
+	double growthRate(double x, double t, void * env){
 		++nrc;
 		return g0*pow(x,phiG);	
 	}
 
-	double mortalityRate(double x, double t, LightEnvironment * env){
+	double mortalityRate(double x, double t, void * env){
 		++ndc;
 		return mort;
 	}
 
-	double birthRate(double x, double t, LightEnvironment * env){
+	double birthRate(double x, double t, void * env){
 		++nbc;
-		return 0.1/0.9*g0*pow(x,phiG)*(1-env->evalEnv(x,t));
+		LightEnvironment* env1 = (LightEnvironment*)env;
+		return 0.1/0.9*g0*pow(x,phiG)*(1-env1->evalEnv(x,t));
 	}
 
-
-	vector<double> initStateExtra(double x, double t, LightEnvironment * env){
-		return vector<double>();
+	vector<double>::iterator init_state(double x, vector<double>::iterator &it){
+		return it;
 	}
-		
-	vector<double>::iterator calcRates_extra(double x, double t, LightEnvironment * env, 
-											vector<double>::iterator istate, vector<double>::iterator irates){
-		return vector<double>().begin();
+	vector<double>::iterator set_state(vector<double>::iterator &it){
+		return it;
+	}
+	vector<double>::iterator get_state(vector<double>::iterator &it){
+		return it;
+	}
+	vector<double>::iterator get_rates(vector<double>::iterator &it){
+		return it;
 	}
 
+	void print(){
+	}
 };
 
 

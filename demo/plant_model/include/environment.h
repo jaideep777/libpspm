@@ -22,7 +22,7 @@ class Environment {
 	public:
 	
 //	Patch * patch;
-	double time = 0;
+	//double time = 0;
 	double fixed_canopy_openness = 1;
 
 	// Disturbance regime paramters
@@ -38,7 +38,7 @@ class Environment {
 	
 	double canopy_openness(double z) const;
 
-	double patch_survival() const;	// TODO: Rename to something more intuitive
+	//double patch_survival() const;	// TODO: Rename to something more intuitive
 
 	double patch_survival(double t) const;	// TODO: Rename to something more intuitive
 	double patch_age_density(double t) const; 
