@@ -71,7 +71,7 @@ double Solver::integrate_wudx_above(wFunc w, double t, double xlow, int species_
 	else if (method == SOLVER_FMU){
 		// integrate using midpoint quadrature rule
 		double I=0;
-		for (unsigned int i=0; i<spp->J; ++i){
+		for (int i=spp->J-1; i>=0; --i){  // in FMU, cohorts are sorted ascending
 			if (spp->getX(i) < xlow){
 				//I += (spp->getX(i+1)-xlow) * w(i,t) * spp->getU(i); // interpolating the last interval
 				I += spp->h[i] * w(i,t) * spp->getU(i); // including full last interval
@@ -185,7 +185,7 @@ double Solver::integrate_x(wFunc w, double t, int species_id){
 		double x0 = spp->xb + pi0/(N0+1e-12);
 		spp->setX(spp->J-1, x0);
 		spp->setU(spp->J-1, N0);
-		spp->preCompute(spp->J-1,t,env);
+		spp->preCompute(spp->J-1,t,env); // the precompute here is useful when w needs a demographic function, e.g. birthrate
 
 		// calculate integral
 		double I = 0;

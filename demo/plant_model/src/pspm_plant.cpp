@@ -16,7 +16,11 @@ double PSPM_Plant::init_density(double x, void * _env){
 		//p.set_height(x);
 		EnvUsed * env = (EnvUsed*)_env;
 		compute_vars_phys(*env);
-		double u0 = input_seed_rain*germination_probability(*env)/vars.height_dt;
+		double u0;
+		if (x == vars.height)
+			u0 = input_seed_rain*germination_probability(*env)/vars.height_dt;
+		else 
+			u0 = 0;
 		return u0;
 	//}
 	//else return 0;
