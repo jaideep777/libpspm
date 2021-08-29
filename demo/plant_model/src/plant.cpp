@@ -18,7 +18,7 @@ pn::Integrator Plant::plantIntegrator;
 void Plant::initParameters(){
 	// * Individual allometry
 	// Canopy shape parameter (extra calculation here later)
-	par.eta    = 12.0; // [dimensionless]
+	par.eta    = trait_eta; //12.0; // [dimensionless]
 	// Ratio sapwood area area to leaf area
 	par.theta  = 1.0/4669; // [dimensionless]
 	// Height - leaf mass scaling

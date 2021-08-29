@@ -79,6 +79,8 @@ class Plant {
 	double hmat      = 16.5958691; // Height at maturation [m]
 	double omega     = 3.8e-5;     // Seed mass [kg]
 
+	double trait_eta = 12.0;
+
 	PlantParameters par;	// JAI: making this class member again for multispecies version
 
 	struct{
