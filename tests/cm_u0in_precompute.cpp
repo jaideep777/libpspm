@@ -5,7 +5,7 @@
 #include "solver.h"
 using namespace std;
 
-#include "test_model_2_ms.h"
+#include "test_model_2_ms_precompute.h"
 
 int main(){
 
@@ -38,8 +38,6 @@ int main(){
 	}
 
 	fout.close();
-
-	S.print();
 
 	cout << S.u0_out()[0] << endl;
 	// test value is from R code	

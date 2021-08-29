@@ -18,7 +18,7 @@ pn::Integrator Plant::plantIntegrator;
 void Plant::initParameters(){
 	// * Individual allometry
 	// Canopy shape parameter (extra calculation here later)
-	par.eta    = 12.0; // [dimensionless]
+	par.eta    = trait_eta; //12.0; // [dimensionless]
 	// Ratio sapwood area area to leaf area
 	par.theta  = 1.0/4669; // [dimensionless]
 	// Height - leaf mass scaling
@@ -81,6 +81,8 @@ void Plant::initParameters(){
 	par.a_d0     = 0.1; //[kg / yr / m2]
 	// Baseline for intrinsic mortality
 	par.d_I      = 0.01; // [ / yr]
+	par.c_d0     = 0.52;
+	par.c_d1     = 6.5e-3;
 	// Baseline rate for growth-related mortality
 	par.a_dG1    = 5.5; // [ / yr]
 	// Risk coefficient for dry mass production (per area)
@@ -440,6 +442,7 @@ double Plant::mortality_dt(double productivity_area,
 
 double Plant::mortality_growth_independent_dt() const {
   return par.d_I;
+  //return par.c_d0*exp(-par.c_d1*rho);
 }
 
 double Plant::mortality_growth_dependent_dt(double productivity_area) const {

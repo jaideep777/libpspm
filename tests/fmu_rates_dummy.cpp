@@ -8,23 +8,25 @@ using namespace std;
 
 int main(){
 
-	TestModel M;
-	
-	Solver<TestModel,Environment> S(SOLVER_FMU);
-	S.addSpecies(25, 0, 1, false, &M);
+	Species<TestModel> spp;
+	Environment E;
+
+	Solver S(SOLVER_FMU);
+	S.addSpecies(25, 0, 1, false, &spp, 4, -1);
+	S.species_vec[0]->set_bfin_is_u0in(true);	// say that input_birth_flux is u0
 	S.resetState();
 	S.initialize();
-	//S.print();
-	
-	Environment E;
-	E.computeEnv(0,S.state,&S);
-	//cout << E.evalEnv(0,0) << endl;
-
 	S.setEnvironment(&E);
+	S.print();
+	
+	E.computeEnv(0,&S);
+	cout << E.evalEnv(0,0) << endl;
+
 	S.calcRates_FMU(1, S.state, S.rates);  // dummy rates calc rates(X=X0, U=U0, t=1, E=E(U0))
 	//S.print();
 	//	S.step_to(1);
 
+	// This is with input birth flux set to -1
 	vector <double> rates_exp = {
 		-0.355862928, -0.450926505, -0.417535387, -0.354046196, 
 		-0.301067280, -0.256580544, -0.219012561, -0.187124217,
@@ -33,7 +35,7 @@ int main(){
 	    -0.041683001, -0.034143136, -0.027528209, -0.021716055,
 	    -0.016602617, -0.012098936, -0.008128703, -0.004910899,
 	    -0.001250216};
-	for (int i=0; i< S.rates.size(); ++i){
+	for (int i=0; i< 25; ++i){
 		//cout << S.rates[i] << " " << rates_exp[i] << endl;
 		if ( fabs(S.rates[i] - rates_exp[i]) > 1e-5) return 1;
 	}

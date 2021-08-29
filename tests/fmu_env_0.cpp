@@ -8,16 +8,16 @@ using namespace std;
 
 int main(){
 
-	TestModel M;
+	Species<TestModel> M;
 	
-	Solver<TestModel,Environment> S(SOLVER_FMU);
-	S.addSpecies(25, 0, 1, false, &M);
+	Solver S(SOLVER_FMU);
+	S.addSpecies(25, 0, 1, false, &M, 4);
 	S.resetState();
 	S.initialize();
 	S.print();
 	
 	Environment E;
-	E.computeEnv(0,S.state,&S);
+	E.computeEnv(0,&S);
 	cout << E.evalEnv(0,0) << endl;
 
 	if (fabs(E.evalEnv(0,0) - 0.380194) > 1e-6) return 1;

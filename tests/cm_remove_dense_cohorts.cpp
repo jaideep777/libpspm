@@ -30,14 +30,19 @@ int main(){
 	auto spp1 = S.species_vec[0];	
 	auto spp2 = S.species_vec[1];	
 
-	spp1->setU(1,1e-11); 
-	spp1->setU(2,1e-11); 
-	spp2->setU(4,1e-11); 
-	spp2->setU(5,1e-11); 
+	spp1->setX(1,spp1->getX(0)+1e-5); 
+	spp1->setX(2,spp1->getX(1)+1e-5); 
+
+	spp2->setX(1,spp2->getX(0)+1e-5); 
+	spp2->setX(4,spp2->getX(3)+1e-5); 
+	spp2->setX(5,spp2->getX(3)+1e-5); 
 
 	S.print();
 
-	S.removeDeadCohorts_EBT();
+	spp1->removeDenseCohorts(1e-4);
+	spp2->removeDenseCohorts(1e-4);
+	//S.resizeStateFromSpecies();
+	//S.copyCohortsToState();
 
 	S.print();
 

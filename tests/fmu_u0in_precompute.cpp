@@ -5,7 +5,7 @@
 #include "solver.h"
 using namespace std;
 
-#include "test_model_2_ms.h"
+#include "test_model_2_ms_precompute.h"
 
 int main(){
 

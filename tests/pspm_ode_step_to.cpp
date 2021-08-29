@@ -47,7 +47,7 @@ int main(){
   */
   
 
-	ofstream fout("pendulum2.txt");
+  ofstream fout("pendulum2.txt");
   for (double t=t_start; t <= t_stop; t=t+1) {
     rk.Step_to(t, ti, y,  simple_pendulum);
 	fout<<ti<<" "<<y[0]<<" "<<y[1]<<" "<<y[0]-xmax*sin(ti)<<" "<<Energy(y)<<endl;

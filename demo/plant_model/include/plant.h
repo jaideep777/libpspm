@@ -53,6 +53,8 @@ struct PlantParameters{
 	double a_d0;
 	// Baseline structural mortality rate
 	double d_I;
+	double c_d0;
+	double c_d1;
 	// Baseline for growth mortality rate
 	double a_dG1;
 	// Coefficient for dry mass production in mortality function
@@ -76,6 +78,8 @@ class Plant {
 	double rho       = 608.0;      // Wood density [kg/m3]
 	double hmat      = 16.5958691; // Height at maturation [m]
 	double omega     = 3.8e-5;     // Seed mass [kg]
+
+	double trait_eta = 12.0;
 
 	PlantParameters par;	// JAI: making this class member again for multispecies version
 
@@ -278,7 +282,7 @@ class Plant {
 
 };
 
-#include "plant.tpp"
+#include "../src/plant.tpp"
 
 }
 
