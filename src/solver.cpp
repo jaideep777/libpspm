@@ -506,11 +506,22 @@ void Solver::step_to(double tstop){
 	}
 }
 
+// k = species_id
+double Solver::calcBirthFlux(int k){
+	auto spp = species_vec[k];	
+	auto newborns_production = [this, spp](int i, double t){
+		return spp->birthRate(i,spp->getX(i),t,env);	
+	}; 
+	double birthFlux = integrate_x(newborns_production, current_time, k);
+	return birthFlux;	
+}
 
+	
 vector<double> Solver::newborns_out(){
 	// update Environment from latest state
 	//copyStateToCohorts(state.begin());
 	env->computeEnv(current_time, this);
+	for (auto spp: species_vec) spp->preComputeAllCohorts(current_time,env);	
 
 	vector<double> b_out;
 	for (int k=0; k<species_vec.size(); ++k){	
@@ -518,13 +529,13 @@ vector<double> Solver::newborns_out(){
 		// [solved] wudx doesnt work here. Why?? - works now, no idea why it was not working earlier!
 		auto newborns_production = [this, k](int i, double t){
 			double z = species_vec[k]->getX(i);
-			species_vec[k]->preCompute(i,t,env);	
+			//species_vec[k]->preCompute(i,t,env);	
 			double b = species_vec[k]->birthRate(i,z,t,env);	
 			//cout << "newborns of " << i << " = " << b << "\n"; 
 			return b; 
 		}; 
 		double birthFlux = integrate_x(newborns_production, current_time, k);
-		//double birthFlux = integrate_wudx_above(newborns_production, current_time, 0, state, k);
+		//double birthFlux = integrate_wudx_above(newborns_production, current_time, 0, k);
 		b_out.push_back(birthFlux);
 	}
 	return b_out;
@@ -535,7 +546,7 @@ vector<double> Solver::u0_out(){
 	vector <double> u0out;
 	vector <double> newbornsout = newborns_out();
 	for (int k=0; k < species_vec.size(); ++k){
-		species_vec[k]->preCompute(-1, current_time, env);	
+		//species_vec[k]->preCompute(-1, current_time, env); // not req because precomputeAllCohorts called in newborns_out() precomputes BC too.	
 		u0out.push_back(newbornsout[k]/species_vec[k]->growthRate(-1, species_vec[k]->xb, current_time, env));
 	}
 	return u0out;

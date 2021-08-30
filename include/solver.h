@@ -92,6 +92,7 @@ class Solver{
 
 	////double stepToEquilibrium();
 
+	double calcBirthFlux(int k);
 	std::vector<double> newborns_out();  // This is the actual system reproduction (fitness) hence biologically relevant
 	vector<double> u0_out();        // This is used for equilibrium solving, because in general, u0 rather than birthFlux, will approach a constant value
 	////double get_u0_out();	// just returns from history without recomputing
