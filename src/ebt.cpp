@@ -11,7 +11,7 @@ void Solver::calcRates_EBT(double t, vector<double>&S, vector<double> &dSdt){
 	for (int s = 0; s < species_vec.size(); ++s){
 		Species_Base * spp = species_vec[s];
 
-		spp->preComputeAllCohorts(t,env);
+		//spp->preComputeAllCohorts(t,env);
 		
 		double   pi0  =  spp->getX(spp->J-1);	 // last cohort is pi0, N0
 		double   N0   =  spp->getU(spp->J-1);
@@ -25,9 +25,10 @@ void Solver::calcRates_EBT(double t, vector<double>&S, vector<double> &dSdt){
 
 		double birthFlux;
 		if (spp->birth_flux_in < 0){	
-			birthFlux = integrate_x([this, s](int i, double t){
-												return species_vec[s]->birthRate(i,species_vec[s]->getX(i),t, env);
-											}, t, s);
+			birthFlux = calcSpeciesBirthFlux(s,t);
+			//birthFlux = integrate_x([this, s](int i, double t){
+												//return species_vec[s]->birthRate(i,species_vec[s]->getX(i),t, env);
+											//}, t, s);
 		}
 		else{
 			double u0 = spp->get_u0(t, env);

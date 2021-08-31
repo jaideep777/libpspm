@@ -24,7 +24,7 @@ void Solver::calcRates_FMU(double t, vector<double> &S, vector<double> &dSdt){
 		vector<double> &X = spp->X;
 		vector<double> &h = spp->h;
 
-		spp->preComputeAllCohorts(t,env);
+		//spp->preComputeAllCohorts(t,env);
 		
 		vector <double> growthArray(J+1);
 		growthArray[0] = spp->growthRate(-1, x[0], t, env);
@@ -41,9 +41,10 @@ void Solver::calcRates_FMU(double t, vector<double> &S, vector<double> &dSdt){
 		
 		// i=0
 		if (spp->birth_flux_in < 0){	
-			double birthFlux = integrate_x([this, s](int i, double t){
-												return species_vec[s]->birthRate(i,species_vec[s]->getX(i),t, env);
-											}, t, s);
+			double birthFlux = calcSpeciesBirthFlux(s,t);
+			//double birthFlux = integrate_x([this, s](int i, double t){
+												//return species_vec[s]->birthRate(i,species_vec[s]->getX(i),t, env);
+											//}, t, s);
 											
 			u[0] = birthFlux/(growthArray[0]+1e-12); // Q: is this correct? or g(X0,env)? - A: It is g(xb,env) - growthArray[] indexes x, so (0) is xb. Hence correct. 
 		}

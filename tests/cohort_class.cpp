@@ -3,7 +3,7 @@
 #include <species.h>
 #include <solver.h>
 #include <vector>
-#include <environment.h>
+#include <environment_base.h>
 using namespace std;
 
 
@@ -82,8 +82,8 @@ class Plant {
 		return it;
 	}
 
-	void print(){
-		cout << lma << "|\t" << height << "\t" << crown_area << "\t" << root_mass << "\t";
+	void print(std::ostream& out = std::cout){
+		out << lma << "|\t" << height << "\t" << crown_area << "\t" << root_mass << "\t";
 	}
 };
 
@@ -91,8 +91,10 @@ class Plant {
 class Insect {
 	public:
 	double wingspan = 10;
+	
+	double g = -1, m = -1, f = -1;
 
-	vector<string> varnames = {};
+	vector<string> varnames = {"wing", "f"};
 	
 	double init_density(double x, void * _env){
 		return x/10;
@@ -102,10 +104,13 @@ class Insect {
 	}
 
 	void set_size(double x){
-		
+		wingspan = 2*x;	
 	}
 
 	void preCompute(double x, double t, void * env){
+		f = x*100+t;
+		g = x*50*t;
+		m = 0.1;
 	}
 
 	vector<double>::iterator set_state(vector<double>::iterator &it){
@@ -120,21 +125,21 @@ class Insect {
 	}
 	
 	double growthRate(double x, double t, void * env){
-		return 0.5;
+		return g;
 	}
 	double mortalityRate(double x, double t, void * env){
-		return -0.5;
+		return m;
 	}
 	double birthRate(double x, double t, void * env){
-		return 1;
+		return f;
 	}
 
 	double establishmentProbability(double t, void  * _env){
 		return 1;
 	}
 
-	void print(){
-	
+	void print(std::ostream& out = std::cout){
+		out << wingspan << "\t" << f << "\t";
 	}
 };
 
@@ -174,9 +179,17 @@ int main(){
 	sol.addSpecies(vector<double> {1.1,2.1,3.1}, &I, 0, 1);
 	sol.resetState();
 	sol.initialize();
-	sol.addCohort_EBT();
+	//sol.addCohort_EBT();
 	sol.print();	
 
+	I.setX(2, 0.05);
+	I.setU(2, 0.2);
+	sol.print();	
+	cout << "Insect BF = " << sol.calcSpeciesBirthFlux(1,0) << "\n";
+	
+	sol.preComputeSpecies(1,0);
+	sol.print();	
+	cout << "Insect BF (after precompute) = " << sol.calcSpeciesBirthFlux(1,0) << "\n";
 
 	LightEnv env;
 	sol.setEnvironment(&env);

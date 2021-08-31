@@ -274,7 +274,7 @@ void Solver::initialize(){
 			}
 			// set pi0, N0 as x, u for the last cohort. This scheme allows using this last cohort with xb+pi0 in integrals etc 
 			*it++ = 0; *it++ = 0;
-			s->setX(s->J-1,0); 
+			s->setX(s->J-1,0); // TODO: should this be set to xb for init_state and set to 0 again later? maybe not, as init_state is not expected to be x dependent
 			s->setU(s->J-1,0); 		
 		}
 
@@ -434,6 +434,9 @@ void Solver::step_to(double tstop){
 		auto derivs = [this](double t, vector<double> &S, vector<double> &dSdt){
 			copyStateToCohorts(S.begin());
 			env->computeEnv(t, this);
+			// precompute all species (prepare for rate calcs)
+			for (int k = 0; k<species_vec.size(); ++k) preComputeSpecies(k,t);	
+
 			this->calcRates_FMU(t, S, dSdt);
 		};
 		
@@ -453,6 +456,9 @@ void Solver::step_to(double tstop){
 			
 			// compute environment
 			env->computeEnv(t, this);
+
+			// precompute all species (prepare for rate calcs)
+			for (int k = 0; k<species_vec.size(); ++k) preComputeSpecies(k,t);	
 
 			// get rates
 			calcRates_EBT(t, S, dSdt);
@@ -484,6 +490,9 @@ void Solver::step_to(double tstop){
 			// compute environment
 			env->computeEnv(t, this);
 
+			// precompute all species (prepare for rate calcs)
+			for (int k = 0; k<species_vec.size(); ++k) preComputeSpecies(k,t);	
+
 			// get rates
 			calcRates_CM(t, S, dSdt);
 		};
@@ -507,24 +516,63 @@ void Solver::step_to(double tstop){
 }
 
 
+void Solver::preComputeSpecies(int k, double t){
+	auto spp = species_vec[k];
+
+	double pi0, N0;
+	// backup and real-ize pi0-cohort
+	if (method == SOLVER_EBT){ // for EBT, we need to pi0-cohort too.
+		// get pi0, N0 from last cohort
+		pi0  =  spp->getX(spp->J-1);
+		N0   =  spp->getU(spp->J-1);
+		
+		// update pi0-cohort with actual x0 value
+		double x0 = spp->xb + pi0/(N0+1e-12);
+		spp->setX(spp->J-1, x0);
+	}
+	
+	// precompute cohorts
+	spp->preComputeAllCohorts(t,env);
+
+	// restore pi0-cohort
+	if (method == SOLVER_EBT){ // for EBT, we need to pi0-cohort too.
+		spp->setX(spp->J-1, pi0);
+	}
+}
+
+
+// k = species_id
+double Solver::calcSpeciesBirthFlux(int k, double t){
+	auto spp = species_vec[k];	
+	auto newborns_production = [this, spp](int i, double _t){
+		double b1 = spp->birthRate(i, spp->getX(i), _t, env);
+		return b1;	
+	}; 
+	double birthFlux = integrate_x(newborns_production, t, k);
+	return birthFlux;	
+}
+
+	
 vector<double> Solver::newborns_out(){
 	// update Environment from latest state
 	//copyStateToCohorts(state.begin());
 	env->computeEnv(current_time, this);
+	for (int k = 0; k<species_vec.size(); ++k) preComputeSpecies(k,current_time);	
 
 	vector<double> b_out;
 	for (int k=0; k<species_vec.size(); ++k){	
 		// calculate birthflux
 		// [solved] wudx doesnt work here. Why?? - works now, no idea why it was not working earlier!
-		auto newborns_production = [this, k](int i, double t){
-			double z = species_vec[k]->getX(i);
-			species_vec[k]->preCompute(i,t,env);	
-			double b = species_vec[k]->birthRate(i,z,t,env);	
-			//cout << "newborns of " << i << " = " << b << "\n"; 
-			return b; 
-		}; 
-		double birthFlux = integrate_x(newborns_production, current_time, k);
-		//double birthFlux = integrate_wudx_above(newborns_production, current_time, 0, state, k);
+		//auto newborns_production = [this, k](int i, double t){
+			//double z = species_vec[k]->getX(i);
+			////species_vec[k]->preCompute(i,t,env);	
+			//double b = species_vec[k]->birthRate(i,z,t,env);	
+			////cout << "newborns of " << i << " = " << b << "\n"; 
+			//return b; 
+		//}; 
+		//double birthFlux = integrate_x(newborns_production, current_time, k);
+		//double birthFlux = integrate_wudx_above(newborns_production, current_time, 0, k);
+		double birthFlux = calcSpeciesBirthFlux(k, current_time);
 		b_out.push_back(birthFlux);
 	}
 	return b_out;
@@ -535,7 +583,7 @@ vector<double> Solver::u0_out(){
 	vector <double> u0out;
 	vector <double> newbornsout = newborns_out();
 	for (int k=0; k < species_vec.size(); ++k){
-		species_vec[k]->preCompute(-1, current_time, env);	
+		//species_vec[k]->preCompute(-1, current_time, env); // not req because precomputeAllCohorts called in newborns_out() precomputes BC too.	
 		u0out.push_back(newbornsout[k]/species_vec[k]->growthRate(-1, species_vec[k]->xb, current_time, env));
 	}
 	return u0out;
