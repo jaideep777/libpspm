@@ -142,8 +142,8 @@ class TestModel : public Plant{
 		return it;
 	}
 
-	void print(){
-		cout << mortality << "\t" << viable_seeds << "\t" << heart_mass << "\t" << sap_mass << "\t";
+	void print(std::ostream &out = std::cout){
+		out << mortality << "\t" << viable_seeds << "\t" << heart_mass << "\t" << sap_mass << "\t";
 	}
 
 

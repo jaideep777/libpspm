@@ -89,21 +89,13 @@ double Solver::integrate_wudx_above(wFunc w, double t, double xlow, int species_
 	
 	else if (method == SOLVER_EBT){
 		// set up cohorts to integrate
-		// get pi0, N0 from last cohort
+		// get (backup) pi0, N0 from last cohort 
 		double   pi0  =  spp->getX(spp->J-1);
 		double   N0   =  spp->getU(spp->J-1);
 
-		//cout << "pi0 = " << pi0 << ", N0 = " << N0 << "\n";
-		// backup the cohort containing pi0 and N0
-		spp->backupCohort(spp->J-1);
-		// replace pi0-cohort with boundary cohort
-		spp->copyBoundaryCohortTo(spp->J-1);
-
-		// update pi0-cohort with actual x0 value
+		// real-ize pi0-cohort with actual x0 value
 		double x0 = spp->xb + pi0/(N0+1e-12);
 		spp->setX(spp->J-1, x0);
-		spp->setU(spp->J-1, N0);
-		spp->preCompute(spp->J-1,t,env);
 
 		// calculate integral
 		double I = 0;
@@ -113,7 +105,7 @@ double Solver::integrate_wudx_above(wFunc w, double t, double xlow, int species_
 		}
 		
 		// restore the original pi0-cohort
-		spp->restoreCohort(spp->J-1);
+		spp->setX(spp->J-1, pi0);
 
 		return I;
 		
@@ -171,28 +163,20 @@ double Solver::integrate_x(wFunc w, double t, int species_id){
 	else if (method == SOLVER_EBT){
 		// integrate using EBT rule (sum over cohorts)
 		
-		// get pi0, N0 from last cohort
+		// get (backup) pi0, N0 from last cohort 
 		double   pi0  =  spp->getX(spp->J-1);
 		double   N0   =  spp->getU(spp->J-1);
 
-		//cout << "pi0 = " << pi0 << ", N0 = " << N0 << "\n";
-		// backup the cohort containing pi0 and N0
-		spp->backupCohort(spp->J-1);
-		// replace pi0-cohort with boundary cohort
-		spp->copyBoundaryCohortTo(spp->J-1);
-
-		// update pi0-cohort with actual x0 value
+		// real-ize pi0-cohort with actual x0 value
 		double x0 = spp->xb + pi0/(N0+1e-12);
 		spp->setX(spp->J-1, x0);
-		spp->setU(spp->J-1, N0);
-		spp->preCompute(spp->J-1,t,env); // the precompute here is useful when w needs a demographic function, e.g. birthrate
 
 		// calculate integral
 		double I = 0;
 		for (int i=0; i<spp->J; ++i) I += w(i, t)*spp->getU(i);
 		
 		// restore the original pi0-cohort
-		spp->restoreCohort(spp->J-1);
+		spp->setX(spp->J-1, pi0);
 
 		return I;
 	}

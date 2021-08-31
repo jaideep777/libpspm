@@ -58,8 +58,11 @@ class RED_Plant{
 	void set_size(double _x){
 	}
 
-	double init_density(double x){
+	double init_density(double x, void * env){
 		return 100/pow(x,4);
+	}
+
+	void preCompute(double x, double t, void * env){
 	}
 
 	double establishmentProbability(double t, void * env){
@@ -82,8 +85,7 @@ class RED_Plant{
 		return 0.1/0.9*g0*pow(x,phiG)*(1-env1->evalEnv(x,t));
 	}
 
-	vector<double>::iterator init_state(double x, vector<double>::iterator &it){
-		return it;
+	void init_state(double t, void * env){
 	}
 	vector<double>::iterator set_state(vector<double>::iterator &it){
 		return it;
@@ -95,7 +97,7 @@ class RED_Plant{
 		return it;
 	}
 
-	void print(){
+	void print(std::ostream& out = std::cout){
 	}
 };
 

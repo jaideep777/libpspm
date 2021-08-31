@@ -86,7 +86,7 @@ void Species<Model>::print(){
 		std::cout << "\n";
 	}
 	std::cout << "- - - - - - - - - - - - - - - - - - - - - - - \n";
-	boundaryCohort.print_xu(); //std::cout << c.x << "\t" << c.u << "\t";
+	//boundaryCohort.print_xu(); //std::cout << c.x << "\t" << c.u << "\t";
 	boundaryCohort.print();
 	std::cout << "\n";
 	std::cout << "Max size = " << get_maxSize() << "\n";
