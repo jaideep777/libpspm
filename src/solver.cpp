@@ -713,6 +713,7 @@ std::vector<double> Solver::getDensitySpecies_EBT(int k, int nbreaks){
 		//for (int i=0; i<points.size(); ++i) cout << i << "\t" << points[i].count << "\t" << points[i].xmean << "\t" << points[i].abund << "\n";	
 		//cout << "--\n";
 
+		if (points.size() > 2){
 		vector<double> h(points.size());
 		h[0] = (points[1].xmean+points[0].xmean)/2 - spp->xb;
 		for (int i=1; i<h.size()-1; ++i) h[i] = (points[i+1].xmean - points[i-1].xmean)/2;
@@ -722,9 +723,10 @@ std::vector<double> Solver::getDensitySpecies_EBT(int k, int nbreaks){
 		dens.reserve(2*points.size());
 		for (int i=0; i<points.size(); ++i) dens.push_back(points[i].xmean);
 		for (int i=0; i<points.size(); ++i) dens.push_back(points[i].abund / h[i]);
-
+		
 		return dens;
-
+		}
+		else return vector<double>();
 	}
 	else {
 		return vector<double>();
