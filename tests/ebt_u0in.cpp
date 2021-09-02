@@ -7,6 +7,18 @@ using namespace std;
 
 #include "test_model_2_ms.h"
 
+std::vector <double> myseq(double from, double to, int len){
+	std::vector<double> x(len);
+	for (size_t i=0; i<len; ++i) x[i] = from + i*(to-from)/(len-1);
+	return x;
+}
+
+std::vector <double> diff(vector <double> breaks){
+	std::vector<double> mids(breaks.size()-1);
+	for (size_t i=0; i<mids.size(); ++i) mids[i] = (breaks[i]+breaks[i+1])/2;
+	return mids;
+}
+
 int main(){
 
 	Species<TestModel> spp;
@@ -29,14 +41,19 @@ int main(){
 	
 	ofstream fout("ebt_testmodel.txt");
 
+	vector<double> breaks = myseq(0,1,26);
+	vector<double> mids = diff(breaks);
+
 	for (double t=0.05; t <= 8; t=t+0.05) {
 		S.step_to(t);
 		fout << S.current_time << "\t" << S.u0_out()[0] << "\t";
-	
-		//vector<double> v = S.cohortsToDensity_EBT(x);
-		
+
+		//cout << "HERE" << endl;	
+		vector<double> v = S.getDensitySpecies_EBT(0, 26);
+				
 		cout << S.current_time << " " << S.species_vec[0]->xsize() << " " << S.u0_out()[0] << endl;
-		for (auto y : S.state) fout << y << "\t";
+		//for (auto y : S.state) fout << y << "\t";
+		for (auto y : v) fout << y << "\t";
 		fout << endl;
 	}
 
