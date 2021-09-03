@@ -49,8 +49,8 @@ int main(){
 
   ofstream fout("pendulum2.txt");
   for (double t=t_start; t <= t_stop; t=t+1) {
-    rk.Step_to(t, ti, y,  simple_pendulum);
-	fout<<ti<<" "<<y[0]<<" "<<y[1]<<" "<<y[0]-xmax*sin(ti)<<" "<<Energy(y)<<endl;
+    rk.Step_to(t, ti, y,  simple_pendulum, "rk4", 0.005);
+	fout<<ti<<" "<<y[0]<<" "<<y[1]<<" | "<<y[0]-xmax*sin(ti)<<" | "<<y[1] - xmax*cos(ti)<< " | "<< Energy(y)<<endl;
 
 	if (fabs(y[0] - xmax*sin(ti)) > 1e-5) return 1;
     if (fabs(y[1] - xmax*cos(ti)) > 1e-5) return 1;

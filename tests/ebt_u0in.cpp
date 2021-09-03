@@ -13,6 +13,8 @@ int main(){
 	Environment E;
 
 	Solver S(SOLVER_EBT);
+	//S.control.ode_method = "rk4";
+	//S.control.ode_rk4_stepsize = 0.01;
 	S.addSpecies(25, 0, 1, false, &spp, 4, 2);
 	S.species_vec[0]->set_bfin_is_u0in(true);
 	S.resetState();

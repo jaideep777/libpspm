@@ -440,7 +440,7 @@ void Solver::step_to(double tstop){
 			this->calcRates_FMU(t, S, dSdt);
 		};
 		
-		odeStepper.Step_to(tstop, current_time, state, derivs); // state = [U]
+		odeStepper.Step_to(tstop, current_time, state, derivs, control.ode_method, control.ode_rk4_stepsize); // rk4_stepsize is only used if method is "rk4"
 		copyStateToCohorts(state.begin());
 	}
 	
@@ -465,7 +465,7 @@ void Solver::step_to(double tstop){
 		};
 		
 		// integrate 
-		odeStepper.Step_to(tstop, current_time, state, derivs); // state = [pi0, Xint, N0, Nint]
+		odeStepper.Step_to(tstop, current_time, state, derivs, control.ode_method, control.ode_rk4_stepsize); // rk4_stepsize is only used if method is "rk4"
 		
 		// after the last ODE step, the state vector is updated but cohorts still hold an intenal ODE state (y+k5*h etc).
 		// normally, this will be no problem since state will be copied to cohorts in the next rates call. 
@@ -498,7 +498,7 @@ void Solver::step_to(double tstop){
 		};
 		
 		// integrate 
-		odeStepper.Step_to(tstop, current_time, state, derivs); // state = [pi0, Xint, N0, Nint]
+		odeStepper.Step_to(tstop, current_time, state, derivs, control.ode_method, control.ode_rk4_stepsize); // rk4_stepsize is only used if method is "rk4"
 		
 		// after the last ODE step, the state vector is updated but cohorts still hold an intenal ODE state (y+k5*h etc).
 		// normally, this will be no problem since state will be copied to cohorts in the next rates call. 

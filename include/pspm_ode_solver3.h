@@ -22,6 +22,7 @@
 #include <iomanip>
 #include <cmath>
 #include <vector>
+#include <cassert>
 
 using namespace std;
 
@@ -35,23 +36,6 @@ void Euler(double x, double h, container& y, functor& derivs){
 /////////////////////////////////////////////////////////////////////////////
 ///////////////// METHOD OF RUNKGE-KUTTA 4-th ORDER   ///////////////////////
 /////////////////////////////////////////////////////////////////////////////
-template <class functor, class container>
-void RK4(double x, double h, container& y, functor& derivs){
-	static container k1(y.size()), k2(y.size()), k3(y.size()), k4(y.size());// temporary arrays
-	static container yt(y.size());
-
-	double h2=h*0.5;
-	double xh = x + h2;
-	derivs(x, y, k1);     // First step : evaluating k1
-	for (int i=0; i<y.size(); i++) yt[i] = y[i] + h2*k1[i];// Preparing second step by  ty <- y + k1/2
-	derivs(xh, yt, k2);                                    // Second step : evaluating k2
-	for (int i=0; i<y.size(); i++) yt[i] = y[i] + h2*k2[i];// Preparing third step by   yt <- y + k2/2
-	derivs(xh, yt, k3);                                    // Third step : evaluating k3
-	for (int i=0; i<y.size(); i++) yt[i] = y[i] +  h*k3[i];// Preparing fourth step  yt <- y + k3
-	derivs(x+h, yt, k4);                                   // Final step : evaluating k4
-	for (int i=0; i<y.size(); i++) y[i] += h/6.0*(k1[i]+2.0*(k2[i]+k3[i])+k4[i]);
-}
-
 ////////////////////////////////////////////////////////////////////////
 ///////// METHOD OF RUNGE-KUTTA 5-th ORDER, ADAPTIVE STEP  /////////////
 ////////////////////////////////////////////////////////////////////////
@@ -132,8 +116,39 @@ class RKCK45{
 	}
  
 	template <class functor>
-	void Step_to(double t_stop, double& x, container& y, functor& derivs){
-		while (x < t_stop) Step(x,y,derivs, t_stop-x);
+	void Step_RK4(double &x, double h, container& y, functor& derivs){
+		//static container k1(y.size()), k2(y.size()), k3(y.size()), k4(y.size());// temporary arrays
+		//static container yt(y.size());
+		// resize the container if necessary
+		if (y.size() != sys_size) resize(y.size());
+
+		double h2=h*0.5;
+		double xh = x + h2;
+		derivs(x, y, k1);     // First step : evaluating k1
+		for (int i=0; i<y.size(); i++) yt[i] = y[i] + h2*k1[i];// Preparing second step by  ty <- y + k1/2
+		derivs(xh, yt, k2);                                    // Second step : evaluating k2
+		for (int i=0; i<y.size(); i++) yt[i] = y[i] + h2*k2[i];// Preparing third step by   yt <- y + k2/2
+		derivs(xh, yt, k3);                                    // Third step : evaluating k3
+		for (int i=0; i<y.size(); i++) yt[i] = y[i] +  h*k3[i];// Preparing fourth step  yt <- y + k3
+		derivs(x+h, yt, k4);                                   // Final step : evaluating k4
+		for (int i=0; i<y.size(); i++) y[i] += h/6.0*(k1[i]+2.0*(k2[i]+k3[i])+k4[i]);
+
+		x += h;
+	}
+
+	template <class functor>
+	void Step_to(double t_stop, double& x, container& y, functor& derivs, std::string ode_method = "rk45ck", double h_rk4 = 0.1){
+		if (ode_method == "rk45ck"){
+			while (x < t_stop) Step(x,y,derivs, t_stop-x);
+		}
+		else if (ode_method == "rk4"){
+			double h_now = std::min(h_rk4, t_stop-x);
+			while (x < t_stop) Step_RK4(x, h_now, y, derivs);
+		}
+		else{
+			cout << "Invalid ODE method: " << ode_method << "\n";
+			assert(false);
+		}
 	}
 
 	double h(){return ht;}

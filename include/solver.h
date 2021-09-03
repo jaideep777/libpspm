@@ -4,6 +4,7 @@
 #include <vector>
 #include <list>
 #include <map>
+#include <string>
 
 #include "environment_base.h"
 #include "species.h"
@@ -39,6 +40,8 @@ class Solver{
 		bool update_cohorts = true;
 		int  max_cohorts = 500;
 		double ebt_ucut = 1e-10;
+		std::string ode_method = "rk45ck";
+		double ode_rk4_stepsize = 0.1;
 	} control;
 	
 	bool use_log_densities = true;
