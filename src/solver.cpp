@@ -23,6 +23,14 @@ std::vector <double> logseq(double from, double to, int len){
 	for (size_t i=0; i<len; ++i) x[i] = exp(log(from) + i*(log(to)-log(from))/(len-1));
 	return x;
 }
+
+inline std::vector <double> diff(vector <double> breaks){
+	std::vector<double> mids(breaks.size()-1);
+	for (size_t i=0; i<mids.size(); ++i) mids[i] = (breaks[i]+breaks[i+1])/2;
+	return mids;
+}
+
+
 // ~~~~~~~~~~~ SOLVER ~~~~~~~~~~~~~~~~~~~~~
 
 //template<class Model, class Environment>
@@ -632,5 +640,101 @@ vector<double> Solver::u0_out(){
 
 
 //*/
+
+
+
+// xb
+// |---*--|--*--|----*----|---*---|
+//     0     1       2        3        <--- points
+// 0      1     2         3       4    <--- breaks
+
+// Test this function with this R script:
+/**
+x = c(0, 1,1.1,1.2, 2,2.2,2.3, 4.5,5.5,6.5)[length(x):1]
+N = c(1, 1,1,  1,   2,2,  2,   3,   4,  5)[length(N):1]
+plot(N~x)
+abline(v=breaks, col="grey")
+breaks = seq(0,10,1)
+dens = rep(0, length(x))
+J = length(x)
+
+current_interval = length(breaks)-1
+for (i in 1:J){
+  while(breaks[current_interval] > x[i]) current_interval = current_interval-1
+  dens[current_interval] = dens[current_interval]+N[i]
+}
+**/
+struct point{
+	double xmean = 0;
+	double abund = 0;
+	int    count = 0;
+};	
+
+std::vector<double> Solver::getDensitySpecies_EBT(int k, int nbreaks){
+	auto spp = species_vec[k];
+
+	//cout << "HRER" << endl;
+	
+	if (method == SOLVER_EBT){
+		double xm = spp->getX(0)+1e-6;
+		vector<double> breaks = seq(spp->xb, xm, nbreaks);
+		
+		vector<point> points(breaks.size()-1);
+
+		// assuming breaks are sorted ascending
+		// cohorts are sorted descending
+		int current_interval = breaks.size()-2;
+		for (int i=0; i<spp->J; ++i){ // loop over all cohorts except boundary cohort
+			double x = spp->getX(i);
+			double N = spp->getU(i);
+			if (i == spp->J-1) x = spp->xb + x/(N+1e-12); // real-ize x if it's boundary cohort
+			
+			while(breaks[current_interval]>x) --current_interval; // decrement interval until x fits
+			//cout << current_interval << ", x = " << x << "(" << N << ") in [" << breaks[current_interval] << ", " << breaks[current_interval+1] << "]\n"; cout.flush();
+			if (N>0){
+				points[current_interval].abund += N;
+				points[current_interval].count += 1;
+				points[current_interval].xmean += N*x;
+			}
+		}
+
+		
+		for (int i=0; i<points.size(); ++i) if (points[i].count>0) points[i].xmean /= points[i].abund;
+		
+		// remove 0-count points
+		auto pred = [this](const point& p) -> bool {
+			return p.count == 0; // TODO: make conatiner-type safe
+		};
+
+		auto pend = std::remove_if(points.begin(), points.end(), pred);
+		points.erase(pend, points.end());
+
+		//cout << "mean x and abund (removed):\n";
+		//for (int i=0; i<points.size(); ++i) cout << i << "\t" << points[i].count << "\t" << points[i].xmean << "\t" << points[i].abund << "\n";	
+		//cout << "--\n";
+
+		if (points.size() > 2){
+		vector<double> h(points.size());
+		h[0] = (points[1].xmean+points[0].xmean)/2 - spp->xb;
+		for (int i=1; i<h.size()-1; ++i) h[i] = (points[i+1].xmean - points[i-1].xmean)/2;
+		h[h.size()-1] = xm - (points[h.size()-1].xmean+points[h.size()-2].xmean)/2;
+
+		vector <double> dens;
+		dens.reserve(2*points.size());
+		for (int i=0; i<points.size(); ++i) dens.push_back(points[i].xmean);
+		for (int i=0; i<points.size(); ++i) dens.push_back(points[i].abund / h[i]);
+		
+		return dens;
+		}
+		else return vector<double>();
+	}
+	else {
+		return vector<double>();
+	}
+
+}
+
+
+
 
 

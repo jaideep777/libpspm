@@ -110,6 +110,8 @@ class Solver{
 	template<typename wFunc>
 	double integrate_wudx_above(wFunc w, double t, double xlow, int species_id);
 	
+
+	std::vector<double> getDensitySpecies_EBT(int k, int nbreaks);
 };
 
 //#include "../src/solver.tpp"
