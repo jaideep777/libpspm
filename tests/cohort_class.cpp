@@ -60,7 +60,7 @@ class Plant {
 		return 1;
 	}
 
-	double init_density(double x, void * _env){
+	double init_density(double x, void * _env, double bf){
 		return 5/(x+0.5);
 	}
 
@@ -96,7 +96,7 @@ class Insect {
 
 	vector<string> varnames = {"wing", "f"};
 	
-	double init_density(double x, void * _env){
+	double init_density(double x, void * _env, double bf){
 		return x/10;
 	}
 

@@ -34,7 +34,7 @@ class LightEnvironment : public EnvironmentBase{
 class RED_Plant{
 	public:
 
-	double input_seed_rain = 1;	
+	//double input_seed_rain = 1;	
 	vector <string> varnames;
 
 	int nrc = 0; // number of evals of compute_vars_phys() - derivative computations actually done by plant
@@ -58,7 +58,7 @@ class RED_Plant{
 	void set_size(double _x){
 	}
 
-	double init_density(double x, void * env){
+	double init_density(double x, void * env, double input_seed_rain){
 		return 100/pow(x,4);
 	}
 

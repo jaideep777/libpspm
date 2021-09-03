@@ -11,7 +11,7 @@ class PSPM_Plant : public plant::Plant {
 	public:
 	
 	double t_birth = 0;
-	double input_seed_rain = 1;	
+	//double input_seed_rain = 1;	
 
 	double viable_seeds;
 	double viable_seeds_dt;
@@ -25,7 +25,7 @@ class PSPM_Plant : public plant::Plant {
 
 	PSPM_Plant(); 
 	void set_size(double _x);
-	double init_density(double x, void * _env);
+	double init_density(double x, void * _env, double input_seed_rain);
 	void preCompute(double x, double t, void * _env);
 	double establishmentProbability(double t, void * _env);
 	double growthRate(double x, double t, void * env);

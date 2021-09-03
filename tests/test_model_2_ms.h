@@ -71,7 +71,7 @@ class TestModel : public Plant{
 
 	TestModel() : Plant(0) {}
 
-	double init_density(double x, void * _env){
+	double init_density(double x, void * _env, double bf){
 		return pow(1-x,2)/pow(1+x,4) + (1-x)/pow(1+x,3);
 	}
 
