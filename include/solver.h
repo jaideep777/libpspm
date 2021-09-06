@@ -40,6 +40,7 @@ class Solver{
 		bool update_cohorts = true;
 		int  max_cohorts = 500;
 		double ebt_ucut = 1e-10;
+		double ebt_grad_dx = 1e-6;
 		std::string ode_method = "rk45ck";
 		double ode_rk4_stepsize = 0.1;
 	} control;

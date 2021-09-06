@@ -25,6 +25,7 @@ int main(){
 	Environment E;
 
 	Solver S(SOLVER_EBT);
+	S.control.ebt_grad_dx = 0.001;
 	//S.control.ode_method = "rk4";
 	//S.control.ode_rk4_stepsize = 0.01;
 	S.addSpecies(25, 0, 1, false, &spp, 4, 2);

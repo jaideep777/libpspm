@@ -17,15 +17,15 @@ void Solver::calcRates_EBT(double t, vector<double>&S, vector<double> &dSdt){
 		double   N0   =  spp->getU(spp->J-1);
 		//std::cout << "pi = " << pi0 << ", N0 = " << N0 << "\n";
 
-		double grad_dx = 0.001;
-		std::vector<double> g_gx = spp->growthRateGradient(-1, spp->xb, t, env, grad_dx);
-		std::vector<double> m_mx = spp->mortalityRateGradient(-1, spp->xb, t, env, grad_dx);
+		std::vector<double> g_gx = spp->growthRateGradient(-1, spp->xb, t, env, control.ebt_grad_dx);
+		std::vector<double> m_mx = spp->mortalityRateGradient(-1, spp->xb, t, env, control.ebt_grad_dx);
 		//std::cout << "g = " << g_gx[0] << ", gx = " << g_gx[1] << "\n";
 		//std::cout << "m = " << m_mx[0] << ", mx = " << m_mx[1] << "\n";
 
 		double birthFlux;
 		if (spp->birth_flux_in < 0){	
 			birthFlux = calcSpeciesBirthFlux(s,t);
+			//cout << "birthFlux = " << birthFlux << "\n";
 			//birthFlux = integrate_x([this, s](int i, double t){
 												//return species_vec[s]->birthRate(i,species_vec[s]->getX(i),t, env);
 											//}, t, s);
@@ -33,6 +33,9 @@ void Solver::calcRates_EBT(double t, vector<double>&S, vector<double> &dSdt){
 		else{
 			double u0 = spp->get_u0(t, env);
 			birthFlux = u0*g_gx[0];
+			//if (birthFlux <=0) print();
+			//cout << "u0 = " << u0 << ", g_gx = " << g_gx[0] << " " << g_gx[1] << "\n";
+			//assert(birthFlux > 0);
 			//double g = spp.mod->growthRate(spp.xb, current_time, env);
 			//// --- debug ---
 			//if (spp.bfin_is_u0in)
@@ -59,16 +62,22 @@ void Solver::calcRates_EBT(double t, vector<double>&S, vector<double> &dSdt){
 
 
 		for (int i=0; i<spp->J-1; ++i){	// go down to the second last cohort (exclude boundary cohort)
-			*itr++ =  spp->growthRate(i, spp->getX(i), t, env);							// dx/dt
-			*itr++ = -spp->mortalityRate(i, spp->getX(i), t, env) * spp->getU(i);		// du/dt
+			double dx = spp->growthRate(i, spp->getX(i), t, env);							// dx/dt
+			double du = -spp->mortalityRate(i, spp->getX(i), t, env) * spp->getU(i);		// du/dt
+			std::cout << "S/C = " << s << "/" << i << " " << spp->getX(i) << " " << dx << " " << du << "\n";
+			*itr++ = dx;
+			*itr++ = du;
 			its += 2;
 		}
 
 		// dpi0/dt and dN0/dt
 		double mb = m_mx[0], mortGrad = m_mx[1], gb = g_gx[0], growthGrad = g_gx[1];	
-		double dN0 = -mb*N0 - mortGrad*pi0 + birthFlux;
-		double dpi0  = gb*N0 + growthGrad*pi0 - mb*pi0;
-		//std::cout << "dpi0 = " << dpi0 << ", dN0 = " << dN0 << "\n";
+		std::cout << "S/C = " << s << "/" << "b" << " | pi0/N0 = " << pi0 << " " << N0;
+		if (pi0 <= 0) pi0 = 1e-40;
+		if (N0  <= 0) N0  = 1e-40;
+		double dN0  = (-mb - mortGrad*pi0/N0 + birthFlux/N0)*N0;
+		double dpi0 = (gb*N0/pi0 + growthGrad - mb)*pi0;
+		std::cout << " | dpi0/dN0 = " << dpi0 << " " << dN0 << " | mx/gx/mb/gb = " << m_mx[1] << " " << g_gx[1] << " " << m_mx[0] << " " << g_gx[0] << "\n";
 		*itr++ = dpi0;
 		*itr++ = dN0;
 		its += 2;
