@@ -77,7 +77,7 @@ void Solver::addSpecies(std::vector<double> xbreaks, Species_Base* s, int n_extr
 	s->set_inputBirthFlux(input_birth_flux);
 	s->n_extra_statevars = n_extra_vars;
 
-	if (method == SOLVER_FMU){
+	if (method == SOLVER_FMU || method == SOLVER_IFMU){
 		std::sort(xbreaks.begin(), xbreaks.end(), std::less<double>());  // sort cohorts ascending for FMU
 		s->xb = *xbreaks.begin();
 	}
@@ -88,6 +88,7 @@ void Solver::addSpecies(std::vector<double> xbreaks, Species_Base* s, int n_extr
 
 	int J;
 	if (method == SOLVER_FMU) J = xbreaks.size()-1;	
+	if (method == SOLVER_IFMU) J = xbreaks.size()-1;	
 	if (method == SOLVER_MMU) J = xbreaks.size()-1;  
 	if (method == SOLVER_CM ) J = xbreaks.size();
 	if (method == SOLVER_EBT) J = xbreaks.size();
@@ -95,9 +96,10 @@ void Solver::addSpecies(std::vector<double> xbreaks, Species_Base* s, int n_extr
 	s->x = xbreaks;
 	s->resize(J);
 
-	if (method == SOLVER_FMU) n_statevars_internal = 1;
-	else n_statevars_internal = 2;
-
+	// FMU has only 1 internal state variable (x), reset have 2 (x,u)
+	bool cond = (method == SOLVER_FMU || method == SOLVER_IFMU);
+	n_statevars_internal = (cond)? 1:2;
+	
 	int state_size = s->J*(n_statevars_internal + n_extra_vars);    // x/u and extra vars
 
 	//s->start_index = state.size();	// New species will be appended to the end of state vector
@@ -112,6 +114,23 @@ void Solver::addSpecies(std::vector<double> xbreaks, Species_Base* s, int n_extr
 		
 		s->h.resize(s->J);	// This will be used only by FMU
 		for (size_t i=0; i<s->J; ++i) s->h[i] = s->x[i+1] - s->x[i];	
+	}
+
+	if (method == SOLVER_IFMU){
+		s->X.resize(s->J);
+		s->h.resize(s->J);	// This will be used only by FMU
+		
+		if (control.ifmu_centered_grids){ // grids are labelled by the grid center	
+			for (size_t i=0; i<s->J; ++i) s->X[i] = (s->x[i]+s->x[i+1])/2.0;
+			for (size_t i=0; i<s->J; ++i) s->h[i] = s->x[i+1] - s->x[i];	
+			// for centered grids, also set xb to X[0] rather than x[0]. 
+			s->xb = s->X[0];
+		}
+		else{  // grids are labelled by the lower edge (this ensures that recruitment happens exactly at xb)
+			for (size_t i=0; i<s->J; ++i) s->X[i] = s->x[i];
+			for (size_t i=0; i<s->J; ++i) s->h[i] = s->x[i+1] - s->x[i];	
+			s->xb = s->X[0];
+		}
 	}
 
 }
@@ -212,7 +231,7 @@ double Solver::maxSize(){
 
 void Solver::print(){
 	std::cout << ">> SOLVER \n";
-	string types[] = {"FMU", "MMU", "CM", "EBT"};
+	string types[] = {"FMU", "MMU", "CM", "EBT", "Implicit FMU"};
 	std::cout << "+ Type: " << types[method] << std::endl;
 
 	std::cout << "+ State size = " << state.size() << "\n";
@@ -251,9 +270,9 @@ void Solver::initialize(){
 		for (int i=0; i<s->J; ++i) s->set_birthTime(i, current_time);
 
 		// set x, u for all cohorts
-		if (method == SOLVER_FMU){
+		if (method == SOLVER_FMU || method == SOLVER_IFMU){
 			for (size_t i=0; i<s->J; ++i){
-				double X = (s->x[i]+s->x[i+1])/2;			// for FMU, X is the midpoint of the cell edges
+				double X = s->X[i];			// for FMU, X is the midpoint of the cell edges
 				double U = s->init_density(i, X, env); 
 				s->setX(i,X); 
 				s->setU(i,U);
@@ -305,7 +324,7 @@ void Solver::copyStateToCohorts(std::vector<double>::iterator state_begin){
 	for (int k=0; k<species_vec.size(); ++k){
 		Species_Base* s = species_vec[k];
 		
-		if (method == SOLVER_FMU){
+		if (method == SOLVER_FMU || method == SOLVER_IFMU){
 			for (size_t i=0; i<s->J; ++i){
 				s->setU(i,*it++);
 			}
@@ -345,7 +364,7 @@ void Solver::copyCohortsToState(){
 	for (int k=0; k<species_vec.size(); ++k){
 		Species_Base* s = species_vec[k];
 		
-		if (method == SOLVER_FMU){
+		if (method == SOLVER_FMU || method == SOLVER_IFMU){
 			for (size_t i=0; i<s->J; ++i){
 				*it++ = s->getU(i);
 			}
@@ -452,6 +471,22 @@ void Solver::step_to(double tstop){
 		copyStateToCohorts(state.begin());
 	}
 	
+	if (method == SOLVER_IFMU){	
+		// step_to implemented explicitly for iFMU
+		while (current_time < tstop){
+			double dt = std::min(control.ode_ifmu_stepsize, tstop-current_time);
+			
+			copyStateToCohorts(state.begin());
+			env->computeEnv(current_time, this);
+			
+			// precompute all species (prepare for rate calcs)
+			for (int k = 0; k<species_vec.size(); ++k) preComputeSpecies(k,current_time);	
+			
+			step_iFMU(current_time, state, dt);
+			current_time += dt;
+		}
+
+	}
 	
 	//if (method == SOLVER_MMU){
 	//}
@@ -561,7 +596,7 @@ double Solver::calcSpeciesBirthFlux(int k, double t){
 }
 
 	
-vector<double> Solver::newborns_out(){
+vector<double> Solver::newborns_out(){  // TODO: make recompute env optional
 	// update Environment from latest state
 	//copyStateToCohorts(state.begin());
 	env->computeEnv(current_time, this);
