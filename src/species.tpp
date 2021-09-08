@@ -331,7 +331,7 @@ template <class Model>
 void Species<Model>::addCohort(Cohort<Model> bc){
 	cohorts.push_back(bc);
 	++J;
-	// FIXME: sort cohorts here
+	// FIXME: add option to sort cohorts here.
 }
 
 

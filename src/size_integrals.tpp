@@ -68,7 +68,7 @@ double Solver::integrate_wudx_above(wFunc w, double t, double xlow, int species_
 		return I*0.5;
 	}
 
-	else if (method == SOLVER_FMU){
+	else if (method == SOLVER_FMU || method == SOLVER_IFMU){
 		// integrate using midpoint quadrature rule
 		double I=0;
 		for (int i=spp->J-1; i>=0; --i){  // in FMU, cohorts are sorted ascending
@@ -151,7 +151,7 @@ template<typename wFunc>
 double Solver::integrate_x(wFunc w, double t, int species_id){
 	Species_Base* spp = species_vec[species_id];
 
-	if (method == SOLVER_FMU){
+	if (method == SOLVER_FMU || method == SOLVER_IFMU){
 		// integrate using midpoint quadrature rule
 		double I=0;
 		for (unsigned int i=0; i<spp->J; ++i){

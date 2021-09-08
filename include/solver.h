@@ -10,7 +10,7 @@
 #include "species.h"
 #include "pspm_ode_solver3.h"
 
-enum PSPM_SolverType {SOLVER_FMU, SOLVER_MMU, SOLVER_CM, SOLVER_EBT};
+enum PSPM_SolverType {SOLVER_FMU, SOLVER_MMU, SOLVER_CM, SOLVER_EBT, SOLVER_IFMU};
 
 class Solver{
 	private:
@@ -43,6 +43,8 @@ class Solver{
 		double ebt_grad_dx = 1e-6;
 		std::string ode_method = "rk45ck";
 		double ode_rk4_stepsize = 0.1;
+		double ode_ifmu_stepsize = 0.1;
+		bool ifmu_centered_grids = true;
 	} control;
 	
 	bool use_log_densities = true;
@@ -79,6 +81,9 @@ class Solver{
 	////void calcRates_extra(double t, vector<double>&S, vector<double>& dSdt);
 	
 	void calcRates_FMU(double t, vector<double> &S, vector<double> &dSdt);
+	
+	void calcRates_iFMU(double t, vector<double> &S, vector<double> &dSdt);
+	void stepU_iFMU(double t, vector<double> &S, vector<double> &dSdt, double dt);
 	
 	void calcRates_EBT(double t, vector<double>&S, vector<double> &dSdt);
 	void addCohort_EBT();
