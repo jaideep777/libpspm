@@ -472,18 +472,28 @@ void Solver::step_to(double tstop){
 	}
 	
 	if (method == SOLVER_IFMU){	
-		// step_to implemented explicitly for iFMU
 		while (current_time < tstop){
 			double dt = std::min(control.ode_ifmu_stepsize, tstop-current_time);
 			
-			copyStateToCohorts(state.begin());
+			//copyStateToCohorts(state.begin());
 			env->computeEnv(current_time, this);
 			
 			// precompute all species (prepare for rate calcs)
 			for (int k = 0; k<species_vec.size(); ++k) preComputeSpecies(k,current_time);	
 			
-			step_iFMU(current_time, state, dt);
-			current_time += dt;
+			// use implicit stepper to advance u
+			stepU_iFMU(current_time, state, rates, dt);
+			// current_time += dt; // not needed here, as current time is advanced by the ODE stepper below.
+
+			// use the ODE-stepper for other state variables
+			auto derivs = [this](double t, vector<double> &S, vector<double> &dSdt){
+				copyStateToCohorts(S.begin());
+				// precompute and env computation is not needed here, because it depends on x and u, which are not updated by the solver.
+				calcRates_iFMU(t,S,dSdt);
+			};
+			odeStepper.Step_to(current_time+dt, current_time, state, derivs, control.ode_method, control.ode_rk4_stepsize); // rk4_stepsize is only used if method is "rk4"
+	
+			copyStateToCohorts(state.begin());
 		}
 
 	}

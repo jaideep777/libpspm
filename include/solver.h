@@ -82,7 +82,8 @@ class Solver{
 	
 	void calcRates_FMU(double t, vector<double> &S, vector<double> &dSdt);
 	
-	void step_iFMU(double t, vector<double> &S, double dt);
+	void calcRates_iFMU(double t, vector<double> &S, vector<double> &dSdt);
+	void stepU_iFMU(double t, vector<double> &S, vector<double> &dSdt, double dt);
 	
 	void calcRates_EBT(double t, vector<double>&S, vector<double> &dSdt);
 	void addCohort_EBT();

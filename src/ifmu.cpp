@@ -1,10 +1,32 @@
 #include <cassert>
 #include "solver.h"
 
-void Solver::step_iFMU(double t, vector<double> &S, double dt){
-	
+
+void Solver::calcRates_iFMU(double t, vector<double> &S, vector<double> &dSdt){
 	vector<double>::iterator its = S.begin()    + n_statevars_system; // Skip system variables
+	vector<double>::iterator itr = dSdt.begin() + n_statevars_system;
 	
+	for (int s = 0; s<species_vec.size(); ++s){
+		auto spp = species_vec[s];
+		
+		its += spp->J;// skip u 
+		for (int i=0; i<spp->J; ++i) *itr++ = 0; // set du/dt to 0 
+	
+		if (spp->n_extra_statevars > 0){
+			auto itr_prev = itr;
+			spp->getExtraRates(itr); // TODO/FIXME: Does calc of extra rates need t and env?
+			assert(distance(itr_prev, itr) == spp->n_extra_statevars*spp->J);
+			its += spp->n_extra_statevars*spp->J; 	
+		}
+	}
+
+}
+
+void Solver::stepU_iFMU(double t, vector<double> &S, vector<double> &dSdt, double dt){
+	
+	vector<double>::iterator its = S.begin() + n_statevars_system; // Skip system variables
+	
+	// 1. Take implicit step for U
 	for (int s = 0; s<species_vec.size(); ++s){
 		auto spp = species_vec[s];
 		
@@ -25,7 +47,7 @@ void Solver::step_iFMU(double t, vector<double> &S, double dt){
 			birthFlux = spp->get_u0(t, env)*growthArray[0];
 		}
 		
-		cout << t << "\t" << birthFlux/growthArray[0] << " -> " << calcSpeciesBirthFlux(s,t)/growthArray[0] << "\n";
+		//cout << t << "\t" << birthFlux/growthArray[0] << " -> " << calcSpeciesBirthFlux(s,t)/growthArray[0] << "\n";
 		double B0  = 1 + dt/h[0]*growthArray[0] + dt*spp->mortalityRate(0, spp->getX(0), t, env);
 		double C0 = spp->getU(0) + dt/h[0]*birthFlux;
 		U[0] = C0/B0;
@@ -38,10 +60,10 @@ void Solver::step_iFMU(double t, vector<double> &S, double dt){
 			U[w] = (Cw - Aw*U[w-1])/Bw;
 		}
 		
-		for (int i=0; i<J; ++i) spp->setU(i, U[i]); // copy new U to cohorts
+		its += J*(1+spp->n_extra_statevars);
+
 	}
 	
 }
-
 
 

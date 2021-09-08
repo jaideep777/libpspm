@@ -147,8 +147,10 @@ int main(){
 	
 	//exit(1);
 
-    Solver S(SOLVER_FMU);
-    S.use_log_densities = true;
+    Solver S(SOLVER_IFMU);
+    S.control.ode_ifmu_stepsize = 0.1;
+	S.control.ifmu_centered_grids = false; //true;
+	S.use_log_densities = true;
 	S.control.ode_eps = 1e-4;
 	S.setEnvironment(&env);
 	//    S.createSizeStructuredVariables({"mort", "fec", "heart_area", "heart_mass"});
@@ -172,6 +174,7 @@ int main(){
 	sio.openStreams({"mort", "fec", "heart", "sap"});
 
 	ofstream fli("light_profile_ind_plant.txt");
+	ofstream fseed("seed_rains.txt");
 	
 	vector <vector<double>> seeds_out(S.species_vec.size());
 
@@ -189,6 +192,11 @@ int main(){
 		for (int i=0; i<S.n_species(); ++i) cout << seeds[i] << " ";
 		cout << " | " << env.light_profile.npoints << "\n";
 
+		fseed << times[i] << "\t";
+		for (int i=0; i<S.n_species(); ++i) fseed << seeds[i] << "\t";
+		fseed << "\n";
+
+
 		vector<double> xl = myseq(0, 20, 200);
 		for (auto h : xl) fli << env.canopy_openness(h) << "\t";
 		fli << endl;
@@ -198,6 +206,7 @@ int main(){
 	}
 	
 	fli.close();
+	fseed.close();
 	sio.closeStreams();
 	int nga=0, nma=0, nfa=0, npa=0;
 
