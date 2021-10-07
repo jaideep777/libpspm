@@ -1,7 +1,9 @@
 #include "pspm_ode_solver3.h"
 #include <fstream>
 
-void simple_pendulum(double x, const vector<double>& y, vector<double>& dydx){ 
+void simple_pendulum(double x, const vector<double>::iterator _y, vector<double>::iterator _dydx){ 
+	double *y = &(*_y);
+	double *dydx = &(*_dydx);
 	// use time units omega*t->t
   // d^2 u/dt^2 = - omega^2 u    is written as
   // y[0,1] = [u(t), du/dt]
@@ -34,7 +36,7 @@ int main(){
   RKCK45<vector<double> > rk(t_start, 1e-8, 1e-8); // RK class for adaptive step
   
   cout.precision(15);
-  int M = static_cast<int>((t_stop-t_start)/dh+0.5); // Number of timesteps
+//  int M = static_cast<int>((t_stop-t_start)/dh+0.5); // Number of timesteps
   
   double ti = t_start;
   
@@ -49,7 +51,7 @@ int main(){
 
   ofstream fout("pendulum2.txt");
   for (double t=t_start; t <= t_stop; t=t+1) {
-    rk.Step_to(t, ti, y,  simple_pendulum, "rk4", 0.005);
+    rk.Step_to(t, ti, y,  simple_pendulum, "rk45ck", 0.005);
 	fout<<ti<<" "<<y[0]<<" "<<y[1]<<" | "<<y[0]-xmax*sin(ti)<<" | "<<y[1] - xmax*cos(ti)<< " | "<< Energy(y)<<endl;
 
 	if (fabs(y[0] - xmax*sin(ti)) > 1e-5) return 1;

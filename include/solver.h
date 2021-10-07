@@ -80,17 +80,17 @@ class Solver{
 
 	////void calcRates_extra(double t, vector<double>&S, vector<double>& dSdt);
 	
-	void calcRates_FMU(double t, vector<double> &S, vector<double> &dSdt);
+	void calcRates_FMU(double t, vector<double>::iterator S, vector<double>::iterator dSdt);
 	
-	void calcRates_iFMU(double t, vector<double> &S, vector<double> &dSdt);
+	void calcRates_iFMU(double t, vector<double>::iterator S, vector<double>::iterator dSdt);
 	void stepU_iFMU(double t, vector<double> &S, vector<double> &dSdt, double dt);
 	
-	void calcRates_EBT(double t, vector<double>&S, vector<double> &dSdt);
+	void calcRates_EBT(double t, vector<double>::iterator S, vector<double>::iterator dSdt);
 	void addCohort_EBT();
 	void removeDeadCohorts_EBT();
 	////vector<double> cohortsToDensity_EBT(vector <double> &breaks);
 
-	void calcRates_CM(double t, vector<double>&S, vector<double> &dSdt);
+	void calcRates_CM(double t, vector<double>::iterator S, vector<double>::iterator dSdt);
 	//double calc_u0_CM();
 	void addCohort_CM();
 	void removeCohort_CM();

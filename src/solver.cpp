@@ -458,8 +458,8 @@ void Solver::step_to(double tstop){
 	if (tstop <= current_time) return;
 	
 	if (method == SOLVER_FMU){	
-		auto derivs = [this](double t, vector<double> &S, vector<double> &dSdt){
-			copyStateToCohorts(S.begin());
+		auto derivs = [this](double t, vector<double>::iterator S, vector<double>::iterator dSdt){
+			copyStateToCohorts(S);
 			env->computeEnv(t, this);
 			// precompute all species (prepare for rate calcs)
 			for (int k = 0; k<species_vec.size(); ++k) preComputeSpecies(k,t);	
@@ -486,8 +486,8 @@ void Solver::step_to(double tstop){
 			// current_time += dt; // not needed here, as current time is advanced by the ODE stepper below.
 
 			// use the ODE-stepper for other state variables
-			auto derivs = [this](double t, vector<double> &S, vector<double> &dSdt){
-				copyStateToCohorts(S.begin());
+			auto derivs = [this](double t, vector<double>::iterator S, vector<double>::iterator dSdt){
+				copyStateToCohorts(S);
 				// precompute and env computation is not needed here, because it depends on x and u, which are not updated by the solver.
 				calcRates_iFMU(t,S,dSdt);
 			};
@@ -503,9 +503,9 @@ void Solver::step_to(double tstop){
 	
 	
 	if (method == SOLVER_EBT){
-		auto derivs = [this](double t, vector<double> &S, vector<double> &dSdt){
+		auto derivs = [this](double t, vector<double>::iterator S, vector<double>::iterator dSdt){
 			// copy state vector to cohorts
-			copyStateToCohorts(S.begin());
+			copyStateToCohorts(S);
 			
 			// compute environment
 			env->computeEnv(t, this);
@@ -533,9 +533,9 @@ void Solver::step_to(double tstop){
 	
 	
 	if (method == SOLVER_CM){
-		auto derivs = [this](double t, vector<double> &S, vector<double> &dSdt){
+		auto derivs = [this](double t, vector<double>::iterator S, vector<double>::iterator dSdt){
 			// copy state vector to cohorts
-			copyStateToCohorts(S.begin());
+			copyStateToCohorts(S);
 
 			// update u0 (u of boundary cohort)
 			for (auto s : species_vec) s->get_u0(t, env);

@@ -3,10 +3,10 @@
 
 #include <solver.h>
 
-void Solver::calcRates_EBT(double t, vector<double>&S, vector<double> &dSdt){
+void Solver::calcRates_EBT(double t, vector<double>::iterator S, vector<double>::iterator dSdt){
 
-	vector<double>::iterator its = S.begin()    + n_statevars_system; // Skip system variables
-	vector<double>::iterator itr = dSdt.begin() + n_statevars_system;
+	vector<double>::iterator its = S    + n_statevars_system; // Skip system variables
+	vector<double>::iterator itr = dSdt + n_statevars_system;
 
 	for (int s = 0; s < species_vec.size(); ++s){
 		Species_Base * spp = species_vec[s];
@@ -64,7 +64,7 @@ void Solver::calcRates_EBT(double t, vector<double>&S, vector<double> &dSdt){
 		for (int i=0; i<spp->J-1; ++i){	// go down to the second last cohort (exclude boundary cohort)
 			double dx = spp->growthRate(i, spp->getX(i), t, env);							// dx/dt
 			double du = -spp->mortalityRate(i, spp->getX(i), t, env) * spp->getU(i);		// du/dt
-			std::cout << "S/C = " << s << "/" << i << " " << spp->getX(i) << " " << dx << " " << du << "\n";
+			//std::cout << "S/C = " << s << "/" << i << " " << spp->getX(i) << " " << dx << " " << du << "\n";
 			*itr++ = dx;
 			*itr++ = du;
 			its += 2;
@@ -72,12 +72,12 @@ void Solver::calcRates_EBT(double t, vector<double>&S, vector<double> &dSdt){
 
 		// dpi0/dt and dN0/dt
 		double mb = m_mx[0], mortGrad = m_mx[1], gb = g_gx[0], growthGrad = g_gx[1];	
-		std::cout << "S/C = " << s << "/" << "b" << " | pi0/N0 = " << pi0 << " " << N0;
-		if (pi0 <= 0) pi0 = 1e-40;
-		if (N0  <= 0) N0  = 1e-40;
-		double dN0  = (-mb - mortGrad*pi0/N0 + birthFlux/N0)*N0;
-		double dpi0 = (gb*N0/pi0 + growthGrad - mb)*pi0;
-		std::cout << " | dpi0/dN0 = " << dpi0 << " " << dN0 << " | mx/gx/mb/gb = " << m_mx[1] << " " << g_gx[1] << " " << m_mx[0] << " " << g_gx[0] << "\n";
+		//std::cout << "S/C = " << s << "/" << "b" << " | pi0/N0 = " << pi0 << " " << N0;
+		//if (pi0 <= 0) pi0 = 1e-40;
+		//if (N0  <= 0) N0  = 1e-40;
+		double dN0  = -mb*N0 - mortGrad*pi0 + birthFlux;
+		double dpi0 = gb*N0 + growthGrad*pi0 - mb*pi0;
+		//std::cout << " | dpi0/dN0 = " << dpi0 << " " << dN0 << " | mx/gx/mb/gb = " << m_mx[1] << " " << g_gx[1] << " " << m_mx[0] << " " << g_gx[0] << "\n";
 		*itr++ = dpi0;
 		*itr++ = dN0;
 		its += 2;
@@ -89,7 +89,7 @@ void Solver::calcRates_EBT(double t, vector<double>&S, vector<double> &dSdt){
 			its += spp->n_extra_statevars*spp->J; 	
 		}
 		
-		// TODO: Should other rates of boundary cohort be explicitly set to zero? YES, set to nan.
+		// TODO: Should other rates of boundary cohort be explicitly set to zero? YES, set to nan. NO, boundary cohort is a valid cohort,
 
 		//if (spp.varnames_extra.size() > 0){
 		//    auto it_returned = spp.mod->calcRates_extra(*itx, t, env, itse, itre);

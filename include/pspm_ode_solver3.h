@@ -99,7 +99,7 @@ class RKCK45{
 
 		// Calculates derivatives for the new step
 		//cout << "\n>> init derivs ~~~\n";
-		derivs(xt,y,dydx);
+		derivs(xt,y.begin(),dydx.begin());
 		// good way of determining desired accuracy
 		for (int i=0; i<y.size(); i++) yscal[i] =  eps_abs + eps_rel*(a_y * fabs(y[i]) + a_dydt * fabs(dydx[i]*ht)); // fabs(y[i]) + fabs(dydx[i]*ht) + 1e-3;
 		double hnext, hdid;
@@ -124,13 +124,13 @@ class RKCK45{
 
 		double h2=h*0.5;
 		double xh = x + h2;
-		derivs(x, y, k1);     // First step : evaluating k1
+		derivs(x, y.begin(), k1.begin());     // First step : evaluating k1
 		for (int i=0; i<y.size(); i++) yt[i] = y[i] + h2*k1[i];// Preparing second step by  ty <- y + k1/2
-		derivs(xh, yt, k2);                                    // Second step : evaluating k2
+		derivs(xh, yt.begin(), k2.begin());                                    // Second step : evaluating k2
 		for (int i=0; i<y.size(); i++) yt[i] = y[i] + h2*k2[i];// Preparing third step by   yt <- y + k2/2
-		derivs(xh, yt, k3);                                    // Third step : evaluating k3
+		derivs(xh, yt.begin(), k3.begin());                                    // Third step : evaluating k3
 		for (int i=0; i<y.size(); i++) yt[i] = y[i] +  h*k3[i];// Preparing fourth step  yt <- y + k3
-		derivs(x+h, yt, k4);                                   // Final step : evaluating k4
+		derivs(x+h, yt.begin(), k4.begin());                                   // Final step : evaluating k4
 		for (int i=0; i<y.size(); i++) y[i] += h/6.0*(k1[i]+2.0*(k2[i]+k3[i])+k4[i]);
 
 		x += h;
@@ -229,23 +229,23 @@ void RKCK45<container>::RKTry(container& y, container& dydx, double& x, double h
 	
 	// First step.	
 	for (int i=0; i<N; i++) yt[i] = y[i] + h*bs[1][0]*k0[i];
-	derivs(x+as[1]*h, yt, k1);                            
+	derivs(x+as[1]*h, yt.begin(), k1.begin());                            
 	
 	// Second step.
 	for (int i=0; i<N; i++) yt[i] = y[i] + h*(bs[2][0]*k0[i]+bs[2][1]*k1[i]);
-	derivs(x+as[2]*h,yt,k2);                             
+	derivs(x+as[2]*h,yt.begin(),k2.begin());                             
 	
 	// Third step.
 	for (int i=0; i<N; i++) yt[i] = y[i] + h*(bs[3][0]*k0[i]+bs[3][1]*k1[i]+bs[3][2]*k2[i]);
-	derivs(x+as[3]*h,yt,k3);                             
+	derivs(x+as[3]*h,yt.begin(),k3.begin());                             
 	
 	// Fourth step.
 	for (int i=0; i<N; i++) yt[i] = y[i] + h*(bs[4][0]*k0[i]+bs[4][1]*k1[i]+bs[4][2]*k2[i]+bs[4][3]*k3[i]);
-	derivs(x+as[4]*h,yt,k4);                             
+	derivs(x+as[4]*h,yt.begin(),k4.begin());                             
 	
 	// Fifth step.
 	for (int i=0;i<N;i++)   yt[i] = y[i] + h*(bs[5][0]*k0[i]+bs[5][1]*k1[i]+bs[5][2]*k2[i]+bs[5][3]*k3[i]+bs[5][4]*k4[i]);
-	derivs(x+as[5]*h,yt,k5);                             
+	derivs(x+as[5]*h,yt.begin(),k5.begin());                             
 	
 	// Sixth step.
 	// Accumulate increments with proper weights.

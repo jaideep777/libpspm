@@ -21,7 +21,7 @@ int main(){
 	cout << E.evalEnv(0,0) << endl;
 
 	S.setEnvironment(&E);
-	S.calcRates_EBT(1, S.state, S.rates);  // dummy rates calc rates(X=X0, U=U0, t=1, E=E(U0))
+	S.calcRates_EBT(1, S.state.begin(), S.rates.begin());  // dummy rates calc rates(X=X0, U=U0, t=1, E=E(U0))
 //	S.step_to(1);
 
 //	vector <double> rates_exp = {

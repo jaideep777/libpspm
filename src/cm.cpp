@@ -5,14 +5,14 @@
 //#include "vector_insert.h"
 
 // state must be copied to cohorts before calling this function
-void Solver::calcRates_CM(double t, vector<double>&S, vector<double> &dSdt){
+void Solver::calcRates_CM(double t, vector<double>::iterator S, vector<double>::iterator dSdt){
 
 	//auto ss = species_vec[0];	
 	//cout << "svec: " << t << " " << S[0] << " " << S[1] << " " << S[2] << " " << S[3] << "\n";
 	//cout << "coho: " << t << " " << ss->getX(0) << " " << ss->getU(0) << " " << ss->getX(1) << " " << ss->getU(1) << "\n";
 	
-	vector<double>::iterator its = S.begin()    + n_statevars_system; // Skip system variables
-	vector<double>::iterator itr = dSdt.begin() + n_statevars_system;
+	vector<double>::iterator its = S    + n_statevars_system; // Skip system variables
+	vector<double>::iterator itr = dSdt + n_statevars_system;
 
 	for (auto spp : species_vec){	
 

@@ -1,7 +1,9 @@
-#include "pspm_ode_solver2.h"
+#include "pspm_ode_solver3.h"
 #include <fstream>
 
-void simple_pendulum(double x, const vector<double>& y, vector<double>& dydx){ 
+void simple_pendulum(double x, const vector<double>::iterator _y, vector<double>::iterator _dydx){ 
+	double *y = &(*_y);
+	double *dydx = &(*_dydx);
 	// use time units omega*t->t
   // d^2 u/dt^2 = - omega^2 u    is written as
   // y[0,1] = [u(t), du/dt]
@@ -51,14 +53,15 @@ int main(){
   while(ti < t_stop) {
 	fout<<ti<<" "<<y[0]<<" "<<y[1]<<" "<<y[0]-xmax*sin(ti)<<" "<<Energy(y)<<endl;
     rk.Step(ti, y,  simple_pendulum);
-    
-	if (fabs(y[0] - xmax*sin(ti)) > 1e-6) return 1;
-    if (fabs(y[1] - xmax*cos(ti)) > 1e-6) return 1;
+//	cout<<ti<<" "<<y[0]<<" "<<y[1]<<" | "<<y[0]-xmax*sin(ti)<<" | "<<y[1] - xmax*cos(ti)<< " | "<< Energy(y)<<endl;
+	    
+	if (fabs(y[0] - xmax*sin(ti)) > 1e-5) return 1;
+    if (fabs(y[1] - xmax*cos(ti)) > 1e-5) return 1;
 
   }
 	fout.close();
 
-  if (rk.size() != 2) return 1;
+//  if (rk.size() != 2) return 1;
 //  fout<<ti<<" "<<y[0]<<" "<<y[1]<<" "<<y[0]-xmax*sin(ti)<<" "<<Energy(y)<<endl;
   
   return 0;

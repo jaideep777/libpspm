@@ -7,10 +7,10 @@ double phi(double r){
 }
 
 
-void Solver::calcRates_FMU(double t, vector<double> &S, vector<double> &dSdt){
+void Solver::calcRates_FMU(double t, vector<double>::iterator S, vector<double>::iterator dSdt){
 
-	vector<double>::iterator its = S.begin()    + n_statevars_system; // Skip system variables
-	vector<double>::iterator itr = dSdt.begin() + n_statevars_system;
+	vector<double>::iterator its = S    + n_statevars_system; // Skip system variables
+	vector<double>::iterator itr = dSdt + n_statevars_system;
 	
 	for (int s = 0; s<species_vec.size(); ++s){
 		auto spp = species_vec[s];
