@@ -2,6 +2,8 @@
 #include <cassert>
 
 #include <solver.h>
+using namespace std;
+
 
 void Solver::calcRates_EBT(double t, vector<double>::iterator S, vector<double>::iterator dSdt){
 

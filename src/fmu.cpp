@@ -1,5 +1,6 @@
 #include <cassert>
 #include "solver.h"
+using namespace std;
 
 // ~~~~~~~~~~~ FMU Solver ~~~~~~~~~~~
 double phi(double r){

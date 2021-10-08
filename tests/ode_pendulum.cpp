@@ -1,14 +1,16 @@
-#include "pspm_ode_solver3.h"
+#include "ode_solver.h"
 #include <fstream>
+#include <vector>
+using namespace std;
 
-void simple_pendulum(double x, const vector<double>::iterator _y, vector<double>::iterator _dydx){ 
-	double *y = &(*_y);
-	double *dydx = &(*_dydx);
+void simple_pendulum(double x, vector<double>::iterator _y, vector<double>::iterator _dydx, void* _data){ 
 	// use time units omega*t->t
   // d^2 u/dt^2 = - omega^2 u    is written as
   // y[0,1] = [u(t), du/dt]
   // d y/dt = [du/dt, d^2u/dt] = [du/dt, -u] = [y[1],-y[0]]
   // Exact solution is y[0,1] = [xmax*sin(t), xmax*cos(t)]
+  double* y = &*_y;
+  double* dydx = &*_dydx;
   dydx[0] = y[1];
   dydx[1] = -y[0];
 }
@@ -33,10 +35,10 @@ int main(){
   //    y[0,1] = [xmax*sin(t), xmax*cos(t)]
 
 
-  RKCK45<vector<double> > rk(t_start, 1e-8, 1e-8); // RK class for adaptive step
+  OdeSolver stepper("rk45ck", t_start, 1e-8, 1e-8); // RK class for adaptive step
   
   cout.precision(15);
-  int M = static_cast<int>((t_stop-t_start)/dh+0.5); // Number of timesteps
+  //int M = static_cast<int>((t_stop-t_start)/dh+0.5); // Number of timesteps
   
   double ti = t_start;
   
@@ -49,20 +51,21 @@ int main(){
   */
   
 
-	ofstream fout("pendulum.txt");
-  while(ti < t_stop) {
-	fout<<ti<<" "<<y[0]<<" "<<y[1]<<" "<<y[0]-xmax*sin(ti)<<" "<<Energy(y)<<endl;
-    rk.Step(ti, y,  simple_pendulum);
-//	cout<<ti<<" "<<y[0]<<" "<<y[1]<<" | "<<y[0]-xmax*sin(ti)<<" | "<<y[1] - xmax*cos(ti)<< " | "<< Energy(y)<<endl;
-	    
+  ofstream fout("pendulum2.txt");
+  for (double t=t_start; t <= t_stop; t=t+1) {
+    stepper.step_to(t, ti, y,  simple_pendulum);
+	fout<<ti<<" "<<y[0]<<" "<<y[1]<<" | "<<y[0]-xmax*sin(ti)<<" | "<<y[1] - xmax*cos(ti)<< " | "<< Energy(y)<<endl;
+
 	if (fabs(y[0] - xmax*sin(ti)) > 1e-5) return 1;
-    if (fabs(y[1] - xmax*cos(ti)) > 1e-5) return 1;
+	if (fabs(y[1] - xmax*cos(ti)) > 1e-5) return 1;
 
   }
-	fout.close();
 
-//  if (rk.size() != 2) return 1;
-//  fout<<ti<<" "<<y[0]<<" "<<y[1]<<" "<<y[0]-xmax*sin(ti)<<" "<<Energy(y)<<endl;
+  
+  fout.close();
+ 
+	cout << "Number of fn evaluations = " << stepper.get_fn_evals() << endl;  
+  //if (rk.size() != 2) return 1;
   
   return 0;
 }

@@ -1,6 +1,6 @@
 #include <cassert>
 #include "solver.h"
-
+using namespace std;
 
 void Solver::calcRates_iFMU(double t, vector<double>::iterator S, vector<double>::iterator dSdt){
 	vector<double>::iterator its = S    + n_statevars_system; // Skip system variables

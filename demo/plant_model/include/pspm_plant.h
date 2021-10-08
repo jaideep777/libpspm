@@ -33,9 +33,9 @@ class PSPM_Plant : public plant::Plant {
 	double birthRate(double x, double t, void * env);
 	
 	void init_state(double t, void * _env);
-	vector<double>::iterator set_state(vector<double>::iterator &it);
-	vector<double>::iterator get_state(vector<double>::iterator &it);
-	vector<double>::iterator get_rates(vector<double>::iterator &it);
+	std::vector<double>::iterator set_state(std::vector<double>::iterator &it);
+	std::vector<double>::iterator get_state(std::vector<double>::iterator &it);
+	std::vector<double>::iterator get_rates(std::vector<double>::iterator &it);
 	void print(std::ostream &out = std::cout);
 
 };

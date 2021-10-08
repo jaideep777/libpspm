@@ -3,6 +3,7 @@
 
 #include "solver.h"
 //#include "vector_insert.h"
+using namespace std;
 
 // state must be copied to cohorts before calling this function
 void Solver::calcRates_CM(double t, vector<double>::iterator S, vector<double>::iterator dSdt){
