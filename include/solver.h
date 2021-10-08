@@ -8,19 +8,19 @@
 
 #include "environment_base.h"
 #include "species.h"
-#include "pspm_ode_solver3.h"
+#include "ode_solver.h"
 
 enum PSPM_SolverType {SOLVER_FMU, SOLVER_MMU, SOLVER_CM, SOLVER_EBT, SOLVER_IFMU};
 
 class Solver{
 	private:
 	PSPM_SolverType method;
-	RKCK45<vector<double>> odeStepper;
 
 	int n_statevars_internal = 0;		// number of internal i-state variables (x and/or u)
 	int n_statevars_system = 0;			// number of s-state variables 
 
 	public:	
+	OdeSolver odeStepper;
 	EnvironmentBase * env;
 	
 	public:
@@ -41,7 +41,7 @@ class Solver{
 		int  max_cohorts = 500;
 		double ebt_ucut = 1e-10;
 		double ebt_grad_dx = 1e-6;
-		std::string ode_method = "rk45ck";
+		//std::string ode_method = "lsoda";
 		double ode_rk4_stepsize = 0.1;
 		double ode_ifmu_stepsize = 0.1;
 		bool ifmu_centered_grids = true;
@@ -50,7 +50,7 @@ class Solver{
 	bool use_log_densities = true;
 
 	public:	
-	Solver(PSPM_SolverType _method);
+	Solver(PSPM_SolverType _method, std::string ode_method = "lsoda");
 
 	void addSystemVariables(int _s);
 	void addSpecies(int _J, double _xb, double _xm, bool log_breaks, Species_Base* _mod, int n_extra_vars, double input_birth_flux = -1);
@@ -72,25 +72,25 @@ class Solver{
 	
 	////const int xsize();
 	////const double* getX();
-	////vector<double> getx();
-	////double getMaxSize(vector<double>::iterator sbegin);
+	////std::vector<double> getx();
+	////double getMaxSize(std::vector<double>::iterator sbegin);
 	double maxSize();
 	//double get_u0(double t, int s);	
 
 
-	////void calcRates_extra(double t, vector<double>&S, vector<double>& dSdt);
+	////void calcRates_extra(double t, std::vector<double>&S, std::vector<double>& dSdt);
 	
-	void calcRates_FMU(double t, vector<double> &S, vector<double> &dSdt);
+	void calcRates_FMU(double t, std::vector<double>::iterator S, std::vector<double>::iterator dSdt);
 	
-	void calcRates_iFMU(double t, vector<double> &S, vector<double> &dSdt);
-	void stepU_iFMU(double t, vector<double> &S, vector<double> &dSdt, double dt);
+	void calcRates_iFMU(double t, std::vector<double>::iterator S, std::vector<double>::iterator dSdt);
+	void stepU_iFMU(double t, std::vector<double> &S, std::vector<double> &dSdt, double dt);
 	
-	void calcRates_EBT(double t, vector<double>&S, vector<double> &dSdt);
+	void calcRates_EBT(double t, std::vector<double>::iterator S, std::vector<double>::iterator dSdt);
 	void addCohort_EBT();
 	void removeDeadCohorts_EBT();
-	////vector<double> cohortsToDensity_EBT(vector <double> &breaks);
+	////std::vector<double> cohortsToDensity_EBT(vector <double> &breaks);
 
-	void calcRates_CM(double t, vector<double>&S, vector<double> &dSdt);
+	void calcRates_CM(double t, std::vector<double>::iterator S, std::vector<double>::iterator dSdt);
 	//double calc_u0_CM();
 	void addCohort_CM();
 	void removeCohort_CM();
@@ -104,7 +104,7 @@ class Solver{
 	void preComputeSpecies(int k, double t);
 	double calcSpeciesBirthFlux(int k, double t);
 	std::vector<double> newborns_out();  // This is the actual system reproduction (fitness) hence biologically relevant
-	vector<double> u0_out();        // This is used for equilibrium solving, because in general, u0 rather than birthFlux, will approach a constant value
+	std::vector<double> u0_out();        // This is used for equilibrium solving, because in general, u0 rather than birthFlux, will approach a constant value
 	////double get_u0_out();	// just returns from history without recomputing
 
 	void print();

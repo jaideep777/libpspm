@@ -41,8 +41,9 @@ inline std::vector <double> diff(vector <double> breaks){
 //    if (method == SOLVER_EBT) return J;
 //}
 
-Solver::Solver(PSPM_SolverType _method) : odeStepper(0, 1e-6, 1e-6) {
+Solver::Solver(PSPM_SolverType _method, string ode_method) : odeStepper(ode_method, 0, 1e-6, 1e-6) {
 	method = _method;
+	//control.ode_method = ode_method;
 }
 
 
@@ -155,7 +156,7 @@ void Solver::addSystemVariables(int _s){
 
 void Solver::resetState(){  // FIXME: This is currently redundant, and needs to be improved with reset of both state and cohorts for a true reset of state
 	current_time = 0;
-	odeStepper = RKCK45<vector<double>> (0, control.ode_eps, control.ode_initial_step_size);  // this is a cheap operation, but this will empty the internal containers, which will then be (automatically) resized at next 1st ODE step. Maybe add a reset function to the ODE stepper? 
+	odeStepper.reset(current_time, control.ode_eps, control.ode_eps); // = RKCK45<vector<double>> (0, control.ode_eps, control.ode_initial_step_size);  // this is a cheap operation, but this will empty the internal containers, which will then be (automatically) resized at next 1st ODE step. Maybe add a reset function to the ODE stepper? 
 
 	// state.resize(state_size);   // state will be resized by addSpecies
 	//rates.resize(state.size());
@@ -458,8 +459,8 @@ void Solver::step_to(double tstop){
 	if (tstop <= current_time) return;
 	
 	if (method == SOLVER_FMU){	
-		auto derivs = [this](double t, vector<double> &S, vector<double> &dSdt){
-			copyStateToCohorts(S.begin());
+		auto derivs = [this](double t, vector<double>::iterator S, vector<double>::iterator dSdt, void* params){
+			copyStateToCohorts(S);
 			env->computeEnv(t, this);
 			// precompute all species (prepare for rate calcs)
 			for (int k = 0; k<species_vec.size(); ++k) preComputeSpecies(k,t);	
@@ -467,7 +468,7 @@ void Solver::step_to(double tstop){
 			this->calcRates_FMU(t, S, dSdt);
 		};
 		
-		odeStepper.Step_to(tstop, current_time, state, derivs, control.ode_method, control.ode_rk4_stepsize); // rk4_stepsize is only used if method is "rk4"
+		odeStepper.step_to(tstop, current_time, state, derivs); // rk4_stepsize is only used if method is "rk4"
 		copyStateToCohorts(state.begin());
 	}
 	
@@ -486,12 +487,12 @@ void Solver::step_to(double tstop){
 			// current_time += dt; // not needed here, as current time is advanced by the ODE stepper below.
 
 			// use the ODE-stepper for other state variables
-			auto derivs = [this](double t, vector<double> &S, vector<double> &dSdt){
-				copyStateToCohorts(S.begin());
+			auto derivs = [this](double t, vector<double>::iterator S, vector<double>::iterator dSdt, void* params){
+				copyStateToCohorts(S);
 				// precompute and env computation is not needed here, because it depends on x and u, which are not updated by the solver.
 				calcRates_iFMU(t,S,dSdt);
 			};
-			odeStepper.Step_to(current_time+dt, current_time, state, derivs, control.ode_method, control.ode_rk4_stepsize); // rk4_stepsize is only used if method is "rk4"
+			odeStepper.step_to(current_time+dt, current_time, state, derivs); // rk4_stepsize is only used if method is "rk4"
 	
 			copyStateToCohorts(state.begin());
 		}
@@ -503,9 +504,9 @@ void Solver::step_to(double tstop){
 	
 	
 	if (method == SOLVER_EBT){
-		auto derivs = [this](double t, vector<double> &S, vector<double> &dSdt){
+		auto derivs = [this](double t, vector<double>::iterator S, vector<double>::iterator dSdt, void* params){
 			// copy state vector to cohorts
-			copyStateToCohorts(S.begin());
+			copyStateToCohorts(S);
 			
 			// compute environment
 			env->computeEnv(t, this);
@@ -518,7 +519,7 @@ void Solver::step_to(double tstop){
 		};
 		
 		// integrate 
-		odeStepper.Step_to(tstop, current_time, state, derivs, control.ode_method, control.ode_rk4_stepsize); // rk4_stepsize is only used if method is "rk4"
+		odeStepper.step_to(tstop, current_time, state, derivs); // rk4_stepsize is only used if method is "rk4"
 		
 		// after the last ODE step, the state vector is updated but cohorts still hold an intenal ODE state (y+k5*h etc).
 		// normally, this will be no problem since state will be copied to cohorts in the next rates call. 
@@ -533,9 +534,9 @@ void Solver::step_to(double tstop){
 	
 	
 	if (method == SOLVER_CM){
-		auto derivs = [this](double t, vector<double> &S, vector<double> &dSdt){
+		auto derivs = [this](double t, vector<double>::iterator S, vector<double>::iterator dSdt, void* params){
 			// copy state vector to cohorts
-			copyStateToCohorts(S.begin());
+			copyStateToCohorts(S);
 
 			// update u0 (u of boundary cohort)
 			for (auto s : species_vec) s->get_u0(t, env);
@@ -551,7 +552,7 @@ void Solver::step_to(double tstop){
 		};
 		
 		// integrate 
-		odeStepper.Step_to(tstop, current_time, state, derivs, control.ode_method, control.ode_rk4_stepsize); // rk4_stepsize is only used if method is "rk4"
+		odeStepper.step_to(tstop, current_time, state, derivs); // rk4_stepsize is only used if method is "rk4"
 		
 		// after the last ODE step, the state vector is updated but cohorts still hold an intenal ODE state (y+k5*h etc).
 		// normally, this will be no problem since state will be copied to cohorts in the next rates call. 

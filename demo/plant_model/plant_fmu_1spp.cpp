@@ -147,9 +147,9 @@ int main(){
 	
 	//exit(1);
 
-    Solver S(SOLVER_IFMU);
-    S.control.ode_ifmu_stepsize = 0.1;
-	S.control.ifmu_centered_grids = false; //true;
+    Solver S(SOLVER_FMU, "lsoda");
+    //S.control.ode_ifmu_stepsize = 0.1;
+	//S.control.ifmu_centered_grids = false; //true;
 	S.use_log_densities = true;
 	S.control.ode_eps = 1e-4;
 	S.setEnvironment(&env);

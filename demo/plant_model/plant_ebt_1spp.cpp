@@ -129,7 +129,7 @@ int main(){
 	
 	//exit(1);
 
-    Solver S(SOLVER_EBT);
+    Solver S(SOLVER_EBT, "lsoda");
     S.use_log_densities = true;
 	S.control.ode_eps = 1e-4;
 	//S.control.ode_method = "rk4";

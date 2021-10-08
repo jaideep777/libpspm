@@ -1,5 +1,6 @@
 #include <solver.h>
 #include "test_model_2_ms.h"
+using namespace std;
 
 int main(){
 	TestModel M;
