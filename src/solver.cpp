@@ -41,8 +41,9 @@ inline std::vector <double> diff(vector <double> breaks){
 //    if (method == SOLVER_EBT) return J;
 //}
 
-Solver::Solver(PSPM_SolverType _method) : odeStepper(0, 1e-6, 1e-6) {
+Solver::Solver(PSPM_SolverType _method, string ode_method) : odeStepper(0, 1e-6, 1e-6) {
 	method = _method;
+	control.ode_method = ode_method;
 }
 
 

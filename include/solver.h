@@ -50,7 +50,7 @@ class Solver{
 	bool use_log_densities = true;
 
 	public:	
-	Solver(PSPM_SolverType _method);
+	Solver(PSPM_SolverType _method, std::string ode_method);
 
 	void addSystemVariables(int _s);
 	void addSpecies(int _J, double _xb, double _xm, bool log_breaks, Species_Base* _mod, int n_extra_vars, double input_birth_flux = -1);
