@@ -1,4 +1,5 @@
 #include "pspm_plant.h"
+using namespace std;
 
 typedef LightEnvironment EnvUsed;
 
@@ -11,7 +12,7 @@ void PSPM_Plant::set_size(double _x){
 	set_height(_x);
 }
 
-double PSPM_Plant::init_density(double x, void * _env){
+double PSPM_Plant::init_density(double x, void * _env, double input_seed_rain){
 	//if (x == seed.vars.height){
 		//p.set_height(x);
 		EnvUsed * env = (EnvUsed*)_env;

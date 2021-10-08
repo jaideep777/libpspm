@@ -22,7 +22,7 @@ int main(){
 	E.computeEnv(0,&S);
 	cout << E.evalEnv(0,0) << endl;
 
-	S.calcRates_FMU(1, S.state, S.rates);  // dummy rates calc rates(X=X0, U=U0, t=1, E=E(U0))
+	S.calcRates_FMU(1, S.state.begin(), S.rates.begin());  // dummy rates calc rates(X=X0, U=U0, t=1, E=E(U0))
 	//S.print();
 	//	S.step_to(1);
 

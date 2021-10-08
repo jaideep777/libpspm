@@ -12,21 +12,24 @@ int main(){
 	Species<TestModel> spp;
 	Environment E;
 
-	Solver S(SOLVER_FMU, "lsoda");
-	S.control.ode_eps = 1e-4;
-	S.addSpecies(25, 0, 1, false, &spp, 4, 2);
+	Solver S(SOLVER_IFMU);
+	S.control.ifmu_centered_grids = false;
+	S.addSpecies(30, 0, 1, false, &spp, 4, -1);
 	S.species_vec[0]->set_bfin_is_u0in(true);	// say that input_birth_flux is u0
 	S.resetState();
 	S.initialize();
 	S.setEnvironment(&E);
 	S.print();
 	
-	ofstream fout("fmu_testmodel.txt");
+	E.computeEnv(0, &S);
+	cout << E.evalEnv(0,0) << endl;
+	
+	ofstream fout("ifmu_testmodel.txt");
 
 	for (double t=0.05; t <= 8; t=t+0.05) {
 		S.step_to(t);
 		fout << S.current_time << "\t" << S.u0_out()[0] << "\t";
-		cout << S.current_time << " " << S.u0_out()[0] << "\n";
+		cout << S.current_time << " " << S.u0_out()[0] << ", E = " << E.evalEnv(0,S.current_time) << "\n";
 		for (auto y : S.state) fout << y << "\t";
 		fout << endl;
 	}
@@ -34,8 +37,7 @@ int main(){
 	fout.close();
 
 	cout << S.u0_out()[0] << endl; 
-	cout << "Number of fn evaluations = " << S.odeStepper.get_fn_evals() << "\n";
-	if (abs(S.u0_out()[0] - 1.468232) < 1e-5) return 0;
+	if (abs(S.u0_out()[0] - 0.9900189) < 1e-5) return 0;
 	else return 1;
 
 }

@@ -172,7 +172,7 @@ void Species<Model>::initBoundaryCohort(double t, void * env){
 
 template <class Model>
 double Species<Model>::init_density(int i, double _x, void * _env){
-	return cohorts[i].init_density(_x, _env);
+	return cohorts[i].init_density(_x, _env, birth_flux_in);
 }
 
 // TODO: check increment here itself
@@ -331,7 +331,7 @@ template <class Model>
 void Species<Model>::addCohort(Cohort<Model> bc){
 	cohorts.push_back(bc);
 	++J;
-	// FIXME: sort cohorts here
+	// FIXME: add option to sort cohorts here.
 }
 
 

@@ -129,9 +129,11 @@ int main(){
 	
 	//exit(1);
 
-    Solver S(SOLVER_EBT);
+    Solver S(SOLVER_EBT, "lsoda");
     S.use_log_densities = true;
 	S.control.ode_eps = 1e-4;
+	//S.control.ode_method = "rk4";
+	//S.control.ode_rk4_stepsize = 0.5;
 	S.setEnvironment(&env);
 	//    S.createSizeStructuredVariables({"mort", "fec", "heart_area", "heart_mass"});
    

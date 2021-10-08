@@ -13,6 +13,7 @@ int main(){
 	Environment E;
 
 	Solver S(SOLVER_EBT);
+	S.control.ebt_grad_dx = 0.001;
 	S.addSpecies(25, 0, 1, false, &spp, 4, 2);
 	S.species_vec[0]->set_bfin_is_u0in(true);
 	S.resetState();

@@ -45,14 +45,14 @@ class Plant{
 	double heart_mass;
 	double sap_mass;
 
-	vector<string> varnames = {"mort", "vs", "heart", "sap"};
+	std::vector<std::string> varnames = {"mort", "vs", "heart", "sap"};
 
 	Plant(double h){
 		height = h;
 	}
 
-	vector<double> calcRates(){
-		vector<double> rates(4);
+	std::vector<double> calcRates(){
+		std::vector<double> rates(4);
 		rates[0] = -2;
 		rates[1] = 0;
 		rates[2] = -20*height;
@@ -74,7 +74,7 @@ class TestModel : public Plant{
 	
 	TestModel() : Plant(0) {}
 
-	double init_density(double x, void * _env){
+	double init_density(double x, void * _env, double bf){
 		return pow(1-x,2)/pow(1+x,4) + (1-x)/pow(1+x,3);
 	}
 	
@@ -125,14 +125,14 @@ class TestModel : public Plant{
 	void init_state(double t, void * env){
 	}
 
-	vector<double>::iterator set_state(vector<double>::iterator &it){
+	std::vector<double>::iterator set_state(std::vector<double>::iterator &it){
 		mortality    = *it++;
 		viable_seeds = *it++;
 		heart_mass   = *it++;
 		sap_mass     = *it++;
 		return it;
 	}
-	vector<double>::iterator get_state(vector<double>::iterator &it){
+	std::vector<double>::iterator get_state(std::vector<double>::iterator &it){
 		*it++ = mortality;
 		*it++ = viable_seeds;
 		*it++ = heart_mass;
@@ -140,8 +140,8 @@ class TestModel : public Plant{
 		return it;
 	}
 
-	vector<double>::iterator get_rates(vector<double>::iterator &it){
-		vector<double> r = calcRates();
+	std::vector<double>::iterator get_rates(std::vector<double>::iterator &it){
+		std::vector<double> r = calcRates();
 		*it++ = r[0];
 		*it++ = r[1];
 		*it++ = r[2];

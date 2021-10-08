@@ -23,6 +23,14 @@ std::vector <double> logseq(double from, double to, int len){
 	for (size_t i=0; i<len; ++i) x[i] = exp(log(from) + i*(log(to)-log(from))/(len-1));
 	return x;
 }
+
+inline std::vector <double> diff(vector <double> breaks){
+	std::vector<double> mids(breaks.size()-1);
+	for (size_t i=0; i<mids.size(); ++i) mids[i] = (breaks[i]+breaks[i+1])/2;
+	return mids;
+}
+
+
 // ~~~~~~~~~~~ SOLVER ~~~~~~~~~~~~~~~~~~~~~
 
 //template<class Model, class Environment>
@@ -33,8 +41,9 @@ std::vector <double> logseq(double from, double to, int len){
 //    if (method == SOLVER_EBT) return J;
 //}
 
-Solver::Solver(PSPM_SolverType _method) : odeStepper(0, 1e-6, 1e-6) {
+Solver::Solver(PSPM_SolverType _method, string ode_method) : odeStepper(ode_method, 0, 1e-6, 1e-6) {
 	method = _method;
+	//control.ode_method = ode_method;
 }
 
 
@@ -69,7 +78,7 @@ void Solver::addSpecies(std::vector<double> xbreaks, Species_Base* s, int n_extr
 	s->set_inputBirthFlux(input_birth_flux);
 	s->n_extra_statevars = n_extra_vars;
 
-	if (method == SOLVER_FMU){
+	if (method == SOLVER_FMU || method == SOLVER_IFMU){
 		std::sort(xbreaks.begin(), xbreaks.end(), std::less<double>());  // sort cohorts ascending for FMU
 		s->xb = *xbreaks.begin();
 	}
@@ -80,6 +89,7 @@ void Solver::addSpecies(std::vector<double> xbreaks, Species_Base* s, int n_extr
 
 	int J;
 	if (method == SOLVER_FMU) J = xbreaks.size()-1;	
+	if (method == SOLVER_IFMU) J = xbreaks.size()-1;	
 	if (method == SOLVER_MMU) J = xbreaks.size()-1;  
 	if (method == SOLVER_CM ) J = xbreaks.size();
 	if (method == SOLVER_EBT) J = xbreaks.size();
@@ -87,9 +97,10 @@ void Solver::addSpecies(std::vector<double> xbreaks, Species_Base* s, int n_extr
 	s->x = xbreaks;
 	s->resize(J);
 
-	if (method == SOLVER_FMU) n_statevars_internal = 1;
-	else n_statevars_internal = 2;
-
+	// FMU has only 1 internal state variable (x), reset have 2 (x,u)
+	bool cond = (method == SOLVER_FMU || method == SOLVER_IFMU);
+	n_statevars_internal = (cond)? 1:2;
+	
 	int state_size = s->J*(n_statevars_internal + n_extra_vars);    // x/u and extra vars
 
 	//s->start_index = state.size();	// New species will be appended to the end of state vector
@@ -104,6 +115,23 @@ void Solver::addSpecies(std::vector<double> xbreaks, Species_Base* s, int n_extr
 		
 		s->h.resize(s->J);	// This will be used only by FMU
 		for (size_t i=0; i<s->J; ++i) s->h[i] = s->x[i+1] - s->x[i];	
+	}
+
+	if (method == SOLVER_IFMU){
+		s->X.resize(s->J);
+		s->h.resize(s->J);	// This will be used only by FMU
+		
+		if (control.ifmu_centered_grids){ // grids are labelled by the grid center	
+			for (size_t i=0; i<s->J; ++i) s->X[i] = (s->x[i]+s->x[i+1])/2.0;
+			for (size_t i=0; i<s->J; ++i) s->h[i] = s->x[i+1] - s->x[i];	
+			// for centered grids, also set xb to X[0] rather than x[0]. 
+			s->xb = s->X[0];
+		}
+		else{  // grids are labelled by the lower edge (this ensures that recruitment happens exactly at xb)
+			for (size_t i=0; i<s->J; ++i) s->X[i] = s->x[i];
+			for (size_t i=0; i<s->J; ++i) s->h[i] = s->x[i+1] - s->x[i];	
+			s->xb = s->X[0];
+		}
 	}
 
 }
@@ -128,7 +156,7 @@ void Solver::addSystemVariables(int _s){
 
 void Solver::resetState(){  // FIXME: This is currently redundant, and needs to be improved with reset of both state and cohorts for a true reset of state
 	current_time = 0;
-	odeStepper = RKCK45<vector<double>> (0, control.ode_eps, control.ode_initial_step_size);  // this is a cheap operation, but this will empty the internal containers, which will then be (automatically) resized at next 1st ODE step. Maybe add a reset function to the ODE stepper? 
+	odeStepper.reset(current_time, control.ode_eps, control.ode_eps); // = RKCK45<vector<double>> (0, control.ode_eps, control.ode_initial_step_size);  // this is a cheap operation, but this will empty the internal containers, which will then be (automatically) resized at next 1st ODE step. Maybe add a reset function to the ODE stepper? 
 
 	// state.resize(state_size);   // state will be resized by addSpecies
 	//rates.resize(state.size());
@@ -204,7 +232,7 @@ double Solver::maxSize(){
 
 void Solver::print(){
 	std::cout << ">> SOLVER \n";
-	string types[] = {"FMU", "MMU", "CM", "EBT"};
+	string types[] = {"FMU", "MMU", "CM", "EBT", "Implicit FMU"};
 	std::cout << "+ Type: " << types[method] << std::endl;
 
 	std::cout << "+ State size = " << state.size() << "\n";
@@ -243,9 +271,9 @@ void Solver::initialize(){
 		for (int i=0; i<s->J; ++i) s->set_birthTime(i, current_time);
 
 		// set x, u for all cohorts
-		if (method == SOLVER_FMU){
+		if (method == SOLVER_FMU || method == SOLVER_IFMU){
 			for (size_t i=0; i<s->J; ++i){
-				double X = (s->x[i]+s->x[i+1])/2;			// for FMU, X is the midpoint of the cell edges
+				double X = s->X[i];			// for FMU, X is the midpoint of the cell edges
 				double U = s->init_density(i, X, env); 
 				s->setX(i,X); 
 				s->setU(i,U);
@@ -297,7 +325,7 @@ void Solver::copyStateToCohorts(std::vector<double>::iterator state_begin){
 	for (int k=0; k<species_vec.size(); ++k){
 		Species_Base* s = species_vec[k];
 		
-		if (method == SOLVER_FMU){
+		if (method == SOLVER_FMU || method == SOLVER_IFMU){
 			for (size_t i=0; i<s->J; ++i){
 				s->setU(i,*it++);
 			}
@@ -337,7 +365,7 @@ void Solver::copyCohortsToState(){
 	for (int k=0; k<species_vec.size(); ++k){
 		Species_Base* s = species_vec[k];
 		
-		if (method == SOLVER_FMU){
+		if (method == SOLVER_FMU || method == SOLVER_IFMU){
 			for (size_t i=0; i<s->J; ++i){
 				*it++ = s->getU(i);
 			}
@@ -431,8 +459,8 @@ void Solver::step_to(double tstop){
 	if (tstop <= current_time) return;
 	
 	if (method == SOLVER_FMU){	
-		auto derivs = [this](double t, vector<double> &S, vector<double> &dSdt){
-			copyStateToCohorts(S.begin());
+		auto derivs = [this](double t, vector<double>::iterator S, vector<double>::iterator dSdt, void* params){
+			copyStateToCohorts(S);
 			env->computeEnv(t, this);
 			// precompute all species (prepare for rate calcs)
 			for (int k = 0; k<species_vec.size(); ++k) preComputeSpecies(k,t);	
@@ -440,19 +468,45 @@ void Solver::step_to(double tstop){
 			this->calcRates_FMU(t, S, dSdt);
 		};
 		
-		odeStepper.Step_to(tstop, current_time, state, derivs); // state = [U]
+		odeStepper.step_to(tstop, current_time, state, derivs); // rk4_stepsize is only used if method is "rk4"
 		copyStateToCohorts(state.begin());
 	}
 	
+	if (method == SOLVER_IFMU){	
+		while (current_time < tstop){
+			double dt = std::min(control.ode_ifmu_stepsize, tstop-current_time);
+			
+			//copyStateToCohorts(state.begin());
+			env->computeEnv(current_time, this);
+			
+			// precompute all species (prepare for rate calcs)
+			for (int k = 0; k<species_vec.size(); ++k) preComputeSpecies(k,current_time);	
+			
+			// use implicit stepper to advance u
+			stepU_iFMU(current_time, state, rates, dt);
+			// current_time += dt; // not needed here, as current time is advanced by the ODE stepper below.
+
+			// use the ODE-stepper for other state variables
+			auto derivs = [this](double t, vector<double>::iterator S, vector<double>::iterator dSdt, void* params){
+				copyStateToCohorts(S);
+				// precompute and env computation is not needed here, because it depends on x and u, which are not updated by the solver.
+				calcRates_iFMU(t,S,dSdt);
+			};
+			odeStepper.step_to(current_time+dt, current_time, state, derivs); // rk4_stepsize is only used if method is "rk4"
+	
+			copyStateToCohorts(state.begin());
+		}
+
+	}
 	
 	//if (method == SOLVER_MMU){
 	//}
 	
 	
 	if (method == SOLVER_EBT){
-		auto derivs = [this](double t, vector<double> &S, vector<double> &dSdt){
+		auto derivs = [this](double t, vector<double>::iterator S, vector<double>::iterator dSdt, void* params){
 			// copy state vector to cohorts
-			copyStateToCohorts(S.begin());
+			copyStateToCohorts(S);
 			
 			// compute environment
 			env->computeEnv(t, this);
@@ -465,7 +519,7 @@ void Solver::step_to(double tstop){
 		};
 		
 		// integrate 
-		odeStepper.Step_to(tstop, current_time, state, derivs); // state = [pi0, Xint, N0, Nint]
+		odeStepper.step_to(tstop, current_time, state, derivs); // rk4_stepsize is only used if method is "rk4"
 		
 		// after the last ODE step, the state vector is updated but cohorts still hold an intenal ODE state (y+k5*h etc).
 		// normally, this will be no problem since state will be copied to cohorts in the next rates call. 
@@ -480,9 +534,9 @@ void Solver::step_to(double tstop){
 	
 	
 	if (method == SOLVER_CM){
-		auto derivs = [this](double t, vector<double> &S, vector<double> &dSdt){
+		auto derivs = [this](double t, vector<double>::iterator S, vector<double>::iterator dSdt, void* params){
 			// copy state vector to cohorts
-			copyStateToCohorts(S.begin());
+			copyStateToCohorts(S);
 
 			// update u0 (u of boundary cohort)
 			for (auto s : species_vec) s->get_u0(t, env);
@@ -498,7 +552,7 @@ void Solver::step_to(double tstop){
 		};
 		
 		// integrate 
-		odeStepper.Step_to(tstop, current_time, state, derivs); // state = [pi0, Xint, N0, Nint]
+		odeStepper.step_to(tstop, current_time, state, derivs); // rk4_stepsize is only used if method is "rk4"
 		
 		// after the last ODE step, the state vector is updated but cohorts still hold an intenal ODE state (y+k5*h etc).
 		// normally, this will be no problem since state will be copied to cohorts in the next rates call. 
@@ -553,7 +607,7 @@ double Solver::calcSpeciesBirthFlux(int k, double t){
 }
 
 	
-vector<double> Solver::newborns_out(){
+vector<double> Solver::newborns_out(){  // TODO: make recompute env optional
 	// update Environment from latest state
 	//copyStateToCohorts(state.begin());
 	env->computeEnv(current_time, this);
@@ -632,5 +686,101 @@ vector<double> Solver::u0_out(){
 
 
 //*/
+
+
+
+// xb
+// |---*--|--*--|----*----|---*---|
+//     0     1       2        3        <--- points
+// 0      1     2         3       4    <--- breaks
+
+// Test this function with this R script:
+/**
+x = c(0, 1,1.1,1.2, 2,2.2,2.3, 4.5,5.5,6.5)[length(x):1]
+N = c(1, 1,1,  1,   2,2,  2,   3,   4,  5)[length(N):1]
+plot(N~x)
+abline(v=breaks, col="grey")
+breaks = seq(0,10,1)
+dens = rep(0, length(x))
+J = length(x)
+
+current_interval = length(breaks)-1
+for (i in 1:J){
+  while(breaks[current_interval] > x[i]) current_interval = current_interval-1
+  dens[current_interval] = dens[current_interval]+N[i]
+}
+**/
+struct point{
+	double xmean = 0;
+	double abund = 0;
+	int    count = 0;
+};	
+
+std::vector<double> Solver::getDensitySpecies_EBT(int k, int nbreaks){
+	auto spp = species_vec[k];
+
+	//cout << "HRER" << endl;
+	
+	if (method == SOLVER_EBT){
+		double xm = spp->getX(0)+1e-6;
+		vector<double> breaks = seq(spp->xb, xm, nbreaks);
+		
+		vector<point> points(breaks.size()-1);
+
+		// assuming breaks are sorted ascending
+		// cohorts are sorted descending
+		int current_interval = breaks.size()-2;
+		for (int i=0; i<spp->J; ++i){ // loop over all cohorts except boundary cohort
+			double x = spp->getX(i);
+			double N = spp->getU(i);
+			if (i == spp->J-1) x = spp->xb + x/(N+1e-12); // real-ize x if it's boundary cohort
+			
+			while(breaks[current_interval]>x) --current_interval; // decrement interval until x fits
+			//cout << current_interval << ", x = " << x << "(" << N << ") in [" << breaks[current_interval] << ", " << breaks[current_interval+1] << "]\n"; cout.flush();
+			if (N>0){
+				points[current_interval].abund += N;
+				points[current_interval].count += 1;
+				points[current_interval].xmean += N*x;
+			}
+		}
+
+		
+		for (int i=0; i<points.size(); ++i) if (points[i].count>0) points[i].xmean /= points[i].abund;
+		
+		// remove 0-count points
+		auto pred = [this](const point& p) -> bool {
+			return p.count == 0; // TODO: make conatiner-type safe
+		};
+
+		auto pend = std::remove_if(points.begin(), points.end(), pred);
+		points.erase(pend, points.end());
+
+		//cout << "mean x and abund (removed):\n";
+		//for (int i=0; i<points.size(); ++i) cout << i << "\t" << points[i].count << "\t" << points[i].xmean << "\t" << points[i].abund << "\n";	
+		//cout << "--\n";
+
+		if (points.size() > 2){
+		vector<double> h(points.size());
+		h[0] = (points[1].xmean+points[0].xmean)/2 - spp->xb;
+		for (int i=1; i<h.size()-1; ++i) h[i] = (points[i+1].xmean - points[i-1].xmean)/2;
+		h[h.size()-1] = xm - (points[h.size()-1].xmean+points[h.size()-2].xmean)/2;
+
+		vector <double> dens;
+		dens.reserve(2*points.size());
+		for (int i=0; i<points.size(); ++i) dens.push_back(points[i].xmean);
+		for (int i=0; i<points.size(); ++i) dens.push_back(points[i].abund / h[i]);
+		
+		return dens;
+		}
+		else return vector<double>();
+	}
+	else {
+		return vector<double>();
+	}
+
+}
+
+
+
 
 
