@@ -1,87 +1,52 @@
 #-------------------------------------------------------------------------------
 # executable name
-TARGET := libpspm
+FILE = 
+TARGET = $(patsubst %.cpp, %.exec, $(FILE)) 
 
 # files
-SRCFILES  :=  $(wildcard src/*.cpp) 
-HEADERS := $(wildcard src/*.tpp) $(wildcard include/*.h) $(wildcard tests/*.h)
+SRCFILES  :=  $(wildcard plant/*.cpp)
+SRCFILES += $(FILE)
+#HEADERS := $(wildcard ../../src/*.tpp) $(wildcard ../../include/*.h)  # only to indicate recompilation
 # ------------------------------------------------------------------------------
 
 # paths
 #CUDA_INSTALL_PATH ?= /usr/local/cuda#-5.0
 
 # include and lib dirs (esp for cuda)
-INC_PATH := -I./include 
-LIB_PATH := -L./lib 
+INC_PATH := -I../../include 
+LIB_PATH := -L../../lib 
 
 # flags
 CPPFLAGS = -O3 -g -pg -std=c++11 -Wno-sign-compare -Wno-unused-variable -Wno-unused-but-set-variable
 LDFLAGS =  -g -pg
 
 # libs
-LIBS = 	 #-lgsl -lgslcblas 	# additional libs
+LIBS = 	 -lpspm #-lgsl -lgslcblas 	# additional libs
 #LIBS = -lcudart 			# cuda libs 		
 
 # files
-OBJECTS = $(patsubst src/%.cpp, build/%.o, $(SRCFILES))
+OBJECTS = $(patsubst %.cpp, %.o, $(SRCFILES))
 
 
 all: dir $(TARGET)	
 
 dir: 
-	mkdir -p lib build tests/build
+	mkdir -p build 
 
-$(TARGET): $(OBJECTS) 
-	ar rcs lib/$(TARGET).a $(OBJECTS)
-	#g++ $(LDFLAGS) -o $(TARGET) $(LIB_PATH) $(OBJECTS) $(LIBS) 
+$(TARGET): $(OBJECTS)	
+	g++ $(LDFLAGS) -o $(TARGET) $(LIB_PATH) $(OBJECTS) $(LIBS) 
 
-$(OBJECTS): build/%.o : src/%.cpp $(HEADERS)
+$(OBJECTS): %.o : %.cpp $(HEADERS)
 	g++ -c $(CPPFLAGS) $(INC_PATH) $< -o $@ 
 
 clean:
-	rm -f $(TARGET) build/*.o 
+	rm -f $(TARGET) $(OBJECTS) 
 	
 re: clean all
 
-superclean: clean testclean
 
 
-## TESTING SUITE ##
 
-TEST_FILES = $(wildcard tests/*.cpp) 
-TEST_OBJECTS = $(patsubst tests/%.cpp, tests/%.o, $(TEST_FILES))
-TEST_TARGETS = $(patsubst tests/%.cpp, tests/%.test, $(TEST_FILES))
-TEST_RUNS = $(patsubst tests/%.cpp, tests/%.run, $(TEST_FILES))
-ADD_OBJECTS = 
-
-check: $(OBJECTS) compile_tests clean_log run_tests
-
-compile_tests: $(TEST_TARGETS)
-	
-clean_log:
-	@rm -f log.txt
-
-run_tests: $(TEST_RUNS) 
-	
-$(TEST_RUNS): tests/%.run : tests/%.test	
-	@echo "~~~~~~~~~~~~~~~ $< ~~~~~~~~~~~~~~~~" >> log.txt
-	@./$< >> log.txt && \
-		printf "%b" "\033[0;32m[PASS]\033[m" ": $* \n"  || \
-		printf "%b" "\033[1;31m[FAIL]\033[m" ": $* \n"
-
-$(TEST_OBJECTS): tests/%.o : tests/%.cpp $(HEADERS) 
-	g++ -c $(CPPFLAGS) $(INC_PATH) $< -o $@
-
-$(TEST_TARGETS): tests/%.test : tests/%.o
-	g++ $(LDFLAGS) -o $@ $(LIB_PATH) $(OBJECTS) $(ADD_OBJECTS) $< $(LIBS) 
-
-testclean: 
-	rm -f tests/*.o tests/*.test lib/*.a lib/*.so
-
-recheck: testclean check
-
-.PHONY: $(TEST_RUNS) run_tests clean testclean
-# ------------------------------------------------------------------------------
 
 
 
