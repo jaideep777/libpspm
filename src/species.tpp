@@ -205,6 +205,12 @@ void Species<Model>::preComputeAllCohorts(double t, void * env){
 
 
 template <class Model>
+double Species<Model>::establishmentProbability(double t, void * env){
+	boundaryCohort.establishmentProbability(t, env);
+}
+
+
+template <class Model>
 double Species<Model>::get_u0(double t, void * env){
 	
 	if (bfin_is_u0in){

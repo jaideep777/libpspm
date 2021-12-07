@@ -41,7 +41,8 @@ void Solver::stepU_iFMU(double t, vector<double> &S, vector<double> &dSdt, doubl
 		
 		double birthFlux;
 		if (spp->birth_flux_in < 0){	
-			birthFlux = calcSpeciesBirthFlux(s,t);
+			birthFlux = calcSpeciesBirthFlux(s,t) * spp->establishmentProbability(t, env);
+//			std::cout << "birthflux = " << calcSpeciesBirthFlux(s,t) << " * " << spp->establishmentProbability(t, env) << " = " << birthFlux << endl; 
 		}
 		else{
 			birthFlux = spp->get_u0(t, env)*growthArray[0];
@@ -49,8 +50,10 @@ void Solver::stepU_iFMU(double t, vector<double> &S, vector<double> &dSdt, doubl
 		
 		//cout << t << "\t" << birthFlux/growthArray[0] << " -> " << calcSpeciesBirthFlux(s,t)/growthArray[0] << "\n";
 		double B0  = 1 + dt/h[0]*growthArray[0] + dt*spp->mortalityRate(0, spp->getX(0), t, env);
+//		std::cout << "B0 = " << B0 << endl; 
 		double C0 = spp->getU(0) + dt/h[0]*birthFlux;
 		U[0] = C0/B0;
+//		std::cout << "U0 = " << U[0] << endl; 
 
 		for (int w = 1; w < J; ++w){
 			double Aw = -growthArray[w-1]*dt/h[w];

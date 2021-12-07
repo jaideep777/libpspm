@@ -89,6 +89,7 @@ class Species_Base{
 	virtual void copyExtraStateToCohorts(std::vector<double>::iterator &it) = 0;
 	virtual void copyCohortsExtraToState(std::vector<double>::iterator &it) = 0;
 	
+	virtual double establishmentProbability(double t, void * env) = 0;
 	virtual double get_u0(double t, void * env) = 0;
 	virtual double get_boundary_u() = 0;
 
@@ -150,6 +151,7 @@ class Species : public Species_Base{
 	void copyExtraStateToCohorts(std::vector<double>::iterator &it);
 	void copyCohortsExtraToState(std::vector<double>::iterator &it);
 
+	double establishmentProbability(double t, void * env);
 	double get_u0(double t, void * env);
 	double get_boundary_u();
 	
