@@ -96,7 +96,7 @@ void Species<Model>::print(){
 	//std::cout << "Rates (" << size() << "):\n";
 	//auto irates = get_iterators(rv);
 	//irates.print();
-	std::cout << "-------\n\n";
+	std::cout << "-------\n\n"; std::cout.flush();
 
 }
 
@@ -206,7 +206,7 @@ void Species<Model>::preComputeAllCohorts(double t, void * env){
 
 template <class Model>
 double Species<Model>::establishmentProbability(double t, void * env){
-	boundaryCohort.establishmentProbability(t, env);
+	return boundaryCohort.establishmentProbability(t, env);
 }
 
 

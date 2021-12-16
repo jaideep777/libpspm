@@ -238,6 +238,7 @@ void Solver::print(){
 	std::cout << "+ State size = " << state.size() << "\n";
 	std::cout << "+ Rates size = " << rates.size() << "\n";
 	std::cout << "+ Species:\n";
+	std::cout.flush();
 	for (int i=0; i<species_vec.size(); ++i) {
 		std::cout << "Sp (" << i << "):\n";
 		species_vec[i]->print();
