@@ -459,6 +459,13 @@ void Solver::step_to(double tstop){
 	// do nothing if tstop is <= current_time
 	if (tstop <= current_time) return;
 	
+	auto after_step = [this](double t, vector<double>::iterator S){
+		//cout << "After step: t = " << t << "\n";
+		copyStateToCohorts(S);
+		for (int k = 0; k<species_vec.size(); ++k) preComputeSpecies(k,t);	
+		for (auto spp : species_vec) spp->afterStep(t, env);
+	};
+	
 	if (method == SOLVER_FMU){	
 		auto derivs = [this](double t, vector<double>::iterator S, vector<double>::iterator dSdt, void* params){
 			copyStateToCohorts(S);
@@ -469,9 +476,10 @@ void Solver::step_to(double tstop){
 			this->calcRates_FMU(t, S, dSdt);
 		};
 		
-		odeStepper.step_to(tstop, current_time, state, derivs); // rk4_stepsize is only used if method is "rk4"
-		copyStateToCohorts(state.begin());
+		odeStepper.step_to(tstop, current_time, state, derivs, after_step); // rk4_stepsize is only used if method is "rk4"
+//		copyStateToCohorts(state.begin());
 	}
+	
 	
 	if (method == SOLVER_IFMU){	
 		while (current_time < tstop){
@@ -493,9 +501,10 @@ void Solver::step_to(double tstop){
 				// precompute and env computation is not needed here, because it depends on x and u, which are not updated by the solver.
 				calcRates_iFMU(t,S,dSdt);
 			};
-			odeStepper.step_to(current_time+dt, current_time, state, derivs); // rk4_stepsize is only used if method is "rk4"
+			// this step below will do afterstep. FIXME: But what if there are no extra state variables? 
+			odeStepper.step_to(current_time+dt, current_time, state, derivs, after_step); // rk4_stepsize is only used if method is "rk4"
 	
-			copyStateToCohorts(state.begin());
+//			copyStateToCohorts(state.begin());
 		}
 
 	}
@@ -520,13 +529,13 @@ void Solver::step_to(double tstop){
 		};
 		
 		// integrate 
-		odeStepper.step_to(tstop, current_time, state, derivs); // rk4_stepsize is only used if method is "rk4"
+		odeStepper.step_to(tstop, current_time, state, derivs, after_step); // rk4_stepsize is only used if method is "rk4"
 		
 		// after the last ODE step, the state vector is updated but cohorts still hold an intenal ODE state (y+k5*h etc).
 		// normally, this will be no problem since state will be copied to cohorts in the next rates call. 
 		// But since add/remove cohort below will rewrite the state from cohorts, the updated state vector will be lost
 		// rewrite the cohorts now to avoid this.
-		copyStateToCohorts(state.begin());
+//		copyStateToCohorts(state.begin());
 		
 		// update cohorts
 		removeDeadCohorts_EBT();
@@ -553,12 +562,13 @@ void Solver::step_to(double tstop){
 		};
 		
 		// integrate 
-		odeStepper.step_to(tstop, current_time, state, derivs); // rk4_stepsize is only used if method is "rk4"
+		odeStepper.step_to(tstop, current_time, state, derivs, after_step); // rk4_stepsize is only used if method is "rk4"
 		
 		// after the last ODE step, the state vector is updated but cohorts still hold an intenal ODE state (y+k5*h etc).
 		// normally, this will be no problem since state will be copied to cohorts in the next rates call. 
 		// But since add/remove cohort below will rewrite the state from cohorts, the updated state vector will be lost
 		// rewrite the cohorts now to avoid this.
+		// Note: This is likely no longer required because afterStep() does a copy
 		copyStateToCohorts(state.begin());
 
 		// update cohorts

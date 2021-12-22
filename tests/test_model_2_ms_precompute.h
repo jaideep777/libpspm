@@ -96,6 +96,10 @@ class TestModel : public Plant{
 		se = 1;
 
 	}
+
+	void afterStep(double x, double t, void * _env){
+		//std::cout << "   After step in cohort\n";
+	}
 	
 	double growthRate(double x, double t, void * _env){
 		return g;

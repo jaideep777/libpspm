@@ -87,8 +87,8 @@ class RKCK45{
 	//template <class functor>
 	//void Step_RK4(double &x, double h, container& y, functor& derivs);
 	
-	template <class functor>
-	void Step_to(double t_stop, double& x, container& y, functor& derivs);
+	template <class functor, class AfterStep>
+	void Step_to(double t_stop, double& x, container& y, functor& derivs, AfterStep &after_step);
 
 	double h(){return ht;}
 	double size(){return sys_size;}

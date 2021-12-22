@@ -57,17 +57,17 @@ class OdeSolver{
 	}
 
 
-	template <class Functor>
-	void step_to(double t_stop, double &t, std::vector<double>&y, Functor &derivs){
+	template <class Functor, class AfterStep>
+	void step_to(double t_stop, double &t, std::vector<double>&y, Functor &derivs, AfterStep &after_step){
 		if (t_stop == t || y.size() == 0) return;
 		
 		if (type == ODE_RKCK45){
-			(static_cast<RKCK45*>(solver))->Step_to(t_stop, t, y, derivs);
+			(static_cast<RKCK45*>(solver))->Step_to(t_stop, t, y, derivs, after_step);
 		}
 		else if (type == ODE_LSODA ){
 			LSODA* sol = static_cast<LSODA*>(solver);
 			sol->set_istate(1); // forces re-initialization
-			sol->lsoda_update(derivs, y.size(), y, &t, t_stop, nullptr, control.rel_tol, control.abs_tol);
+			sol->lsoda_update(derivs, after_step, y.size(), y, &t, t_stop, nullptr, control.rel_tol, control.abs_tol);
 			if(sol->get_istate() <= 0) {
 				std::cerr << "LSODA Error: istate = " << sol->get_istate() << std::endl;
 				return;

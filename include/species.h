@@ -105,6 +105,8 @@ class Species_Base{
 	virtual double birthRate(int i, double x, double t, void * env) = 0;
 	virtual void getExtraRates(std::vector<double>::iterator &it) = 0;
 
+	virtual void afterStep(double t, void * env) = 0;
+
 	virtual void addCohort() = 0;
 	template<class T> void addCohort(T bc);
 
@@ -165,6 +167,8 @@ class Species : public Species_Base{
 	std::vector<double> mortalityRateGradient(int i, double x, double t, void * env, double grad_dx);
 	double birthRate(int i, double x, double t, void * env);
 	void getExtraRates(std::vector<double>::iterator &it);
+
+	void afterStep(double t, void * env);
 
 	void addCohort();
 	void addCohort(Cohort<Model> bc);

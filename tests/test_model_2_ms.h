@@ -78,6 +78,10 @@ class TestModel : public Plant{
 	void preCompute(double x, double t, void * _env){
 	}
 
+	void afterStep(double x, double t, void * _env){
+		//std::cout << "   After step in cohort\n";
+	}
+
 	double growthRate(double x, double t, void * _env){
 		Environment* env = (Environment*)_env;
 		double E = env->evalEnv(x,t);
