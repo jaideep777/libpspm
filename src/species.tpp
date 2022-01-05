@@ -154,6 +154,9 @@ void Species<Model>::setU(int i, double _u){
 
 template <class Model>
 void Species<Model>::initAndCopyExtraState(double t, void * env, std::vector<double>::iterator &it){
+	// init boundary cohort (no copy required)
+	boundaryCohort.init_state(t, env); 
+	// init internal cohorts and copy to state vector
 	for (auto& c : cohorts){
 		c.init_state(t, env);	// init state
 		auto it_prev = it;		
