@@ -154,9 +154,9 @@ void Solver::addSystemVariables(int _s){
 }
 
 
-void Solver::resetState(){  // FIXME: This is currently redundant, and needs to be improved with reset of both state and cohorts for a true reset of state
-	current_time = 0;
-	odeStepper.reset(current_time, control.ode_eps, control.ode_eps); // = RKCK45<vector<double>> (0, control.ode_eps, control.ode_initial_step_size);  // this is a cheap operation, but this will empty the internal containers, which will then be (automatically) resized at next 1st ODE step. Maybe add a reset function to the ODE stepper? 
+void Solver::resetState(double t0){  // FIXME: This is currently redundant, and needs to be improved with reset of both state and cohorts for a true reset of state
+	current_time = t0;
+	odeStepper.reset(t0, control.ode_eps, control.ode_eps); // = RKCK45<vector<double>> (0, control.ode_eps, control.ode_initial_step_size);  // this is a cheap operation, but this will empty the internal containers, which will then be (automatically) resized at next 1st ODE step. Maybe add a reset function to the ODE stepper? 
 
 	// state.resize(state_size);   // state will be resized by addSpecies
 	//rates.resize(state.size());

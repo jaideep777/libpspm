@@ -62,7 +62,7 @@ class Solver{
 	void setEnvironment(EnvironmentBase * _env);
 
 	//int setupLayout(Species<Model> &s);
-	void resetState(); 	
+	void resetState(double t0 = 0); 	
 	void resizeStateFromSpecies();
 
 	void initialize();
