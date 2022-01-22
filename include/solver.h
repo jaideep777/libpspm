@@ -96,15 +96,17 @@ class Solver{
 	void removeCohort_CM();
 	//void removeDenseCohorts_CM();
 	
-	
+	template<typename AfterStepFunc>
+	void step_to(double tstop, AfterStepFunc &afterStep_user);
+
 	void step_to(double tstop);
 
 	////double stepToEquilibrium();
 
 	void preComputeSpecies(int k, double t);
 	double calcSpeciesBirthFlux(int k, double t);
-	std::vector<double> newborns_out();  // This is the actual system reproduction (fitness) hence biologically relevant
-	std::vector<double> u0_out();        // This is used for equilibrium solving, because in general, u0 rather than birthFlux, will approach a constant value
+	std::vector<double> newborns_out(double t);  // This is the actual system reproduction (fitness) hence biologically relevant
+	std::vector<double> u0_out(double t);        // This is used for equilibrium solving, because in general, u0 rather than birthFlux, will approach a constant value
 	////double get_u0_out();	// just returns from history without recomputing
 
 	void print();
@@ -120,7 +122,7 @@ class Solver{
 	std::vector<double> getDensitySpecies_EBT(int k, int nbreaks);
 };
 
-//#include "../src/solver.tpp"
+#include "../src/solver.tpp"
 //#include "../src/mu.tpp"
 //#include "../src/ebt.tpp"
 //#include "../src/cm.tpp"
