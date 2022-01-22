@@ -88,11 +88,11 @@ void Solver::addSpecies(std::vector<double> xbreaks, Species_Base* s, int n_extr
 	}
 
 	int J;
-	if (method == SOLVER_FMU) J = xbreaks.size()-1;	
+	if (method == SOLVER_FMU)  J = xbreaks.size()-1;	
 	if (method == SOLVER_IFMU) J = xbreaks.size()-1;	
-	if (method == SOLVER_MMU) J = xbreaks.size()-1;  
-	if (method == SOLVER_CM ) J = xbreaks.size();
-	if (method == SOLVER_EBT) J = xbreaks.size();
+	if (method == SOLVER_MMU)  J = xbreaks.size()-1;  
+	if (method == SOLVER_CM )  J = xbreaks.size();
+	if (method == SOLVER_EBT)  J = xbreaks.size();
 
 	s->x = xbreaks;
 	s->resize(J);

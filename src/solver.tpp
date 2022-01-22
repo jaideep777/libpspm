@@ -7,7 +7,7 @@ void Solver::step_to(double tstop, AfterStepFunc &afterStep_user){
 	auto after_step = [this, afterStep_user](double t, std::vector<double>::iterator S){
 		//cout << "After step: t = " << t << "\n";
 		copyStateToCohorts(S);
-		for (int k = 0; k<species_vec.size(); ++k) preComputeSpecies(k,t);	// FIXME: Check if this is needed
+		//for (int k = 0; k<species_vec.size(); ++k) preComputeSpecies(k,t);	// FIXME: Check if this is needed
 		//for (auto spp : species_vec) spp->afterStep(t, env);
 		afterStep_user(t);
 	};
