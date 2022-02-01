@@ -78,7 +78,7 @@ class TestModel : public Plant{
 		return pow(1-x,2)/pow(1+x,4) + (1-x)/pow(1+x,3);
 	}
 	
-	double preCompute(double x, double t, void * _env){
+	void preCompute(double x, double t, void * _env){
 		Environment* env = (Environment*)_env;
 	
 		// growth rate
@@ -97,10 +97,6 @@ class TestModel : public Plant{
 
 	}
 
-	void afterStep(double x, double t, void * _env){
-		//std::cout << "   After step in cohort\n";
-	}
-	
 	double growthRate(double x, double t, void * _env){
 		return g;
 	}

@@ -327,13 +327,6 @@ void Species<Model>::getExtraRates(std::vector<double>::iterator &it){
 
 
 template <class Model>
-void Species<Model>::afterStep(double t, void * env){
-	for (auto& c : cohorts) c.afterStep(c.x, t, env);
-	boundaryCohort.afterStep(boundaryCohort.x, t, env);
-}
-
-
-template <class Model>
 void Species<Model>::addCohort(){
 	cohorts.push_back(boundaryCohort);
 	++J;
