@@ -27,7 +27,7 @@ double Energy(const vector<double>& y){
 
 
 int main(){
-	
+   try{
    for (auto str : {"lsoda", "rk45ck"}){
  
 
@@ -75,6 +75,11 @@ int main(){
 			cout << "Number of fn evaluations " << str << " = " << stepper.get_fn_evals() << endl;  
 	  //if (rk.size() != 2) return 1;
 	  
+	}
+	}
+	catch(std::exception &e){
+		cout << "Failed with error: " << e.what() << "\n";
+		return 1;
 	}
 	
   return 0;

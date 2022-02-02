@@ -15,8 +15,34 @@ INC_PATH := -I./include
 LIB_PATH := -L./lib 
 
 # flags
-CPPFLAGS = -O3 -g -pg -std=c++11 -Wall -Wextra -Wreturn-type -Wno-unused-parameter -Wno-sign-compare -Wno-unused-variable -Wno-unused-but-set-variable
+CPPFLAGS = -O3 -g -pg -std=c++11 -Wall -Wextra -pedantic
 LDFLAGS =  -g -pg
+
+#CPPFLAGS +=   \
+#-pedantic-errors -Wcast-align \
+#-Wcast-qual -Wconversion \
+#-Wdisabled-optimization \
+#-Wfloat-equal -Wformat=2 \
+#-Wformat-nonliteral -Wformat-security  \
+#-Wformat-y2k \
+#-Wimplicit  -Wimport  -Winit-self  -Winline \
+#-Winvalid-pch   \
+#-Wlong-long \
+#-Wmissing-field-initializers -Wmissing-format-attribute   \
+#-Wmissing-include-dirs -Wmissing-noreturn \
+#-Wpacked  -Wpadded -Wpointer-arith \
+#-Wredundant-decls \
+#-Wshadow -Wstack-protector \
+#-Wstrict-aliasing=2 -Wswitch-default \
+#-Wswitch-enum \
+#-Wunreachable-code -Wunused \
+#-Wunused-parameter \
+#-Wvariadic-macros \
+#-Wwrite-strings 
+
+CPPFLAGS += -Wno-unused-variable -Wno-sign-compare \
+-Wno-unused-parameter
+# -Wno-unused-but-set-variable
 
 # libs
 LIBS = 	 #-lgsl -lgslcblas 	# additional libs

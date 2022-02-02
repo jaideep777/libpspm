@@ -7,7 +7,7 @@
 #include <string>
 #include <vector>
 #include <iostream>
-#include <cstdlib>
+#include <exception>
 
 enum SolverType {ODE_RKCK45, ODE_LSODA};
 
@@ -28,8 +28,7 @@ class OdeSolver{
 		if (method == "rk45ck") type = ODE_RKCK45;
 		else if (method == "lsoda") type = ODE_LSODA;
 		else {
-			std::cout << "Fatal: Unknown ODE method " << method << "\n";
-			exit(1);
+			throw std::runtime_error("Fatal: Unknown ODE method " + method); //exit(1);
 		}
 		reset(t_start, rtol, atol);
 	}
@@ -91,7 +90,8 @@ class OdeSolver{
 
 	int get_fn_evals(){
 		if      (type == ODE_RKCK45) return static_cast<RKCK45*>(solver)->get_fn_evals();	
-		else if (type == ODE_LSODA)  return nfe_cumm;	
+		else if (type == ODE_LSODA)  return nfe_cumm;
+		else return -1;
 	}
 
 };

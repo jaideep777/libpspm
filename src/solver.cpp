@@ -88,11 +88,12 @@ void Solver::addSpecies(std::vector<double> xbreaks, Species_Base* s, int n_extr
 	}
 
 	int J;
-	if (method == SOLVER_FMU)  J = xbreaks.size()-1;	
-	if (method == SOLVER_IFMU) J = xbreaks.size()-1;	
-	if (method == SOLVER_MMU)  J = xbreaks.size()-1;  
-	if (method == SOLVER_CM )  J = xbreaks.size();
-	if (method == SOLVER_EBT)  J = xbreaks.size();
+	if      (method == SOLVER_FMU)  J = xbreaks.size()-1;	
+	else if (method == SOLVER_IFMU) J = xbreaks.size()-1;	
+	else if (method == SOLVER_MMU)  J = xbreaks.size()-1;  
+	else if (method == SOLVER_CM )  J = xbreaks.size();
+	else if (method == SOLVER_EBT)  J = xbreaks.size();
+	else    throw std::runtime_error("Unsupported method");
 
 	s->x = xbreaks;
 	s->resize(J);
@@ -464,25 +465,26 @@ void Solver::step_to(double tstop){
 void Solver::preComputeSpecies(int k, double t){
 	auto spp = species_vec[k];
 
-	double pi0, N0;
-	// backup and real-ize pi0-cohort
 	if (method == SOLVER_EBT){ // for EBT, we need to pi0-cohort too.
+		// backup and real-ize pi0-cohort
 		// get pi0, N0 from last cohort
-		pi0  =  spp->getX(spp->J-1);
-		N0   =  spp->getU(spp->J-1);
+		double pi0  =  spp->getX(spp->J-1);
+		double N0   =  spp->getU(spp->J-1);
 		
 		// update pi0-cohort with actual x0 value
 		double x0 = spp->xb + pi0/(N0+1e-12);
 		spp->setX(spp->J-1, x0);
-	}
 	
-	// precompute cohorts
-	spp->preComputeAllCohorts(t,env);
+		// precompute cohorts
+		spp->preComputeAllCohorts(t,env);
 
-	// restore pi0-cohort
-	if (method == SOLVER_EBT){ // for EBT, we need to pi0-cohort too.
+		// restore pi0-cohort
 		spp->setX(spp->J-1, pi0);
 	}
+	else{
+		spp->preComputeAllCohorts(t,env);
+	}
+	
 }
 
 

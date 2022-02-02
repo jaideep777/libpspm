@@ -27,7 +27,7 @@ int main(){
 	ofstream fout("cm_testmodel.txt");
 
 	fout << S.current_time << "\t" << 0 << "\t";
-	for (auto y : S.state) fout << y << "\t"; fout << "\n";
+	for (auto y : S.state){ fout << y << "\t";} fout << "\n";
 	for (double t=0.05; t <= 8; t=t+0.05) {
 		S.step_to(t);
 		fout << S.current_time << "\t" << S.u0_out(t)[0] << "\t";

@@ -136,10 +136,11 @@ double Solver::integrate_wudx_above(wFunc w, double t, double xlow, int species_
 		//return I;
 	}
 	
-	//else{
+	else{
+		throw std::runtime_error("Unsupported solver method");
 		//std::cout << "Only CM is implemented\n";
 		//return 0;
-	//}
+	}
 }
 
 
@@ -219,8 +220,7 @@ double Solver::integrate_x(wFunc w, double t, int species_id){
 	}
 	
 	else{
-		std::cout << "Only FMU and MMU are implemented\n";
-		return 0;
+		throw std::runtime_error("Unsupported solver method");
 	}
 }
 
