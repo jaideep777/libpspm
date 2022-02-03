@@ -61,7 +61,8 @@ class OdeSolver{
 		if (t_stop == t || y.size() == 0) return;
 		
 		if (type == ODE_RKCK45){
-			(static_cast<RKCK45*>(solver))->Step_to(t_stop, t, y, derivs, after_step);
+			RKCK45 * sol = static_cast<RKCK45*>(solver);
+			sol->Step_to(t_stop, t, y, derivs, after_step);
 		}
 		else if (type == ODE_LSODA ){
 			LSODA* sol = static_cast<LSODA*>(solver);

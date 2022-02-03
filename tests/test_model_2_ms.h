@@ -1,7 +1,7 @@
 #ifndef __PSPM_TEST_TEST_TEST_MODEL_H_
 #define __PSPM_TEST_TEST_TEST_MODEL_H_
 
-
+#include <individual_base.h>
 
 class Environment : public EnvironmentBase{
 	
@@ -65,7 +65,7 @@ class Plant{
 
 
 
-class TestModel : public Plant{
+class TestModel : public Plant, public Individual_Base{
 	public:
 	double sc = 10;
 
