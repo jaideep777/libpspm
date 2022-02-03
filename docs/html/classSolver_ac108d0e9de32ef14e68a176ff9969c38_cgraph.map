@@ -1,0 +1,5 @@
+<map id="Solver::copyCohortsToState" name="Solver::copyCohortsToState">
+<area shape="rect" id="node2" href="$classSpecies__Base.html#ad412522fc071525a19f95609880b20ff" title="Species_Base::getU" alt="" coords="263,5,405,32"/>
+<area shape="rect" id="node3" href="$classSpecies__Base.html#aa6880c6f5c8ff125cab4d1195dedfb13" title="Species_Base::getX" alt="" coords="263,56,405,83"/>
+<area shape="rect" id="node4" href="$classSpecies__Base.html#a096db78d3a8d871b594f8a23e44f1873" title="Species_Base::copyCohorts\lExtraToState" alt="" coords="240,107,428,149"/>
+</map>

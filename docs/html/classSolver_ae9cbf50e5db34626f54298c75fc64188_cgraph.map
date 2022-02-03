@@ -1,0 +1,10 @@
+<map id="Solver::newborns_out" name="Solver::newborns_out">
+<area shape="rect" id="node2" href="$classEnvironmentBase.html#ae8ee835be256735745ed1c68161b0f17" title="EnvironmentBase::computeEnv" alt="" coords="201,5,408,32"/>
+<area shape="rect" id="node3" href="$classSolver.html#af574bcfab58cef5440c32fa87b027e7d" title="Solver::preComputeSpecies" alt="" coords="212,56,397,83"/>
+<area shape="rect" id="node4" href="$classSolver.html#aa5f2d1d48f6b4db83dbb257325924d2c" title="Solver::calcSpeciesBirthFlux" alt="" coords="209,107,400,133"/>
+<area shape="rect" id="node5" href="$classSolver.html#a2a6ca7647a4cde1195789132f3873c0b" title="Solver::integrate_x" alt="" coords="456,107,587,133"/>
+<area shape="rect" id="node6" href="$classSpecies__Base.html#ad412522fc071525a19f95609880b20ff" title="Species_Base::getU" alt="" coords="667,31,809,57"/>
+<area shape="rect" id="node7" href="$classSpecies__Base.html#aa6880c6f5c8ff125cab4d1195dedfb13" title="Species_Base::getX" alt="" coords="667,81,809,108"/>
+<area shape="rect" id="node8" href="$classSpecies__Base.html#a86a04ae53b3f25c4e90b01a8eaed3bfd" title="Species_Base::setX" alt="" coords="667,132,809,159"/>
+<area shape="rect" id="node9" href="$classSpecies__Base.html#a191930a24322d8df293e759943d156fa" title="Species_Base::get_boundary_u" alt="" coords="635,183,841,209"/>
+</map>

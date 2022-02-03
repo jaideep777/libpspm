@@ -1,0 +1,7 @@
+<map id="Species_Base::get_boundary_u" name="Species_Base::get_boundary_u">
+<area shape="rect" id="node2" href="$classSolver.html#a9172d0d2dc6399ada494ef23020943d5" title="Solver::integrate_wudx\l_above" alt="" coords="260,5,415,47"/>
+<area shape="rect" id="node3" href="$classSolver.html#a2a6ca7647a4cde1195789132f3873c0b" title="Solver::integrate_x" alt="" coords="272,71,403,98"/>
+<area shape="rect" id="node4" href="$classSolver.html#aa5f2d1d48f6b4db83dbb257325924d2c" title="Solver::calcSpeciesBirthFlux" alt="" coords="463,71,653,98"/>
+<area shape="rect" id="node5" href="$classSolver.html#ae9cbf50e5db34626f54298c75fc64188" title="Solver::newborns_out" alt="" coords="701,71,849,98"/>
+<area shape="rect" id="node6" href="$classSolver.html#a40c9ebb8d585e07d8f65c4ac5ada6420" title="Solver::u0_out" alt="" coords="897,71,1004,98"/>
+</map>

@@ -1,0 +1,5 @@
+<map id="Solver::integrate_x" name="Solver::integrate_x">
+<area shape="rect" id="node2" href="$classSolver.html#aa5f2d1d48f6b4db83dbb257325924d2c" title="Solver::calcSpeciesBirthFlux" alt="" coords="184,5,375,32"/>
+<area shape="rect" id="node3" href="$classSolver.html#ae9cbf50e5db34626f54298c75fc64188" title="Solver::newborns_out" alt="" coords="423,5,571,32"/>
+<area shape="rect" id="node4" href="$classSolver.html#a40c9ebb8d585e07d8f65c4ac5ada6420" title="Solver::u0_out" alt="" coords="619,5,725,32"/>
+</map>

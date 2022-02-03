@@ -1,0 +1,12 @@
+<map id="include/solver.h" name="include/solver.h">
+<area shape="rect" id="node6" href="$environment__base_8h.html" title="environment_base.h" alt="" coords="367,80,506,107"/>
+<area shape="rect" id="node7" href="$species_8h.html" title="species.h" alt="" coords="143,80,221,107"/>
+<area shape="rect" id="node13" href="$ode__solver_8h.html" title="ode_solver.h" alt="" coords="581,80,677,107"/>
+<area shape="rect" id="node21" href="$solver_8tpp.html" title="../src/solver.tpp" alt="" coords="701,80,815,107"/>
+<area shape="rect" id="node22" href="$size__integrals_8tpp.html" title="../src/size_integrals.tpp" alt="" coords="839,80,997,107"/>
+<area shape="rect" id="node8" href="$cohort_8h.html" title="cohort.h" alt="" coords="253,229,322,256"/>
+<area shape="rect" id="node10" href="$species_8tpp.html" title="../src/species.tpp" alt="" coords="69,155,191,181"/>
+<area shape="rect" id="node14" href="$rkck45_8h.html" title="rkck45.h" alt="" coords="562,155,634,181"/>
+<area shape="rect" id="node15" href="$lsoda_8h.html" title="lsoda.h" alt="" coords="658,155,722,181"/>
+<area shape="rect" id="node19" href="$lsoda_8tpp.html" title="../src/lsoda.tpp" alt="" coords="539,229,649,256"/>
+</map>
