@@ -60,9 +60,8 @@ class Species_Base{
 
 	public: // public functions
 
+	virtual ~Species_Base() = 0;
 	
-	//IteratorSet<std::vector<double>::iterator> get_iterators(std::vector<double> &v);
-	//std::vector<std::string> get_varnames();
 	int xsize();
 	int size();
 
@@ -131,6 +130,7 @@ class Species : public Species_Base{
 	// TODO: make these virtual?
 	Species(std::vector<double> breaks = std::vector<double>());
 	Species(Model M);
+	
 	void resize(int _J);
 	double get_maxSize();
 	

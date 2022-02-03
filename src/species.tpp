@@ -8,7 +8,10 @@ void Species_Base::addCohort(T bc){
 	(dynamic_cast<Species<T>>(*this)).addCohort(bc);
 }
 
+
 // *************** Species<Model> ******************
+
+
 
 template<class Model>
 void Species<Model>::resize(int _J){
