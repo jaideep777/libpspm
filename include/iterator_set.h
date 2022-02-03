@@ -40,7 +40,7 @@ class IteratorSet{
 	IteratorSet(Iterator _first, std::vector<std::string> varnames, int _size, std::vector<int> spacing, std::vector<int> _strides){
 		first = _first;
 		size = _size;
-		Iterator temp = first;
+		//Iterator temp = first;
 		names = varnames;
 		strides = _strides;
 

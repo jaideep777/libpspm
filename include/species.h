@@ -60,9 +60,8 @@ class Species_Base{
 
 	public: // public functions
 
+	virtual ~Species_Base() = 0;
 	
-	//IteratorSet<std::vector<double>::iterator> get_iterators(std::vector<double> &v);
-	//std::vector<std::string> get_varnames();
 	int xsize();
 	int size();
 
@@ -89,6 +88,7 @@ class Species_Base{
 	virtual void copyExtraStateToCohorts(std::vector<double>::iterator &it) = 0;
 	virtual void copyCohortsExtraToState(std::vector<double>::iterator &it) = 0;
 	
+	virtual double establishmentProbability(double t, void * env) = 0;
 	virtual double get_u0(double t, void * env) = 0;
 	virtual double get_boundary_u() = 0;
 
@@ -130,6 +130,7 @@ class Species : public Species_Base{
 	// TODO: make these virtual?
 	Species(std::vector<double> breaks = std::vector<double>());
 	Species(Model M);
+	
 	void resize(int _J);
 	double get_maxSize();
 	
@@ -150,6 +151,7 @@ class Species : public Species_Base{
 	void copyExtraStateToCohorts(std::vector<double>::iterator &it);
 	void copyCohortsExtraToState(std::vector<double>::iterator &it);
 
+	double establishmentProbability(double t, void * env);
 	double get_u0(double t, void * env);
 	double get_boundary_u();
 	

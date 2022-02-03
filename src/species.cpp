@@ -1,6 +1,10 @@
 #include <species.h>
 
 
+Species_Base::~Species_Base(){
+}
+
+
 //template<class Model>
 //int Species<Model>::addVar(std::string name, int stride, int offset){
 //    varnames.push_back(name);

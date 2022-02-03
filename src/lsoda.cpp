@@ -236,26 +236,6 @@ void LSODA::terminate2(vector<double> &y, double *t)
     return;
 }
 
-/*
-   The following block handles all successful returns from lsoda.
-   If itask != 1, y is loaded from yh_ and t is set accordingly.
-   *Istate is set to 2, the illegal input counter is zeroed, and the
-   optional outputs are loaded into the work arrays before returning.
-*/
-
-void LSODA::successreturn(
-    vector<double> &y, double *t, int itask, int ihit, double tcrit, int *istate)
-{
-    for(size_t i = 1; i <= n; i++)
-        y[i] = yh_[1][i];
-    *t = tn_;
-    if(itask == 4 || itask == 5)
-        if(ihit)
-            *t = tcrit;
-    *istate = 2;
-    illin   = 0;
-}
-
 
 
 void LSODA::ewset(const vector<double> &ycur)

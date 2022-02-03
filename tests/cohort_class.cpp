@@ -45,6 +45,10 @@ class Plant {
 	void preCompute(double x, double t, void * env){
 	}
 
+	void afterStep(double x, double t, void * _env){
+		//std::cout << "   After step in cohort\n";
+	}
+
 	double growthRate(double x, double t, void * env){
 		cout << "in g: " << x << " " << t << " " << ((LightEnv*)env)->E << "\n";
 		return x*((LightEnv*)env)->E;
@@ -111,6 +115,10 @@ class Insect {
 		f = x*100+t;
 		g = x*50*t;
 		m = 0.1;
+	}
+
+	void afterStep(double x, double t, void * _env){
+		//std::cout << "   After step in cohort\n";
 	}
 
 	vector<double>::iterator set_state(vector<double>::iterator &it){

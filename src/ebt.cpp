@@ -26,7 +26,7 @@ void Solver::calcRates_EBT(double t, vector<double>::iterator S, vector<double>:
 
 		double birthFlux;
 		if (spp->birth_flux_in < 0){	
-			birthFlux = calcSpeciesBirthFlux(s,t);
+			birthFlux = calcSpeciesBirthFlux(s,t) * spp->establishmentProbability(t, env);
 			//cout << "birthFlux = " << birthFlux << "\n";
 			//birthFlux = integrate_x([this, s](int i, double t){
 												//return species_vec[s]->birthRate(i,species_vec[s]->getX(i),t, env);

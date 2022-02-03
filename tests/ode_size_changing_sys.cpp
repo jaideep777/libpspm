@@ -11,6 +11,10 @@ void sys(double x, vector<double>::iterator _y, vector<double>::iterator _dydx, 
   for (int i=0; i<nsys; ++i) dydx[i] = 20*exp(-y[i]/1);
 }
 
+void after_step(double x, vector<double>::iterator _y){
+    double* y = &*_y;
+	cout << "After step: t = " << x << "\n";
+}
 
 
 int main(){
@@ -33,7 +37,7 @@ int main(){
 		for (auto yy: y) fout << yy << "\t"; //[0]<<" "<<y[1]<<" | "<<y[0]-xmax*sin(ti)<<" | "<<y[1] - xmax*cos(ti)<< " | "<< Energy(y)<<endl;
 		fout << "\n";
 		
-		stepper.step_to(t, ti, y,  sys);
+		stepper.step_to(t, ti, y,  sys, after_step);
 		
 		if (abs(t-int(t*1.00000001)) < 1e-6){ // insert cohort at integer t
 			//cout << " insert.";
@@ -46,7 +50,7 @@ int main(){
 	  }
 	  fout.close();
 	 
-		cout << "Number of fn evaluations = " << stepper.get_fn_evals() << endl;  
+		cout << "Number of fn evaluations " << str << " = " << stepper.get_fn_evals() << endl;  
 	  //if (rk.size() != 2) return 1;
   }
 
