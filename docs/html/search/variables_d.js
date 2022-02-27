@@ -1,9 +1,25 @@
 var searchData=
 [
-  ['param',['param',['../classLSODA.html#ada74753b36c3dadef600b8daf8d59650',1,'LSODA']]],
-  ['pdest',['pdest',['../classLSODA.html#add3023907688af489b97b494246a1072',1,'LSODA']]],
-  ['pdlast',['pdlast',['../classLSODA.html#abcde4935fa152a294c70fff854102816',1,'LSODA']]],
-  ['pdnorm',['pdnorm',['../classLSODA.html#a7d6f8f94e8fb7d0fe9bd9af53e17ed20',1,'LSODA']]],
-  ['pgrow',['PGROW',['../classRKCK45.html#a1c0c63f42dd836183032301d65c9d4e9',1,'RKCK45']]],
-  ['pshrnk',['PSHRNK',['../classRKCK45.html#a2049631f359a96f3c05ae4cbf70c19bb',1,'RKCK45']]]
+  ['n',['n',['../classLSODA.html#a05f50b8f97aa0155da712fce56079fe4',1,'LSODA']]],
+  ['n_5fextra_5fstatevars',['n_extra_statevars',['../classSpecies__Base.html#aa69fc5e02b19d76902bbf7de18d257de',1,'Species_Base']]],
+  ['n_5fstatevars_5finternal',['n_statevars_internal',['../classSolver.html#a99a6593acd2444b2a8422840bb7133a1',1,'Solver']]],
+  ['n_5fstatevars_5fsystem',['n_statevars_system',['../classSolver.html#a17a2cbcb93b71c98bcbf084ecff09a8a',1,'Solver']]],
+  ['names',['names',['../classIteratorSet.html#a36932cfe19119e06772279acbba148b2',1,'IteratorSet']]],
+  ['nbad',['nbad',['../classVRungeKutta.html#a434b64a054bb94b3633094576ed60b9e',1,'VRungeKutta::nbad()'],['../classRKCK45.html#a68044e8dc5867d8a728499fe7ffb50de',1,'RKCK45::nbad()']]],
+  ['nf',['nf',['../classSpecies__Base.html#a45c99329477b974440e1359a36c1e21e',1,'Species_Base']]],
+  ['nfe',['nfe',['../classLSODA.html#af4b3fe3f80b35509ef5769b34c6b22ee',1,'LSODA::nfe()'],['../classRKCK45.html#a86c8c3d2acb1f525a0eec123792b67b3',1,'RKCK45::nfe()']]],
+  ['nfe_5fcumm',['nfe_cumm',['../classOdeSolver.html#a3ae8df3a088e4e573d10e8d5fad3c3a2',1,'OdeSolver']]],
+  ['ng',['ng',['../classSpecies__Base.html#a7fabaf886691242e743af775e20a036d',1,'Species_Base']]],
+  ['nhnil',['nhnil',['../classLSODA.html#a774a5a60c368b1fe2519d7cc20eff64e',1,'LSODA']]],
+  ['nje',['nje',['../classLSODA.html#ae5fb71da43d6b83b5e3c0152efe7a65a',1,'LSODA']]],
+  ['nm',['nm',['../classSpecies__Base.html#ac30a94b817a4f371ca24a9c379927774',1,'Species_Base']]],
+  ['nok',['nok',['../classVRungeKutta.html#ad4551bc256afffaa89669682e308797d',1,'VRungeKutta::nok()'],['../classRKCK45.html#a4d9a17b0d4bb0bf58ed9bbde9ec7a86a',1,'RKCK45::nok()']]],
+  ['np',['np',['../classSpecies__Base.html#a5ad4e341acd80808bda657d073f95d0d',1,'Species_Base']]],
+  ['nq',['nq',['../classLSODA.html#a9b20353821107b604f5a265f8bda32f3',1,'LSODA']]],
+  ['nqu',['nqu',['../classLSODA.html#a8239a9d50b645959aaad803925fc830f',1,'LSODA']]],
+  ['nslast',['nslast',['../classLSODA.html#a7e2d8c648d4c3d6fb8655556ae9471f4',1,'LSODA']]],
+  ['nslp',['nslp',['../classLSODA.html#a5be022e5e81ff675d5696215a75dfd46',1,'LSODA']]],
+  ['nst',['nst',['../classLSODA.html#adce89db9d5111148f4e422acdd541be2',1,'LSODA']]],
+  ['ntrep',['ntrep',['../classLSODA.html#a831d6ce70c1eb95f38cd991489f8fee2',1,'LSODA']]],
+  ['nyh',['nyh',['../classLSODA.html#a20849bf61e85211387e1eb2216d273ca',1,'LSODA']]]
 ];

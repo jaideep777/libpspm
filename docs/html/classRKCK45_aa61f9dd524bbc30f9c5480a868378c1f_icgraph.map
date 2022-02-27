@@ -1,9 +1,0 @@
-<map id="RKCK45::RKTry" name="RKCK45::RKTry">
-<area shape="rect" id="node2" href="$classRKCK45.html#a118a0972fa102cd12f85f6f5cadbf416" title="RKCK45::get_fn_evals" alt="" coords="349,5,505,32"/>
-<area shape="rect" id="node3" href="$classRKCK45.html#adfa11ff7b8da1b21aea9e457ac4e9d1c" title="RKCK45::RKStep" alt="" coords="173,56,301,83"/>
-<area shape="rect" id="node4" href="$classRKCK45.html#a20415037da7046ff94afadbf927c42d3" title="RKCK45::Step" alt="" coords="373,56,482,83"/>
-<area shape="rect" id="node5" href="$classRKCK45.html#a91b5ae2e8a9dadc117e6412f054afa59" title="RKCK45::Step_to" alt="" coords="553,56,680,83"/>
-<area shape="rect" id="node6" href="$classOdeSolver.html#a77d9f02ed28d5515366e6be08560f35a" title="OdeSolver::step_to" alt="" coords="728,56,863,83"/>
-<area shape="rect" id="node7" href="$classSolver.html#af4c8f6565df94ed6a058a224196b9c2b" title="Solver::step_to" alt="" coords="911,56,1021,83"/>
-<area shape="rect" id="node8" href="$classSolver.html#a06cf82d0a99490279ab20d2ad6b876db" title="Solver::step_to" alt="" coords="1069,56,1180,83"/>
-</map>

@@ -1,10 +1,8 @@
 var searchData=
 [
-  ['rates',['rates',['../classSolver.html#a46b0abd950267593b77e0aa092f1a8d0',1,'Solver']]],
-  ['ratio',['ratio',['../classLSODA.html#a5c4585a664779e7995c62efd31f51635',1,'LSODA']]],
-  ['rc',['rc',['../classLSODA.html#ad15a80d0f3aed9d1b99024ed429e8595',1,'LSODA']]],
-  ['rel_5ftol',['rel_tol',['../classOdeSolver.html#a5a59aa04f298ffd31cc3ea1d7490cdb1',1,'OdeSolver']]],
-  ['remove',['remove',['../classCohort.html#abaa1ce0190380d622ed3a36d951519ed',1,'Cohort']]],
-  ['rmax',['rmax',['../classLSODA.html#acefae6a291211a6bcb8affcc95b2150c',1,'LSODA']]],
-  ['rtol_5f',['rtol_',['../classLSODA.html#a01336e7fabd50e37e331316badf4f4ee',1,'LSODA']]]
+  ['ode_5feps',['ode_eps',['../classSolver.html#ad95c22cf47405f40232dc4178a91a522',1,'Solver']]],
+  ['ode_5fifmu_5fstepsize',['ode_ifmu_stepsize',['../classSolver.html#ac64ca0695e9c0bb501e7cd6be8c7fed5',1,'Solver']]],
+  ['ode_5finitial_5fstep_5fsize',['ode_initial_step_size',['../classSolver.html#afcf1cfeb2d095551fc2bc030f7ab5a4d',1,'Solver']]],
+  ['ode_5frk4_5fstepsize',['ode_rk4_stepsize',['../classSolver.html#a325f7c6744ce4cbb2066af84da378884',1,'Solver']]],
+  ['odestepper',['odeStepper',['../classSolver.html#a7dff59b3d59a6cf29e06e06a4e996144',1,'Solver']]]
 ];

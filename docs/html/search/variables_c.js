@@ -1,8 +1,19 @@
 var searchData=
 [
-  ['ode_5feps',['ode_eps',['../classSolver.html#ad95c22cf47405f40232dc4178a91a522',1,'Solver']]],
-  ['ode_5fifmu_5fstepsize',['ode_ifmu_stepsize',['../classSolver.html#ac64ca0695e9c0bb501e7cd6be8c7fed5',1,'Solver']]],
-  ['ode_5finitial_5fstep_5fsize',['ode_initial_step_size',['../classSolver.html#afcf1cfeb2d095551fc2bc030f7ab5a4d',1,'Solver']]],
-  ['ode_5frk4_5fstepsize',['ode_rk4_stepsize',['../classSolver.html#a325f7c6744ce4cbb2066af84da378884',1,'Solver']]],
-  ['odestepper',['odeStepper',['../classSolver.html#a7dff59b3d59a6cf29e06e06a4e996144',1,'Solver']]]
+  ['max_5fcohorts',['max_cohorts',['../classSolver.html#a208f8b006e6accf958268bf0fc903b9c',1,'Solver']]],
+  ['maxcor',['maxcor',['../classLSODA.html#a11974b6fbf510d5e29ea2e75dc742941',1,'LSODA']]],
+  ['maxord',['maxord',['../classLSODA.html#afb2feae4ffb2ee5975a545d7f044cc9b',1,'LSODA']]],
+  ['meth_5f',['meth_',['../classLSODA.html#a2a1d1690d1e2324bf0ce9003c743ded7',1,'LSODA']]],
+  ['method',['method',['../classSolver.html#aa32df3a8111011684ee20f6e0cf8bdd3',1,'Solver']]],
+  ['miter',['miter',['../classLSODA.html#a1d4e87c54ca65af467a16a9eae6d591d',1,'LSODA']]],
+  ['ml',['ml',['../classLSODA.html#ac39fd36e1c6076e2a5d7fa397cd8c8e3',1,'LSODA']]],
+  ['mord',['mord',['../classLSODA.html#a4886fd30cda453dac3516116250e34f3',1,'LSODA']]],
+  ['msbp',['msbp',['../classLSODA.html#a4b42cc5f6084610ac4ee40044d4c8629',1,'LSODA']]],
+  ['mu',['mu',['../classLSODA.html#a517cd075e203416fbc7bcd28e8928a11',1,'LSODA']]],
+  ['mused',['mused',['../classLSODA.html#abf84ce80e5581be3ceaa7085851015ea',1,'LSODA']]],
+  ['mxhnil',['mxhnil',['../classLSODA.html#a28dc476f9309ca8f859e951177b53fe0',1,'LSODA']]],
+  ['mxncf',['mxncf',['../classLSODA.html#ab77ec578cd9727a690c14ea30cdc94cf',1,'LSODA']]],
+  ['mxordn',['mxordn',['../classLSODA.html#aee092eec3c2a0f76064eaed35ccddbbe',1,'LSODA']]],
+  ['mxords',['mxords',['../classLSODA.html#a8a2193d85bbfd1c292f04009e14c7142',1,'LSODA']]],
+  ['mxstep',['mxstep',['../classLSODA.html#ab6d71e610573fb27460d0b63643ed3a2',1,'LSODA']]]
 ];

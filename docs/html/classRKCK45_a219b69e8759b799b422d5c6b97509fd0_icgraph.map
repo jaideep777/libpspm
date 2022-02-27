@@ -1,7 +1,0 @@
-<map id="RKCK45::resize" name="RKCK45::resize">
-<area shape="rect" id="node2" href="$classRKCK45.html#a20415037da7046ff94afadbf927c42d3" title="RKCK45::Step" alt="" coords="171,5,280,32"/>
-<area shape="rect" id="node3" href="$classRKCK45.html#a91b5ae2e8a9dadc117e6412f054afa59" title="RKCK45::Step_to" alt="" coords="328,5,455,32"/>
-<area shape="rect" id="node4" href="$classOdeSolver.html#a77d9f02ed28d5515366e6be08560f35a" title="OdeSolver::step_to" alt="" coords="503,5,637,32"/>
-<area shape="rect" id="node5" href="$classSolver.html#af4c8f6565df94ed6a058a224196b9c2b" title="Solver::step_to" alt="" coords="685,5,796,32"/>
-<area shape="rect" id="node6" href="$classSolver.html#a06cf82d0a99490279ab20d2ad6b876db" title="Solver::step_to" alt="" coords="844,5,955,32"/>
-</map>

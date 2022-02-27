@@ -4,5 +4,5 @@ var searchData=
   ['xb',['xb',['../classSpecies__Base.html#ae2b77d4c8ab8d40ff93b75bc8168f1dd',1,'Species_Base']]],
   ['xmean',['xmean',['../structpoint.html#a635ce990258fc078ca1e4cecaa6315cc',1,'point']]],
   ['xsize',['xsize',['../classSpecies__Base.html#a8888ccafcd9ac6a921bc71a12ccb98b2',1,'Species_Base']]],
-  ['xt',['xt',['../classRKCK45.html#aaf3b5d00ab429ba1917a40e0f05bb272',1,'RKCK45']]]
+  ['xt',['xt',['../classVRungeKutta.html#a56bdd1f1a49bd414b9a1bcb661e17759',1,'VRungeKutta::xt()'],['../classRKCK45.html#ac2c653715d6aab001634ceb5cf812646',1,'RKCK45::xt()']]]
 ];

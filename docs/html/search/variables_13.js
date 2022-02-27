@@ -1,7 +1,6 @@
 var searchData=
 [
-  ['x',['X',['../classSpecies__Base.html#ad05abcae28b870403bfcb774c660ba47',1,'Species_Base::X()'],['../classCohort.html#a2eb820df167a3841eb71d53d63826999',1,'Cohort::x()'],['../classSpecies__Base.html#a49e7790c468580f9405625c2d2a9febf',1,'Species_Base::x()']]],
-  ['xb',['xb',['../classSpecies__Base.html#ae2b77d4c8ab8d40ff93b75bc8168f1dd',1,'Species_Base']]],
-  ['xmean',['xmean',['../structpoint.html#a635ce990258fc078ca1e4cecaa6315cc',1,'point']]],
-  ['xt',['xt',['../classRKCK45.html#aaf3b5d00ab429ba1917a40e0f05bb272',1,'RKCK45']]]
+  ['u',['u',['../classCohort.html#a59ef45c3138e1d1eee01161eeb98714e',1,'Cohort']]],
+  ['update_5fcohorts',['update_cohorts',['../classSolver.html#a18f44ba1ab572e234bbe44078e6f2ed1',1,'Solver']]],
+  ['use_5flog_5fdensities',['use_log_densities',['../classSolver.html#a2457dacf25a510fcadbee30d8f470257',1,'Solver']]]
 ];

@@ -1,8 +1,10 @@
 var searchData=
 [
-  ['t_5fstop',['t_stop',['../classRKCK45.html#aeee2e3db70889c1e43855880ce378d18',1,'RKCK45']]],
-  ['tesco',['tesco',['../classLSODA.html#a94c1cc02ac4e5eab80947872312fc5c8',1,'LSODA']]],
-  ['tn_5f',['tn_',['../classLSODA.html#a2fd3e1d3b06c98d5b437d4bcbdf9b223',1,'LSODA']]],
-  ['tsw',['tsw',['../classLSODA.html#a579ed68c0766ab587f85bdfce6e8db20',1,'LSODA']]],
-  ['type',['type',['../classOdeSolver.html#a2d273ce7a633666d83abe9ab6770fdfd',1,'OdeSolver']]]
+  ['rates',['rates',['../classSolver.html#a46b0abd950267593b77e0aa092f1a8d0',1,'Solver']]],
+  ['ratio',['ratio',['../classLSODA.html#a5c4585a664779e7995c62efd31f51635',1,'LSODA']]],
+  ['rc',['rc',['../classLSODA.html#ad15a80d0f3aed9d1b99024ed429e8595',1,'LSODA']]],
+  ['rel_5ftol',['rel_tol',['../classODE__Solver.html#ac0b1a63ec3253b895bb71fcc726d5910',1,'ODE_Solver::rel_tol()'],['../classOdeSolver.html#a5a59aa04f298ffd31cc3ea1d7490cdb1',1,'OdeSolver::rel_tol()']]],
+  ['remove',['remove',['../classCohort.html#abaa1ce0190380d622ed3a36d951519ed',1,'Cohort']]],
+  ['rmax',['rmax',['../classLSODA.html#acefae6a291211a6bcb8affcc95b2150c',1,'LSODA']]],
+  ['rtol_5f',['rtol_',['../classLSODA.html#a01336e7fabd50e37e331316badf4f4ee',1,'LSODA']]]
 ];
