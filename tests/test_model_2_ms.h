@@ -17,7 +17,7 @@ class Environment : public EnvironmentBase{
 	// In such a case, the solver's SubdivisionSpline can be ussed
 	// Note: The state vector in the solver will not be updated until the RK step is completed. 
 	// Hence, explicitly pass the state to this function.
-	void computeEnv(double t, Solver * S){
+	void computeEnv(double t, Solver * S, std::vector<double>::iterator s, std::vector<double>::iterator dsdt){
 		//             _xm 
 		// Calculate _/ w(z,t)u(z,t)dz
 		//         xb

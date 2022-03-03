@@ -28,6 +28,7 @@ int main(){
 		S.step_to(t);
 		fout << S.current_time << "\t" << S.newborns_out()[0] << "\t";
 		//cout << S.current_time << " " [><< S.u0_out()<] << "\n";
+		
 		for (auto y : S.state) fout << y << "\t";
 		fout << endl;
 	}
