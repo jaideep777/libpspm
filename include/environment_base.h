@@ -5,6 +5,7 @@ class Solver;
 
 class EnvironmentBase{
 	public:
+	virtual ~EnvironmentBase() = 0;
 	virtual void computeEnv(double t, Solver * sol) = 0;
 
 };
