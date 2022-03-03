@@ -28,7 +28,7 @@ int main(){
 	
 	ofstream fout("ebt_Daphnia.txt");
 
-	for (double t=0.05; t <= 100; t=t+0.05) {
+	for (double t=0.05; t <= 100; t=t+0.1) {
 		S.step_to(t);
 		fout << S.current_time << "\t" << S.newborns_out(t)[0] << "\t";
 		cout << S.current_time << " " << S.state[0] << "\n";

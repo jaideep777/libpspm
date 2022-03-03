@@ -1,4 +1,5 @@
 #include "solver.h"
+#include "cubic_spline.h"
 
 #include <iostream>
 #include <cmath>
@@ -657,17 +658,30 @@ std::vector<double> Solver::getDensitySpecies_EBT(int k, int nbreaks){
 			for (int i=1; i<h.size()-1; ++i) h[i] = (points[i+1].xmean - points[i-1].xmean)/2;
 			h[h.size()-1] = xm - (points[h.size()-1].xmean+points[h.size()-2].xmean)/2;
 
+			vector <double> xx, uu;
+			xx.reserve(points.size());
+			uu.reserve(points.size());
+			for (int i=0; i<points.size(); ++i){
+				xx.push_back(points[i].xmean);
+				uu.push_back(points[i].abund / h[i]);
+			}
+			
+			Spline spl;
+			spl.splineType = Spline::LINEAR; //Spline::CONSTRAINED_CUBIC;
+			spl.set_points(xx, uu);
+			
 			vector <double> dens;
-			dens.reserve(2*points.size());
-			for (int i=0; i<points.size(); ++i) dens.push_back(points[i].xmean);
-			for (int i=0; i<points.size(); ++i) dens.push_back(points[i].abund / h[i]);
+			dens.reserve(points.size());
+			for (int i=0; i<breaks.size(); ++i){
+				dens.push_back(spl.eval(breaks[i]));			
+			}
 			
 			return dens;
 		}
 		else return vector<double>();
 	}
 	else {
-		return vector<double>();
+		throw std::runtime_error("This function can only be called for the EBT solver");
 	}
 
 }
