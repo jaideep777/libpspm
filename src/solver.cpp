@@ -502,7 +502,7 @@ double Solver::calcSpeciesBirthFlux(int k, double t){
 vector<double> Solver::newborns_out(double t){  // TODO: make recompute env optional
 	// update Environment from latest state
 	//copyStateToCohorts(state.begin());
-	env->computeEnv(t, this);
+	env->computeEnv(t, this, state.begin(), rates.begin());
 	for (int k = 0; k<species_vec.size(); ++k) preComputeSpecies(k,t);	
 
 	vector<double> b_out;
