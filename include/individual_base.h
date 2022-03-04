@@ -3,9 +3,12 @@
 
 #include <iostream>
 #include <vector>
+#include <string>
 
 class IndividualBase{
 	public:
+	std::vector<std::string> varnames;
+	
 	// essential functions which must be defined by user
 	virtual double init_density(double x, void * _env, double bf) = 0;
 	virtual double growthRate(double x, double t, void * _env) = 0;
