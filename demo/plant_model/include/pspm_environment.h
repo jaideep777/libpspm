@@ -26,7 +26,7 @@ class LightEnvironment : public plant::Environment, public EnvironmentBase {
 	// level attributes from x, which can be reused if required. E.g., in Plant, we can add leaf_area
 	// as an iAttribute. iAttributes can be mapped to integers, say using enums
 	// Alternatively, switch to Indiviudual class as a template parameter for solver
-	void computeEnv(double t, Solver * S);
+	void computeEnv(double t, Solver * S, std::vector<double>::iterator s, std::vector<double>::iterator dsdt);
 
 
 };
@@ -41,7 +41,7 @@ class FixedEnvironment : public EnvironmentBase {
 
 	double canopy_openness(double z) const;
 
-	void computeEnv(double t, Solver * S);
+	void computeEnv(double t, Solver * S, std::vector<double>::iterator s, std::vector<double>::iterator dsdt);
 
 	double patch_survival(double t) const;
 

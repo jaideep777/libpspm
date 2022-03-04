@@ -8,6 +8,12 @@ using namespace std;
 #include "pspm_environment.h"
 #include "pspm_plant.h"
 
+vector<double> my_log_seq(double x0, double xf, int N){
+	vector<double> grid;
+	for (int i=0; i<N; ++i) grid.push_back(exp(log(x0) + (double(i)/(N-1))*(log(xf)-log(x0))));
+	return grid;
+}
+
 std::vector <double> myseq(double from, double to, int len){
 	std::vector<double> x(len);
 	for (size_t i=0; i<len; ++i) x[i] = from + i*(to-from)/(len-1);
@@ -79,10 +85,21 @@ class SolverIO{
 
 			for (int i=0; i<streams[s].size(); ++i) streams[s][i] << S->current_time << "\t";
 
+			vector<double> breaks = my_log_seq(spp->xb, 20, 100);
+			vector<double> dist = S->getDensitySpecies_EBT(s, breaks);
+			//cout << "here: " << breaks.size() << " " << dist.size() << endl;
+
+			for (int i=0; i<100; ++i){
+				//cout << i << " " << "here" << endl;
+				
+				streams[s][0] << breaks[i] << "\t";
+				streams[s][1] << dist[i] << "\t";
+			}
+
 			for (int j=0; j<spp->xsize(); ++j){
 				auto& C = spp->getCohort(j);
-				streams[s][0] << C.x << "\t";
-				streams[s][1] << C.u << "\t";
+//				streams[s][0] << C.x << "\t";
+//				streams[s][1] << C.u << "\t";
 				streams[s][2] << C.vars.mortality << "\t";
 				streams[s][3] << C.viable_seeds << "\t";
 				streams[s][4] << C.vars.area_heartwood << "\t";
@@ -90,7 +107,7 @@ class SolverIO{
 
 			}
 			
-			for (int i=0; i<streams[s].size(); ++i) streams[s][i] << "\n";
+			for (int i=0; i<streams[s].size(); ++i) streams[s][i] << endl;
 		}
 	}
 };
@@ -129,7 +146,7 @@ int main(){
 	
 	//exit(1);
 
-    Solver S(SOLVER_EBT, "lsoda");
+    Solver S(SOLVER_EBT, "rk45ck");
     S.use_log_densities = true;
 	S.control.ode_eps = 1e-4;
 	//S.control.ode_method = "rk4";
@@ -156,6 +173,7 @@ int main(){
 	sio.openStreams({"mort", "fec", "heart", "sap"});
 
 	ofstream fli("light_profile_ind_plant.txt");
+	ofstream fseed("seed_rains.txt");
 	
 	vector <vector<double>> seeds_out(S.species_vec.size());
 
@@ -163,7 +181,7 @@ int main(){
 
 		S.step_to(times[i]);		
 		
-		vector<double> seeds = S.newborns_out();
+		vector<double> seeds = S.newborns_out(times[i]);
 		for (int s=0; s< S.species_vec.size(); ++s){
 			double S_D = 0.25;
 			seeds_out[s].push_back(seeds[s] * S_D * env.patch_age_density(times[i]));
@@ -172,6 +190,10 @@ int main(){
 		cout << times[i] << " " << S.species_vec[0]->xsize() << " ";
 		for (int i=0; i<S.n_species(); ++i) cout << seeds[i] << " ";
 		cout << " | " << env.light_profile.npoints << "\n";
+
+		fseed << times[i] << "\t";
+		for (int i=0; i<S.n_species(); ++i) fseed << seeds[i] << "\t";
+		fseed << "\n";
 
 		vector<double> xl = myseq(0, 20, 200);
 		for (auto h : xl) fli << env.canopy_openness(h) << "\t";

@@ -8,7 +8,10 @@ void Species_Base::addCohort(T bc){
 	(dynamic_cast<Species<T>>(*this)).addCohort(bc);
 }
 
+
 // *************** Species<Model> ******************
+
+
 
 template<class Model>
 void Species<Model>::resize(int _J){
@@ -96,7 +99,7 @@ void Species<Model>::print(){
 	//std::cout << "Rates (" << size() << "):\n";
 	//auto irates = get_iterators(rv);
 	//irates.print();
-	std::cout << "-------\n\n";
+	std::cout << "-------\n\n"; std::cout.flush();
 
 }
 
@@ -154,6 +157,9 @@ void Species<Model>::setU(int i, double _u){
 
 template <class Model>
 void Species<Model>::initAndCopyExtraState(double t, void * env, std::vector<double>::iterator &it){
+	// init boundary cohort (no copy required)
+	boundaryCohort.init_state(t, env); 
+	// init internal cohorts and copy to state vector
 	for (auto& c : cohorts){
 		c.init_state(t, env);	// init state
 		auto it_prev = it;		
@@ -201,6 +207,12 @@ void Species<Model>::preComputeAllCohorts(double t, void * env){
 	for (auto& c : cohorts) c.preCompute(c.x, t, env);
 	boundaryCohort.preCompute(boundaryCohort.x, t, env);
 	np += cohorts.size()+1;
+}
+
+
+template <class Model>
+double Species<Model>::establishmentProbability(double t, void * env){
+	return boundaryCohort.establishmentProbability(t, env);
 }
 
 
@@ -337,6 +349,7 @@ void Species<Model>::addCohort(Cohort<Model> bc){
 
 template <class Model>
 void Species<Model>::removeDensestCohort(){
+	if (cohorts.size() < 3) return; // do nothing if there are 2 or less cohorts
 	int i_min = 1;
 	double dx_min = cohorts[0].x - cohorts[2].x;  
 	for (int i=1; i<J-1; ++i){ // skip first and last cohorts
@@ -373,7 +386,7 @@ void Species<Model>::removeDenseCohorts(double dxcut){
 
 template <class Model>
 void Species<Model>::removeDeadCohorts(double ucut){
-	// mark cohorts to remove; skip pi0-cohort
+	// mark cohorts to remove; skip pi0-cohort (index J-1)
 	for (int i=0; i<J-1; ++i){
 		if (cohorts[i].u < ucut) cohorts[i].remove = true;
 	}

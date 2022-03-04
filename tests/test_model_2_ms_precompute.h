@@ -17,7 +17,7 @@ class Environment : public EnvironmentBase{
 	// In such a case, the solver's SubdivisionSpline can be ussed
 	// Note: The state vector in the solver will not be updated until the RK step is completed. 
 	// Hence, explicitly pass the state to this function.
-	void computeEnv(double t, Solver * S){
+	void computeEnv(double t, Solver * S, std::vector<double>::iterator s, std::vector<double>::iterator dsdt){
 		//             _xm 
 		// Calculate _/ w(z,t)u(z,t)dz
 		//         xb
@@ -78,7 +78,7 @@ class TestModel : public Plant{
 		return pow(1-x,2)/pow(1+x,4) + (1-x)/pow(1+x,3);
 	}
 	
-	double preCompute(double x, double t, void * _env){
+	void preCompute(double x, double t, void * _env){
 		Environment* env = (Environment*)_env;
 	
 		// growth rate
@@ -96,7 +96,7 @@ class TestModel : public Plant{
 		se = 1;
 
 	}
-	
+
 	double growthRate(double x, double t, void * _env){
 		return g;
 	}

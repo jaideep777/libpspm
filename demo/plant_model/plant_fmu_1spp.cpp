@@ -147,7 +147,7 @@ int main(){
 	
 	//exit(1);
 
-    Solver S(SOLVER_FMU, "lsoda");
+    Solver S(SOLVER_FMU, "rk45ck");
     //S.control.ode_ifmu_stepsize = 0.1;
 	//S.control.ifmu_centered_grids = false; //true;
 	S.use_log_densities = true;
@@ -182,7 +182,7 @@ int main(){
 
 		S.step_to(times[i]);		
 		
-		vector<double> seeds = S.newborns_out();
+		vector<double> seeds = S.newborns_out(times[i]);
 		for (int s=0; s< S.species_vec.size(); ++s){
 			double S_D = 0.25;
 			seeds_out[s].push_back(seeds[s] * S_D * env.patch_age_density(times[i]));

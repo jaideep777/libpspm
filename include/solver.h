@@ -50,7 +50,7 @@ class Solver{
 	bool use_log_densities = true;
 
 	public:	
-	Solver(PSPM_SolverType _method, std::string ode_method = "lsoda");
+	Solver(PSPM_SolverType _method, std::string ode_method = "rk45ck");
 
 	void addSystemVariables(int _s);
 	void addSpecies(int _J, double _xb, double _xm, bool log_breaks, Species_Base* _mod, int n_extra_vars, double input_birth_flux = -1);
@@ -62,7 +62,7 @@ class Solver{
 	void setEnvironment(EnvironmentBase * _env);
 
 	//int setupLayout(Species<Model> &s);
-	void resetState(); 	
+	void resetState(double t0 = 0); 	
 	void resizeStateFromSpecies();
 
 	void initialize();
@@ -96,15 +96,17 @@ class Solver{
 	void removeCohort_CM();
 	//void removeDenseCohorts_CM();
 	
-	
+	template<typename AfterStepFunc>
+	void step_to(double tstop, AfterStepFunc &afterStep_user);
+
 	void step_to(double tstop);
 
 	////double stepToEquilibrium();
 
 	void preComputeSpecies(int k, double t);
 	double calcSpeciesBirthFlux(int k, double t);
-	std::vector<double> newborns_out();  // This is the actual system reproduction (fitness) hence biologically relevant
-	std::vector<double> u0_out();        // This is used for equilibrium solving, because in general, u0 rather than birthFlux, will approach a constant value
+	std::vector<double> newborns_out(double t);  // This is the actual system reproduction (fitness) hence biologically relevant
+	std::vector<double> u0_out(double t);        // This is used for equilibrium solving, because in general, u0 rather than birthFlux, will approach a constant value
 	////double get_u0_out();	// just returns from history without recomputing
 
 	void print();
@@ -117,10 +119,10 @@ class Solver{
 	double integrate_wudx_above(wFunc w, double t, double xlow, int species_id);
 	
 
-	std::vector<double> getDensitySpecies_EBT(int k, int nbreaks);
+	std::vector<double> getDensitySpecies_EBT(int k, std::vector<double> breaks);
 };
 
-//#include "../src/solver.tpp"
+#include "../src/solver.tpp"
 //#include "../src/mu.tpp"
 //#include "../src/ebt.tpp"
 //#include "../src/cm.tpp"

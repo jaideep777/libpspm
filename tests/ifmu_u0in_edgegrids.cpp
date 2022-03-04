@@ -21,23 +21,23 @@ int main(){
 	S.setEnvironment(&E);
 	S.print();
 	
-	E.computeEnv(0, &S);
+	E.computeEnv(0, &S, S.state.begin(), S.rates.begin());
 	cout << E.evalEnv(0,0) << endl;
 	
 	ofstream fout("ifmu_testmodel.txt");
 
 	for (double t=0.05; t <= 8; t=t+0.05) {
 		S.step_to(t);
-		fout << S.current_time << "\t" << S.u0_out()[0] << "\t";
-		cout << S.current_time << " " << S.u0_out()[0] << ", E = " << E.evalEnv(0,S.current_time) << "\n";
+		fout << S.current_time << "\t" << S.u0_out(t)[0] << "\t";
+		cout << S.current_time << " " << S.u0_out(t)[0] << ", E = " << E.evalEnv(0,S.current_time) << "\n";
 		for (auto y : S.state) fout << y << "\t";
 		fout << endl;
 	}
 
 	fout.close();
 
-	cout << S.u0_out()[0] << endl; 
-	if (abs(S.u0_out()[0] - 0.9900189) < 1e-5) return 0;
+	cout << S.u0_out(S.current_time)[0] << endl; 
+	if (abs(S.u0_out(S.current_time)[0] - 0.9900189) < 1e-5) return 0;
 	else return 1;
 
 }

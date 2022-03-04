@@ -568,6 +568,31 @@ void LSODA::stoda(
 
 
 /*
+   The following block handles all successful returns from lsoda.
+   If itask != 1, y is loaded from yh_ and t is set accordingly.
+   *Istate is set to 2, the illegal input counter is zeroed, and the
+   optional outputs are loaded into the work arrays before returning.
+*/
+
+template<class AfterStep>
+void LSODA::successreturn(AfterStep &after_step,
+    std::vector<double> &y, double *t, int itask, int ihit, double tcrit, int *istate)
+{
+    for(size_t i = 1; i <= n; i++)
+        y[i] = yh_[1][i];
+    *t = tn_;
+    if(itask == 4 || itask == 5)
+        if(ihit)
+            *t = tcrit;
+    *istate = 2;
+    illin   = 0;
+    
+    after_step(*t, ++y.begin());
+}
+
+
+
+/*
 c references..
 c 1.  alan c. hindmarsh,  odepack, a systematized collection of ode
 c     solvers, in scientific computing, r. s. stepleman et al. (eds.),
@@ -577,8 +602,8 @@ c     stiff and nonstiff systems of ordinary differential equations,
 c     siam j. sci. stat. comput. 4 (1983), pp. 136-148.
 c-----------------------------------------------------------------------
 */
-template <class Functor>
-void LSODA::lsoda(Functor &derivs, const size_t neq, std::vector<double> &y, double *t,
+template <class Functor, class AfterStep>
+void LSODA::lsoda(Functor &derivs, AfterStep &after_step, const size_t neq, std::vector<double> &y, double *t,
     double tout, int itask, int *istate, int iopt, int jt, std::array<int, 7> &iworks,
     std::array<double, 4> &rworks, void *_data)
 {
@@ -957,7 +982,7 @@ void LSODA::lsoda(Functor &derivs, const size_t neq, std::vector<double> &y, dou
                 }
                 if((tn_ - tout) * h_ < 0.)
                     break;
-                successreturn(y, t, itask, ihit, tcrit, istate);
+                successreturn(after_step, y, t, itask, ihit, tcrit, istate);
                 return;
             case 4:
                 tcrit = rworks[0];
@@ -983,6 +1008,7 @@ void LSODA::lsoda(Functor &derivs, const size_t neq, std::vector<double> &y, dou
                     *t      = tout;
                     *istate = 2;
                     illin   = 0;
+	                after_step(*t, ++y.begin());
                     return;
                 }
                 break;
@@ -999,7 +1025,7 @@ void LSODA::lsoda(Functor &derivs, const size_t neq, std::vector<double> &y, dou
                 ihit = fabs(tn_ - tcrit) <= (100. * ETA * hmx);
                 if(ihit) {
                     *t = tcrit;
-                    successreturn(y, t, itask, ihit, tcrit, istate);
+                    successreturn(after_step, y, t, itask, ihit, tcrit, istate);
                     return;
                 }
                 tnext = tn_ + h_ * (1. + 4. * ETA);
@@ -1089,6 +1115,8 @@ void LSODA::lsoda(Functor &derivs, const size_t neq, std::vector<double> &y, dou
                and do extra printing of data if ixpr = 1.
                Then, in any case, check for stop conditions.
             */
+			if (tn_ < tout) after_step(tn_, ++y.begin());
+
             init = 1;
             if(meth_ != mused) {
                 tsw    = tn_;
@@ -1117,13 +1145,14 @@ void LSODA::lsoda(Functor &derivs, const size_t neq, std::vector<double> &y, dou
                 *t      = tout;
                 *istate = 2;
                 illin   = 0;
+                after_step(*t, ++y.begin());
                 return;
             }
             /*
                itask = 2.
             */
             if(itask == 2) {
-                successreturn(y, t, itask, ihit, tcrit, istate);
+                successreturn(after_step, y, t, itask, ihit, tcrit, istate);
                 return;
             }
             /*
@@ -1132,7 +1161,7 @@ void LSODA::lsoda(Functor &derivs, const size_t neq, std::vector<double> &y, dou
             */
             if(itask == 3) {
                 if((tn_ - tout) * h_ >= 0.) {
-                    successreturn(y, t, itask, ihit, tcrit, istate);
+                    successreturn(after_step, y, t, itask, ihit, tcrit, istate);
                     return;
                 }
                 continue;
@@ -1147,13 +1176,14 @@ void LSODA::lsoda(Functor &derivs, const size_t neq, std::vector<double> &y, dou
                     *t      = tout;
                     *istate = 2;
                     illin   = 0;
+					after_step(*t, ++y.begin());
                     return;
                 }
                 else {
                     hmx  = fabs(tn_) + fabs(h_);
                     ihit = fabs(tn_ - tcrit) <= (100. * ETA * hmx);
                     if(ihit) {
-                        successreturn(y, t, itask, ihit, tcrit, istate);
+                        successreturn(after_step, y, t, itask, ihit, tcrit, istate);
                         return;
                     }
                     tnext = tn_ + h_ * (1. + 4. * ETA);
@@ -1171,9 +1201,10 @@ void LSODA::lsoda(Functor &derivs, const size_t neq, std::vector<double> &y, dou
             if(itask == 5) {
                 hmx  = fabs(tn_) + fabs(h_);
                 ihit = fabs(tn_ - tcrit) <= (100. * ETA * hmx);
-                successreturn(y, t, itask, ihit, tcrit, istate);
+                successreturn(after_step, y, t, itask, ihit, tcrit, istate);
                 return;
             }
+
         } /* end if ( kflag == 0 )   */
         /*
            kflag = -1, error test failed repeatedly or with fabs(h_) = hmin.
@@ -1222,8 +1253,8 @@ void LSODA::lsoda(Functor &derivs, const size_t neq, std::vector<double> &y, dou
  * @Param atol, absolute tolerance.
  */
 /* ----------------------------------------------------------------------------*/
-template <class Functor>
-void LSODA::lsoda_update(Functor &derivs, const size_t neq, std::vector<double> &y,
+template <class Functor, class AfterStep>
+void LSODA::lsoda_update(Functor &derivs, AfterStep &after_step, const size_t neq, std::vector<double> &y,
     /*std::vector<double> &yout_notused,*/ double *t, const double tout, /*int *istate,*/ void *_data,
     double rtol, double atol)
 {
@@ -1250,8 +1281,8 @@ void LSODA::lsoda_update(Functor &derivs, const size_t neq, std::vector<double> 
     for(size_t i = 1; i <= neq; i++)
         yout[i] = y[i - 1];
 
-    lsoda(derivs, neq, yout, t, tout, itask, &iState, iopt, jt, iworks, rworks, _data);
-
+    lsoda(derivs, after_step, neq, yout, t, tout, itask, &iState, iopt, jt, iworks, rworks, _data);
+	
 	for (int i=0; i<y.size(); ++i) y[i] = yout[i+1];
 }
 

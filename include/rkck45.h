@@ -7,6 +7,7 @@
  *  Original version obtained from:
  *     https://www.physics.rutgers.edu/grad/509/src_numerics/ODE/1/ode1.cc 
  *  
+ *  v2
  *  Modified sligtly by Jaideep Joshi (30/5/2020)
  *  - Cleaned up indentation
  *  - Better class names
@@ -87,8 +88,8 @@ class RKCK45{
 	//template <class functor>
 	//void Step_RK4(double &x, double h, container& y, functor& derivs);
 	
-	template <class functor>
-	void Step_to(double t_stop, double& x, container& y, functor& derivs);
+	template <class functor, class AfterStep>
+	void Step_to(double t_stop, double& x, container& y, functor& derivs, AfterStep &after_step);
 
 	double h(){return ht;}
 	double size(){return sys_size;}

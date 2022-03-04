@@ -11,7 +11,7 @@ class LightEnv : public EnvironmentBase{
 	public:
 	double E = 0.95;
 
-	void computeEnv(double t, Solver * S){
+	void computeEnv(double t, Solver * S, vector<double>::iterator s, vector<double>::iterator dsdt){
 		E = 0.95 + 0.05*t;
 	}
 
@@ -43,6 +43,10 @@ class Plant {
 	}
 
 	void preCompute(double x, double t, void * env){
+	}
+
+	void afterStep(double x, double t, void * _env){
+		//std::cout << "   After step in cohort\n";
 	}
 
 	double growthRate(double x, double t, void * env){
@@ -111,6 +115,10 @@ class Insect {
 		f = x*100+t;
 		g = x*50*t;
 		m = 0.1;
+	}
+
+	void afterStep(double x, double t, void * _env){
+		//std::cout << "   After step in cohort\n";
 	}
 
 	vector<double>::iterator set_state(vector<double>::iterator &it){

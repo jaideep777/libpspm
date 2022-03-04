@@ -1,7 +1,7 @@
 #ifndef __PSPM_TEST_TEST_TEST_MODEL_H_
 #define __PSPM_TEST_TEST_TEST_MODEL_H_
 
-
+#include <individual_base.h>
 
 class Environment : public EnvironmentBase{
 	
@@ -17,7 +17,7 @@ class Environment : public EnvironmentBase{
 	// In such a case, the solver's SubdivisionSpline can be ussed
 	// Note: The state vector in the solver will not be updated until the RK step is completed. 
 	// Hence, explicitly pass the state to this function.
-	void computeEnv(double t, Solver * S){
+	void computeEnv(double t, Solver * S, std::vector<double>::iterator s, std::vector<double>::iterator dsdt){
 		//             _xm 
 		// Calculate _/ w(z,t)u(z,t)dz
 		//         xb
@@ -65,7 +65,7 @@ class Plant{
 
 
 
-class TestModel : public Plant{
+class TestModel : public Plant, public Individual_Base{
 	public:
 	double sc = 10;
 

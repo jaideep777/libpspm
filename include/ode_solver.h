@@ -7,7 +7,7 @@
 #include <string>
 #include <vector>
 #include <iostream>
-#include <cstdlib>
+#include <exception>
 
 enum SolverType {ODE_RKCK45, ODE_LSODA};
 
@@ -28,8 +28,7 @@ class OdeSolver{
 		if (method == "rk45ck") type = ODE_RKCK45;
 		else if (method == "lsoda") type = ODE_LSODA;
 		else {
-			std::cout << "Fatal: Unknown ODE method " << method << "\n";
-			exit(1);
+			throw std::runtime_error("Fatal: Unknown ODE method " + method); //exit(1);
 		}
 		reset(t_start, rtol, atol);
 	}
@@ -57,17 +56,18 @@ class OdeSolver{
 	}
 
 
-	template <class Functor>
-	void step_to(double t_stop, double &t, std::vector<double>&y, Functor &derivs){
+	template <class Functor, class AfterStep>
+	void step_to(double t_stop, double &t, std::vector<double>&y, Functor &derivs, AfterStep &after_step){
 		if (t_stop == t || y.size() == 0) return;
 		
 		if (type == ODE_RKCK45){
-			(static_cast<RKCK45*>(solver))->Step_to(t_stop, t, y, derivs);
+			RKCK45 * sol = static_cast<RKCK45*>(solver);
+			sol->Step_to(t_stop, t, y, derivs, after_step);
 		}
 		else if (type == ODE_LSODA ){
 			LSODA* sol = static_cast<LSODA*>(solver);
 			sol->set_istate(1); // forces re-initialization
-			sol->lsoda_update(derivs, y.size(), y, &t, t_stop, nullptr, control.rel_tol, control.abs_tol);
+			sol->lsoda_update(derivs, after_step, y.size(), y, &t, t_stop, nullptr, control.rel_tol, control.abs_tol);
 			if(sol->get_istate() <= 0) {
 				std::cerr << "LSODA Error: istate = " << sol->get_istate() << std::endl;
 				return;
@@ -91,7 +91,8 @@ class OdeSolver{
 
 	int get_fn_evals(){
 		if      (type == ODE_RKCK45) return static_cast<RKCK45*>(solver)->get_fn_evals();	
-		else if (type == ODE_LSODA)  return nfe_cumm;	
+		else if (type == ODE_LSODA)  return nfe_cumm;
+		else return -1;
 	}
 
 };

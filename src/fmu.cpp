@@ -28,7 +28,7 @@ void Solver::calcRates_FMU(double t, vector<double>::iterator S, vector<double>:
 		//spp->preComputeAllCohorts(t,env);
 		
 		vector <double> growthArray(J+1);
-		growthArray[0] = spp->growthRate(-1, x[0], t, env);
+		growthArray[0] = spp->growthRate(-1, x[0], t, env); // growth rate of boundary cohort
 		for (int i=1; i<J+1; ++i) growthArray[i] = spp->growthRateOffset(i-1, x[i], t, env);
 
 	//	#define growth(i) growthRate(x[i], mod->evalEnv(x[i],t))
@@ -42,7 +42,7 @@ void Solver::calcRates_FMU(double t, vector<double>::iterator S, vector<double>:
 		
 		// i=0
 		if (spp->birth_flux_in < 0){	
-			double birthFlux = calcSpeciesBirthFlux(s,t);
+			double birthFlux = calcSpeciesBirthFlux(s,t) * spp->establishmentProbability(t, env);
 			//double birthFlux = integrate_x([this, s](int i, double t){
 												//return species_vec[s]->birthRate(i,species_vec[s]->getX(i),t, env);
 											//}, t, s);

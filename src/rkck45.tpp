@@ -145,8 +145,15 @@ void RKCK45::Step(double& x, container& y, functor& derivs, double hmax, double 
 		//x += h;
 	//}
 
-template <class functor>
-void RKCK45::Step_to(double t_stop, double& x, container& y, functor& derivs){
-		while (x < t_stop) Step(x,y,derivs, t_stop-x);
+template <class functor, class AfterStep>
+void RKCK45::Step_to(double t_stop, double& x, container& y, functor& derivs, AfterStep &after_step){
+		while (x < t_stop){
+			Step(x,y,derivs, t_stop-x);
+			after_step(x, y.begin());
+		}
 }
+
+
+
+
 

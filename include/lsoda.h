@@ -60,8 +60,8 @@ public:
     template <class Functor>
 	void prja(const size_t neq, std::vector<double> &y, Functor &derivs, void *_data);
 
-    template <class Functor>
-    void lsoda(Functor &derivs, const size_t neq, std::vector<double> &y, double *t,
+    template <class Functor, class AfterStep>
+    void lsoda(Functor &derivs, AfterStep &after_step, const size_t neq, std::vector<double> &y, double *t,
         double tout, int itask, int *istate, int iopt, int jt, std::array<int, 7> &iworks,
         std::array<double, 4> &rworks, void *_data);
 
@@ -74,16 +74,18 @@ public:
     void stoda(const size_t neq, std::vector<double> &y, Functor &derivs, void *_data);
 
     // We call this function in VoxelPools::
-    template <class Functor>
-    void lsoda_update(Functor &derivs, const size_t neq, std::vector<double> &y,
+    template <class Functor, class AfterStep>
+    void lsoda_update(Functor &derivs, AfterStep &after_step, const size_t neq, std::vector<double> &y,
         double *t, const double tout, 
         void *const _data, double rtol = 1e-6, double atol = 1e-6  // Tolerance
     );
 
+    template<class AfterStep>
+    void successreturn(AfterStep &after_step,
+        std::vector<double> &y, double *t, int itask, int ihit, double tcrit, int *istate);
+
     void terminate(int *istate);
     void terminate2(std::vector<double> &y, double *t);
-    void successreturn(
-        std::vector<double> &y, double *t, int itask, int ihit, double tcrit, int *istate);
     void _freevectors(void);
     void ewset(const std::vector<double> &ycur);
     void resetcoeff(void);
