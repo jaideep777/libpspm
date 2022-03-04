@@ -65,7 +65,7 @@ $(OBJECTS): build/%.o : src/%.cpp $(HEADERS)
 	g++ -c $(CPPFLAGS) $(INC_PATH) $< -o $@ 
 
 clean:
-	rm -f $(TARGET) build/*.o 
+	rm -f $(TARGET) build/*.o lib/*.a
 	
 re: clean all
 

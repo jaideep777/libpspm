@@ -1,4 +1,5 @@
 #include "solver.h"
+#include "cubic_spline.h"
 
 #include <iostream>
 #include <cmath>
@@ -11,13 +12,13 @@
 using namespace std;
 
 
-std::vector <double> seq(double from, double to, int len){
+inline std::vector <double> seq(double from, double to, int len){
 	std::vector<double> x(len);
 	for (size_t i=0; i<len; ++i) x[i] = from + i*(to-from)/(len-1);
 	return x;
 }
 
-std::vector <double> logseq(double from, double to, int len){
+inline std::vector <double> logseq(double from, double to, int len){
 	std::vector<double> x(len);
 	for (size_t i=0; i<len; ++i) x[i] = exp(log(from) + i*(log(to)-log(from))/(len-1));
 	return x;
@@ -502,7 +503,7 @@ double Solver::calcSpeciesBirthFlux(int k, double t){
 vector<double> Solver::newborns_out(double t){  // TODO: make recompute env optional
 	// update Environment from latest state
 	//copyStateToCohorts(state.begin());
-	env->computeEnv(t, this);
+	env->computeEnv(t, this, state.begin(), rates.begin());
 	for (int k = 0; k<species_vec.size(); ++k) preComputeSpecies(k,t);	
 
 	vector<double> b_out;
@@ -608,14 +609,15 @@ struct point{
 	int    count = 0;
 };	
 
-std::vector<double> Solver::getDensitySpecies_EBT(int k, int nbreaks){
+std::vector<double> Solver::getDensitySpecies_EBT(int k, vector<double> breaks){
 	auto spp = species_vec[k];
 
 	//cout << "HRER" << endl;
 	
 	if (method == SOLVER_EBT){
 		double xm = spp->getX(0)+1e-6;
-		vector<double> breaks = seq(spp->xb, xm, nbreaks);
+
+		//vector<double> breaks = (logscale)?  logseq(spp->xb, xm, nbreaks) : seq(spp->xb, xm, nbreaks);
 		
 		vector<point> points(breaks.size()-1);
 
@@ -652,22 +654,36 @@ std::vector<double> Solver::getDensitySpecies_EBT(int k, int nbreaks){
 		//cout << "--\n";
 
 		if (points.size() > 2){
-		vector<double> h(points.size());
-		h[0] = (points[1].xmean+points[0].xmean)/2 - spp->xb;
-		for (int i=1; i<h.size()-1; ++i) h[i] = (points[i+1].xmean - points[i-1].xmean)/2;
-		h[h.size()-1] = xm - (points[h.size()-1].xmean+points[h.size()-2].xmean)/2;
+			vector<double> h(points.size());
+			h[0] = (points[1].xmean+points[0].xmean)/2 - spp->xb;
+			for (int i=1; i<h.size()-1; ++i) h[i] = (points[i+1].xmean - points[i-1].xmean)/2;
+			h[h.size()-1] = xm - (points[h.size()-1].xmean+points[h.size()-2].xmean)/2;
 
-		vector <double> dens;
-		dens.reserve(2*points.size());
-		for (int i=0; i<points.size(); ++i) dens.push_back(points[i].xmean);
-		for (int i=0; i<points.size(); ++i) dens.push_back(points[i].abund / h[i]);
-		
-		return dens;
+			vector <double> xx, uu;
+			xx.reserve(points.size());
+			uu.reserve(points.size());
+			for (int i=0; i<points.size(); ++i){
+				xx.push_back(points[i].xmean);
+				uu.push_back(points[i].abund / h[i]);
+			}
+			
+			Spline spl;
+			spl.splineType = Spline::LINEAR; //Spline::CONSTRAINED_CUBIC;
+			spl.extrapolate = Spline::ZERO;
+			spl.set_points(xx, uu);
+			
+			vector <double> dens;
+			dens.reserve(points.size());
+			for (int i=0; i<breaks.size(); ++i){
+				dens.push_back(spl.eval(breaks[i]));			
+			}
+			
+			return dens;
 		}
-		else return vector<double>();
+		else return vector<double>(breaks.size(), 0);
 	}
 	else {
-		return vector<double>();
+		throw std::runtime_error("This function can only be called for the EBT solver");
 	}
 
 }

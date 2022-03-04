@@ -1,37 +1,50 @@
-#ifndef DEMO_RED_MODEL_H
-#define DEMO_RED_MODEL_H
+#ifndef DEMO_DAPHNIA_MODEL_H
+#define DEMO_DAPHNIA_MODEL_H
 
 
-class LightEnvironment : public EnvironmentBase{
+class Environment : public EnvironmentBase{
 	
-	double E = 0;
-
 	public:
-	double evalEnv(double x, double t){
-		return E;
-	}
+	double r = 0.5;
+	double K = 3;
+	double S = 0;
 
+	double dSdt;
+	
+	public:
+//	double evalEnv(double x, double t){
+//		return E;
+//	}
+
+//	void calcRatesSystem(double t, vector<double>::iterator S, vector<double>::iterator dSdt){
+
+//	}
 	// This function must do any necessary precomputations to facilitate evalEnv()
 	// Therefore, this should calculate env for all X when it is a function of X
 	// In such a case, the solver's SubdivisionSpline can be ussed
 	// Note: The state vector in the solver will not be updated until the RK step is completed. 
 	// Hence, explicitly pass the state to this function.
-	void computeEnv(double t, Solver * S, std::vector<double>::iterator s, std::vector<double>::iterator dsdt){
+	void computeEnv(double t, Solver * sol, vector<double>::iterator _S, vector<double>::iterator _dSdt){
 		//             _xm 
 		// Calculate _/ w(z,t)u(z,t)dz
 		//         xb
-		auto w = [S](int i, double t) -> double {
-			double z = S->species_vec[0]->getX(i);
-			return 0.396*pow(z, 0.749)/10000;
+		S = *_S;
+		
+		auto w = [sol](int i, double t) -> double {
+			double z = sol->species_vec[0]->getX(i);
+			return z*z;
 		};
-		E = S->integrate_x(w, t, 0);
+		double E = sol->integrate_x(w, t, 0);
+//		cout << "E = " << E << "\n";
+		
+		*_dSdt = r*S*(1-S/K) - S/(1+S)*E;
 	}
 
 };
 
 
 
-class RED_Plant{
+class Daphnia{
 	public:
 
 	//double input_seed_rain = 1;	
@@ -41,17 +54,12 @@ class RED_Plant{
 	int ndc = 0; // number of evals of mortality_rate() - derivative computations requested by solver
 	int nbc = 0;
 
-	double a0 = 0.396;
-	double phiA = 0.749;
-	double g0 = 0.0838;
-	double phiG = 0.7134;
-	double m0 = 1;
-	double mort = 0.035;
-	double alpha = 0.1;
-	double mu0;
+	double a = 0.75;
+	double mu0 = 0.1;
+	
+	double xb = 0, xm = 1; 
 
-	RED_Plant() {
-		mu0 = mort*m0/g0;
+	Daphnia() {
 	}
 
 
@@ -59,7 +67,7 @@ class RED_Plant{
 	}
 
 	double init_density(double x, void * env, double input_seed_rain){
-		return 100/pow(x,4);
+		return exp(-8*pow((x-xb)/(xm-xb),3));
 	}
 
 	void preCompute(double x, double t, void * env){
@@ -71,18 +79,19 @@ class RED_Plant{
 
 	double growthRate(double x, double t, void * env){
 		++nrc;
-		return g0*pow(x,phiG);	
+		double S = ((Environment*)env)->S;
+		return fmax(S/(1+S) - x, 0);	
 	}
 
 	double mortalityRate(double x, double t, void * env){
 		++ndc;
-		return mort;
+		return mu0;
 	}
 
 	double birthRate(double x, double t, void * env){
 		++nbc;
-		LightEnvironment* env1 = (LightEnvironment*)env;
-		return 0.1/0.9*g0*pow(x,phiG)*(1-env1->evalEnv(x,t));
+		double S = ((Environment*)env)->S;
+		return a*x*x*S/(1+S);
 	}
 
 	void init_state(double t, void * env){

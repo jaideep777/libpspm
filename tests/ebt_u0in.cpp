@@ -34,7 +34,7 @@ int main(){
 	S.initialize();
 	S.print();
 	
-	E.computeEnv(0, &S);
+	E.computeEnv(0, &S, S.state.begin(), S.rates.begin());
 	cout << E.evalEnv(0,0) << endl;
 
 	S.setEnvironment(&E);
@@ -52,7 +52,7 @@ int main(){
 		fout << S.current_time << "\t" << S.u0_out(t)[0] << "\t";
 
 		//cout << "HERE" << endl;	
-		vector<double> v = S.getDensitySpecies_EBT(0, 26);
+		vector<double> v = S.getDensitySpecies_EBT(0, breaks);
 				
 		cout << S.current_time << " " << S.species_vec[0]->xsize() << " " << S.u0_out(t)[0] << endl;
 		//for (auto y : S.state) fout << y << "\t";

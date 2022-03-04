@@ -19,7 +19,7 @@ int main(){
 	S.setEnvironment(&E);
 	S.print();
 	
-	E.computeEnv(0,&S);
+	E.computeEnv(0,&S, S.state.begin(), S.rates.begin());
 	cout << E.evalEnv(0,0) << endl;
 
 	S.calcRates_FMU(1, S.state.begin(), S.rates.begin());  // dummy rates calc rates(X=X0, U=U0, t=1, E=E(U0))

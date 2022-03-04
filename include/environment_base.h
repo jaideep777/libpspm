@@ -5,10 +5,11 @@ class Solver;
 
 class EnvironmentBase{
 	public:
-	virtual ~EnvironmentBase() = 0;
-	virtual void computeEnv(double t, Solver * sol) = 0;
-
+	virtual ~EnvironmentBase(){};
+	virtual void computeEnv(double t, Solver * sol, std::vector<double>::iterator S, std::vector<double>::iterator dSdt) = 0;
+/*	virtual void calcRatesSystem(double t, vector<double>::iterator S, vector<double>::iterator dSdt) = 0;*/
 };
 
 
 #endif
+

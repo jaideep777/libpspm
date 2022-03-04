@@ -20,7 +20,7 @@ int main(){
 	S.setEnvironment(&E);
 	S.print();
 	
-	E.computeEnv(0, &S);
+	E.computeEnv(0, &S, S.state.begin(), S.rates.begin());
 	cout << E.evalEnv(0,0) << endl;
 	
 	ofstream fout("ifmu_testmodel.txt");

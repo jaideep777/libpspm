@@ -23,7 +23,7 @@ void Solver::calcRates_iFMU(double t, vector<double>::iterator S, vector<double>
 }
 
 void Solver::stepU_iFMU(double t, vector<double> &S, vector<double> &dSdt, double dt){
-	
+		
 	vector<double>::iterator its = S.begin() + n_statevars_system; // Skip system variables
 	
 	// 1. Take implicit step for U

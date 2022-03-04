@@ -129,7 +129,7 @@ int main(){
 	
 	//exit(1);
 
-    Solver S(SOLVER_CM, "lsoda");
+    Solver S(SOLVER_CM, "rk45ck");
     S.use_log_densities = true;
 	S.control.ode_eps = 1e-4;
 	S.setEnvironment(&env);
@@ -161,7 +161,7 @@ int main(){
 
 		S.step_to(times[i]);		
 		
-		vector<double> seeds = S.newborns_out();
+		vector<double> seeds = S.newborns_out(times[i]);
 		for (int s=0; s< S.species_vec.size(); ++s){
 			double S_D = 0.25;
 			seeds_out[s].push_back(seeds[s] * S_D * env.patch_age_density(times[i]));

@@ -11,7 +11,7 @@ class LightEnv : public EnvironmentBase{
 	public:
 	double E = 0.95;
 
-	void computeEnv(double t, Solver * S){
+	void computeEnv(double t, Solver * S, vector<double>::iterator s, vector<double>::iterator dsdt){
 		E = 0.95 + 0.05*t;
 	}
 

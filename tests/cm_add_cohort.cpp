@@ -18,7 +18,7 @@ int main(){
 	S.addSpecies(2, 0, 1, false, &spp3, 4, 2);
 	S.resetState();
 	S.initialize();
-	E.computeEnv(0, &S);
+	E.computeEnv(0, &S, S.state.begin(), S.rates.begin());
 	S.print();
 
 	S.addCohort_CM();
