@@ -40,7 +40,10 @@ $(OBJECTS): %.o : %.cpp $(HEADERS)
 	g++ -c $(CPPFLAGS) $(INC_PATH) $< -o $@ 
 
 clean:
-	rm -f $(TARGET) $(OBJECTS) 
+	rm -f *.o *.exec gmon.out 
+
+dataclean:	
+	rm -f *.txt
 	
 re: clean all
 

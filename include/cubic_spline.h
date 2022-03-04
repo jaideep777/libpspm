@@ -124,8 +124,12 @@ class Spline{
 	
 	enum Type{LINEAR, CUBIC, CONSTRAINED_CUBIC};
 	Type splineType = CUBIC;
-	bool extrapolate_constant = true;
+	enum Extr{ZERO, CONSTANT, QUADRATIC};
+	Extr extrapolate = CONSTANT;
 
+//	bool extrapolate_constant = true;
+//	bool extrapolate_off = true;
+	
 	protected:
 	std::vector <Float> m_a, m_b, m_c;
 	std::vector <Float> m_x, m_y;		// Need random-access containers here
@@ -246,7 +250,8 @@ class Spline{
 	inline Float extrapolate_left(double x) const{
 		  double h=x-m_x[0];
 		  // extrapolation to the left
-		  if (extrapolate_constant) return m_y[0];	// constant
+		  if (extrapolate == ZERO) return 0;	// zero
+		  else if (extrapolate == CONSTANT) return m_y[0];	// constant
 		  else return ((m_b[0])*h + m_c[0])*h + m_y[0];  // quadratic
 	}
 	
@@ -254,7 +259,8 @@ class Spline{
 			size_t n=m_x.size();
 			double h=x-m_x[n-1];
 		  // extrapolation to the right
-			if (extrapolate_constant) return m_y[n-1]; // constant
+			if (extrapolate == ZERO) return 0;	// zero
+			else if (extrapolate == CONSTANT) return m_y[n-1]; // constant
 			else return ((m_b[n-1])*h + m_c[n-1])*h + m_y[n-1];  // quadratic
 	
 	}

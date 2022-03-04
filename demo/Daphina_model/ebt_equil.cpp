@@ -7,6 +7,13 @@ using namespace std;
 
 #include "daphnia.h"
 
+inline std::vector <double> seq(double from, double to, int len){
+	std::vector<double> x(len);
+	for (size_t i=0; i<len; ++i) x[i] = from + i*(to-from)/(len-1);
+	return x;
+}
+
+
 int main(){
 
 	Species<Daphnia> spp;
@@ -28,12 +35,12 @@ int main(){
 	
 	ofstream fout("ebt_Daphnia.txt");
 
-	for (double t=0.05; t <= 100; t=t+0.1) {
+	for (double t=0.05; t <= 100; t=t+0.5) {
 		S.step_to(t);
-		fout << S.current_time << "\t" << S.newborns_out(t)[0] << "\t";
-		cout << S.current_time << " " << S.state[0] << "\n";
+		fout << S.current_time << "\t" << S.newborns_out(t)[0] << "\t" << E.S << "\t";
+		cout << S.current_time << " " << S.state[0] << " " << S.species_vec[0]->xsize() << "\n";
 		
-		vector <double> dist = S.getDensitySpecies_EBT(0, 30);
+		vector <double> dist = S.getDensitySpecies_EBT(0, seq(0,1,300));
 		for (auto y : dist) fout << y << "\t";
 		
 		fout << endl;

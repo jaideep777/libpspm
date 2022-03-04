@@ -12,13 +12,13 @@
 using namespace std;
 
 
-std::vector <double> seq(double from, double to, int len){
+inline std::vector <double> seq(double from, double to, int len){
 	std::vector<double> x(len);
 	for (size_t i=0; i<len; ++i) x[i] = from + i*(to-from)/(len-1);
 	return x;
 }
 
-std::vector <double> logseq(double from, double to, int len){
+inline std::vector <double> logseq(double from, double to, int len){
 	std::vector<double> x(len);
 	for (size_t i=0; i<len; ++i) x[i] = exp(log(from) + i*(log(to)-log(from))/(len-1));
 	return x;
@@ -609,14 +609,15 @@ struct point{
 	int    count = 0;
 };	
 
-std::vector<double> Solver::getDensitySpecies_EBT(int k, int nbreaks){
+std::vector<double> Solver::getDensitySpecies_EBT(int k, vector<double> breaks){
 	auto spp = species_vec[k];
 
 	//cout << "HRER" << endl;
 	
 	if (method == SOLVER_EBT){
 		double xm = spp->getX(0)+1e-6;
-		vector<double> breaks = seq(spp->xb, xm, nbreaks);
+
+		//vector<double> breaks = (logscale)?  logseq(spp->xb, xm, nbreaks) : seq(spp->xb, xm, nbreaks);
 		
 		vector<point> points(breaks.size()-1);
 
@@ -668,6 +669,7 @@ std::vector<double> Solver::getDensitySpecies_EBT(int k, int nbreaks){
 			
 			Spline spl;
 			spl.splineType = Spline::LINEAR; //Spline::CONSTRAINED_CUBIC;
+			spl.extrapolate = Spline::ZERO;
 			spl.set_points(xx, uu);
 			
 			vector <double> dens;
@@ -678,7 +680,7 @@ std::vector<double> Solver::getDensitySpecies_EBT(int k, int nbreaks){
 			
 			return dens;
 		}
-		else return vector<double>();
+		else return vector<double>(breaks.size(), 0);
 	}
 	else {
 		throw std::runtime_error("This function can only be called for the EBT solver");

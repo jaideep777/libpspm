@@ -1,3 +1,10 @@
+
+setwd("/home/jaideep/codes/libpspm/demo/")
+
+png("RED_Daphnia.png", width = 900*3, height=680*3, res=300)
+
+par(mfrow = c(2,3), mar=c(4,4,4,1), oma=c(1,1,1,1), cex.lab=1.2, cex.axis=1.2)
+
 ### RED ####
 # Analytical calculation of equilibrium distribution, if available
 Ueq = function(x){
@@ -16,33 +23,50 @@ Ueq = function(x){
   return(n0*(x/m0)^(-phiG)*exp(mu0/(1-phiG)*(1-(x/m0)^(1-phiG)))*10000)
 }
 
-dat = read.delim("/home/jaideep/codes/libpspm/demo/RED_model/fmu_Redmodel.txt", header=F)
-dat = dat[,-ncol(dat)]
-N = 100
-x = exp(seq(log(1), log(1e6), length.out=N))
+plot = function(file, N, title){
+  dat = read.delim(file, header=F)
+  dat = dat[,-ncol(dat)]
+  x = exp(seq(log(1), log(1e6), length.out=N))
+  
+  matplot(x=x, y = t(dat[seq(1,nrow(dat),by=1),-c(1,2)]), col=rainbow(nrow(dat)/1, start=0, end=0.9, alpha=10/nrow(dat)), 
+          type="l", lty=1, log="xy", ylim=c(1e-20, 1e4), xlab="Size", ylab="Density", main=title)
+  xeq = exp(seq(log(1), log(1e6), length.out=30))
+  points(x=xeq, y= Ueq(xeq))
+}
 
-matplot(x=x, y = t(dat[seq(1,nrow(dat),by=1),-c(1,2)]), col=rainbow(nrow(dat)/1, start=0, end=0.9, alpha=10/nrow(dat)), type="l", lty=1, log="xy", ylim=c(1e-20, 1e4))
-xeq = exp(seq(log(1), log(1e6), length.out=30))
-points(x=xeq, y= Ueq(xeq))
-# plot(dat$V2~dat$V1, type="l")
+plot("RED_model/fmu_Redmodel.txt", 150, "FMU")
+plot("RED_model/ifmu_Redmodel.txt", 150, "IFMU")
+plot("RED_model/ebt_Redmodel.txt", 150, "EBT")
+
 
 
 ### DAPHNIA ####
 
-dat = read.delim("/home/jaideep/codes/libpspm/demo/Daphina_model/ebt_Daphnia.txt", header=F)
-dat = dat[,-ncol(dat)]
 a = 0.75
 mu = 0.1
 r = 0.5
 K = 3
 xstar = (mu*(1+mu)*(2+mu)/2/a)^(1/3)
 sstar = xstar/(1-xstar)
-N = 30
-x=seq(0,1,length.out = N)
-# plot(x=x, y=exp(-8*x^3), type="l")
 
-matplot(x=seq(0,1,length.out = N), y = t(dat[seq(1,nrow(dat),by=1),-c(1,2)]), col=rainbow(nrow(dat)/1, start=0, end=0.9, alpha=10/nrow(dat)), type="l", lty=1, log="y", ylim=c(0.1, 1e4))
-abline(v=xstar, col="black")
-xeq = seq(0,1,length.out = 30)
-points(x=xeq, y= a*r*sstar*(1-sstar/K)*(xstar-xeq)^(mu-1)/xstar^mu)
-# plot(dat$V2~dat$V1, type="l")
+plot = function(file, N, title){
+  dat = read.delim(file, header=F)
+  dat = dat[,-ncol(dat)]
+  x=seq(0,1,length.out = N)
+  # plot(x=x, y=exp(-8*x^3), type="l")
+  
+  matplot(x=x, y = t(dat[seq(1,nrow(dat),by=1),-c(1,2,3)]), col=rainbow(nrow(dat)/1, start=0, end=0.9, alpha=10/nrow(dat)), 
+          type="l", lty=1, log="y", ylim=c(0.1, 1e4), xlab="Size", ylab="Density", main=title)
+  abline(v=xstar, col="grey")
+  xeq = seq(0,1,length.out = 30)
+  points(x=xeq, y= a*r*sstar*(1-sstar/K)*(xstar-xeq)^(mu-1)/xstar^mu)
+  # plot(dat$V2~dat$V1, type="l")
+}
+
+plot("Daphina_model/fmu_Daphnia.txt", 300, "FMU")
+plot("Daphina_model/ifmu_Daphnia.txt", 300, "IFMU")
+plot("Daphina_model/ebt_Daphnia.txt", 300, "EBT")
+
+dev.off()
+
+

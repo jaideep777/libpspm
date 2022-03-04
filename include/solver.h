@@ -119,7 +119,7 @@ class Solver{
 	double integrate_wudx_above(wFunc w, double t, double xlow, int species_id);
 	
 
-	std::vector<double> getDensitySpecies_EBT(int k, int nbreaks);
+	std::vector<double> getDensitySpecies_EBT(int k, std::vector<double> breaks);
 };
 
 #include "../src/solver.tpp"

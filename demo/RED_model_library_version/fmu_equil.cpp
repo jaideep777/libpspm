@@ -13,7 +13,7 @@ int main(){
 	LightEnvironment E;
 
 	Solver S(SOLVER_FMU);
-	S.addSpecies(30, 1, 1e6, true, &spp, 0);
+	S.addSpecies(150, 1, 1e6, true, &spp, 0);
 	//S.get_species(0)->set_bfin_is_u0in(true);	// say that input_birth_flux is u0
 	S.resetState();
 	S.initialize();
@@ -22,10 +22,10 @@ int main(){
 	
 	ofstream fout("fmu_Redmodel.txt");
 
-	for (double t=0.05; t <= 5000; t=t+100) {
+	for (double t=0.05; t <= 5000; t=t+10) {
 		S.step_to(t);
-		fout << S.current_time << "\t" << S.newborns_out()[0] << "\t";
-		//cout << S.current_time << " " [><< S.u0_out()<] << "\n";
+		fout << S.current_time << "\t" << S.newborns_out(t)[0] << "\t";
+		
 		for (auto y : S.state) fout << y << "\t";
 		fout << endl;
 	}
@@ -33,7 +33,7 @@ int main(){
 	fout.close();
 
 	// Expected 44.3530812 
-	cout << S.newborns_out()[0] << endl; 
+	cout << S.newborns_out(5000)[0] << endl; 
 	//if (abs(S.u0_out()[0] - 1.468232) < 1e-5) return 0;
 	//else return 1;
 

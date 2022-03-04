@@ -12,7 +12,7 @@ int main(){
 	Species<Daphnia> spp;
 	Environment E;
 
-	Solver S(SOLVER_FMU);
+	Solver S(SOLVER_IFMU);
 	S.control.ode_ifmu_stepsize = 0.1;
 	
 	S.addSpecies(300, 0, 1, false, &spp, 0, -1);
@@ -24,7 +24,7 @@ int main(){
 	S.state[0] = E.K;
 	//S.print();
 	
-	ofstream fout("fmu_Daphnia.txt");
+	ofstream fout("ifmu_Daphnia.txt");
 
 	for (double t=0.05; t <= 100; t=t+1) {
 		S.step_to(t);

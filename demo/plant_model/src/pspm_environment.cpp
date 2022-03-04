@@ -20,7 +20,7 @@ LightEnvironment::LightEnvironment(double openness) : Environment(openness){
 // level attributes from x, which can be reused if required. E.g., in Plant, we can add leaf_area
 // as an iAttribute. iAttributes can be mapped to integers, say using enums
 // Alternatively, switch to Indiviudual class as a template parameter for solver
-void LightEnvironment::computeEnv(double t, Solver * S){
+void LightEnvironment::computeEnv(double t, Solver * S, std::vector<double>::iterator s, std::vector<double>::iterator dsdt){
 	//            _xm 
 	// Calculate / w(z,t)u(z,t)dz
 	//        xb`
@@ -64,7 +64,7 @@ double FixedEnvironment::canopy_openness(double z) const {
 	return openness;
 }
 
-void FixedEnvironment::computeEnv(double t, Solver * S){
+void FixedEnvironment::computeEnv(double t, Solver * S, std::vector<double>::iterator s, std::vector<double>::iterator dsdt){
 }
 
 double FixedEnvironment::patch_survival(double t) const{

@@ -268,38 +268,6 @@ matplot(y = x, x= t(lep), type="l", lty=1, col= scales::alpha(rainbow(142, end =
 
 
 ##### FMU result 
-hp=read.delim("~/codes/pspm_package_try_simple_plant/fmu_result_plant/species_0_u.txt", header=F)
-hp2 = read.delim("~/codes/pspm_package_try_simple_plant/fmu_result_plant/species_1_u.txt", header=F)
-hp3 = read.delim("~/codes/pspm_package_try_simple_plant/fmu_result_plant/species_2_u.txt", header=F)
-hp=as.matrix(hp[,-ncol(hp)])
-hp2=as.matrix(hp2[,-ncol(hp2)])
-hp3=as.matrix(hp3[,-ncol(hp3)])
-
-xp=read.delim("~/codes/pspm_package_try_simple_plant/fmu_result_plant/species_0_X.txt", header=F)
-xp2 = read.delim("~/codes/pspm_package_try_simple_plant/fmu_result_plant/species_1_X.txt", header=F)
-xp3 = read.delim("~/codes/pspm_package_try_simple_plant/fmu_result_plant/species_2_X.txt", header=F)
-xp = xp[,-ncol(xp)]
-xp2 = xp2[,-ncol(xp2)]
-xp3 = xp3[,-ncol(xp3)]
-
-xp=as.numeric(xp[1,-1])
-xp2=as.numeric(xp2[1,-1])
-xp3=as.numeric(xp3[1,-1])
-
-times = as.numeric(hp[,1])
-
-umat = hp[,-1]
-umat2 = hp2[,-1]
-umat3 = hp3[,-1]
-
-umat[umat<0] = 0
-umat2[umat2<0] = 0
-umat3[umat3<0] = 0
-
-par(mfrow=c(3,1), mar=c(4,4,1,1))
-image(x=times, y=xp[200:1],  z=log(1+100*umat[,200:1]), col=inferno(100), ylab="lma = 0.0825")
-image(x=times, y=xp2[200:1], z=log(1+100*umat2[,200:1]), col=inferno(100), ylab="lma = 0.2625")
-image(x=times, y=xp3[200:1], z=log(1+100*umat3[,200:1]), col=inferno(100), ylab="lma = 0.4625")
 
 
 #### Debig interpolator
