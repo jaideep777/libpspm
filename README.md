@@ -39,7 +39,7 @@ Latest development version can be found here: https://github.com/jaideep777/pspm
 
 ## Usage
 
-To solve a PSPM, you need to define two classes for the `Environment` and the `Individual` (not necessarily with those names). The simplest minimal way to implement these classes is to derive them from `EnvironmentBase` and `IndividualBase` provided by the library, and defining the following five functions (one in `Environment` and four in `Individual`):
+To solve a PSPM, you need to define two classes for the `Environment` and the `Individual` (not necessarily with those names). The `Environment` class must be derived from the `EnvironmentBase` class provided by the library. The `Individual` class can also (but need not) be derived from the `IndividualBase` class provided by the library. In these derived classes you must implement the following five member functions (one in `Environment` and four in `Individual`):
 
 ```C++
 class Environment : public EnvironmentBase{
