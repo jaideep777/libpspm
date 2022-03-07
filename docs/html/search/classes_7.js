@@ -1,6 +1,4 @@
 var searchData=
 [
-  ['solver',['Solver',['../classSolver.html',1,'']]],
-  ['species',['Species',['../classSpecies.html',1,'']]],
-  ['species_5fbase',['Species_Base',['../classSpecies__Base.html',1,'']]]
+  ['rkck45',['RKCK45',['../classRKCK45.html',1,'']]]
 ];

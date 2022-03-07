@@ -15,8 +15,11 @@ var searchData=
   ['cohort_2eh',['cohort.h',['../cohort_8h.html',1,'']]],
   ['cohort_3c_20model_20_3e',['Cohort&lt; Model &gt;',['../classCohort.html',1,'']]],
   ['cohorts',['cohorts',['../classSpecies.html#a284669364649807f9eba1824c3dcad6d',1,'Species']]],
-  ['computeenv',['computeEnv',['../classEnvironmentBase.html#ae8ee835be256735745ed1c68161b0f17',1,'EnvironmentBase']]],
+  ['computeenv',['computeEnv',['../classEnvironmentBase.html#aab04d5438741c4f04d09514bac07348c',1,'EnvironmentBase']]],
   ['conit',['conit',['../classLSODA.html#af141d9896017083f3190ce83f8e5656b',1,'LSODA']]],
+  ['constant',['CONSTANT',['../classSpline.html#ae5abfe66422cb4e2514d8062194506edaf5f21b1143a7e243398bed10a21aa106',1,'Spline']]],
+  ['constrained_5fcubic',['CONSTRAINED_CUBIC',['../classSpline.html#ae805682e3d11b057a2eb8aaaad0328ceaa056c24d2fdfef1f4ad3338065ebd069',1,'Spline']]],
+  ['constructandreset',['constructAndReset',['../classSpline.html#a2990afcfd16e90f6b9fa0391fdc9b2b0',1,'Spline']]],
   ['container',['container',['../rkck45_8h.html#acf5ce1ab15b0f4d6ab45e74b0852a17e',1,'rkck45.h']]],
   ['control',['control',['../classOdeSolver.html#abd539064c7bce23995c96ff6943046f2',1,'OdeSolver::control()'],['../classSolver.html#a23b1cf8c0b88e8ef124a7defc3614dec',1,'Solver::control()']]],
   ['convergence_5feps',['convergence_eps',['../classSolver.html#af36052b437269a818479d9810cf3cab5',1,'Solver']]],
@@ -29,5 +32,7 @@ var searchData=
   ['correction',['correction',['../classLSODA.html#ae5ebdebff330f29ef0c15bece1bf8299',1,'LSODA']]],
   ['count',['count',['../structpoint.html#a0921a7eb5c25701e01328131fd434159',1,'point']]],
   ['crate',['crate',['../classLSODA.html#ad56224fd2c463b1ef84cdd3ba528e64c',1,'LSODA']]],
+  ['cubic',['CUBIC',['../classSpline.html#ae805682e3d11b057a2eb8aaaad0328ceaee13a16cc933b0e7f343c6ca94ce5e27',1,'Spline']]],
+  ['cubic_5fspline_2eh',['cubic_spline.h',['../cubic__spline_8h.html',1,'']]],
   ['current_5ftime',['current_time',['../classSolver.html#a3dd7ebf891bd7363b37d50df24cfe433',1,'Solver']]]
 ];

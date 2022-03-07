@@ -19,6 +19,12 @@
 <link href="search/search.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="search/searchdata.js"></script>
 <script type="text/javascript" src="search/search.js"></script>
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    extensions: ["tex2jax.js"],
+    jax: ["input/TeX","output/HTML-CSS"],
+});
+</script><script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js"></script>
 <link href="doxygen.css" rel="stylesheet" type="text/css" />
 <link href="doxygen-awesome.css" rel="stylesheet" type="text/css"/>
 </head>
@@ -87,7 +93,8 @@ $(document).ready(function(){initNavTree('classEnvironmentBase.html','');});
 
 <p>This is the complete list of members for <a class="el" href="classEnvironmentBase.html">EnvironmentBase</a>, including all inherited members.</p>
 <table class="directory">
-  <tr class="even"><td class="entry"><a class="el" href="classEnvironmentBase.html#ae8ee835be256735745ed1c68161b0f17">computeEnv</a>(double t, Solver *sol)=0</td><td class="entry"><a class="el" href="classEnvironmentBase.html">EnvironmentBase</a></td><td class="entry"><span class="mlabel">pure virtual</span></td></tr>
+  <tr class="even"><td class="entry"><a class="el" href="classEnvironmentBase.html#aab04d5438741c4f04d09514bac07348c">computeEnv</a>(double t, Solver *sol, std::vector&lt; double &gt;::iterator S, std::vector&lt; double &gt;::iterator dSdt)=0</td><td class="entry"><a class="el" href="classEnvironmentBase.html">EnvironmentBase</a></td><td class="entry"><span class="mlabel">pure virtual</span></td></tr>
+  <tr><td class="entry"><a class="el" href="classEnvironmentBase.html#ae8661cf24cd1402c62718d7584608df6">~EnvironmentBase</a>()</td><td class="entry"><a class="el" href="classEnvironmentBase.html">EnvironmentBase</a></td><td class="entry"><span class="mlabel">inline</span><span class="mlabel">virtual</span></td></tr>
 </table></div><!-- contents -->
 </div><!-- doc-content -->
 <!-- start footer part -->

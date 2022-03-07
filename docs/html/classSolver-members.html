@@ -19,6 +19,12 @@
 <link href="search/search.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="search/searchdata.js"></script>
 <script type="text/javascript" src="search/search.js"></script>
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    extensions: ["tex2jax.js"],
+    jax: ["input/TeX","output/HTML-CSS"],
+});
+</script><script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js"></script>
 <link href="doxygen.css" rel="stylesheet" type="text/css" />
 <link href="doxygen-awesome.css" rel="stylesheet" type="text/css"/>
 </head>
@@ -106,7 +112,7 @@ $(document).ready(function(){initNavTree('classSolver.html','');});
   <tr class="even"><td class="entry"><a class="el" href="classSolver.html#a136a2d31c26e0f28b4bd07b177daa8b3">ebt_grad_dx</a></td><td class="entry"><a class="el" href="classSolver.html">Solver</a></td><td class="entry"></td></tr>
   <tr><td class="entry"><a class="el" href="classSolver.html#a60e2493c2ef2c7af6892eb0e2e948915">ebt_ucut</a></td><td class="entry"><a class="el" href="classSolver.html">Solver</a></td><td class="entry"></td></tr>
   <tr class="even"><td class="entry"><a class="el" href="classSolver.html#a118706cbb6e1616155dd77c60288d801">env</a></td><td class="entry"><a class="el" href="classSolver.html">Solver</a></td><td class="entry"></td></tr>
-  <tr><td class="entry"><a class="el" href="classSolver.html#adae147b4a43d3bd20e0333e2a5a2cc3a">getDensitySpecies_EBT</a>(int k, int nbreaks)</td><td class="entry"><a class="el" href="classSolver.html">Solver</a></td><td class="entry"></td></tr>
+  <tr><td class="entry"><a class="el" href="classSolver.html#aca318144131fe7ed314e6e62037dcde6">getDensitySpecies_EBT</a>(int k, std::vector&lt; double &gt; breaks)</td><td class="entry"><a class="el" href="classSolver.html">Solver</a></td><td class="entry"></td></tr>
   <tr class="even"><td class="entry"><a class="el" href="classSolver.html#a75c7e77fdf07c996034e785edba70fb8">ifmu_centered_grids</a></td><td class="entry"><a class="el" href="classSolver.html">Solver</a></td><td class="entry"></td></tr>
   <tr><td class="entry"><a class="el" href="classSolver.html#a0c67ab4d4fd9c36cfcbfdc13021b419f">initialize</a>()</td><td class="entry"><a class="el" href="classSolver.html">Solver</a></td><td class="entry"></td></tr>
   <tr class="even"><td class="entry"><a class="el" href="classSolver.html#a9172d0d2dc6399ada494ef23020943d5">integrate_wudx_above</a>(wFunc w, double t, double xlow, int species_id)</td><td class="entry"><a class="el" href="classSolver.html">Solver</a></td><td class="entry"></td></tr>
@@ -131,7 +137,7 @@ $(document).ready(function(){initNavTree('classSolver.html','');});
   <tr><td class="entry"><a class="el" href="classSolver.html#ab96a5a58ead6c525a4f74c2e793b9cd3">resetState</a>(double t0=0)</td><td class="entry"><a class="el" href="classSolver.html">Solver</a></td><td class="entry"></td></tr>
   <tr class="even"><td class="entry"><a class="el" href="classSolver.html#abd9eb317756b34b97ebe6ece348681f3">resizeStateFromSpecies</a>()</td><td class="entry"><a class="el" href="classSolver.html">Solver</a></td><td class="entry"></td></tr>
   <tr><td class="entry"><a class="el" href="classSolver.html#a967eb7f9d64273be988233b2a8530242">setEnvironment</a>(EnvironmentBase *_env)</td><td class="entry"><a class="el" href="classSolver.html">Solver</a></td><td class="entry"></td></tr>
-  <tr class="even"><td class="entry"><a class="el" href="classSolver.html#a2f4d07185f6643ec6599baa823df10e8">Solver</a>(PSPM_SolverType _method, std::string ode_method=&quot;lsoda&quot;)</td><td class="entry"><a class="el" href="classSolver.html">Solver</a></td><td class="entry"></td></tr>
+  <tr class="even"><td class="entry"><a class="el" href="classSolver.html#ad412388e4d79d17fae0738492489d413">Solver</a>(PSPM_SolverType _method, std::string ode_method=&quot;rk45ck&quot;)</td><td class="entry"><a class="el" href="classSolver.html">Solver</a></td><td class="entry"></td></tr>
   <tr><td class="entry"><a class="el" href="classSolver.html#ad795740d116e1ab2589f845d4debfac5">species_vec</a></td><td class="entry"><a class="el" href="classSolver.html">Solver</a></td><td class="entry"></td></tr>
   <tr class="even"><td class="entry"><a class="el" href="classSolver.html#a2e4e6a291b18fec36eb33a82ea93d48c">state</a></td><td class="entry"><a class="el" href="classSolver.html">Solver</a></td><td class="entry"></td></tr>
   <tr><td class="entry"><a class="el" href="classSolver.html#af4c8f6565df94ed6a058a224196b9c2b">step_to</a>(double tstop, AfterStepFunc &amp;afterStep_user)</td><td class="entry"><a class="el" href="classSolver.html">Solver</a></td><td class="entry"></td></tr>

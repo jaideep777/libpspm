@@ -1,8 +1,8 @@
 var searchData=
 [
-  ['y',['y',['../classODE__Solver.html#afa24ed9c8c7cb2d7e7d49a6af41e56cb',1,'ODE_Solver']]],
-  ['yh_5f',['yh_',['../classLSODA.html#aac74299f7a3daae262397f00b022eee4',1,'LSODA']]],
-  ['yout',['yout',['../classLSODA.html#a76df19fcee954c259c2ca0a142ee460c',1,'LSODA']]],
-  ['yscal',['yscal',['../classVRungeKutta.html#a3a641bfb266cfef8efe03f482dd13610',1,'VRungeKutta::yscal()'],['../classRKCK45.html#ab38eff05d0f278af8018f1bd7c79d472',1,'RKCK45::yscal()']]],
-  ['yt',['yt',['../classRKCK45.html#aaeeceda4089c4d6a11f6ec6ceb24d8f0',1,'RKCK45']]]
+  ['x',['X',['../classSpecies__Base.html#ad05abcae28b870403bfcb774c660ba47',1,'Species_Base::X()'],['../classCohort.html#a2eb820df167a3841eb71d53d63826999',1,'Cohort::x()'],['../classSpecies__Base.html#a49e7790c468580f9405625c2d2a9febf',1,'Species_Base::x()']]],
+  ['xb',['xb',['../classSpecies__Base.html#ae2b77d4c8ab8d40ff93b75bc8168f1dd',1,'Species_Base']]],
+  ['xmean',['xmean',['../structpoint.html#a635ce990258fc078ca1e4cecaa6315cc',1,'point']]],
+  ['xsize',['xsize',['../classSpecies__Base.html#a8888ccafcd9ac6a921bc71a12ccb98b2',1,'Species_Base']]],
+  ['xt',['xt',['../classRKCK45.html#aaf3b5d00ab429ba1917a40e0f05bb272',1,'RKCK45']]]
 ];

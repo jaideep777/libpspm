@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['solvertype',['SolverType',['../ode__solver_8h.html#a8b06041d7c1fb05f379714f4312306ec',1,'ode_solver.h']]]
+  ['pspm_5fsolvertype',['PSPM_SolverType',['../solver_8h.html#a36c7c2c605ac0bf05f8948bb5b0a12a9',1,'solver.h']]]
 ];

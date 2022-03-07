@@ -19,6 +19,12 @@
 <link href="search/search.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="search/searchdata.js"></script>
 <script type="text/javascript" src="search/search.js"></script>
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    extensions: ["tex2jax.js"],
+    jax: ["input/TeX","output/HTML-CSS"],
+});
+</script><script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js"></script>
 <link href="doxygen.css" rel="stylesheet" type="text/css" />
 <link href="doxygen-awesome.css" rel="stylesheet" type="text/css"/>
 </head>
@@ -92,15 +98,51 @@ $(document).ready(function(){initNavTree('classEnvironmentBase.html','');});
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:ae8ee835be256735745ed1c68161b0f17"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEnvironmentBase.html#ae8ee835be256735745ed1c68161b0f17">computeEnv</a> (double t, <a class="el" href="classSolver.html">Solver</a> *sol)=0</td></tr>
-<tr class="separator:ae8ee835be256735745ed1c68161b0f17"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae8661cf24cd1402c62718d7584608df6"><td class="memItemLeft" align="right" valign="top">virtual&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEnvironmentBase.html#ae8661cf24cd1402c62718d7584608df6">~EnvironmentBase</a> ()</td></tr>
+<tr class="separator:ae8661cf24cd1402c62718d7584608df6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aab04d5438741c4f04d09514bac07348c"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classEnvironmentBase.html#aab04d5438741c4f04d09514bac07348c">computeEnv</a> (double t, <a class="el" href="classSolver.html">Solver</a> *sol, std::vector&lt; double &gt;::iterator S, std::vector&lt; double &gt;::iterator dSdt)=0</td></tr>
+<tr class="separator:aab04d5438741c4f04d09514bac07348c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock">
 <p class="definition">Definition at line <a class="el" href="environment__base_8h_source.html#l00006">6</a> of file <a class="el" href="environment__base_8h_source.html">environment_base.h</a>.</p>
-</div><h2 class="groupheader">Member Function Documentation</h2>
-<a id="ae8ee835be256735745ed1c68161b0f17"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ae8ee835be256735745ed1c68161b0f17">&#9670;&nbsp;</a></span>computeEnv()</h2>
+</div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
+<a id="ae8661cf24cd1402c62718d7584608df6"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae8661cf24cd1402c62718d7584608df6">&#9670;&nbsp;</a></span>~EnvironmentBase()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual EnvironmentBase::~EnvironmentBase </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="environment__base_8h_source.html#l00008">8</a> of file <a class="el" href="environment__base_8h_source.html">environment_base.h</a>.</p>
+<div class="fragment"><div class="line"><a name="l00008"></a><span class="lineno">    8</span>&#160;{};</div></div><!-- fragment --><div class="dynheader">
+Here is the call graph for this function:</div>
+<div class="dyncontent">
+<div class="center"><iframe scrolling="no" frameborder="0" src="classEnvironmentBase_ae8661cf24cd1402c62718d7584608df6_cgraph.svg" width="510" height="38"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe>
+</div>
+</div>
+
+</div>
+</div>
+<h2 class="groupheader">Member Function Documentation</h2>
+<a id="aab04d5438741c4f04d09514bac07348c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aab04d5438741c4f04d09514bac07348c">&#9670;&nbsp;</a></span>computeEnv()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -118,7 +160,19 @@ Public Member Functions</h2></td></tr>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype"><a class="el" href="classSolver.html">Solver</a> *&#160;</td>
-          <td class="paramname"><em>sol</em>&#160;</td>
+          <td class="paramname"><em>sol</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">std::vector&lt; double &gt;::iterator&#160;</td>
+          <td class="paramname"><em>S</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">std::vector&lt; double &gt;::iterator&#160;</td>
+          <td class="paramname"><em>dSdt</em>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -135,7 +189,7 @@ Public Member Functions</h2></td></tr>
 <div class="dynheader">
 Here is the caller graph for this function:</div>
 <div class="dyncontent">
-<div class="center"><iframe scrolling="no" frameborder="0" src="classEnvironmentBase_ae8ee835be256735745ed1c68161b0f17_icgraph.svg" width="572" height="88"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe>
+<div class="center"><iframe scrolling="no" frameborder="0" src="classEnvironmentBase_aab04d5438741c4f04d09514bac07348c_icgraph.svg" width="668" height="139"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe>
 </div>
 </div>
 

@@ -1,21 +1,9 @@
 var searchData=
 [
-  ['ialth',['ialth',['../classLSODA.html#a2625ffd95dee8dddd2404ee0123d11ab',1,'LSODA']]],
-  ['icount',['icount',['../classLSODA.html#a3b56dd6f2272884b5e2127b0a5c6efcd',1,'LSODA']]],
-  ['id',['id',['../classCohort.html#aa19ffc9eac21ecce5ac1be30cc801089',1,'Cohort']]],
-  ['ierpj',['ierpj',['../classLSODA.html#a3f9461ff03ec66b33a3a6f26ef265f02',1,'LSODA']]],
-  ['iersl',['iersl',['../classLSODA.html#a3bb30692f94364baabea5d51d6f2601f',1,'LSODA']]],
-  ['ifmu_5fcentered_5fgrids',['ifmu_centered_grids',['../classSolver.html#a75c7e77fdf07c996034e785edba70fb8',1,'Solver']]],
-  ['illin',['illin',['../classLSODA.html#a02f2c4e09828561b26772b3fabaee767',1,'LSODA']]],
-  ['imxer',['imxer',['../classLSODA.html#a12155192ae58825e5aa97e0493bcec2e',1,'LSODA']]],
-  ['init',['init',['../classLSODA.html#a85603b0e6969c434e6149b97bf0a3e3e',1,'LSODA']]],
-  ['initial_5fstep_5fsize',['initial_step_size',['../classODE__Solver.html#a07b21ff3103af3b964159fedc86418d8',1,'ODE_Solver']]],
-  ['ipup',['ipup',['../classLSODA.html#affc57283b8f361e2fd83683bb7af10e6',1,'LSODA']]],
-  ['ipvt',['ipvt',['../classLSODA.html#acd7a0db568c9c8ee993b9cc086eac28f',1,'LSODA']]],
-  ['irflag',['irflag',['../classLSODA.html#a1d56b8aa2f77dc8286a886cbf79c1c7c',1,'LSODA']]],
-  ['is_5fresident',['is_resident',['../classSpecies__Base.html#a86aa95db03eb3a843b97deebe3fa8c97',1,'Species_Base']]],
-  ['istate',['iState',['../classLSODA.html#a597b7f5e409aa2a27905d83a219ef158',1,'LSODA']]],
-  ['iters',['iters',['../classIteratorSet.html#a99ed372a4df20208baeca95b008d6e50',1,'IteratorSet']]],
-  ['itol_5f',['itol_',['../classLSODA.html#ab7bae8711a18dd8bf261d633647a3da0',1,'LSODA']]],
-  ['ixpr',['ixpr',['../classLSODA.html#a79043ffa1321459f88becaf12b6ac2f8',1,'LSODA']]]
+  ['k1',['k1',['../classRKCK45.html#ade871e48475463a55cb24f6772093183',1,'RKCK45']]],
+  ['k2',['k2',['../classRKCK45.html#af570a1f83771e6a428db041829885e5c',1,'RKCK45']]],
+  ['k3',['k3',['../classRKCK45.html#a80c3820bc657cb949a32bc0183ac87c3',1,'RKCK45']]],
+  ['k4',['k4',['../classRKCK45.html#a82cebca5e3432c88321fea97f84bcab9',1,'RKCK45']]],
+  ['k5',['k5',['../classRKCK45.html#abadb3fe7f9aec5e75ceeb411d1e3cc94',1,'RKCK45']]],
+  ['kflag',['kflag',['../classLSODA.html#abd05febd0d33e5702c7b4fc0113bc280',1,'LSODA']]]
 ];

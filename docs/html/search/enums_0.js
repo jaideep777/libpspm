@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['pspm_5fsolvertype',['PSPM_SolverType',['../solver_8h.html#a36c7c2c605ac0bf05f8948bb5b0a12a9',1,'solver.h']]]
+  ['extr',['Extr',['../classSpline.html#ae5abfe66422cb4e2514d8062194506ed',1,'Spline']]]
 ];

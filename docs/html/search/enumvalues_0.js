@@ -1,5 +1,6 @@
 var searchData=
 [
-  ['ode_5flsoda',['ODE_LSODA',['../ode__solver_8h.html#a8b06041d7c1fb05f379714f4312306ecaa93fc6eccb497db2250ae0b2e9dee0c9',1,'ode_solver.h']]],
-  ['ode_5frkck45',['ODE_RKCK45',['../ode__solver_8h.html#a8b06041d7c1fb05f379714f4312306ecab7f46db0ee5acc35706d88115a687586',1,'ode_solver.h']]]
+  ['constant',['CONSTANT',['../classSpline.html#ae5abfe66422cb4e2514d8062194506edaf5f21b1143a7e243398bed10a21aa106',1,'Spline']]],
+  ['constrained_5fcubic',['CONSTRAINED_CUBIC',['../classSpline.html#ae805682e3d11b057a2eb8aaaad0328ceaa056c24d2fdfef1f4ad3338065ebd069',1,'Spline']]],
+  ['cubic',['CUBIC',['../classSpline.html#ae805682e3d11b057a2eb8aaaad0328ceaee13a16cc933b0e7f343c6ca94ce5e27',1,'Spline']]]
 ];

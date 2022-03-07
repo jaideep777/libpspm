@@ -19,6 +19,12 @@
 <link href="search/search.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="search/searchdata.js"></script>
 <script type="text/javascript" src="search/search.js"></script>
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    extensions: ["tex2jax.js"],
+    jax: ["input/TeX","output/HTML-CSS"],
+});
+</script><script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js"></script>
 <link href="doxygen.css" rel="stylesheet" type="text/css" />
 <link href="doxygen-awesome.css" rel="stylesheet" type="text/css"/>
 </head>
@@ -84,8 +90,7 @@ $(document).ready(function(){initNavTree('functions_s.html','');});
 
 <h3><a id="index_s"></a>- s -</h3><ul>
 <li>SAFETY
-: <a class="el" href="classRKCK45.html#a430cf252bafb80bb91fdcda099bf10eb">RKCK45&lt; container &gt;</a>
-, <a class="el" href="classVRungeKutta.html#a0c142561129905f99149e5e787fa4d6e">VRungeKutta&lt; container &gt;</a>
+: <a class="el" href="classRKCK45.html#a56ba129b08650bcba531d145e44062c6">RKCK45</a>
 </li>
 <li>savedCohort
 : <a class="el" href="classSpecies.html#a7fe924cbd557a399e9cc2c587d5e6a2a">Species&lt; Model &gt;</a>
@@ -112,8 +117,15 @@ $(document).ready(function(){initNavTree('functions_s.html','');});
 <li>set_istate()
 : <a class="el" href="classLSODA.html#a278bb538d9b0354084473a931567a023">LSODA</a>
 </li>
+<li>set_points()
+: <a class="el" href="classSpline.html#a42eec80590bdc7fa338c4643cf307344">Spline</a>
+</li>
 <li>set_size()
 : <a class="el" href="classCohort.html#af684d203ee2a31b98f767fd6f1362ae0">Cohort&lt; Ind &gt;</a>
+, <a class="el" href="classIndividualBase.html#a540199e914588b1aa95399d108dce066">IndividualBase</a>
+</li>
+<li>set_state()
+: <a class="el" href="classIndividualBase.html#a818b896db632d32aa5b6225756035ba6">IndividualBase</a>
 </li>
 <li>set_xb()
 : <a class="el" href="classSpecies.html#a236c6e58fb9459c7a9e055523c82693c">Species&lt; Model &gt;</a>
@@ -130,9 +142,8 @@ $(document).ready(function(){initNavTree('functions_s.html','');});
 : <a class="el" href="classSpecies.html#a9494e8cf6d507019f5469ba718fbd574">Species&lt; Model &gt;</a>
 , <a class="el" href="classSpecies__Base.html#a86a04ae53b3f25c4e90b01a8eaed3bfd">Species_Base</a>
 </li>
-<li>size
-: <a class="el" href="classIteratorSet.html#adc4b3f55b7ad707374642d315a93533b">IteratorSet&lt; Iterator &gt;</a>
-, <a class="el" href="classRKCK45.html#a8779263975ee2b9cc3c37bd024e8b658">RKCK45&lt; container &gt;</a>
+<li>size()
+: <a class="el" href="classRKCK45.html#a59b778f17f40c08a948b831a97d2b20b">RKCK45</a>
 , <a class="el" href="classSpecies__Base.html#ade8a7f89414210e0238d1889b29075a8">Species_Base</a>
 </li>
 <li>sm1
@@ -141,18 +152,33 @@ $(document).ready(function(){initNavTree('functions_s.html','');});
 <li>solsy()
 : <a class="el" href="classLSODA.html#a5476113f8738e733652f1f6b02eaba3b">LSODA</a>
 </li>
+<li>solve()
+: <a class="el" href="classBandMatrix.html#afe93a8c9ba520e3adf955e26f5b55dbd">BandMatrix</a>
+</li>
+<li>solve_coeffs_constrained_cubic()
+: <a class="el" href="classSpline.html#a5bf7d2457cf9635742b921a1380ea88f">Spline</a>
+</li>
+<li>solve_coeffs_cubic()
+: <a class="el" href="classSpline.html#a387b90e40d7bc335fed9163123f45827">Spline</a>
+</li>
+<li>solve_coeffs_linear()
+: <a class="el" href="classSpline.html#af8963e6ffac552d5d4401411d6db7cef">Spline</a>
+</li>
 <li>solver
 : <a class="el" href="classOdeSolver.html#a507eb1f5a78ec06a5a3b9a58bde7597b">OdeSolver</a>
 </li>
 <li>Solver()
-: <a class="el" href="classSolver.html#a2f4d07185f6643ec6599baa823df10e8">Solver</a>
+: <a class="el" href="classSolver.html#ad412388e4d79d17fae0738492489d413">Solver</a>
 , <a class="el" href="classSpecies__Base.html#a16432758b314f3cedad3fba81c895417">Species_Base</a>
 </li>
 <li>Species()
-: <a class="el" href="classSpecies.html#a418ee1754f61bd3963ef674b40898bf2">Species&lt; Model &gt;</a>
+: <a class="el" href="classSpecies.html#a925161a83b7c2f6a0a2ebf612bd9b4e9">Species&lt; Model &gt;</a>
 </li>
 <li>species_vec
 : <a class="el" href="classSolver.html#ad795740d116e1ab2589f845d4debfac5">Solver</a>
+</li>
+<li>splineType
+: <a class="el" href="classSpline.html#a6cb2f5ce823f0f78acfcdd5612242365">Spline</a>
 </li>
 <li>sqrteta
 : <a class="el" href="classLSODA.html#a3454b3a36929eb882c04bf8776679d61">LSODA</a>
@@ -161,18 +187,13 @@ $(document).ready(function(){initNavTree('functions_s.html','');});
 : <a class="el" href="classSolver.html#a2e4e6a291b18fec36eb33a82ea93d48c">Solver</a>
 </li>
 <li>Step()
-: <a class="el" href="classRKCK45.html#a64a973687a0b02cf6fc8c480dfa11e05">RKCK45&lt; container &gt;</a>
-, <a class="el" href="classVRungeKutta.html#a0313bdce3b6486bc5ee84fc4bee7824e">VRungeKutta&lt; container &gt;</a>
-</li>
-<li>Step_RK4()
-: <a class="el" href="classRKCK45.html#a6f523f989183e3316163bea9363d6dac">RKCK45&lt; container &gt;</a>
+: <a class="el" href="classRKCK45.html#a20415037da7046ff94afadbf927c42d3">RKCK45</a>
 </li>
 <li>step_to()
-: <a class="el" href="classODE__Solver.html#a97e62678f9dfbae085ce3c93d418beb1">ODE_Solver&lt; F &gt;</a>
-, <a class="el" href="classOdeSolver.html#a77d9f02ed28d5515366e6be08560f35a">OdeSolver</a>
+: <a class="el" href="classOdeSolver.html#a77d9f02ed28d5515366e6be08560f35a">OdeSolver</a>
 </li>
 <li>Step_to()
-: <a class="el" href="classRKCK45.html#a2b94ffb928c9ed7e07d6d4bb049c7e16">RKCK45&lt; container &gt;</a>
+: <a class="el" href="classRKCK45.html#a91b5ae2e8a9dadc117e6412f054afa59">RKCK45</a>
 </li>
 <li>step_to()
 : <a class="el" href="classSolver.html#a06cf82d0a99490279ab20d2ad6b876db">Solver</a>
@@ -183,14 +204,11 @@ $(document).ready(function(){initNavTree('functions_s.html','');});
 <li>stoda()
 : <a class="el" href="classLSODA.html#a7c6d8d75b383474b5b05c710d2921618">LSODA</a>
 </li>
-<li>strides
-: <a class="el" href="classIteratorSet.html#a2afffda20fba018a75655c001d5d4aad">IteratorSet&lt; Iterator &gt;</a>
-</li>
 <li>successreturn()
 : <a class="el" href="classLSODA.html#abf4eccf92cba7f87f9d5051ee6b28a42">LSODA</a>
 </li>
 <li>sys_size
-: <a class="el" href="classRKCK45.html#a660b795d0624d6682b73e6dbb205a77e">RKCK45&lt; container &gt;</a>
+: <a class="el" href="classRKCK45.html#ac6651a3ca40bcef91590e314a7ac8770">RKCK45</a>
 </li>
 </ul>
 </div><!-- contents -->

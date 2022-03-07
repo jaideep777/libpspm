@@ -19,6 +19,12 @@
 <link href="search/search.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="search/searchdata.js"></script>
 <script type="text/javascript" src="search/search.js"></script>
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    extensions: ["tex2jax.js"],
+    jax: ["input/TeX","output/HTML-CSS"],
+});
+</script><script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js"></script>
 <link href="doxygen.css" rel="stylesheet" type="text/css" />
 <link href="doxygen-awesome.css" rel="stylesheet" type="text/css"/>
 </head>
@@ -114,8 +120,12 @@ $(document).ready(function(){initNavTree('functions_i.html','');});
 : <a class="el" href="classLSODA.html#a85603b0e6969c434e6149b97bf0a3e3e">LSODA</a>
 </li>
 <li>init_density()
-: <a class="el" href="classSpecies.html#a1f11f6bc408b4c4a1073f62f8d482cd5">Species&lt; Model &gt;</a>
+: <a class="el" href="classIndividualBase.html#abe5bcfdc7e5116e42bd567d6f84ef70e">IndividualBase</a>
+, <a class="el" href="classSpecies.html#a1f11f6bc408b4c4a1073f62f8d482cd5">Species&lt; Model &gt;</a>
 , <a class="el" href="classSpecies__Base.html#af3f776b8c56e133a0b260e2281a27178">Species_Base</a>
+</li>
+<li>init_state()
+: <a class="el" href="classIndividualBase.html#a5fe41ef5ae4840d70d71d865a0aa45f6">IndividualBase</a>
 </li>
 <li>initAndCopyExtraState()
 : <a class="el" href="classSpecies.html#a5d06f9dae6ffccbc0c0085f09c9a1fe3">Species&lt; Model &gt;</a>
@@ -125,12 +135,8 @@ $(document).ready(function(){initNavTree('functions_i.html','');});
 : <a class="el" href="classSpecies.html#a519fc6f6f07e3b4cfcd25ac9188418bb">Species&lt; Model &gt;</a>
 , <a class="el" href="classSpecies__Base.html#a809883f8bb0937168f84766e40af8b33">Species_Base</a>
 </li>
-<li>initial_step_size
-: <a class="el" href="classODE__Solver.html#a07b21ff3103af3b964159fedc86418d8">ODE_Solver&lt; F &gt;</a>
-</li>
 <li>initialize()
-: <a class="el" href="classODE__Solver.html#a457e87c70c2bed42ea0fd1044b33732c">ODE_Solver&lt; F &gt;</a>
-, <a class="el" href="classSolver.html#a0c67ab4d4fd9c36cfcbfdc13021b419f">Solver</a>
+: <a class="el" href="classSolver.html#a0c67ab4d4fd9c36cfcbfdc13021b419f">Solver</a>
 </li>
 <li>intdy()
 : <a class="el" href="classLSODA.html#a1ee114165850fa09fcbd0b206de560dc">LSODA</a>
@@ -140,9 +146,6 @@ $(document).ready(function(){initNavTree('functions_i.html','');});
 </li>
 <li>integrate_x()
 : <a class="el" href="classSolver.html#a2a6ca7647a4cde1195789132f3873c0b">Solver</a>
-</li>
-<li>invoke_f()
-: <a class="el" href="classODE__Solver.html#aeaec22a10c1250913da96960dcb5b987">ODE_Solver&lt; F &gt;</a>
 </li>
 <li>ipup
 : <a class="el" href="classLSODA.html#affc57283b8f361e2fd83683bb7af10e6">LSODA</a>
@@ -158,12 +161,6 @@ $(document).ready(function(){initNavTree('functions_i.html','');});
 </li>
 <li>iState
 : <a class="el" href="classLSODA.html#a597b7f5e409aa2a27905d83a219ef158">LSODA</a>
-</li>
-<li>IteratorSet()
-: <a class="el" href="classIteratorSet.html#ad58104385ccd0ea2b804264516bee8a8">IteratorSet&lt; Iterator &gt;</a>
-</li>
-<li>iters
-: <a class="el" href="classIteratorSet.html#a99ed372a4df20208baeca95b008d6e50">IteratorSet&lt; Iterator &gt;</a>
 </li>
 <li>itol_
 : <a class="el" href="classLSODA.html#ab7bae8711a18dd8bf261d633647a3da0">LSODA</a>

@@ -1,7 +1,7 @@
 var searchData=
 [
-  ['_7elsoda',['~LSODA',['../classLSODA.html#af1a90c68af62cb7760ef9a3d419e8e55',1,'LSODA']]],
-  ['_7eode_5fsolver',['~ODE_Solver',['../classODE__Solver.html#a314036d2b53f8e7f586ec55368ab6989',1,'ODE_Solver']]],
-  ['_7eodesolver',['~OdeSolver',['../classOdeSolver.html#a253f7f448b8e38708ab44d639504061b',1,'OdeSolver']]],
-  ['_7especies_5fbase',['~Species_Base',['../classSpecies__Base.html#ad40ae94f2b46a2e35ba2148758af2139',1,'Species_Base']]]
+  ['yh_5f',['yh_',['../classLSODA.html#aac74299f7a3daae262397f00b022eee4',1,'LSODA']]],
+  ['yout',['yout',['../classLSODA.html#a76df19fcee954c259c2ca0a142ee460c',1,'LSODA']]],
+  ['yscal',['yscal',['../classRKCK45.html#aa0d9b6851acc28f7ed3bb894df288ab8',1,'RKCK45']]],
+  ['yt',['yt',['../classRKCK45.html#a9eac8bdf600e9a615e78287275b011cc',1,'RKCK45']]]
 ];

@@ -1,5 +1,10 @@
 var searchData=
 [
+  ['m_5fa',['m_a',['../classSpline.html#a67ef67977fd514f42afca876c41d8c0c',1,'Spline']]],
+  ['m_5fb',['m_b',['../classSpline.html#a8ce68054077cdd0526987dede1fadab0',1,'Spline']]],
+  ['m_5fc',['m_c',['../classSpline.html#a93f045963fa06cfd28ee448e3e86fa8d',1,'Spline']]],
+  ['m_5fx',['m_x',['../classSpline.html#ad864845866b22d66c57e0715e29dea22',1,'Spline']]],
+  ['m_5fy',['m_y',['../classSpline.html#a05fe41af6806613bbd5f203c2b3e4555',1,'Spline']]],
   ['max_5fcohorts',['max_cohorts',['../classSolver.html#a208f8b006e6accf958268bf0fc903b9c',1,'Solver']]],
   ['maxcor',['maxcor',['../classLSODA.html#a11974b6fbf510d5e29ea2e75dc742941',1,'LSODA']]],
   ['maxord',['maxord',['../classLSODA.html#afb2feae4ffb2ee5975a545d7f044cc9b',1,'LSODA']]],
@@ -10,7 +15,7 @@ var searchData=
   ['miter',['miter',['../classLSODA.html#a1d4e87c54ca65af467a16a9eae6d591d',1,'LSODA']]],
   ['ml',['ml',['../classLSODA.html#ac39fd36e1c6076e2a5d7fa397cd8c8e3',1,'LSODA']]],
   ['mord',['mord',['../classLSODA.html#a4886fd30cda453dac3516116250e34f3',1,'LSODA']]],
-  ['mortalityrate',['mortalityRate',['../classSpecies__Base.html#a59ab3c647c48a819f1911957e5724d5e',1,'Species_Base::mortalityRate()'],['../classSpecies.html#a11f2e15a662e03a0c09c032586912f8c',1,'Species::mortalityRate()']]],
+  ['mortalityrate',['mortalityRate',['../classIndividualBase.html#a74b794d45bc34a84529b1cc8898e77e1',1,'IndividualBase::mortalityRate()'],['../classSpecies__Base.html#a59ab3c647c48a819f1911957e5724d5e',1,'Species_Base::mortalityRate()'],['../classSpecies.html#a11f2e15a662e03a0c09c032586912f8c',1,'Species::mortalityRate()']]],
   ['mortalityrategradient',['mortalityRateGradient',['../classSpecies__Base.html#a83ff45fc4f334241eeae08d523d343b5',1,'Species_Base::mortalityRateGradient()'],['../classSpecies.html#a070336f0725472a8bfb59da72f40197a',1,'Species::mortalityRateGradient()']]],
   ['msbp',['msbp',['../classLSODA.html#a4b42cc5f6084610ac4ee40044d4c8629',1,'LSODA']]],
   ['mu',['mu',['../classLSODA.html#a517cd075e203416fbc7bcd28e8928a11',1,'LSODA']]],
@@ -19,5 +24,7 @@ var searchData=
   ['mxncf',['mxncf',['../classLSODA.html#ab77ec578cd9727a690c14ea30cdc94cf',1,'LSODA']]],
   ['mxordn',['mxordn',['../classLSODA.html#aee092eec3c2a0f76064eaed35ccddbbe',1,'LSODA']]],
   ['mxords',['mxords',['../classLSODA.html#a8a2193d85bbfd1c292f04009e14c7142',1,'LSODA']]],
-  ['mxstep',['mxstep',['../classLSODA.html#ab6d71e610573fb27460d0b63643ed3a2',1,'LSODA']]]
+  ['mxstep',['mxstep',['../classLSODA.html#ab6d71e610573fb27460d0b63643ed3a2',1,'LSODA']]],
+  ['my_5flower_5fbound',['my_lower_bound',['../cubic__spline_8h.html#a7e40d975b9c8e0ee31c4639fd4f0e2d1',1,'cubic_spline.h']]],
+  ['my_5fupper_5fbound',['my_upper_bound',['../cubic__spline_8h.html#a84424df486c9c0bdb78c6ab571b305c2',1,'cubic_spline.h']]]
 ];

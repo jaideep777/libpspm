@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['lsoda',['LSODA',['../classLSODA.html',1,'']]]
+  ['individualbase',['IndividualBase',['../classIndividualBase.html',1,'']]]
 ];

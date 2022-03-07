@@ -1,5 +1,25 @@
 var searchData=
 [
-  ['l',['l',['../classLSODA.html#ad6cde4dd0c6e98953d88b7abc7178b41',1,'LSODA']]],
-  ['lmax',['lmax',['../classLSODA.html#a91b646ffeec9266995d9c6f328b74159',1,'LSODA']]]
+  ['n',['n',['../classLSODA.html#a05f50b8f97aa0155da712fce56079fe4',1,'LSODA::n()'],['../classBandMatrix.html#abf371613e091dd4c7baeaf9506bb06d1',1,'BandMatrix::N()']]],
+  ['n_5fextra_5fstatevars',['n_extra_statevars',['../classSpecies__Base.html#aa69fc5e02b19d76902bbf7de18d257de',1,'Species_Base']]],
+  ['n_5fstatevars_5finternal',['n_statevars_internal',['../classSolver.html#a99a6593acd2444b2a8422840bb7133a1',1,'Solver']]],
+  ['n_5fstatevars_5fsystem',['n_statevars_system',['../classSolver.html#a17a2cbcb93b71c98bcbf084ecff09a8a',1,'Solver']]],
+  ['nbad',['nbad',['../classRKCK45.html#a5fe86dd347e8270d061152530671b67b',1,'RKCK45']]],
+  ['nf',['nf',['../classSpecies__Base.html#a45c99329477b974440e1359a36c1e21e',1,'Species_Base']]],
+  ['nfe',['nfe',['../classLSODA.html#af4b3fe3f80b35509ef5769b34c6b22ee',1,'LSODA::nfe()'],['../classRKCK45.html#a08aee7f3e3fdf2c297941c43157554ce',1,'RKCK45::nfe()']]],
+  ['nfe_5fcumm',['nfe_cumm',['../classOdeSolver.html#a3ae8df3a088e4e573d10e8d5fad3c3a2',1,'OdeSolver']]],
+  ['ng',['ng',['../classSpecies__Base.html#a7fabaf886691242e743af775e20a036d',1,'Species_Base']]],
+  ['nhnil',['nhnil',['../classLSODA.html#a774a5a60c368b1fe2519d7cc20eff64e',1,'LSODA']]],
+  ['nje',['nje',['../classLSODA.html#ae5fb71da43d6b83b5e3c0152efe7a65a',1,'LSODA']]],
+  ['nm',['nm',['../classSpecies__Base.html#ac30a94b817a4f371ca24a9c379927774',1,'Species_Base']]],
+  ['nok',['nok',['../classRKCK45.html#a22201c2e6f6240d8c2adf6433e863ad1',1,'RKCK45']]],
+  ['np',['np',['../classSpecies__Base.html#a5ad4e341acd80808bda657d073f95d0d',1,'Species_Base']]],
+  ['npoints',['npoints',['../classSpline.html#a936a07fba0bc41e843aa3c86712af418',1,'Spline']]],
+  ['nq',['nq',['../classLSODA.html#a9b20353821107b604f5a265f8bda32f3',1,'LSODA']]],
+  ['nqu',['nqu',['../classLSODA.html#a8239a9d50b645959aaad803925fc830f',1,'LSODA']]],
+  ['nslast',['nslast',['../classLSODA.html#a7e2d8c648d4c3d6fb8655556ae9471f4',1,'LSODA']]],
+  ['nslp',['nslp',['../classLSODA.html#a5be022e5e81ff675d5696215a75dfd46',1,'LSODA']]],
+  ['nst',['nst',['../classLSODA.html#adce89db9d5111148f4e422acdd541be2',1,'LSODA']]],
+  ['ntrep',['ntrep',['../classLSODA.html#a831d6ce70c1eb95f38cd991489f8fee2',1,'LSODA']]],
+  ['nyh',['nyh',['../classLSODA.html#a20849bf61e85211387e1eb2216d273ca',1,'LSODA']]]
 ];

@@ -17,7 +17,7 @@
 <!-- Node29 -->
 <g id="node2" class="node">
 <title>Node29</title>
-<g id="a_node2"><a xlink:href="classSolver.html#a9172d0d2dc6399ada494ef23020943d5" target="_top" xlink:title="Solver::integrate_wudx\l_above">
+<g id="a_node2"><a xlink:href="classSolver.html#a9172d0d2dc6399ada494ef23020943d5" target="_top" xlink:title="Computes the partial integral &#160;for the specified species. ">
 <polygon fill="none" stroke="#000000" points="191,-39 191,-69 307,-69 307,-39 191,-39"/>
 <text text-anchor="start" x="199" y="-57" font-family="Helvetica,sans-Serif" font-size="10.00" fill="#000000">Solver::integrate_wudx</text>
 <text text-anchor="middle" x="249" y="-46" font-family="Helvetica,sans-Serif" font-size="10.00" fill="#000000">_above</text>

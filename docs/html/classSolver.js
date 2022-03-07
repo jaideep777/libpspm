@@ -1,6 +1,6 @@
 var classSolver =
 [
-    [ "Solver", "classSolver.html#a2f4d07185f6643ec6599baa823df10e8", null ],
+    [ "Solver", "classSolver.html#ad412388e4d79d17fae0738492489d413", null ],
     [ "addCohort_CM", "classSolver.html#af6469f699052d7c5fc9192c75b597f30", null ],
     [ "addCohort_EBT", "classSolver.html#a1b1f4ba3186796d37c909c6b26c7d6f2", null ],
     [ "addSpecies", "classSolver.html#af84f4387e484f0cdb9b92fa6ff9ff858", null ],
@@ -13,7 +13,7 @@ var classSolver =
     [ "calcSpeciesBirthFlux", "classSolver.html#aa5f2d1d48f6b4db83dbb257325924d2c", null ],
     [ "copyCohortsToState", "classSolver.html#ac108d0e9de32ef14e68a176ff9969c38", null ],
     [ "copyStateToCohorts", "classSolver.html#ad3f68f3021eed287c5b1c85bdc24afd8", null ],
-    [ "getDensitySpecies_EBT", "classSolver.html#adae147b4a43d3bd20e0333e2a5a2cc3a", null ],
+    [ "getDensitySpecies_EBT", "classSolver.html#aca318144131fe7ed314e6e62037dcde6", null ],
     [ "initialize", "classSolver.html#a0c67ab4d4fd9c36cfcbfdc13021b419f", null ],
     [ "integrate_wudx_above", "classSolver.html#a9172d0d2dc6399ada494ef23020943d5", null ],
     [ "integrate_x", "classSolver.html#a2a6ca7647a4cde1195789132f3873c0b", null ],
