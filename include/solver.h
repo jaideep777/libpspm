@@ -115,6 +115,11 @@ class Solver{
 	template<typename wFunc>
 	double integrate_x(wFunc w, double t, int species_id);
 
+	/// @brief Computes the partial integral \f[I = \int_{x_{low}}^{x_m} w(z,t)u(z)dz\f] for the specified species. 
+	/// @param w A function or function-object of the form `w(int i, double t)` that returns a double. It can be a lambda.
+	/// @param t The current time (corresponding to the current physiological state), to be passed to `w`
+	/// @param xlow The lower limit of the integral
+	/// @param species_id The id of the species for which the integral should be computed
 	template<typename wFunc>
 	double integrate_wudx_above(wFunc w, double t, double xlow, int species_id);
 	

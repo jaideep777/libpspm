@@ -72,7 +72,6 @@ class Individual : public IndividualBase{
 	}
 
 };
-
 ```
 
 Having defined these classes, create an `Environment` object and a species of `Individual`s as follows:

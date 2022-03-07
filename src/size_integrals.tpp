@@ -1,11 +1,28 @@
+
+/**
+The integral is computed for different methods as follows:
+
+`FMU:` \f$\quad I = \sum_{i=i_0}^J h_i w_i u_i\f$
+
+`EBT:` \f$\quad I = \sum_{i=i_0}^J w_i N_i\f$, with \f$x_0 = x_b + \pi_0/N_0 \f$
+
+`CM :` \f$\quad I = \sum_{i=i_0}^J h_i w_i (u_{i+1}+u_i)/2 \f$
+
+where \f$i_0 = \text{argmax}(x_i<x_{low})\f$, \f$h_i = x_{i+1}-x_i\f$, and \f$w_i = w(x_i)\f$.
+
+Since the CM method uses the trapezoidal rule for integration, it must include the boundary cohort irrespective of the value of \f$x_0\f$.
+*/
+//             _xm 
+// Calculate _/ w(z,t)u(z)dz
+//         xlow
 template<typename wFunc>
 double Solver::integrate_wudx_above(wFunc w, double t, double xlow, int species_id){
 
 	Species_Base* spp = species_vec[species_id];
 
-	// cohorts are inserted at the end, hence sorted in descending order - FIXME: should there be an optional "sort_cohorts" control parameter? Maybe some freak models are such that cohorts dont remain in sorted order?
+	// cohorts are inserted at the end, hence sorted in descending order
+	// FIXME: should there be an optional "sort_cohorts" control parameter? Maybe some freak models are such that cohorts dont remain in sorted order?
 	if (method == SOLVER_CM){
-		//std::cout << "J = " << spp.J << ", dist = " << iset.dist << std::endl; 
 		// integrate using trapezoidal rule 
 		// Note, new cohorts are inserted at the end, so x will be descending
 		bool integration_completed = false;
@@ -14,7 +31,6 @@ double Solver::integrate_wudx_above(wFunc w, double t, double xlow, int species_
 		double x_hi = spp->getX(0);
 		double f_hi = w(0, t)*u_hi;
 		//if (xlow < 0.01) cout << "x/w/u/f = " << x_hi << " " <<  w(*itx,t) <<  " " << exp(*itu)  << " " << f_hi << "\n";
-		//--itx; --itu;
 		for (int i=1; i<spp->J; ++i){  // going from high ----> low
 			double u_lo = spp->getU(i); //(use_log_densities)? exp(spp->getU(i)) : spp->getU(i);
 			double x_lo = spp->getX(i);
@@ -79,11 +95,9 @@ double Solver::integrate_wudx_above(wFunc w, double t, double xlow, int species_
 			}
 			else{
 				I += spp->h[i] * w(i,t) * spp->getU(i);
-				//std::cout << "Here: " << i << std::endl;
 			}
 		}
 		
-		//std::cout << "Here" << std::endl;
 		return I;
 	}
 	
@@ -108,38 +122,10 @@ double Solver::integrate_wudx_above(wFunc w, double t, double xlow, int species_
 		spp->setX(spp->J-1, pi0);
 
 		return I;
-		
-		
-		//// integrate using midpoint quadrature rule
-		//double I=0;
-		//auto iset = spp.get_iterators(S);
-		//auto &itu = iset.get("u");
-		//auto &itx = iset.get("X");
-		
-		//double pi0 = *itx;
-		//double N0  = *itu;
-
-		//iset.rbegin();
-
-		//for (int i=spp.J-1; i>=1; --i, --iset){  // iterate over cohorts except boundary cohort
-		//    if (*itx < xlow) break;
-			
-		//    double f = w(*itx,t) * (*itu);
-		//    //std::cout << "f = " << f << " " << spp.x[i] << " " << xlow << " " << spp.h[i] << std::endl;
-		//    I += f;
-		//}
-		
-		//double x0 = spp.xb + pi0/(N0+1e-12);  
-		//if (xlow < x0) I += w(x0, t)*N0;	 
-		
-		////std::cout << "Here" << std::endl;
-		//return I;
 	}
 	
 	else{
 		throw std::runtime_error("Unsupported solver method");
-		//std::cout << "Only CM is implemented\n";
-		//return 0;
 	}
 }
 
@@ -147,7 +133,9 @@ double Solver::integrate_wudx_above(wFunc w, double t, double xlow, int species_
 
 
 
-
+//             _xm 
+// Calculate _/ w(z,t)u(z,t)dz
+//         xb
 template<typename wFunc>
 double Solver::integrate_x(wFunc w, double t, int species_id){
 	Species_Base* spp = species_vec[species_id];
@@ -164,7 +152,7 @@ double Solver::integrate_x(wFunc w, double t, int species_id){
 	else if (method == SOLVER_EBT){
 		// integrate using EBT rule (sum over cohorts)
 		
-		// get (backup) pi0, N0 from last cohort 
+		// backup pi0, N0 from last cohort 
 		double   pi0  =  spp->getX(spp->J-1);
 		double   N0   =  spp->getU(spp->J-1);
 
@@ -183,15 +171,6 @@ double Solver::integrate_x(wFunc w, double t, int species_id){
 	}
 	
 	if (method == SOLVER_CM){
-		// integrate using trapezoidal rule. Below modified to avoid double computation of w(x)
-		//double I = 0;
-		//for (iset.begin(); iset.dist < iset.size-1; ++iset){
-		//    double unext = (use_log_densities)? exp(*(itu+1)) : *(itu+1);
-		//    double unow  = (use_log_densities)? exp(*itu) : *itu;
-		//    I += (*(itx+1)-*itx)*(w(*(itx+1), t)*unext + w(*itx, t)*unow);
-		//}
-		//return I*0.5;
-		
 		// integrate using trapezoidal rule 
 		// Note, new cohorts are inserted at the beginning, so x will be ascending
 		double I = 0;
@@ -199,7 +178,7 @@ double Solver::integrate_x(wFunc w, double t, int species_id){
 		double x_hi = spp->getX(0);
 		double f_hi = w(0, t)*u_hi;
 		//if (xlow < 0.01) cout << "x/w/u/f = " << x_hi << " " <<  w(*itx,t) <<  " " << exp(*itu)  << " " << f_hi << "\n";
-		//--itx; --itu;
+
 		for (int i=1; i<spp->J; ++i){
 			double u_lo = spp->getU(i); //(use_log_densities)? exp(spp->getU(i)) : spp->getU(i);
 			double x_lo = spp->getX(i);
