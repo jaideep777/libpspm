@@ -1,6 +1,7 @@
 #ifndef DEMO_RED_MODEL_H
 #define DEMO_RED_MODEL_H
 
+#include <individual_base.h>
 
 class LightEnvironment : public EnvironmentBase{
 	
@@ -31,7 +32,7 @@ class LightEnvironment : public EnvironmentBase{
 
 
 
-class RED_Plant{
+class RED_Plant : public IndividualBase{
 	public:
 
 	//double input_seed_rain = 1;	
@@ -55,18 +56,8 @@ class RED_Plant{
 	}
 
 
-	void set_size(double _x){
-	}
-
 	double init_density(double x, void * env, double input_seed_rain){
 		return 100/pow(x,4);
-	}
-
-	void preCompute(double x, double t, void * env){
-	}
-
-	double establishmentProbability(double t, void * env){
-		return 1;
 	}
 
 	double growthRate(double x, double t, void * env){
@@ -85,20 +76,6 @@ class RED_Plant{
 		return 0.1/0.9*g0*pow(x,phiG)*(1-env1->evalEnv(x,t));
 	}
 
-	void init_state(double t, void * env){
-	}
-	vector<double>::iterator set_state(vector<double>::iterator &it){
-		return it;
-	}
-	vector<double>::iterator get_state(vector<double>::iterator &it){
-		return it;
-	}
-	vector<double>::iterator get_rates(vector<double>::iterator &it){
-		return it;
-	}
-
-	void print(std::ostream& out = std::cout){
-	}
 };
 
 

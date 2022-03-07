@@ -12,11 +12,6 @@ class Environment : public EnvironmentBase{
 		return E;
 	}
 
-	// This function must do any necessary precomputations to facilitate evalEnv()
-	// Therefore, this should calculate env for all X when it is a function of X
-	// In such a case, the solver's SubdivisionSpline can be ussed
-	// Note: The state vector in the solver will not be updated until the RK step is completed. 
-	// Hence, explicitly pass the state to this function.
 	void computeEnv(double t, Solver * S, std::vector<double>::iterator s, std::vector<double>::iterator dsdt){
 		//             _xm 
 		// Calculate _/ w(z,t)u(z,t)dz
@@ -65,7 +60,7 @@ class Plant{
 
 
 
-class TestModel : public Plant, public Individual_Base{
+class TestModel : public Plant{
 	public:
 	double sc = 10;
 
