@@ -68,6 +68,27 @@ int main(){
 	if(abs(S.integrate_wudx_above(w, 0, 1.1, 0) - 10.5) > 1e-5) return 1;
 
 
+	//     x
+	//     ^ 
+	//     |
+	//   4 |---------------* (8)
+	//     |  A = 6
+	//   3 |-------*         (4)
+	//     |  A = 3
+	//   2 |---*             (2)
+	// 1.1 |  *   A = 1.5    (1.1)
+	//   1 |-*               (1)
+	//	   |  A = 1.5   
+	//   0 +----*------------(2)---> u
+	//
+	S.state = {4,log(8), 3,log(4), 2,log(2), 1,log(1), 0,0,0,0,1,1,1,1,2,2,2,2,3,3,3,3};
+	S.copyStateToCohorts(S.state.begin());
+	S.control.integral_interpolate = true;
+	cout << S.integrate_x(w, 0, 0) << " " << S.integrate_wudx_above(w, 0, 1.1, 0) << endl;
+	if(abs(S.integrate_x(w, 0, 0) - 12) > 1e-5) return 1;
+	if(abs(S.integrate_wudx_above(w, 0, 1.1, 0) - 10.395) > 1e-5) return 1;
+
+
 	return 0;
 
 }

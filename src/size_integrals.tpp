@@ -1,4 +1,8 @@
 
+/// @param w A function or function-object of the form `w(int i, double t)` that returns a double. It can be a lambda.
+/// @param t The current time (corresponding to the current physiological state), to be passed to `w`
+/// @param xlow The lower limit of the integral
+/// @param species_id The id of the species for which the integral should be computed
 /**
 The integral is computed for different methods as follows:
 
@@ -10,7 +14,7 @@ The integral is computed for different methods as follows:
 
 where \f$i_0 = \text{argmax}(x_i<x_{low})\f$, \f$h_i = x_{i+1}-x_i\f$, and \f$w_i = w(x_i)\f$.
 
-Since the CM method uses the trapezoidal rule for integration, it must include the boundary cohort irrespective of the value of \f$x_0\f$.
+Since the CM method uses the trapezoidal rule for integration, it includes the boundary cohort irrespective of the value of \f$x_0\f$.
 */
 //             _xm 
 // Calculate _/ w(z,t)u(z)dz
@@ -19,6 +23,13 @@ template<typename wFunc>
 double Solver::integrate_wudx_above(wFunc w, double t, double xlow, int species_id){
 
 	Species_Base* spp = species_vec[species_id];
+
+	//// implementation from orig plant model	
+	//I += (x_hi - x_lo) * (f_hi + f_lo);
+	//x_hi = x_lo;
+	//f_hi = f_lo;
+	//if (x_lo < xlow) break;
+	// ---- 
 
 	// cohorts are inserted at the end, hence sorted in descending order
 	// FIXME: should there be an optional "sort_cohorts" control parameter? Maybe some freak models are such that cohorts dont remain in sorted order?
@@ -36,22 +47,15 @@ double Solver::integrate_wudx_above(wFunc w, double t, double xlow, int species_
 			double x_lo = spp->getX(i);
 			double f_lo = w(i, t)*u_lo;
 	
-			//// implementation from orig plant model	
-			//I += (x_hi - x_lo) * (f_hi + f_lo);
-			//x_hi = x_lo;
-			//f_hi = f_lo;
-			//if (x_lo < xlow) break;
-			// ---- 
-
 			// This implementation allows stopping the integration exactly at xlow. TODO: Need to check if that actually makes sense
 			//if (xlow < 0.01) cout << "x/w/u/f = " << x_lo << " " <<  w(*itx,t) <<  " " << exp(*itu)  << " " << f_lo << "\n";
 			if (x_lo < xlow){
 				// * interpolate to stop exactly at xlow
-				//double f = f_lo + (f_hi-f_lo)/(x_hi-x_lo)*(xlow - x_lo);  
-				//double x = xlow;
-				// * include integration up to next cohort
-				double f = f_lo;
-				double x = x_lo;
+				double f = (control.integral_interpolate)? f_lo + (f_hi-f_lo)/(x_hi-x_lo)*(xlow - x_lo) : f_lo;  
+				double x = (control.integral_interpolate)? xlow : x_lo;
+//				// * include integration up to next cohort
+//				double f = f_lo;
+//				double x = x_lo;
 
 				I += (x_hi - x) * (f_hi + f);
 				x_hi = x_lo;  // - these two probably not needed
