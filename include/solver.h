@@ -45,7 +45,7 @@ class Solver{
 		double ode_rk4_stepsize = 0.1;
 		double ode_ifmu_stepsize = 0.1;
 		bool ifmu_centered_grids = true;
-		bool integral_interpolate = false;
+		bool integral_interpolate = true;
 	} control;
 	
 	bool use_log_densities = true;
