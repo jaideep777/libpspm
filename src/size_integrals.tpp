@@ -5,7 +5,9 @@
 /// @param species_id   The id of the species for which the integral should be computed
 ///
 /// The integral is computed for different methods as follows:
-/// 
+///
+/// \image html size_integral.png width=700cm 
+///
 /// `FMU:` \f$\quad I = \sum_{i=i_0}^J h_i w_i u_i\f$
 /// 
 /// `EBT:` \f$\quad I = \sum_{i=i_0}^J w_i N_i\f$, with \f$x_0 = x_b + \pi_0/N_0 \f$
