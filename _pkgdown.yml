@@ -15,7 +15,8 @@ navbar:
   structure:
     left:
     - home
-    - theory 
+    - tutorials 
+    - developer
     - api
     right:
     - news
@@ -25,14 +26,18 @@ navbar:
       text: Home
       icon: fa-home fa-lg
       href: index.html
-    theory:
-      text: Theory
+    tutorials:
+      text: Tutorials
       icon: fa-book fa-lg
       menu:
-        - text: Allometric relations
-          href: articles/theory_allometry.html
-        - text: Crown shape model
-          href: articles/crown_geometry.html
+        - text: Computing size integrals
+          href: articles/size_integral.html
+    developer:
+      text: Developer
+      icon: fa-user-secret
+      menu:
+        - text: Size integrals
+          href: articles/size_integral.html
     api:
       text: API
       icon: fa-code fa-lg
