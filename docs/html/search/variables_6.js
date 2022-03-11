@@ -9,6 +9,7 @@ var searchData=
   ['illin',['illin',['../classLSODA.html#a02f2c4e09828561b26772b3fabaee767',1,'LSODA']]],
   ['imxer',['imxer',['../classLSODA.html#a12155192ae58825e5aa97e0493bcec2e',1,'LSODA']]],
   ['init',['init',['../classLSODA.html#a85603b0e6969c434e6149b97bf0a3e3e',1,'LSODA']]],
+  ['integral_5finterpolate',['integral_interpolate',['../classSolver.html#a648b409a0b1a144940a2ce975d92cb88',1,'Solver']]],
   ['ipup',['ipup',['../classLSODA.html#affc57283b8f361e2fd83683bb7af10e6',1,'LSODA']]],
   ['ipvt',['ipvt',['../classLSODA.html#acd7a0db568c9c8ee993b9cc086eac28f',1,'LSODA']]],
   ['irflag',['irflag',['../classLSODA.html#a1d56b8aa2f77dc8286a886cbf79c1c7c',1,'LSODA']]],

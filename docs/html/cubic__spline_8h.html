@@ -100,12 +100,14 @@ $(document).ready(function(){initNavTree('cubic__spline_8h.html','');});
 </div><div class="textblock"><div class="dynheader">
 Include dependency graph for cubic_spline.h:</div>
 <div class="dyncontent">
-<div class="center"><iframe scrolling="no" frameborder="0" src="cubic__spline_8h__incl.svg" width="251" height="112"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
+<div class="center"><iframe scrolling="no" frameborder="0" src="cubic__spline_8h__incl.svg" width="251" height="112"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe>
+</div>
 </div>
 </div><div class="textblock"><div class="dynheader">
 This graph shows which files directly or indirectly include this file:</div>
 <div class="dyncontent">
-<div class="center"><iframe scrolling="no" frameborder="0" src="cubic__spline_8h__dep__incl.svg" width="162" height="112"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
+<div class="center"><iframe scrolling="no" frameborder="0" src="cubic__spline_8h__dep__incl.svg" width="162" height="112"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe>
+</div>
 </div>
 </div>
 <p><a href="cubic__spline_8h_source.html">Go to the source code of this file.</a></p>
@@ -189,7 +191,8 @@ template&lt;typename T &gt; </div>
 <div class="fragment"><div class="line"><a name="l00064"></a><span class="lineno">   64</span>&#160;{</div><div class="line"><a name="l00065"></a><span class="lineno">   65</span>&#160;  <span class="keywordtype">int</span> it, first=0, last=arrlen;</div><div class="line"><a name="l00066"></a><span class="lineno">   66</span>&#160;  <span class="keywordtype">int</span> count, step;</div><div class="line"><a name="l00067"></a><span class="lineno">   67</span>&#160;  count = arrlen;</div><div class="line"><a name="l00068"></a><span class="lineno">   68</span>&#160;  <span class="keywordflow">while</span> (count&gt;0)</div><div class="line"><a name="l00069"></a><span class="lineno">   69</span>&#160;  {</div><div class="line"><a name="l00070"></a><span class="lineno">   70</span>&#160;    it = first; step=count/2; </div><div class="line"><a name="l00071"></a><span class="lineno">   71</span>&#160;    it += step;</div><div class="line"><a name="l00072"></a><span class="lineno">   72</span>&#160;    <span class="keywordflow">if</span> (arr[it] &lt; val) {              </div><div class="line"><a name="l00073"></a><span class="lineno">   73</span>&#160;      first=++it;</div><div class="line"><a name="l00074"></a><span class="lineno">   74</span>&#160;      count-=step+1;</div><div class="line"><a name="l00075"></a><span class="lineno">   75</span>&#160;    }</div><div class="line"><a name="l00076"></a><span class="lineno">   76</span>&#160;    <span class="keywordflow">else</span> count=step;</div><div class="line"><a name="l00077"></a><span class="lineno">   77</span>&#160;  }</div><div class="line"><a name="l00078"></a><span class="lineno">   78</span>&#160;  <span class="keywordflow">return</span> first;</div><div class="line"><a name="l00079"></a><span class="lineno">   79</span>&#160;}</div></div><!-- fragment --><div class="dynheader">
 Here is the caller graph for this function:</div>
 <div class="dyncontent">
-<div class="center"><iframe scrolling="no" frameborder="0" src="cubic__spline_8h_a7e40d975b9c8e0ee31c4639fd4f0e2d1_icgraph.svg" width="528" height="38"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
+<div class="center"><iframe scrolling="no" frameborder="0" src="cubic__spline_8h_a7e40d975b9c8e0ee31c4639fd4f0e2d1_icgraph.svg" width="528" height="38"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe>
+</div>
 </div>
 
 </div>
@@ -288,7 +291,8 @@ template&lt;typename T &gt; </div>
 <div class="fragment"><div class="line"><a name="l00035"></a><span class="lineno">   35</span>&#160;                                                                            {</div><div class="line"><a name="l00036"></a><span class="lineno">   36</span>&#160;    n--; <span class="comment">// since we start from x0 (not x1) JAI: Therefore last valid index is n for a,b, n-1 for c</span></div><div class="line"><a name="l00037"></a><span class="lineno">   37</span>&#160;    c[0] /= b[0];</div><div class="line"><a name="l00038"></a><span class="lineno">   38</span>&#160;    d[0] /= b[0];</div><div class="line"><a name="l00039"></a><span class="lineno">   39</span>&#160;</div><div class="line"><a name="l00040"></a><span class="lineno">   40</span>&#160;    <span class="keywordflow">for</span> (<span class="keywordtype">int</span> i = 1; i &lt; n; i++) {</div><div class="line"><a name="l00041"></a><span class="lineno">   41</span>&#160;        c[i] /= b[i] - a[i]*c[i-1];</div><div class="line"><a name="l00042"></a><span class="lineno">   42</span>&#160;        d[i] = (d[i] - a[i]*d[i-1]) / (b[i] - a[i]*c[i-1]);</div><div class="line"><a name="l00043"></a><span class="lineno">   43</span>&#160;    }</div><div class="line"><a name="l00044"></a><span class="lineno">   44</span>&#160;</div><div class="line"><a name="l00045"></a><span class="lineno">   45</span>&#160;    d[n] = (d[n] - a[n]*d[n-1]) / (b[n] - a[n]*c[n-1]);</div><div class="line"><a name="l00046"></a><span class="lineno">   46</span>&#160;</div><div class="line"><a name="l00047"></a><span class="lineno">   47</span>&#160;    <span class="keywordflow">for</span> (<span class="keywordtype">int</span> i = n; i-- &gt; 0;) {</div><div class="line"><a name="l00048"></a><span class="lineno">   48</span>&#160;        d[i] -= c[i]*d[i+1];        <span class="comment">// JAI: note, i is in [0, n-1]</span></div><div class="line"><a name="l00049"></a><span class="lineno">   49</span>&#160;    }</div><div class="line"><a name="l00050"></a><span class="lineno">   50</span>&#160;}</div></div><!-- fragment --><div class="dynheader">
 Here is the caller graph for this function:</div>
 <div class="dyncontent">
-<div class="center"><iframe scrolling="no" frameborder="0" src="cubic__spline_8h_a2c5f148ad4f2ebdf6888836c97369d90_icgraph.svg" width="735" height="122"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
+<div class="center"><iframe scrolling="no" frameborder="0" src="cubic__spline_8h_a2c5f148ad4f2ebdf6888836c97369d90_icgraph.svg" width="735" height="122"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe>
+</div>
 </div>
 
 </div>

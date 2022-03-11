@@ -43,14 +43,23 @@
   </a>
 </li>
 <li class="nav-item dropdown">
-  <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" role="button" aria-expanded="false" aria-haspopup="true" id="dropdown--theory">
+  <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" role="button" aria-expanded="false" aria-haspopup="true" id="dropdown--tutorials">
     <span class="fa fa-book fa-lg"></span>
      
-    Theory
+    Tutorials
   </a>
-  <div class="dropdown-menu" aria-labelledby="dropdown--theory">
-    <a class="dropdown-item" href="articles/theory_allometry.html">Allometric relations</a>
-    <a class="dropdown-item" href="articles/crown_geometry.html">Crown shape model</a>
+  <div class="dropdown-menu" aria-labelledby="dropdown--tutorials">
+    <a class="dropdown-item" href="articles/size_integral.html">Computing size integrals</a>
+  </div>
+</li>
+<li class="nav-item dropdown">
+  <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" role="button" aria-expanded="false" aria-haspopup="true" id="dropdown--developer">
+    <span class="fa fa-user-secret"></span>
+     
+    Developer
+  </a>
+  <div class="dropdown-menu" aria-labelledby="dropdown--developer">
+    <a class="dropdown-item" href="articles/size_integral.html">Size integrals</a>
   </div>
 </li>
 <li class="nav-item">
@@ -90,28 +99,39 @@
   <main id="main" class="col-md-9"><div class="section level1">
 <div class="page-header"><h1 id="libpspm">libpspm<a class="anchor" aria-label="anchor" href="#libpspm"></a>
 </h1></div>
-<p>libpspm is a C++ library to simulate Physiologically Structured Population Models (PSPMs).</p>
-<p>It implements four numerical methods to discretize the McKendrick-von Foerster Partial Differential Equation (PDE), which forms the core of a PSPM, into a set of Ordinary Differential Equations (ODEs); see Zhang et al. 2017:</p>
+<p>libpspm is a C++ library to simulate Physiologically Structured
+Population Models (PSPMs).</p>
+<p>It implements four numerical methods to discretize the McKendrick-von
+Foerster Partial Differential Equation (PDE), which forms the core of a
+PSPM, into a set of Ordinary Differential Equations (ODEs); see Zhang et
+al. 2017:</p>
 <ol style="list-style-type: decimal">
 <li>Fixed Mesh Upwind (FMU)</li>
 <li>Implicit Fixed Mesh Upwind (IFMU)</li>
 <li>Escalator Boxcar Train (EBT)</li>
 <li>Characteristic Method (CM)</li>
 </ol>
-<p>The resulting ODEs can be solved using different ODE-solvers. Two such are currently implemented:</p>
+<p>The resulting ODEs can be solved using different ODE-solvers. Two
+such are currently implemented:</p>
 <ol style="list-style-type: decimal">
 <li>Runge-Kutta 4-5 Cash-Karp</li>
 <li>LSODA</li>
 </ol>
-<p>libpspm supports multi-species systems with multiple size-structured and unstructured species.</p>
+<p>libpspm supports multi-species systems with multiple size-structured
+and unstructured species.</p>
 <div class="section level2">
 <h2 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
 </h2>
 <p>To compile as a static library, just perform</p>
 <pre><code>make 
 make check</code></pre>
-<p>This will create a static library (<code>libpspm.a</code>) in the <code>lib</code> folder. Link to this library as <code>-lpspm</code> while compiling your program.</p>
-<p>Alternatively, just include the contents of the <code>src</code> and <code>include</code> folders in your respective project folders, compile each <code>cpp</code> file into an object file, and link with the objects of your project.</p>
+<p>This will create a static library (<code>libpspm.a</code>) in the
+<code>lib</code> folder. Link to this library as <code>-lpspm</code>
+while compiling your program.</p>
+<p>Alternatively, just include the contents of the <code>src</code> and
+<code>include</code> folders in your respective project folders, compile
+each <code>cpp</code> file into an object file, and link with the
+objects of your project.</p>
 <div class="section level3">
 <h3 id="stable-release">Stable release<a class="anchor" aria-label="anchor" href="#stable-release"></a>
 </h3>
@@ -126,53 +146,64 @@ make check</code></pre>
 <div class="section level2">
 <h2 id="usage">Usage<a class="anchor" aria-label="anchor" href="#usage"></a>
 </h2>
-<p>To solve a PSPM, you need to define two classes for the <code>Environment</code> and the <code>Individual</code> (not necessarily with those names). The <code>Environment</code> class must be derived from the <code>EnvironmentBase</code> class provided by the library. Although the <code>Individual</code> class can be defined as a standalone class, the easiest way to define it is also to derive it from the <code>IndividualBase</code> class provided by the library. In these derived classes you must implement the following member functions (one in <code>Environment</code> and four in <code>Individual</code>):</p>
-<div class="sourceCode" id="cb2"><pre class="sourceCode c++"><code class="sourceCode cpp"><a class="sourceLine" id="cb2-1" data-line-number="1"><span class="kw">class</span> Environment : <span class="kw">public</span> EnvironmentBase{</a>
-<a class="sourceLine" id="cb2-2" data-line-number="2">    <span class="kw">public</span>:</a>
-<a class="sourceLine" id="cb2-3" data-line-number="3">    <span class="co">// This function should perform environment computation, given the current state </span></a>
-<a class="sourceLine" id="cb2-4" data-line-number="4">    <span class="dt">void</span> computeEnv(<span class="dt">double</span> t, Solver * S, <span class="bu">std::</span>vector&lt;<span class="dt">double</span>&gt;::iterator s, <span class="bu">std::</span>vector&lt;<span class="dt">double</span>&gt;::iterator dsdt){</a>
-<a class="sourceLine" id="cb2-5" data-line-number="5">    }</a>
-<a class="sourceLine" id="cb2-6" data-line-number="6">};</a>
-<a class="sourceLine" id="cb2-7" data-line-number="7"></a>
-<a class="sourceLine" id="cb2-8" data-line-number="8"><span class="kw">class</span> Individual : <span class="kw">public</span> IndividualBase{</a>
-<a class="sourceLine" id="cb2-9" data-line-number="9">    <span class="kw">public</span>:</a>
-<a class="sourceLine" id="cb2-10" data-line-number="10">    <span class="co">// return the initial density (initial condition) as a function of </span></a>
-<a class="sourceLine" id="cb2-11" data-line-number="11">    <span class="co">// the physiological variable x, environment _env, and input flux of newborns bf</span></a>
-<a class="sourceLine" id="cb2-12" data-line-number="12">    <span class="dt">double</span> init_density(<span class="dt">double</span> x, <span class="dt">void</span> * _env, <span class="dt">double</span> bf){</a>
-<a class="sourceLine" id="cb2-13" data-line-number="13">    }</a>
-<a class="sourceLine" id="cb2-14" data-line-number="14"></a>
-<a class="sourceLine" id="cb2-15" data-line-number="15">    <span class="co">// return the growth rate as a function of </span></a>
-<a class="sourceLine" id="cb2-16" data-line-number="16">    <span class="co">// the physiological variable x, time t, and environment _env</span></a>
-<a class="sourceLine" id="cb2-17" data-line-number="17">    <span class="dt">double</span> growthRate(<span class="dt">double</span> x, <span class="dt">double</span> t, <span class="dt">void</span> * _env){</a>
-<a class="sourceLine" id="cb2-18" data-line-number="18">    }</a>
-<a class="sourceLine" id="cb2-19" data-line-number="19"></a>
-<a class="sourceLine" id="cb2-20" data-line-number="20">    <span class="co">// return the mortality rate as a function of </span></a>
-<a class="sourceLine" id="cb2-21" data-line-number="21">    <span class="co">// the physiological variable x, time t, and environment _env</span></a>
-<a class="sourceLine" id="cb2-22" data-line-number="22">    <span class="dt">double</span> mortalityRate(<span class="dt">double</span> x, <span class="dt">double</span> t, <span class="dt">void</span> * _env){</a>
-<a class="sourceLine" id="cb2-23" data-line-number="23">    }</a>
-<a class="sourceLine" id="cb2-24" data-line-number="24"></a>
-<a class="sourceLine" id="cb2-25" data-line-number="25">    <span class="co">// return the fecundity (birth rate) as a function of </span></a>
-<a class="sourceLine" id="cb2-26" data-line-number="26">    <span class="co">// the physiological variable x, time t, and environment _env</span></a>
-<a class="sourceLine" id="cb2-27" data-line-number="27">    <span class="dt">double</span> birthRate(<span class="dt">double</span> x, <span class="dt">double</span> t, <span class="dt">void</span> * _env){</a>
-<a class="sourceLine" id="cb2-28" data-line-number="28">    }</a>
-<a class="sourceLine" id="cb2-29" data-line-number="29"></a>
-<a class="sourceLine" id="cb2-30" data-line-number="30">};</a></code></pre></div>
-<p>Having defined these classes, create an <code>Environment</code> object and a species of <code>Individual</code>s as follows:</p>
-<div class="sourceCode" id="cb3"><pre class="sourceCode c++"><code class="sourceCode cpp"><a class="sourceLine" id="cb3-1" data-line-number="1">Environment E;</a>
-<a class="sourceLine" id="cb3-2" data-line-number="2">Species&lt;Individual&gt; spp;</a></code></pre></div>
-<p>Then create a <code>Solver</code> by specifying the PSPM method and the ODE solver, e.g.,</p>
-<div class="sourceCode" id="cb4"><pre class="sourceCode c++"><code class="sourceCode cpp"><a class="sourceLine" id="cb4-1" data-line-number="1">Solver S(SOLVER_FMU, <span class="st">"rk45ck"</span>);</a></code></pre></div>
+<p>To solve a PSPM, you need to define two classes for the
+<code>Environment</code> and the <code>Individual</code> (not
+necessarily with those names). The <code>Environment</code> class must
+be derived from the <code>EnvironmentBase</code> class provided by the
+library. Although the <code>Individual</code> class can be defined as a
+standalone class, the easiest way to define it is also to derive it from
+the <code>IndividualBase</code> class provided by the library. In these
+derived classes you must implement the following member functions (one
+in <code>Environment</code> and four in <code>Individual</code>):</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode c++"><code class="sourceCode cpp"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> Environment <span class="op">:</span> <span class="kw">public</span> EnvironmentBase<span class="op">{</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">public</span><span class="op">:</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>    <span class="co">// This function should perform environment computation, given the current state </span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>    <span class="dt">void</span> computeEnv<span class="op">(</span><span class="dt">double</span> t<span class="op">,</span> Solver <span class="op">*</span> S<span class="op">,</span> <span class="bu">std::</span>vector<span class="op">&lt;</span><span class="dt">double</span><span class="op">&gt;::</span>iterator s<span class="op">,</span> <span class="bu">std::</span>vector<span class="op">&lt;</span><span class="dt">double</span><span class="op">&gt;::</span>iterator dsdt<span class="op">){</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a><span class="op">};</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> Individual <span class="op">:</span> <span class="kw">public</span> IndividualBase<span class="op">{</span></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>    <span class="kw">public</span><span class="op">:</span></span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>    <span class="co">// return the initial density (initial condition) as a function of </span></span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>    <span class="co">// the physiological variable x, environment _env, and input flux of newborns bf</span></span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>    <span class="dt">double</span> init_density<span class="op">(</span><span class="dt">double</span> x<span class="op">,</span> <span class="dt">void</span> <span class="op">*</span> _env<span class="op">,</span> <span class="dt">double</span> bf<span class="op">){</span></span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>    <span class="co">// return the growth rate as a function of </span></span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a>    <span class="co">// the physiological variable x, time t, and environment _env</span></span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a>    <span class="dt">double</span> growthRate<span class="op">(</span><span class="dt">double</span> x<span class="op">,</span> <span class="dt">double</span> t<span class="op">,</span> <span class="dt">void</span> <span class="op">*</span> _env<span class="op">){</span></span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a>    <span class="co">// return the mortality rate as a function of </span></span>
+<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a>    <span class="co">// the physiological variable x, time t, and environment _env</span></span>
+<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a>    <span class="dt">double</span> mortalityRate<span class="op">(</span><span class="dt">double</span> x<span class="op">,</span> <span class="dt">double</span> t<span class="op">,</span> <span class="dt">void</span> <span class="op">*</span> _env<span class="op">){</span></span>
+<span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb2-24"><a href="#cb2-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-25"><a href="#cb2-25" aria-hidden="true" tabindex="-1"></a>    <span class="co">// return the fecundity (birth rate) as a function of </span></span>
+<span id="cb2-26"><a href="#cb2-26" aria-hidden="true" tabindex="-1"></a>    <span class="co">// the physiological variable x, time t, and environment _env</span></span>
+<span id="cb2-27"><a href="#cb2-27" aria-hidden="true" tabindex="-1"></a>    <span class="dt">double</span> birthRate<span class="op">(</span><span class="dt">double</span> x<span class="op">,</span> <span class="dt">double</span> t<span class="op">,</span> <span class="dt">void</span> <span class="op">*</span> _env<span class="op">){</span></span>
+<span id="cb2-28"><a href="#cb2-28" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb2-29"><a href="#cb2-29" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-30"><a href="#cb2-30" aria-hidden="true" tabindex="-1"></a><span class="op">};</span></span></code></pre></div>
+<p>Having defined these classes, create an <code>Environment</code>
+object and a species of <code>Individual</code>s as follows:</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode c++"><code class="sourceCode cpp"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>Environment E<span class="op">;</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>Species<span class="op">&lt;</span>Individual<span class="op">&gt;</span> spp<span class="op">;</span></span></code></pre></div>
+<p>Then create a <code>Solver</code> by specifying the PSPM method and
+the ODE solver, e.g.,</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode c++"><code class="sourceCode cpp"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>Solver S<span class="op">(</span>SOLVER_FMU<span class="op">,</span> <span class="st">"rk45ck"</span><span class="op">);</span></span></code></pre></div>
 <p>Add the species and the environment to the solver:</p>
-<div class="sourceCode" id="cb5"><pre class="sourceCode c++"><code class="sourceCode cpp"><a class="sourceLine" id="cb5-1" data-line-number="1"><span class="co">// add the created Species 'spp' to the solver along with some species-specific properties </span></a>
-<a class="sourceLine" id="cb5-2" data-line-number="2">S.addSpecies(<span class="dv">25</span>, xb, xm, <span class="kw">false</span>, &amp;spp, <span class="dv">0</span>, <span class="dv">-1</span>);</a>
-<a class="sourceLine" id="cb5-3" data-line-number="3">S.setEnvironment(&amp;E);</a></code></pre></div>
+<div class="sourceCode" id="cb5"><pre class="sourceCode c++"><code class="sourceCode cpp"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co">// add the created Species 'spp' to the solver along with some species-specific properties </span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>S<span class="op">.</span>addSpecies<span class="op">(</span><span class="dv">25</span><span class="op">,</span> xb<span class="op">,</span> xm<span class="op">,</span> <span class="kw">false</span><span class="op">,</span> <span class="op">&amp;</span>spp<span class="op">,</span> <span class="dv">0</span><span class="op">,</span> <span class="op">-</span><span class="dv">1</span><span class="op">);</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>S<span class="op">.</span>setEnvironment<span class="op">(&amp;</span>E<span class="op">);</span></span></code></pre></div>
 <p>Initialize and run the PSPM:</p>
-<div class="sourceCode" id="cb6"><pre class="sourceCode c++"><code class="sourceCode cpp"><a class="sourceLine" id="cb6-1" data-line-number="1">S.resetState();</a>
-<a class="sourceLine" id="cb6-2" data-line-number="2">S.initialize();</a>
-<a class="sourceLine" id="cb6-3" data-line-number="3"><span class="cf">for</span> (<span class="dt">double</span> t=<span class="dv">0</span>; t &lt; <span class="dv">10</span>; t=t<span class="dv">+1</span>) {</a>
-<a class="sourceLine" id="cb6-4" data-line-number="4">    S.step_to(t);</a>
-<a class="sourceLine" id="cb6-5" data-line-number="5">}</a></code></pre></div>
-<p>Concrete examples can be found in the <code>demos</code> folder. For more detailed tutorials explaining the demos, see:</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode c++"><code class="sourceCode cpp"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>S<span class="op">.</span>resetState<span class="op">();</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>S<span class="op">.</span>initialize<span class="op">();</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> <span class="op">(</span><span class="dt">double</span> t<span class="op">=</span><span class="dv">0</span><span class="op">;</span> t <span class="op">&lt;</span> <span class="dv">10</span><span class="op">;</span> t<span class="op">=</span>t<span class="op">+</span><span class="dv">1</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>    S<span class="op">.</span>step_to<span class="op">(</span>t<span class="op">);</span></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>Concrete examples can be found in the <code>demos</code> folder. For
+more detailed tutorials explaining the demos, see:</p>
 <ol style="list-style-type: decimal">
 <li>Daphnia model -</li>
 <li>RED model -</li>
@@ -186,7 +217,8 @@ make check</code></pre>
 <div class="section level2">
 <h2 id="acknowledgement">Acknowledgement<a class="anchor" aria-label="anchor" href="#acknowledgement"></a>
 </h2>
-<p>This project was funded by a Marie Sklodowska-Curie fellowship H2020-MSCA-IF-2019, project PlantFATE.</p>
+<p>This project was funded by a Marie Sklodowska-Curie fellowship
+H2020-MSCA-IF-2019, project PlantFATE.</p>
 </div>
 </div>
   </main><aside class="col-md-3"><div class="license">
@@ -220,12 +252,14 @@ make check</code></pre>
 
     <footer><div class="pkgdown-footer-left">
   <p></p>
-<p>Developed by <a href="https://jaideep777.github.io" class="external-link">Jaideep Joshi</a>.</p>
+<p>Developed by <a href="https://jaideep777.github.io" class="external-link">Jaideep
+Joshi</a>.</p>
 </div>
 
 <div class="pkgdown-footer-right">
   <p></p>
-<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.2.</p>
+<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a>
+2.0.2.</p>
 </div>
 
     </footer>

@@ -1,7 +1,8 @@
 var NAVTREEINDEX1 =
 {
+"classSolver.html#af6469f699052d7c5fc9192c75b597f30":[1,0,8,1],
 "classSolver.html#af84f4387e484f0cdb9b92fa6ff9ff858":[1,0,8,3],
-"classSolver.html#afcf1cfeb2d095551fc2bc030f7ab5a4d":[1,0,8,45],
+"classSolver.html#afcf1cfeb2d095551fc2bc030f7ab5a4d":[1,0,8,46],
 "classSpecies.html":[1,0,9],
 "classSpecies.html#a0201a77487709f27bf1f88b66bd39206":[1,0,9,32],
 "classSpecies.html#a070336f0725472a8bfb59da72f40197a":[1,0,9,25],

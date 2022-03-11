@@ -39,6 +39,7 @@ var classSolver =
     [ "ebt_ucut", "classSolver.html#a60e2493c2ef2c7af6892eb0e2e948915", null ],
     [ "env", "classSolver.html#a118706cbb6e1616155dd77c60288d801", null ],
     [ "ifmu_centered_grids", "classSolver.html#a75c7e77fdf07c996034e785edba70fb8", null ],
+    [ "integral_interpolate", "classSolver.html#a648b409a0b1a144940a2ce975d92cb88", null ],
     [ "max_cohorts", "classSolver.html#a208f8b006e6accf958268bf0fc903b9c", null ],
     [ "method", "classSolver.html#aa32df3a8111011684ee20f6e0cf8bdd3", null ],
     [ "n_statevars_internal", "classSolver.html#a99a6593acd2444b2a8422840bb7133a1", null ],

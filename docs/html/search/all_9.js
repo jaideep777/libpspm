@@ -20,6 +20,7 @@ var searchData=
   ['initboundarycohort',['initBoundaryCohort',['../classSpecies__Base.html#a809883f8bb0937168f84766e40af8b33',1,'Species_Base::initBoundaryCohort()'],['../classSpecies.html#a519fc6f6f07e3b4cfcd25ac9188418bb',1,'Species::initBoundaryCohort()']]],
   ['initialize',['initialize',['../classSolver.html#a0c67ab4d4fd9c36cfcbfdc13021b419f',1,'Solver']]],
   ['intdy',['intdy',['../classLSODA.html#a1ee114165850fa09fcbd0b206de560dc',1,'LSODA']]],
+  ['integral_5finterpolate',['integral_interpolate',['../classSolver.html#a648b409a0b1a144940a2ce975d92cb88',1,'Solver']]],
   ['integrate_5fwudx_5fabove',['integrate_wudx_above',['../classSolver.html#a9172d0d2dc6399ada494ef23020943d5',1,'Solver']]],
   ['integrate_5fx',['integrate_x',['../classSolver.html#a2a6ca7647a4cde1195789132f3873c0b',1,'Solver']]],
   ['ipup',['ipup',['../classLSODA.html#affc57283b8f361e2fd83683bb7af10e6',1,'LSODA']]],
