@@ -1,0 +1,81 @@
+---
+title: "Setting up your own PSPM"
+author: "Jaideep Joshi"
+date: "11 March 2022"
+output: html_document
+---
+
+
+The first step in simulating a PSPM with libpspm is to define the behaviour of individuals and the environment. At a minimum, setting up your model requires defining three things:
+  
+1. How the environment should be computed from the size distribution of individuals $u(x)$ and time $t$: $E(u(x),t)$.
+
+2. The three demographic rates of individuals (growth rate $g$, mortality rate $\mu$, and fecundity rate $\beta$) as functions of their physiological state $x$, time $t$, and the environment $E$. 
+
+3. A function to specify the initial condition.
+
+### Defining the environment
+
+libpspm provides a base class for the environment called `EnvironmentBase`. You must inherit it to define your own environment class, and override the `computeEnv` function. For examle, let us call it `MyEnvironment`, and define it as follows. 
+
+```c++
+class MyEnvironment : public EnvironmentBase{
+  public:
+    void computeEnv(double t, Solver * S, std::vector<double>::iterator s, std::vector<double>::iterator dsdt){
+      // compute the environment from cohorts here
+    }
+    
+};
+
+```
+Note that `computeEnv` overrides the function by the same name in  `EnvironmentBase` and thus must have exactly the same arguments and return type as defined here. 
+
+
+### Defining individuals
+
+libpspm provides a base class for individuals called `IndividualBase`. You can inherit it to define your own individual class, and override the functions to calculate the demographic rates, as follows. Note that these functions have an argument of type `void*`, which is used by the `Solver` to pass a pointer to the Environment object. Before accessing it, it needs to be cast to your own environment type, as shown in the functions below.
+
+```c++
+class MyIndividual : public IndividualBase{
+  public:
+    double growthRate(double x, double t, void * _env){
+      MyEnvironment * env = static_cast<MyEnvironment*>(_env);
+      // return the growth rate as a function of 
+      // the physiological variable x, time t, and environment _env
+    }
+  
+  double mortalityRate(double x, double t, void * _env){
+    MyEnvironment * env = static_cast<MyEnvironment*>(_env);
+    // return the mortality rate as a function of 
+    // the physiological variable x, time t, and environment _env
+  }
+  
+  double birthRate(double x, double t, void * _env){
+    MyEnvironment * env = static_cast<MyEnvironment*>(_env);
+    // return the fecundity (birth rate) as a function of 
+    // the physiological variable x, time t, and environment _env
+  }
+  
+};
+```
+
+Note that these functions override the functions by the same names in  `IndividualBase` and thus must have exactly the same arguments and return types as specified here. It is possible to define your Individual class without inheriting from `IndividualBase`: see [advanced usage](defining_model_advanced.html).
+
+
+### Defining the initial condition
+
+During initialization, the `Solver` calls the `init_density()` function for each cohort. This function must be defined in your individual class, like so: 
+  
+```c++
+class MyIndividual : public IndividualBase{
+  public:
+    double init_density(double x, void * _env, double bf){
+      MyEnvironment * env = static_cast<MyEnvironment*>(_env);
+      // return the initial density (initial condition) as a function of 
+      // the physiological variable x, environment _env, and input flux of newborns bf
+    }
+  
+  // other functions
+  // ...
+}
+```

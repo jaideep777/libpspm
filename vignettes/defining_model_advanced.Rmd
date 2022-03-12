@@ -1,0 +1,29 @@
+---
+title: "Defining a PSPM - additional features"
+author: "Jaideep Joshi"
+date: "11 March 2022"
+output: html_document
+---
+  
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Advanced features
+
+#### Defining a custom establishment probability function
+
+
+#### Defining extra individual-state variables
+
+
+
+#### Customizing setSize() to set multiple size-dependent variables
+
+#### Simultaneously calculating all three demographic rates
+
+#### Customizing printing of i-state
+
+### Defining system-state variables
+
+

@@ -71,16 +71,8 @@ class Solver{
 	void copyStateToCohorts(std::vector<double>::iterator state_begin);		////const int size();
 	void copyCohortsToState();
 	
-	////const int xsize();
-	////const double* getX();
-	////std::vector<double> getx();
-	////double getMaxSize(std::vector<double>::iterator sbegin);
 	double maxSize();
-	//double get_u0(double t, int s);	
 
-
-	////void calcRates_extra(double t, std::vector<double>&S, std::vector<double>& dSdt);
-	
 	void calcRates_FMU(double t, std::vector<double>::iterator S, std::vector<double>::iterator dSdt);
 	
 	void calcRates_iFMU(double t, std::vector<double>::iterator S, std::vector<double>::iterator dSdt);
@@ -89,20 +81,16 @@ class Solver{
 	void calcRates_EBT(double t, std::vector<double>::iterator S, std::vector<double>::iterator dSdt);
 	void addCohort_EBT();
 	void removeDeadCohorts_EBT();
-	////std::vector<double> cohortsToDensity_EBT(vector <double> &breaks);
 
 	void calcRates_CM(double t, std::vector<double>::iterator S, std::vector<double>::iterator dSdt);
 	//double calc_u0_CM();
 	void addCohort_CM();
 	void removeCohort_CM();
-	//void removeDenseCohorts_CM();
 	
 	template<typename AfterStepFunc>
 	void step_to(double tstop, AfterStepFunc &afterStep_user);
 
 	void step_to(double tstop);
-
-	////double stepToEquilibrium();
 
 	void preComputeSpecies(int k, double t);
 	double calcSpeciesBirthFlux(int k, double t);
@@ -113,13 +101,14 @@ class Solver{
 	void print();
 	
 	// integrals over size and density
+	/// @brief Computes the integral \f[I = \int_{x_b}^{x_m} w(z,t)u(z)dz\f] for the specified species. For details, see @ref integrate_wudx_above
 	template<typename wFunc>
 	double integrate_x(wFunc w, double t, int species_id);
 
 	/// @brief Computes the partial integral \f[I = \int_{x_{low}}^{x_m} w(z,t)u(z)dz\f] for the specified species. 
 	template<typename wFunc>
 	double integrate_wudx_above(wFunc w, double t, double xlow, int species_id);
-	
+
 
 	std::vector<double> getDensitySpecies_EBT(int k, std::vector<double> breaks);
 };

@@ -30,14 +30,24 @@ navbar:
       text: Tutorials
       icon: fa-book fa-lg
       menu:
-        - text: Computing size integrals
+        - text: What is a PSPM?
+          href: articles/what_is_pspm.html
+        - text: Setting up your PSPM
+          href: articles/defining_model_basic.html
+        - text: Computing state integrals
           href: articles/size_integral.html
+        - text: "Demo: RED model"
+          href: articles/demo_red.html
+        - text: "Advanced usage"
+          href: articles/defining_model_advanced.html
+        - text: "Demo: Daphnia model"
+          href: articles/demo_daphnia.html
     developer:
       text: Developer
       icon: fa-user-secret
       menu:
         - text: Size integrals
-          href: articles/size_integral.html
+          href: articles/size_integral_dev.html
     api:
       text: API
       icon: fa-code fa-lg
