@@ -1,6 +1,6 @@
 <map id="Species_Base::setX" name="Species_Base::setX">
 <area shape="rect" id="node2" href="$classSolver.html#a9172d0d2dc6399ada494ef23020943d5" title="Computes the partial integral &#160;for the specified species. " alt="" coords="211,5,365,47"/>
-<area shape="rect" id="node3" href="$classSolver.html#a2a6ca7647a4cde1195789132f3873c0b" title="Solver::integrate_x" alt="" coords="223,71,353,98"/>
+<area shape="rect" id="node3" href="$classSolver.html#a2a6ca7647a4cde1195789132f3873c0b" title="Computes the integral &#160;for the specified species. For details, see integrate_wudx_above. " alt="" coords="223,71,353,98"/>
 <area shape="rect" id="node7" href="$classSolver.html#a0c67ab4d4fd9c36cfcbfdc13021b419f" title="Solver::initialize" alt="" coords="231,122,345,149"/>
 <area shape="rect" id="node8" href="$classSolver.html#ad3f68f3021eed287c5b1c85bdc24afd8" title="Solver::copyStateToCohorts" alt="" coords="195,173,381,199"/>
 <area shape="rect" id="node4" href="$classSolver.html#aa5f2d1d48f6b4db83dbb257325924d2c" title="Solver::calcSpeciesBirthFlux" alt="" coords="429,71,620,98"/>

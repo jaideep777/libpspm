@@ -2,8 +2,13 @@ pandoc: 2.17.1.1
 pkgdown: 2.0.2
 pkgdown_sha: ~
 articles:
+  defining_model_advanced: defining_model_advanced.html
+  defining_model_basic: defining_model_basic.html
+  demo_red: demo_red.html
   size_integral: size_integral.html
-last_built: 2022-03-11T16:23Z
+  size_integral_dev: size_integral_dev.html
+  what_is_pspm: what_is_pspm.html
+last_built: 2022-03-12T20:04Z
 urls:
   reference: https://jaideep777.github.io/libpspm/reference
   article: https://jaideep777.github.io/libpspm/articles

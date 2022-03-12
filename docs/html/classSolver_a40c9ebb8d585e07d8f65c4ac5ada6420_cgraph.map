@@ -3,7 +3,7 @@
 <area shape="rect" id="node3" href="$classEnvironmentBase.html#aab04d5438741c4f04d09514bac07348c" title="EnvironmentBase::computeEnv" alt="" coords="356,5,563,32"/>
 <area shape="rect" id="node4" href="$classSolver.html#af574bcfab58cef5440c32fa87b027e7d" title="Solver::preComputeSpecies" alt="" coords="367,56,552,83"/>
 <area shape="rect" id="node5" href="$classSolver.html#aa5f2d1d48f6b4db83dbb257325924d2c" title="Solver::calcSpeciesBirthFlux" alt="" coords="364,107,555,133"/>
-<area shape="rect" id="node6" href="$classSolver.html#a2a6ca7647a4cde1195789132f3873c0b" title="Solver::integrate_x" alt="" coords="611,107,741,133"/>
+<area shape="rect" id="node6" href="$classSolver.html#a2a6ca7647a4cde1195789132f3873c0b" title="Computes the integral &#160;for the specified species. For details, see integrate_wudx_above. " alt="" coords="611,107,741,133"/>
 <area shape="rect" id="node7" href="$classSpecies__Base.html#ad412522fc071525a19f95609880b20ff" title="Species_Base::getU" alt="" coords="821,31,964,57"/>
 <area shape="rect" id="node8" href="$classSpecies__Base.html#aa6880c6f5c8ff125cab4d1195dedfb13" title="Species_Base::getX" alt="" coords="822,81,963,108"/>
 <area shape="rect" id="node9" href="$classSpecies__Base.html#a86a04ae53b3f25c4e90b01a8eaed3bfd" title="Species_Base::setX" alt="" coords="822,132,963,159"/>

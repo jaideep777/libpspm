@@ -33,7 +33,7 @@
 <!-- Node138 -->
 <g id="node3" class="node">
 <title>Node138</title>
-<g id="a_node3"><a xlink:href="classSolver.html#a2a6ca7647a4cde1195789132f3873c0b" target="_top" xlink:title="Solver::integrate_x">
+<g id="a_node3"><a xlink:href="classSolver.html#a2a6ca7647a4cde1195789132f3873c0b" target="_top" xlink:title="Computes the integral &#160;for the specified species. For details, see integrate_wudx_above. ">
 <polygon fill="none" stroke="#000000" points="163,-76.5 163,-95.5 261,-95.5 261,-76.5 163,-76.5"/>
 <text text-anchor="middle" x="212" y="-83.5" font-family="Helvetica,sans-Serif" font-size="10.00" fill="#000000">Solver::integrate_x</text>
 </a>

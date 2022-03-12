@@ -77,7 +77,7 @@
 <!-- Node268 -->
 <g id="node6" class="node">
 <title>Node268</title>
-<g id="a_node6"><a xlink:href="classSolver.html#a2a6ca7647a4cde1195789132f3873c0b" target="_top" xlink:title="Solver::integrate_x">
+<g id="a_node6"><a xlink:href="classSolver.html#a2a6ca7647a4cde1195789132f3873c0b" target="_top" xlink:title="Computes the integral &#160;for the specified species. For details, see integrate_wudx_above. ">
 <polygon fill="none" stroke="#000000" points="454,-57.5 454,-76.5 552,-76.5 552,-57.5 454,-57.5"/>
 <text text-anchor="middle" x="503" y="-64.5" font-family="Helvetica,sans-Serif" font-size="10.00" fill="#000000">Solver::integrate_x</text>
 </a>
