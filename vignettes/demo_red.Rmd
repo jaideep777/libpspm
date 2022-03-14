@@ -96,5 +96,3 @@ class LightEnvironment : public EnvironmentBase{
 
 #### Creating the solver
 
-
-

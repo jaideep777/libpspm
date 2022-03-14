@@ -79,3 +79,73 @@ class MyIndividual : public IndividualBase{
   // ...
 }
 ```
+
+### Creating a species of individuals
+
+Once you have defined the individual class, the next step is to create a species of individuals that can be simulated by the Solver. libpspm provides a templated Species class for this purpose, which can be used to create a species as follows:
+
+```c++
+Species<MyIndividual> spp;
+```
+
+
+### Creating an Environment object
+
+You also need to instantiate an environment object which the PSPM Solver can use, as follows
+
+```c++
+MyEnvironment E;
+```
+
+### Creating a PSPM solver
+
+The core task of simulating your model is performed by a PSPM `Solver` provided by libpspm. A solver can be created by specifying the PSPM method and the ODE solver method. For example, if we want to use the EBT method with an LSODA ODE solver, we can write
+
+```c++
+Solver S(SOLVER_EBT, "lsoda")
+```
+
+The PSPM method can be one of the following: `SOLVER_FMU`, `SOLVER_IFMU`, `SOVLER_EBT`, or `SOLVER_CM`. 
+
+The ODE stepper can be either `"rk45ck"` or `"lsoda"`.
+
+### Adding the species and the environment to the solver
+
+We then add our species and the environment object to the solver, so that they can be simulated. While adding a species to the solver, a number of details regarding the i-state must be specified, as described below.
+
+```c++
+S.setEnv(E);
+S.addSpecies(25,     //  the (initial) number of cohorts to simulate
+             1,      //  the i-state at birth
+             1e4,    //  the maximum i-state value
+             false,  //  whether the i-state axis should be on log scale
+             &spp,   //  a pointer to the species object 
+             0,      //  number of extra x-linked i-state variables
+             1       //  the input flux of newborns
+)
+
+S.resetState(0);     //  argument is the start time
+S.initialize();      //  compute the initial condition
+```
+
+With this, we are set to run the simulation.
+
+### Simulating the PSPM
+
+To simulate the PSPM, the solver provides a `step_to()` function. For example, to simulate 100 time units, do
+
+```c++
+S.step_to(100);
+```
+
+
+### Getting system properties from the solver
+
+After simulating the PSPM, we are interested in computing emergent system properties. The solver provides two functions to get the state density distribution and the output flux of newborns:
+
+```c++
+S.newborns_out(100);
+S.getDensitySpecies_EBT(breaks);
+```
+Other emergent properties can be calculated using the state integral function as described in the next tutorial.
+
