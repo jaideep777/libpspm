@@ -9,7 +9,7 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-The developer must ensure that precompute is called appropriately. The idea is that all cohorts must be precomputed after an i-state update, before their demographic rates are called.
+The developer must ensure that precompute is called appropriately. The idea is that all cohorts, **including the boundary cohort**, must be precomputed after an i-state update, before their demographic rates are called.
 
 The following functions alter the i-state of cohorts:
 
@@ -25,6 +25,7 @@ Can automate this via a state-change flag in cohorts - which is turned on by set
 
 The Solver calls `precompute` in the following situations:
   
-- before every `growthRate` computation (i.e., before `calcRates` in the Solver and for all offset cohorts in `growthRateXXX` and `mortalityRateXXX` functions).
+- before every call to `calcRates`
 - before computation of `newborns_out` 
-
+- for all offset cohorts in `growthRateXXX` and `mortalityRateXXX` functions before call to `growthRate` or `mortalityRate`.
+- `preCompute` is NOT called in `afterStep.` <span style="color: red;">Need to check if this is okay.</span>

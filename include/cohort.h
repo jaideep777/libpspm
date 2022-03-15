@@ -35,6 +35,30 @@ class Cohort : public Ind {
 		x = _x;
 		Ind::set_size(x);
 	}
+	
+	
+	//  These are defined here so that precompute trigger can be 
+	//  checked before calling user-defined function 
+	void preCompute(double x, double t, void * _env){
+//		std::cout << "cohort precompute: "; print(); std::cout << "\n";
+		Ind::preCompute(x,t,_env);	
+	}
+	
+	double growthRate(double x, double t, void * _env){
+//		std::cout << "cohort growthRate(): "; print(); std::cout << "\n";
+		return Ind::growthRate(x,t,_env);	
+	}
+	
+	double mortalityRate(double x, double t, void * _env){
+//		std::cout << "cohort mortRate(): "; print(); std::cout << "\n";
+		return Ind::mortalityRate(x,t,_env);	
+	}
+	
+	double birthRate(double x, double t, void * _env){
+//		std::cout << x << " cohort birthRate: "; print(); std::cout << "\n";
+		return Ind::birthRate(x,t,_env);	
+	}
+	
 };
 
 #endif

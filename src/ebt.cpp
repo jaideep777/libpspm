@@ -13,8 +13,6 @@ void Solver::calcRates_EBT(double t, vector<double>::iterator S, vector<double>:
 	for (int s = 0; s < species_vec.size(); ++s){
 		Species_Base * spp = species_vec[s];
 
-		//spp->preComputeAllCohorts(t,env);
-		
 		double   pi0  =  spp->getX(spp->J-1);	 // last cohort is pi0, N0
 		double   N0   =  spp->getU(spp->J-1);
 		//std::cout << "pi = " << pi0 << ", N0 = " << N0 << "\n";
@@ -23,7 +21,7 @@ void Solver::calcRates_EBT(double t, vector<double>::iterator S, vector<double>:
 		std::vector<double> m_mx = spp->mortalityRateGradient(-1, spp->xb, t, env, control.ebt_grad_dx);
 		//std::cout << "g = " << g_gx[0] << ", gx = " << g_gx[1] << "\n";
 		//std::cout << "m = " << m_mx[0] << ", mx = " << m_mx[1] << "\n";
-
+		
 		double birthFlux;
 		if (spp->birth_flux_in < 0){	
 			birthFlux = calcSpeciesBirthFlux(s,t) * spp->establishmentProbability(t, env);
@@ -61,7 +59,6 @@ void Solver::calcRates_EBT(double t, vector<double>::iterator S, vector<double>:
 				//birthFlux = (gb>0)? spp.birth_flux_in*spp.mod->establishmentProbability(t, env)  : 0;
 			//}
 		//}
-
 
 		for (int i=0; i<spp->J-1; ++i){	// go down to the second last cohort (exclude boundary cohort)
 			double dx = spp->growthRate(i, spp->getX(i), t, env);							// dx/dt
