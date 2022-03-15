@@ -72,7 +72,7 @@ The default behaviour when a cohort is printed is to only print the birth time, 
 
 ```c++
 class MyIndividual : public IndividualBase{
-  void PSPM_Plant::print(std::ostream &out){
+  void print(std::ostream &out){
   	out << "|" << lma << "\t" << crown_area;
   }
   
