@@ -1,0 +1,30 @@
+---
+title: "Precompute"
+author: "Jaideep Joshi"
+date: "11 March 2022"
+output: html_document
+---
+  
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+The developer must ensure that precompute is called appropriately. The idea is that all cohorts must be precomputed after an i-state update, before their demographic rates are called.
+
+The following functions alter the i-state of cohorts:
+
+- Every state-update from the ODE solver
+- All gradient functions which create new cohorts with slightly offset i-state values
+
+Currently, pre-compute is called manually at all relevant places.
+
+But:
+
+Can automate this via a state-change flag in cohorts - which is turned on by setSize(), and turned off by preCompute. 
+
+
+The Solver calls `precompute` in the following situations:
+  
+- before every `growthRate` computation (i.e., before `calcRates` in the Solver and for all offset cohorts in `growthRateXXX` and `mortalityRateXXX` functions).
+- before computation of `newborns_out` 
+

@@ -349,7 +349,7 @@ void Species<Model>::addCohort(Cohort<Model> bc){
 
 template <class Model>
 void Species<Model>::removeDensestCohort(){
-	if (cohorts.size() < 3) return; // do nothing if there are 2 or less cohorts
+	if (cohorts.size() < 3) return; // do nothing if there are 2 or fewer cohorts
 	int i_min = 1;
 	double dx_min = cohorts[0].x - cohorts[2].x;  
 	for (int i=1; i<J-1; ++i){ // skip first and last cohorts

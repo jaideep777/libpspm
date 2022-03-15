@@ -34,7 +34,8 @@ class Cohort : public Ind {
 	void set_size(double _x){
 		x = _x;
 		Ind::set_size(x);
-	}	
+	}
 };
 
 #endif
+
