@@ -34,14 +34,14 @@ void LightEnvironment::computeEnv(double t, Solver * S, std::vector<double>::ite
 			auto la_above = [z,k,S](int i, double t){
 				auto& p = ((Species<PSPM_Plant>*)S->species_vec[k])->getCohort(i);
 				double a = p.area_leaf_above(z, p.vars.height, p.vars.area_leaf);
-				//if (z < 1e-4) cout << "(" << i << "," << a << ")" << "\t";
+//				std::cout << "(" << i << "," << a << ")" << "\t";
 				return a;	
 			};
 			leaf_area_above_z += S->integrate_wudx_above(la_above, t, z, k);
 			//leaf_area_above_z += S->integrate_x(la_above, t, state_vec, i);
 		}
 
-		//cout << "LA(" << z << ") = " << exp(-kI*leaf_area_above_z) << "\n";
+//		std::cout << "LA(" << z << ") = " << exp(-kI*leaf_area_above_z) << "\n";
 		return exp(-kI*leaf_area_above_z);
 	};	
 
