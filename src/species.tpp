@@ -244,7 +244,7 @@ template <class Model>
 double Species<Model>::growthRateOffset(int i, double x, double t, void * env){
 	Cohort<Model> coff = (i<0)? boundaryCohort : cohorts[i];
 	coff.set_size(x);
-	coff.preCompute(coff.x,t,env);
+	//coff.preCompute(coff.x,t,env);
 	++np; ++ng;
 	return coff.growthRate(coff.x,t,env);
 }
@@ -256,7 +256,7 @@ std::vector<double> Species<Model>::growthRateGradient(int i, double x, double t
 
 	Cohort<Model> cplus = c;
 	cplus.set_size(c.x + grad_dx);
-	cplus.preCompute(cplus.x,t,env);
+	//cplus.preCompute(cplus.x,t,env);
 	
 	double g = c.growthRate(c.x,t,env);
 	double gplus = cplus.growthRate(cplus.x, t, env);
@@ -274,11 +274,11 @@ std::vector<double> Species<Model>::growthRateGradientCentered(int i, double xpl
 
 	Cohort<Model> cplus = cohorts[i];
 	cplus.set_size(xplus);
-	cplus.preCompute(cplus.x,t,env);
+	//cplus.preCompute(cplus.x,t,env);
 
 	Cohort<Model> cminus = cohorts[i];
 	cminus.set_size(xminus);
-	cminus.preCompute(cminus.x,t,env);
+	//cminus.preCompute(cminus.x,t,env);
 	
 	double gplus  = cplus.growthRate(cplus.x, t, env);
 	double gminus = cminus.growthRate(cminus.x, t, env);
@@ -304,7 +304,7 @@ std::vector<double> Species<Model>::mortalityRateGradient(int i, double x, doubl
 
 	Cohort<Model> cplus = c;
 	cplus.set_size(x + grad_dx);
-	cplus.preCompute(cplus.x,t,env);
+	//cplus.preCompute(cplus.x,t,env);
 	
 	double g = c.mortalityRate(c.x,t,env);
 	double gplus = cplus.mortalityRate(cplus.x, t, env);

@@ -158,7 +158,7 @@ int main(){
 	
 	vector <vector<double>> seeds_out(S.species_vec.size());
 
-	for (size_t i=0; i < times.size(); ++i){
+	for (size_t i=0; i < 5 + 0*times.size(); ++i){
 
 		S.step_to(times[i]);		
 		

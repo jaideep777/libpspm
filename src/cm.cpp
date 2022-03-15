@@ -15,8 +15,9 @@ void Solver::calcRates_CM(double t, vector<double>::iterator S, vector<double>::
 	vector<double>::iterator its = S    + n_statevars_system; // Skip system variables
 	vector<double>::iterator itr = dSdt + n_statevars_system;
 
+	int s = 0;
 	for (auto spp : species_vec){	
-
+		cout << "calcRates(species = " << s << ")\n";
 		for (int i=0; i<spp->J; ++i){
 			double x = spp->getX(i);
 			vector<double> g_gx = spp->growthRateGradient(i, x, t, env, control.cm_grad_dx);  // FIXME: x can go
@@ -35,6 +36,8 @@ void Solver::calcRates_CM(double t, vector<double>::iterator S, vector<double>::
 			assert(distance(itr_prev, itr) == spp->n_extra_statevars*spp->J); 
 			its += spp->n_extra_statevars*spp->J; 	
 		}
+		++s;
+		cout << "---\n";
 	}
 }
 
