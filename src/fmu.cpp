@@ -14,7 +14,7 @@ void Solver::calcRates_FMU(double t, vector<double>::iterator S, vector<double>:
 	vector<double>::iterator itr = dSdt + n_statevars_system;
 	
 	for (int s = 0; s<species_vec.size(); ++s){
-		auto spp = species_vec[s];
+		Species_Base* spp = species_vec[s];
 		
 		// [S S S u u u u u a b c a b c a b c a b c a b c] <--- full SV for species is this
 		//        ^ its, itr

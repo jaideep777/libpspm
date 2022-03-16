@@ -1,10 +1,14 @@
-// Note 1: current_time is updated by the ODE solver at every (internal) step
-//
-// Note 2: after the last ODE step, the state vector is updated but cohorts still hold an intenal ODE state (y+k5*h etc).
-// normally, this will not be a problem because state will be copied to cohorts before rates call of the next timestep. 
-// But since add/remove cohort after step_to will rewrite the state from cohorts, the updated state vector will be lost.
-// To avoid this, we should ensure that the state is copied to cohorts afert completion of every step.
-// This is achieved by the afterStep function
+/// @param tstop   The time until which the ODE solver should be stepped. 
+///                The stepper will stop exactly at tstop, for which the final step size is truncated if necessary.
+/// @param afterStep_user  A function of the form `f(double t)` to be called after every _successful_ ODE step. 
+/// @note 1. `current_time` is updated by the ODE solver at every (internal) step
+///
+/// @note 2. After the last ODE step, the state vector is updated but cohorts still hold an intenal ODE state (y+k5*h etc).
+/// normally, this will not be a problem because state will be copied to cohorts before rates call of the next timestep. 
+/// But since add/remove cohort after step_to will rewrite the state from cohorts, the updated state vector will be lost.
+/// To avoid this, we should ensure that the state is copied to cohorts after every successful ODE step (or at least
+/// after completion of `step_to`).
+/// This is achieved by the afterStep function
 template<typename AfterStepFunc>
 void Solver::step_to(double tstop, AfterStepFunc &afterStep_user){
 	// do nothing if tstop is <= current_time

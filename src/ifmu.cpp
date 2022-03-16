@@ -28,7 +28,7 @@ void Solver::stepU_iFMU(double t, vector<double> &S, vector<double> &dSdt, doubl
 	
 	// 1. Take implicit step for U
 	for (int s = 0; s<species_vec.size(); ++s){
-		auto spp = species_vec[s];
+		Species_Base* spp = species_vec[s];
 		
 		// [S S S u u u u u a b c a b c a b c a b c a b c] <--- full SV for species is this
 		//        ^ its, itr
