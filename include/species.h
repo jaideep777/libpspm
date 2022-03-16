@@ -55,8 +55,6 @@ class Species_Base{
 	
 	//Model * mod = nullptr;
 	public:
-	int ng = 0, nm = 0, nf = 0, np = 0;
-
 
 	public: // public functions
 
@@ -93,6 +91,7 @@ class Species_Base{
 	virtual double get_boundary_u() = 0;
 
 	// TODO: argument x can probably be removed from these functions
+	virtual void triggerPreCompute() = 0;
 	virtual void preComputeAllCohorts(double t, void * env) = 0;
 	virtual void preCompute(int i, double t, void * env) = 0;
 	virtual double growthRate(int i, double x, double t, void * env) = 0;
@@ -155,6 +154,7 @@ class Species : public Species_Base{
 	double get_u0(double t, void * env);
 	double get_boundary_u();
 	
+	void triggerPreCompute();
 	void preComputeAllCohorts(double t, void * env);
 	void preCompute(int i, double t, void * env);
 	double growthRate(int i, double x, double t, void * env);

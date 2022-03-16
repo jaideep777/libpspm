@@ -73,6 +73,8 @@ class Solver{
 	
 	double maxSize();
 
+	void updateEnv(double t, std::vector<double>::iterator S, std::vector<double>::iterator dSdt);
+
 	void calcRates_FMU(double t, std::vector<double>::iterator S, std::vector<double>::iterator dSdt);
 	
 	void calcRates_iFMU(double t, std::vector<double>::iterator S, std::vector<double>::iterator dSdt);

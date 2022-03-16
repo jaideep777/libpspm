@@ -321,12 +321,13 @@ void Solver::initialize(){
 
 
 void Solver::copyStateToCohorts(std::vector<double>::iterator state_begin){
-
+	//std::cout << "state ---> cohorts\n";
 	std::vector<double>::iterator it = state_begin + n_statevars_system; // no need to copy system state
 	
 	for (int k=0; k<species_vec.size(); ++k){
 		Species_Base* s = species_vec[k];
 		
+		s->set_xb(s->xb); // Important: "touch" boundary cohort to trigger a precompute. Note that setSize() triggers it.
 		if (method == SOLVER_FMU || method == SOLVER_IFMU){
 			for (size_t i=0; i<s->J; ++i){
 				s->setU(i,*it++);
@@ -361,7 +362,7 @@ void Solver::copyStateToCohorts(std::vector<double>::iterator state_begin){
 
 
 void Solver::copyCohortsToState(){
-
+	//std::cout << "state <--- cohorts\n";
 	vector<double>::iterator it = state.begin() + n_statevars_system; // no need to copy system state
 	
 	for (int k=0; k<species_vec.size(); ++k){
@@ -461,6 +462,11 @@ void Solver::step_to(double tstop){
 }
 
 
+void Solver::updateEnv(double t, std::vector<double>::iterator S, std::vector<double>::iterator dSdt){
+	for (auto spp : species_vec) spp->triggerPreCompute();
+	env->computeEnv(t, this, S, dSdt);
+}
+
 
 void Solver::preComputeSpecies(int k, double t){
 	auto spp = species_vec[k];
@@ -502,9 +508,10 @@ double Solver::calcSpeciesBirthFlux(int k, double t){
 
 vector<double> Solver::newborns_out(double t){  // TODO: make recompute env optional
 	// update Environment from latest state
-	//copyStateToCohorts(state.begin());
-	env->computeEnv(t, this, state.begin(), rates.begin());
-	for (int k = 0; k<species_vec.size(); ++k) preComputeSpecies(k,t);	
+	//copyStateToCohorts(state.begin());  // not needed here because this is done in afterStep or upon cohorts update
+	//env->computeEnv(t, this, state.begin(), rates.begin());
+	updateEnv(t, state.begin(), rates.begin()); // this will trigger a precompute
+//	for (int k = 0; k<species_vec.size(); ++k) preComputeSpecies(k,t);	
 
 	vector<double> b_out;
 	for (int k=0; k<species_vec.size(); ++k){	

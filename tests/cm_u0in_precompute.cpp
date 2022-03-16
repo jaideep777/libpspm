@@ -39,6 +39,9 @@ int main(){
 
 	fout.close();
 
+	cout << "Number of calls to p/g/m/f (static) : " << Cohort<TestModel>::np << " " << Cohort<TestModel>::ng << " " << Cohort<TestModel>::nm << " " << Cohort<TestModel>::nf << endl;
+	cout << "Number of calls to derivs           : " << S.odeStepper.get_fn_evals() << endl;
+
 	cout << S.u0_out(S.current_time)[0] << endl;
 	// test value is from R code	
 	//if (abs(S.u0_out()[0] - 1.556967) < 1e-5) return 0;  // this is when integrate_x BC is not included

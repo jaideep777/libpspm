@@ -5,7 +5,7 @@ void Solver::step_to(double tstop, AfterStepFunc &afterStep_user){
 	if (tstop <= current_time) return;
 	
 	auto after_step = [this, afterStep_user](double t, std::vector<double>::iterator S){
-		//cout << "After step: t = " << t << "\n";
+		//std::cout << "After step: t = " << t << "\n";
 		copyStateToCohorts(S);
 		//for (int k = 0; k<species_vec.size(); ++k) preComputeSpecies(k,t);	// FIXME: Check if this is needed
 		//for (auto spp : species_vec) spp->afterStep(t, env);
@@ -16,9 +16,9 @@ void Solver::step_to(double tstop, AfterStepFunc &afterStep_user){
 	if (method == SOLVER_FMU){	
 		auto derivs = [this](double t, std::vector<double>::iterator S, std::vector<double>::iterator dSdt, void* params){
 			copyStateToCohorts(S);
-			env->computeEnv(t, this, S, dSdt);
+			updateEnv(t, S, dSdt);
 			// precompute all species (prepare for rate calcs)
-			for (int k = 0; k<species_vec.size(); ++k) preComputeSpecies(k,t);	
+			//for (int k = 0; k<species_vec.size(); ++k) preComputeSpecies(k,t);	
 
 			this->calcRates_FMU(t, S, dSdt);
 		};
@@ -33,11 +33,11 @@ void Solver::step_to(double tstop, AfterStepFunc &afterStep_user){
 			double dt = std::min(control.ode_ifmu_stepsize, tstop-current_time);
 			
 			//copyStateToCohorts(state.begin()); // not needed here because it is called by the odestepper below
-			env->computeEnv(current_time, this, state.begin(), rates.begin());
+			updateEnv(current_time, state.begin(), rates.begin());
 			std::vector<double> rates_prev(rates.begin(), rates.begin()+n_statevars_system);  // save system variable rates
 			
 			// precompute all species (prepare for rate calcs)
-			for (int k = 0; k<species_vec.size(); ++k) preComputeSpecies(k,current_time);	
+			//for (int k = 0; k<species_vec.size(); ++k) preComputeSpecies(k,current_time);	
 			
 			// use implicit stepper to advance u
 			stepU_iFMU(current_time, state, rates, dt);
@@ -45,7 +45,7 @@ void Solver::step_to(double tstop, AfterStepFunc &afterStep_user){
 			
 			if (n_statevars_system > 0){
 				copyStateToCohorts(state.begin());   // copy updated u to cohorts 
-				env->computeEnv(current_time, this, state.begin(), rates.begin());  // recompute env with updated u
+				updateEnv(current_time, state.begin(), rates.begin());  // recompute env with updated u
 				// FIXME: use fully implicit stepper here?
 				for (int i=0; i<n_statevars_system; ++i){
 					state[i] += (rates_prev[i]+rates[i])/2*dt;  // use average of old and updated rates for stepping system vars
@@ -77,10 +77,10 @@ void Solver::step_to(double tstop, AfterStepFunc &afterStep_user){
 			copyStateToCohorts(S);
 			
 			// compute environment
-			env->computeEnv(t, this, S, dSdt);
+			updateEnv(t, S, dSdt);
 
 			// precompute all species (prepare for rate calcs)
-			for (int k = 0; k<species_vec.size(); ++k) preComputeSpecies(k,t);	
+			//for (int k = 0; k<species_vec.size(); ++k) preComputeSpecies(k,t);	
 
 			// get rates
 			calcRates_EBT(t, S, dSdt);
@@ -104,16 +104,16 @@ void Solver::step_to(double tstop, AfterStepFunc &afterStep_user){
 	if (method == SOLVER_CM){
 		auto derivs = [this](double t, std::vector<double>::iterator S, std::vector<double>::iterator dSdt, void* params){
 			// copy state vector to cohorts
-			copyStateToCohorts(S);
+			copyStateToCohorts(S);  // this triggers precompute
 
 			// update u0 (u of boundary cohort)
 			for (auto s : species_vec) s->get_u0(t, env);
 			
 			// compute environment
-			env->computeEnv(t, this, S, dSdt);
+			updateEnv(t, S, dSdt);
 
 			// precompute all species (prepare for rate calcs)
-			for (int k = 0; k<species_vec.size(); ++k) preComputeSpecies(k,t);	
+			//for (int k = 0; k<species_vec.size(); ++k) preComputeSpecies(k,t);	
 
 			// get rates
 			calcRates_CM(t, S, dSdt);
@@ -127,7 +127,7 @@ void Solver::step_to(double tstop, AfterStepFunc &afterStep_user){
 		// But since add/remove cohort below will rewrite the state from cohorts, the updated state vector will be lost
 		// rewrite the cohorts now to avoid this.
 		// Note: This is likely no longer required because afterStep() does a copy
-		copyStateToCohorts(state.begin());
+		//copyStateToCohorts(state.begin());
 
 		// update cohorts
 		if (control.update_cohorts){

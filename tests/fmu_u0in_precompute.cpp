@@ -15,6 +15,7 @@ int main(){
 	Solver S(SOLVER_FMU);
 	S.addSpecies(25, 0, 1, false, &spp, 4, 2);
 	S.species_vec[0]->set_bfin_is_u0in(true);	// say that input_birth_flux is u0
+	S.control.integral_interpolate = false;
 	S.resetState();
 	S.initialize();
 	S.setEnvironment(&E);
@@ -31,6 +32,9 @@ int main(){
 	}
 
 	fout.close();
+
+	cout << "Number of calls to p/g/m/f (static) : " << Cohort<TestModel>::np << " " << Cohort<TestModel>::ng << " " << Cohort<TestModel>::nm << " " << Cohort<TestModel>::nf << endl;
+	cout << "Number of calls to derivs           : " << S.odeStepper.get_fn_evals() << endl;
 
 	cout << S.u0_out(S.current_time)[0] << endl; 
 	if (abs(S.u0_out(S.current_time)[0] - 1.468232) < 1e-5) return 0;

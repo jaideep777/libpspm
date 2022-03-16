@@ -158,7 +158,7 @@ int main(){
 	
 	vector <vector<double>> seeds_out(S.species_vec.size());
 
-	for (size_t i=0; i < 5 + 0*times.size(); ++i){
+	for (size_t i=0; i < times.size(); ++i){
 
 		S.step_to(times[i]);		
 		
@@ -184,8 +184,10 @@ int main(){
 	sio.closeStreams();
 	int nga=0, nma=0, nfa=0, npa=0;
 
-	for (auto spp : S.species_vec) { nga += spp->ng; nma += spp->nm; nfa += spp->nf; npa += spp->np;}
-	cout << "Number of calls to p/g/m/f functions: " << npa << " " << nga << " " << nma << " " << nfa << endl;
+//	for (auto spp : S.species_vec) {spp->fnEvals(); nga += spp->ng; nma += spp->nm; nfa += spp->nf; npa += spp->np;}
+//	cout << "Number of calls to p/g/m/f functions: " << npa << " " << nga << " " << nma << " " << nfa << endl;
+	cout << "Number of calls to p/g/m/f (static) : " << Cohort<PSPM_Plant>::np << " " << Cohort<PSPM_Plant>::ng << " " << Cohort<PSPM_Plant>::nm << " " << Cohort<PSPM_Plant>::nf << endl;
+	cout << "Number of calls to derivs           : " << S.odeStepper.get_fn_evals() << endl;
 
 	for (int s=0; s< S.n_species(); ++s){
 		cout << "Seed rain for Species " << s << " (Lindh 18) = " << pn::integrate_trapezium(times, seeds_out[s]) << endl;

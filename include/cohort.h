@@ -6,6 +6,8 @@
 template<class Ind>
 class Cohort : public Ind {
 	public:
+	static int np, ng, nm, nf;   // number of evaluations of demographic functions
+
 	double x = -999;
 	double u = -999;
 	int id = 0;	
@@ -43,30 +45,46 @@ class Cohort : public Ind {
 	//  These are defined here so that precompute trigger can be 
 	//  checked before calling user-defined function 
 	void preCompute(double x, double t, void * _env){
-		std::cout << "cohort precompute: "; print(); std::cout << "\n";
+		++np;
+		//std::cout << "cohort precompute: "; print(); std::cout << "\n";
 		Ind::preCompute(x,t,_env);	
 		need_precompute = false;   // Once precompute is called, no need to further precompute until necessary
 	}
 	
 	double growthRate(double x, double t, void * _env){
+		++ng;
 		if (need_precompute) preCompute(x,t,_env);
-		std::cout << "cohort growthRate(): "; print(); std::cout << "\n";
+		//std::cout << "cohort growthRate(): "; print(); std::cout << "\n";
 		return Ind::growthRate(x,t,_env);	
 	}
 	
 	double mortalityRate(double x, double t, void * _env){
+		++nm;
 		if (need_precompute) preCompute(x,t,_env);
-		std::cout << "cohort mortRate(): "; print(); std::cout << "\n";
+		//std::cout << "cohort mortRate(): "; print(); std::cout << "\n";
 		return Ind::mortalityRate(x,t,_env);	
 	}
 	
 	double birthRate(double x, double t, void * _env){
+		++nf;
 		if (need_precompute) preCompute(x,t,_env);
-		std::cout << x << " cohort birthRate: "; print(); std::cout << "\n";
+		//std::cout << x << " cohort birthRate: "; print(); std::cout << "\n";
 		return Ind::birthRate(x,t,_env);	
 	}
 	
 };
+
+template<class Model>
+int Cohort<Model>::np = 0;
+
+template<class Model>
+int Cohort<Model>::ng = 0;
+
+template<class Model>
+int Cohort<Model>::nm = 0;
+
+template<class Model>
+int Cohort<Model>::nf = 0;
 
 #endif
 
