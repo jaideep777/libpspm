@@ -17,7 +17,19 @@ void Solver::calcRates_CM(double t, vector<double>::iterator S, vector<double>::
 
 	for (int s = 0; s<species_vec.size(); ++s){
 		Species_Base* spp = species_vec[s];
-		//cout << "calcRates(species = " << s << ")\n";
+		cout << "calcRates(species = " << s << ")\n";
+		
+		double pe = spp->establishmentProbability(t, env);
+		double gb = spp->growthRate(-1, spp->xb, t, env);
+		if (spp->birth_flux_in < 0){	
+			double birthFlux = calcSpeciesBirthFlux(s,t) * pe;
+			spp->set_ub(birthFlux/(gb+1e-20));
+		}
+		else{
+			spp->calc_boundary_u(gb, pe); // this will set u in boundary cohort
+		}
+
+		
 		for (int i=0; i<spp->J; ++i){
 			double x = spp->getX(i);
 			vector<double> g_gx = spp->growthRateGradient(i, x, t, env, control.cm_grad_dx);  // FIXME: x can go
@@ -30,6 +42,8 @@ void Solver::calcRates_CM(double t, vector<double>::iterator S, vector<double>::
 			
 			its+=2;
 		}
+
+		
 		if (spp->n_extra_statevars > 0){
 			auto itr_prev = itr;
 			spp->getExtraRates(itr);
@@ -42,9 +56,23 @@ void Solver::calcRates_CM(double t, vector<double>::iterator S, vector<double>::
 
 
 void Solver::addCohort_CM(){
+	cout << ".......... add cohorts ...............\n";
+	updateEnv(current_time, state.begin(), rates.begin());
+	
+	for (int s = 0; s< species_vec.size(); ++s){
+		auto spp = species_vec[s];
+		
+		// calculate u for boundary cohort
+		double gb = spp->growthRate(-1, spp->xb, current_time, env);
+		double pe = spp->establishmentProbability(current_time, env);
+		if (spp->birth_flux_in < 0){	
+			double birthFlux = calcSpeciesBirthFlux(s,current_time) * pe;
+			spp->set_ub(birthFlux/(gb+1e-20));
+		}
+		else{
+			spp->calc_boundary_u(gb, pe);  // init density of boundary cohort
+		}
 
-	for (auto& spp : species_vec){
-		spp->get_u0(current_time, env);  // init density of boundary cohort
 		spp->initBoundaryCohort(current_time, env); // init extra state variables and birth time of the boundary cohort
 		spp->addCohort();	// introduce copy of boundary cohort in system
 	}
@@ -63,6 +91,7 @@ void Solver::removeCohort_CM(){
 	
 	resizeStateFromSpecies();
 	copyCohortsToState();
+	cout << "........................................\n";
 	
 }
 

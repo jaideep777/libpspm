@@ -21,14 +21,17 @@ void Solver::calcRates_EBT(double t, vector<double>::iterator S, vector<double>:
 		std::vector<double> m_mx = spp->mortalityRateGradient(-1, spp->xb, t, env, control.ebt_grad_dx);
 		//std::cout << "g = " << g_gx[0] << ", gx = " << g_gx[1] << "\n";
 		//std::cout << "m = " << m_mx[0] << ", mx = " << m_mx[1] << "\n";
+
+		double mb = m_mx[0], mortGrad = m_mx[1], gb = g_gx[0], growthGrad = g_gx[1];	
 		
 		double birthFlux;
+		double pe = spp->establishmentProbability(t, env);
 		if (spp->birth_flux_in < 0){	
-			birthFlux = calcSpeciesBirthFlux(s,t) * spp->establishmentProbability(t, env);
+			birthFlux = calcSpeciesBirthFlux(s,t) * pe;
 		}
 		else{
-			double u0 = spp->get_u0(t, env);
-			birthFlux = u0*g_gx[0];
+			double u0 = spp->calc_boundary_u(gb, pe);
+			birthFlux = u0*gb;
 		}
 
 		for (int i=0; i<spp->J-1; ++i){	// go down to the second last cohort (exclude boundary cohort)
@@ -41,7 +44,6 @@ void Solver::calcRates_EBT(double t, vector<double>::iterator S, vector<double>:
 		}
 
 		// dpi0/dt and dN0/dt
-		double mb = m_mx[0], mortGrad = m_mx[1], gb = g_gx[0], growthGrad = g_gx[1];	
 		//std::cout << "S/C = " << s << "/" << "b" << " | pi0/N0 = " << pi0 << " " << N0;
 		//if (pi0 <= 0) pi0 = 1e-40;
 		//if (N0  <= 0) N0  = 1e-40;

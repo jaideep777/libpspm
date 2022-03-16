@@ -124,6 +124,12 @@ void Species<Model>::set_xb(double _xb){
 
 
 template <class Model>
+void Species<Model>::set_ub(double _ub){
+	boundaryCohort.u = _ub;
+}
+
+
+template <class Model>
 void Species<Model>::set_birthTime(int i, double t0){
 	cohorts[i].birth_time = t0;
 }
@@ -194,17 +200,15 @@ double Species<Model>::establishmentProbability(double t, void * env){
 }
 
 
-// FIXME: Should be renamed as "set_boundary_u"
+// FIXME: Should be renamed as "calc_boundary_u"
 template <class Model>
-double Species<Model>::get_u0(double t, void * env){
-	
+double Species<Model>::calc_boundary_u(double gb, double pe){
+	std::cout << "calc_boundary_u\n";
 	if (bfin_is_u0in){
 		boundaryCohort.u = birth_flux_in;
 	}
 	else {
-		//boundaryCohort.need_precompute = true;
-		double g = boundaryCohort.growthRate(boundaryCohort.x, t, env); 
-		boundaryCohort.u = (g>0)? birth_flux_in * boundaryCohort.establishmentProbability(t, env)/g  :  0; 
+		boundaryCohort.u = (gb>0)? birth_flux_in * pe/gb  :  0; 
 	}
 	return boundaryCohort.u;
 }

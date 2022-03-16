@@ -58,6 +58,7 @@ class Species_Base{
 	virtual void print() = 0;
 
 	virtual void set_xb(double _xb) = 0;
+	virtual void set_ub(double _ub) = 0;
 	virtual void set_birthTime(int i, double t0) = 0;
 	virtual void setX(int i, double _x) = 0;
 	virtual void setU(int i, double _u) = 0;
@@ -73,7 +74,7 @@ class Species_Base{
 	virtual void copyCohortsExtraToState(std::vector<double>::iterator &it) = 0;
 	
 	virtual double establishmentProbability(double t, void * env) = 0;
-	virtual double get_u0(double t, void * env) = 0;
+	virtual double calc_boundary_u(double gb, double pe) = 0;
 	virtual double get_boundary_u() = 0;
 
 	virtual void triggerPreCompute() = 0;
@@ -121,6 +122,7 @@ class Species : public Species_Base{
 	void print();
 	
 	void set_xb(double _xb);
+	void set_ub(double _ub);
 	void set_birthTime(int i, double t0);
 	void setX(int i, double _x);
 	void setU(int i, double _u);
@@ -136,7 +138,7 @@ class Species : public Species_Base{
 	void copyCohortsExtraToState(std::vector<double>::iterator &it);
 
 	double establishmentProbability(double t, void * env);
-	double get_u0(double t, void * env);
+	double calc_boundary_u(double gb, double pe);
 	double get_boundary_u();
 	
 	void triggerPreCompute();

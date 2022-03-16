@@ -72,6 +72,7 @@ class Cohort : public Ind {
 		return Ind::birthRate(x,t,_env);	
 	}
 	
+	// FIXME other env dependent rates should also check for precompute
 };
 
 template<class Model>

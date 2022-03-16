@@ -40,12 +40,12 @@ void Solver::stepU_iFMU(double t, vector<double> &S, vector<double> &dSdt, doubl
 		for (int i=0; i<J; ++i) growthArray[i] = spp->growthRate(i, spp->getX(i), t, env);
 		
 		double birthFlux;
+		double pe = spp->establishmentProbability(t, env);
 		if (spp->birth_flux_in < 0){	
-			birthFlux = calcSpeciesBirthFlux(s,t) * spp->establishmentProbability(t, env);
-			//std::cout << "birthflux = " << calcSpeciesBirthFlux(s,t) << " * " << spp->establishmentProbability(t, env) << " = " << birthFlux << endl; 
+			birthFlux = calcSpeciesBirthFlux(s,t) * pe;
 		}
 		else{
-			birthFlux = spp->get_u0(t, env)*growthArray[0];
+			birthFlux = spp->calc_boundary_u(growthArray[0], pe)*growthArray[0];
 		}
 		
 		//cout << t << "\t" << birthFlux/growthArray[0] << " -> " << calcSpeciesBirthFlux(s,t)/growthArray[0] << "\n";

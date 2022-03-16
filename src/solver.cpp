@@ -198,8 +198,9 @@ void Solver::initialize(){
 	for (int k=0; k<species_vec.size(); ++k){
 		Species_Base* s = species_vec[k];
 	
-		// set x for boundary cohort (BC is not in state, but used as a reference).	
-		s->set_xb(s->xb);
+		// Boundary cohort is not in state, but used as a reference.	
+		s->set_xb(s->xb); // set x of boundary cohort 
+		s->set_ub(0);     // set initial density of boundary cohort to 0.
 		
 		// set birth time for each cohort to current_time
 		for (int i=0; i<s->J; ++i) s->set_birthTime(i, current_time);
@@ -253,7 +254,7 @@ void Solver::initialize(){
 
 
 void Solver::copyStateToCohorts(std::vector<double>::iterator state_begin){
-	//std::cout << "state ---> cohorts\n";
+	std::cout << "state ---> cohorts\n";
 	std::vector<double>::iterator it = state_begin + n_statevars_system; // no need to copy system state
 	
 	for (int k=0; k<species_vec.size(); ++k){
@@ -294,7 +295,7 @@ void Solver::copyStateToCohorts(std::vector<double>::iterator state_begin){
 
 
 void Solver::copyCohortsToState(){
-	//std::cout << "state <--- cohorts\n";
+	std::cout << "state <--- cohorts\n";
 	vector<double>::iterator it = state.begin() + n_statevars_system; // no need to copy system state
 	
 	for (int k=0; k<species_vec.size(); ++k){
@@ -341,6 +342,7 @@ void Solver::step_to(double tstop){
 
 
 void Solver::updateEnv(double t, std::vector<double>::iterator S, std::vector<double>::iterator dSdt){
+	std::cout << "update Env...\n";
 	for (auto spp : species_vec) spp->triggerPreCompute();
 	env->computeEnv(t, this, S, dSdt);
 }
@@ -348,6 +350,7 @@ void Solver::updateEnv(double t, std::vector<double>::iterator S, std::vector<do
 
 // k = species_id
 double Solver::calcSpeciesBirthFlux(int k, double t){
+	std::cout << "calc birthFlux...\n";
 	auto spp = species_vec[k];	
 	auto newborns_production = [this, spp](int i, double _t){
 		double b1 = spp->birthRate(i, spp->getX(i), _t, env);

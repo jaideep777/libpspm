@@ -32,12 +32,13 @@ void Solver::calcRates_FMU(double t, vector<double>::iterator S, vector<double>:
 		vector <double> u(J+1);
 		
 		// i=0
+		double pe = spp->establishmentProbability(t, env);
 		if (spp->birth_flux_in < 0){	
-			double birthFlux = calcSpeciesBirthFlux(s,t) * spp->establishmentProbability(t, env);
+			double birthFlux = calcSpeciesBirthFlux(s,t) * pe;
 			u[0] = birthFlux/(growthArray[0]+1e-12); // Q: is this correct? or g(X0,env)? - A: It is g(xb,env) - growthArray[] indexes x, so (0) is xb. Hence correct. 
 		}
 		else{
-			u[0] = spp->get_u0(t, env);
+			u[0] = spp->calc_boundary_u(growthArray[0], pe);
 		}
 
 		// i=1 (calc u1 assuming linear u(x) in first interval)
