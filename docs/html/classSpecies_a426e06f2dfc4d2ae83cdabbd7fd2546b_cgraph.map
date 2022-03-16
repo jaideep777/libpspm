@@ -1,3 +1,4 @@
 <map id="Species::growthRateGradientCentered" name="Species::growthRateGradientCentered">
-<area shape="rect" id="node2" href="$classCohort.html#af684d203ee2a31b98f767fd6f1362ae0" title="Cohort::set_size" alt="" coords="247,13,365,39"/>
+<area shape="rect" id="node2" href="$classCohort.html#af684d203ee2a31b98f767fd6f1362ae0" title="Cohort::set_size" alt="" coords="255,5,374,32"/>
+<area shape="rect" id="node3" href="$classCohort.html#a2bcde3a746dea351fd36ffd77f7c8665" title="Cohort::growthRate" alt="" coords="247,56,383,83"/>
 </map>

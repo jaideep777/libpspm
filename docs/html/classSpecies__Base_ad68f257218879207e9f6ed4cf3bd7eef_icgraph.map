@@ -1,5 +1,6 @@
 <map id="Species_Base::growthRateGradient" name="Species_Base::growthRateGradient">
-<area shape="rect" id="node2" href="$classSolver.html#a23be16428b7ba399bfd2f06555547f6b" title="Solver::calcRates_EBT" alt="" coords="235,13,393,39"/>
-<area shape="rect" id="node3" href="$classSolver.html#af4c8f6565df94ed6a058a224196b9c2b" title="Solver::step_to" alt="" coords="441,13,552,39"/>
-<area shape="rect" id="node4" href="$classSolver.html#a06cf82d0a99490279ab20d2ad6b876db" title="Solver::step_to" alt="" coords="600,13,711,39"/>
+<area shape="rect" id="node2" href="$classSolver.html#ab712f582d6f785adb8620cb40bbb3de4" title="Solver::calcRates_CM" alt="" coords="237,5,391,32"/>
+<area shape="rect" id="node5" href="$classSolver.html#a23be16428b7ba399bfd2f06555547f6b" title="Solver::calcRates_EBT" alt="" coords="235,56,393,83"/>
+<area shape="rect" id="node3" href="$classSolver.html#af4c8f6565df94ed6a058a224196b9c2b" title="Solver::step_to" alt="" coords="441,31,552,57"/>
+<area shape="rect" id="node4" href="$classSolver.html#a06cf82d0a99490279ab20d2ad6b876db" title="Solver::step_to" alt="" coords="600,31,711,57"/>
 </map>

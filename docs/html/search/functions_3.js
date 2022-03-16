@@ -1,5 +1,6 @@
 var searchData=
 [
+  ['calc_5fboundary_5fu',['calc_boundary_u',['../classSpecies__Base.html#a0954e7ce15766c2bae1731fe5d8decd2',1,'Species_Base::calc_boundary_u()'],['../classSpecies.html#a45502736796b39be5d7a6556d23747ce',1,'Species::calc_boundary_u()']]],
   ['calcrates_5fcm',['calcRates_CM',['../classSolver.html#ab712f582d6f785adb8620cb40bbb3de4',1,'Solver']]],
   ['calcrates_5febt',['calcRates_EBT',['../classSolver.html#a23be16428b7ba399bfd2f06555547f6b',1,'Solver']]],
   ['calcrates_5ffmu',['calcRates_FMU',['../classSolver.html#a2ea9fb6abc4ffd5ac28154332029da40',1,'Solver']]],
@@ -9,7 +10,6 @@ var searchData=
   ['cohort',['Cohort',['../classCohort.html#abf4099dec6963a5ef03da33df3e3c24b',1,'Cohort::Cohort()'],['../classCohort.html#ab14249478bf9435f6dee4720cb8610ac',1,'Cohort::Cohort(const Ind &amp;_ind)']]],
   ['computeenv',['computeEnv',['../classEnvironmentBase.html#aab04d5438741c4f04d09514bac07348c',1,'EnvironmentBase']]],
   ['constructandreset',['constructAndReset',['../classSpline.html#a2990afcfd16e90f6b9fa0391fdc9b2b0',1,'Spline']]],
-  ['copyboundarycohortto',['copyBoundaryCohortTo',['../classSpecies__Base.html#a837dd41358e8d46bac3db75982d6f99e',1,'Species_Base::copyBoundaryCohortTo()'],['../classSpecies.html#a416af936e9e7a0c8d957037935995cdb',1,'Species::copyBoundaryCohortTo()']]],
   ['copycohortsextratostate',['copyCohortsExtraToState',['../classSpecies__Base.html#a096db78d3a8d871b594f8a23e44f1873',1,'Species_Base::copyCohortsExtraToState()'],['../classSpecies.html#a49f69db69c86a19f203dbf27befa4f37',1,'Species::copyCohortsExtraToState()']]],
   ['copycohortstostate',['copyCohortsToState',['../classSolver.html#ac108d0e9de32ef14e68a176ff9969c38',1,'Solver']]],
   ['copyextrastatetocohorts',['copyExtraStateToCohorts',['../classSpecies__Base.html#a2ca0ef18e0b775f6efc02b026bd2f5ac',1,'Species_Base::copyExtraStateToCohorts()'],['../classSpecies.html#a68056a76409dbe347b7822c55c3dd37a',1,'Species::copyExtraStateToCohorts()']]],

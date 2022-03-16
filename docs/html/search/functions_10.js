@@ -9,6 +9,7 @@ var searchData=
   ['set_5fpoints',['set_points',['../classSpline.html#a42eec80590bdc7fa338c4643cf307344',1,'Spline']]],
   ['set_5fsize',['set_size',['../classCohort.html#af684d203ee2a31b98f767fd6f1362ae0',1,'Cohort::set_size()'],['../classIndividualBase.html#a540199e914588b1aa95399d108dce066',1,'IndividualBase::set_size()']]],
   ['set_5fstate',['set_state',['../classIndividualBase.html#a818b896db632d32aa5b6225756035ba6',1,'IndividualBase']]],
+  ['set_5fub',['set_ub',['../classSpecies__Base.html#a6f5bcd038896a23f44cd453d004d34d0',1,'Species_Base::set_ub()'],['../classSpecies.html#a6caf437863e8bd96d49dd66fd42931dd',1,'Species::set_ub()']]],
   ['set_5fxb',['set_xb',['../classSpecies__Base.html#a25a20f843be73c25744dd0e860c11c6f',1,'Species_Base::set_xb()'],['../classSpecies.html#a236c6e58fb9459c7a9e055523c82693c',1,'Species::set_xb()']]],
   ['setenvironment',['setEnvironment',['../classSolver.html#a967eb7f9d64273be988233b2a8530242',1,'Solver']]],
   ['setu',['setU',['../classSpecies__Base.html#ad9ddab41ba3c6e242f1b3a8a50ed7a36',1,'Species_Base::setU()'],['../classSpecies.html#a170e08d608bb0e134ae255c63ede8f03',1,'Species::setU()']]],
@@ -22,7 +23,7 @@ var searchData=
   ['solver',['Solver',['../classSolver.html#ad412388e4d79d17fae0738492489d413',1,'Solver']]],
   ['species',['Species',['../classSpecies.html#a925161a83b7c2f6a0a2ebf612bd9b4e9',1,'Species::Species(std::vector&lt; double &gt; breaks=std::vector&lt; double &gt;())'],['../classSpecies.html#a418ee1754f61bd3963ef674b40898bf2',1,'Species::Species(Model M)']]],
   ['step',['Step',['../classRKCK45.html#a20415037da7046ff94afadbf927c42d3',1,'RKCK45']]],
-  ['step_5fto',['Step_to',['../classRKCK45.html#a91b5ae2e8a9dadc117e6412f054afa59',1,'RKCK45::Step_to()'],['../classOdeSolver.html#a77d9f02ed28d5515366e6be08560f35a',1,'OdeSolver::step_to()'],['../classSolver.html#af4c8f6565df94ed6a058a224196b9c2b',1,'Solver::step_to(double tstop, AfterStepFunc &amp;afterStep_user)'],['../classSolver.html#a06cf82d0a99490279ab20d2ad6b876db',1,'Solver::step_to(double tstop)']]],
+  ['step_5fto',['step_to',['../classOdeSolver.html#a77d9f02ed28d5515366e6be08560f35a',1,'OdeSolver::step_to()'],['../classSolver.html#af4c8f6565df94ed6a058a224196b9c2b',1,'Solver::step_to(double tstop, AfterStepFunc &amp;afterStep_user)'],['../classSolver.html#a06cf82d0a99490279ab20d2ad6b876db',1,'Solver::step_to(double tstop)'],['../classRKCK45.html#a91b5ae2e8a9dadc117e6412f054afa59',1,'RKCK45::Step_to()']]],
   ['stepu_5fifmu',['stepU_iFMU',['../classSolver.html#a8f96f44ff535452912b2a3a2fc43e60e',1,'Solver']]],
   ['stoda',['stoda',['../classLSODA.html#a7c6d8d75b383474b5b05c710d2921618',1,'LSODA']]],
   ['successreturn',['successreturn',['../classLSODA.html#abf4eccf92cba7f87f9d5051ee6b28a42',1,'LSODA']]]

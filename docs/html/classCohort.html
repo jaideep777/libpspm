@@ -89,6 +89,7 @@ $(document).ready(function(){initNavTree('classCohort.html','');});
   <div class="summary">
 <a href="#pub-methods">Public Member Functions</a> &#124;
 <a href="#pub-attribs">Public Attributes</a> &#124;
+<a href="#pub-static-attribs">Static Public Attributes</a> &#124;
 <a href="classCohort-members.html">List of all members</a>  </div>
   <div class="headertitle">
 <div class="title">Cohort&lt; Ind &gt; Class Template Reference</div>  </div>
@@ -99,14 +100,12 @@ $(document).ready(function(){initNavTree('classCohort.html','');});
 <div class="dynheader">
 Inheritance diagram for Cohort&lt; Ind &gt;:</div>
 <div class="dyncontent">
-<div class="center"><iframe scrolling="no" frameborder="0" src="classCohort__inherit__graph.svg" width="114" height="112"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe>
-</div>
+<div class="center"><iframe scrolling="no" frameborder="0" src="classCohort__inherit__graph.svg" width="114" height="112"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
 <center><span class="legend">[<a target="top" href="graph_legend.html">legend</a>]</span></center></div>
 <div class="dynheader">
 Collaboration diagram for Cohort&lt; Ind &gt;:</div>
 <div class="dyncontent">
-<div class="center"><iframe scrolling="no" frameborder="0" src="classCohort__coll__graph.svg" width="114" height="112"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe>
-</div>
+<div class="center"><iframe scrolling="no" frameborder="0" src="classCohort__coll__graph.svg" width="114" height="112"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
 <center><span class="legend">[<a target="top" href="graph_legend.html">legend</a>]</span></center></div>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-methods"></a>
@@ -121,6 +120,14 @@ Public Member Functions</h2></td></tr>
 <tr class="separator:a7c06d97557cc7c09a796d53b484b3a1a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:af684d203ee2a31b98f767fd6f1362ae0"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCohort.html#af684d203ee2a31b98f767fd6f1362ae0">set_size</a> (double _x)</td></tr>
 <tr class="separator:af684d203ee2a31b98f767fd6f1362ae0"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5141ee6dc03cb8e1e09708fb222162da"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCohort.html#a5141ee6dc03cb8e1e09708fb222162da">preCompute</a> (double <a class="el" href="classCohort.html#a2eb820df167a3841eb71d53d63826999">x</a>, double t, void *_env)</td></tr>
+<tr class="separator:a5141ee6dc03cb8e1e09708fb222162da"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2bcde3a746dea351fd36ffd77f7c8665"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCohort.html#a2bcde3a746dea351fd36ffd77f7c8665">growthRate</a> (double <a class="el" href="classCohort.html#a2eb820df167a3841eb71d53d63826999">x</a>, double t, void *_env)</td></tr>
+<tr class="separator:a2bcde3a746dea351fd36ffd77f7c8665"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a30709315cd5e4db121e86deac183c4b8"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCohort.html#a30709315cd5e4db121e86deac183c4b8">mortalityRate</a> (double <a class="el" href="classCohort.html#a2eb820df167a3841eb71d53d63826999">x</a>, double t, void *_env)</td></tr>
+<tr class="separator:a30709315cd5e4db121e86deac183c4b8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad18a65be901aa50f357939bbd7731ccb"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCohort.html#ad18a65be901aa50f357939bbd7731ccb">birthRate</a> (double <a class="el" href="classCohort.html#a2eb820df167a3841eb71d53d63826999">x</a>, double t, void *_env)</td></tr>
+<tr class="separator:ad18a65be901aa50f357939bbd7731ccb"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-attribs"></a>
 Public Attributes</h2></td></tr>
@@ -134,6 +141,19 @@ Public Attributes</h2></td></tr>
 <tr class="separator:ab78cd0669466a364f122f884a987731e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:abaa1ce0190380d622ed3a36d951519ed"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCohort.html#abaa1ce0190380d622ed3a36d951519ed">remove</a> = false</td></tr>
 <tr class="separator:abaa1ce0190380d622ed3a36d951519ed"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7f6b247997a218ccbef87a4198abfb76"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCohort.html#a7f6b247997a218ccbef87a4198abfb76">need_precompute</a> = true</td></tr>
+<tr class="separator:a7f6b247997a218ccbef87a4198abfb76"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-static-attribs"></a>
+Static Public Attributes</h2></td></tr>
+<tr class="memitem:a3109241268a3a56dc4ddc4fa318192da"><td class="memItemLeft" align="right" valign="top">static int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCohort.html#a3109241268a3a56dc4ddc4fa318192da">np</a></td></tr>
+<tr class="separator:a3109241268a3a56dc4ddc4fa318192da"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a235696398051a4c55c14985605d55823"><td class="memItemLeft" align="right" valign="top">static int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCohort.html#a235696398051a4c55c14985605d55823">ng</a></td></tr>
+<tr class="separator:a235696398051a4c55c14985605d55823"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae31de75be883084451b9f61b3d21e224"><td class="memItemLeft" align="right" valign="top">static int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCohort.html#ae31de75be883084451b9f61b3d21e224">nm</a></td></tr>
+<tr class="separator:ae31de75be883084451b9f61b3d21e224"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a896ae04ce4b64dc327e8d44838a4ebaf"><td class="memItemLeft" align="right" valign="top">static int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCohort.html#a896ae04ce4b64dc327e8d44838a4ebaf">nf</a></td></tr>
+<tr class="separator:a896ae04ce4b64dc327e8d44838a4ebaf"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><h3>template&lt;class Ind&gt;<br />
@@ -167,8 +187,8 @@ template&lt;class Ind&gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="cohort_8h_source.html#l00018">18</a> of file <a class="el" href="cohort_8h_source.html">cohort.h</a>.</p>
-<div class="fragment"><div class="line"><a name="l00018"></a><span class="lineno">   18</span>&#160;             : Ind() {</div><div class="line"><a name="l00019"></a><span class="lineno">   19</span>&#160;    }</div></div><!-- fragment -->
+<p class="definition">Definition at line <a class="el" href="cohort_8h_source.html#l00022">22</a> of file <a class="el" href="cohort_8h_source.html">cohort.h</a>.</p>
+<div class="fragment"><div class="line"><a name="l00022"></a><span class="lineno">   22</span>&#160;             : Ind() {</div><div class="line"><a name="l00023"></a><span class="lineno">   23</span>&#160;    }</div></div><!-- fragment -->
 </div>
 </div>
 <a id="ab14249478bf9435f6dee4720cb8610ac"></a>
@@ -197,11 +217,230 @@ template&lt;class Ind&gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="cohort_8h_source.html#l00022">22</a> of file <a class="el" href="cohort_8h_source.html">cohort.h</a>.</p>
-<div class="fragment"><div class="line"><a name="l00022"></a><span class="lineno">   22</span>&#160;                            : Ind(_ind){</div><div class="line"><a name="l00023"></a><span class="lineno">   23</span>&#160;    }</div></div><!-- fragment -->
+<p class="definition">Definition at line <a class="el" href="cohort_8h_source.html#l00026">26</a> of file <a class="el" href="cohort_8h_source.html">cohort.h</a>.</p>
+<div class="fragment"><div class="line"><a name="l00026"></a><span class="lineno">   26</span>&#160;                            : Ind(_ind){</div><div class="line"><a name="l00027"></a><span class="lineno">   27</span>&#160;    }</div></div><!-- fragment -->
 </div>
 </div>
 <h2 class="groupheader">Member Function Documentation</h2>
+<a id="ad18a65be901aa50f357939bbd7731ccb"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad18a65be901aa50f357939bbd7731ccb">&#9670;&nbsp;</a></span>birthRate()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;class Ind&gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">double <a class="el" href="classCohort.html">Cohort</a>&lt; Ind &gt;::birthRate </td>
+          <td>(</td>
+          <td class="paramtype">double&#160;</td>
+          <td class="paramname"><em>x</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double&#160;</td>
+          <td class="paramname"><em>t</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">void *&#160;</td>
+          <td class="paramname"><em>_env</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="cohort_8h_source.html#l00068">68</a> of file <a class="el" href="cohort_8h_source.html">cohort.h</a>.</p>
+<div class="fragment"><div class="line"><a name="l00068"></a><span class="lineno">   68</span>&#160;                                                     {</div><div class="line"><a name="l00069"></a><span class="lineno">   69</span>&#160;        ++<a class="code" href="classCohort.html#a896ae04ce4b64dc327e8d44838a4ebaf">nf</a>;</div><div class="line"><a name="l00070"></a><span class="lineno">   70</span>&#160;        <span class="keywordflow">if</span> (<a class="code" href="classCohort.html#a7f6b247997a218ccbef87a4198abfb76">need_precompute</a>) <a class="code" href="classCohort.html#a5141ee6dc03cb8e1e09708fb222162da">preCompute</a>(<a class="code" href="classCohort.html#a2eb820df167a3841eb71d53d63826999">x</a>,t,_env);</div><div class="line"><a name="l00071"></a><span class="lineno">   71</span>&#160;        <span class="comment">//std::cout &lt;&lt; x &lt;&lt; &quot; cohort birthRate: &quot;; print(); std::cout &lt;&lt; &quot;\n&quot;;</span></div><div class="line"><a name="l00072"></a><span class="lineno">   72</span>&#160;        <span class="keywordflow">return</span> Ind::birthRate(<a class="code" href="classCohort.html#a2eb820df167a3841eb71d53d63826999">x</a>,t,_env);    </div><div class="line"><a name="l00073"></a><span class="lineno">   73</span>&#160;    }</div><div class="ttc" id="classCohort_html_a2eb820df167a3841eb71d53d63826999"><div class="ttname"><a href="classCohort.html#a2eb820df167a3841eb71d53d63826999">Cohort::x</a></div><div class="ttdeci">double x</div><div class="ttdef"><b>Definition:</b> <a href="cohort_8h_source.html#l00011">cohort.h:11</a></div></div>
+<div class="ttc" id="classCohort_html_a7f6b247997a218ccbef87a4198abfb76"><div class="ttname"><a href="classCohort.html#a7f6b247997a218ccbef87a4198abfb76">Cohort::need_precompute</a></div><div class="ttdeci">bool need_precompute</div><div class="ttdef"><b>Definition:</b> <a href="cohort_8h_source.html#l00018">cohort.h:18</a></div></div>
+<div class="ttc" id="classCohort_html_a896ae04ce4b64dc327e8d44838a4ebaf"><div class="ttname"><a href="classCohort.html#a896ae04ce4b64dc327e8d44838a4ebaf">Cohort::nf</a></div><div class="ttdeci">static int nf</div><div class="ttdef"><b>Definition:</b> <a href="cohort_8h_source.html#l00009">cohort.h:9</a></div></div>
+<div class="ttc" id="classCohort_html_a5141ee6dc03cb8e1e09708fb222162da"><div class="ttname"><a href="classCohort.html#a5141ee6dc03cb8e1e09708fb222162da">Cohort::preCompute</a></div><div class="ttdeci">void preCompute(double x, double t, void *_env)</div><div class="ttdef"><b>Definition:</b> <a href="cohort_8h_source.html#l00047">cohort.h:47</a></div></div>
+</div><!-- fragment --><div class="dynheader">
+Here is the caller graph for this function:</div>
+<div class="dyncontent">
+<div class="center"><iframe scrolling="no" frameborder="0" src="classCohort_ad18a65be901aa50f357939bbd7731ccb_icgraph.svg" width="312" height="38"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
+</div>
+
+</div>
+</div>
+<a id="a2bcde3a746dea351fd36ffd77f7c8665"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2bcde3a746dea351fd36ffd77f7c8665">&#9670;&nbsp;</a></span>growthRate()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;class Ind&gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">double <a class="el" href="classCohort.html">Cohort</a>&lt; Ind &gt;::growthRate </td>
+          <td>(</td>
+          <td class="paramtype">double&#160;</td>
+          <td class="paramname"><em>x</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double&#160;</td>
+          <td class="paramname"><em>t</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">void *&#160;</td>
+          <td class="paramname"><em>_env</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="cohort_8h_source.html#l00054">54</a> of file <a class="el" href="cohort_8h_source.html">cohort.h</a>.</p>
+<div class="fragment"><div class="line"><a name="l00054"></a><span class="lineno">   54</span>&#160;                                                      {</div><div class="line"><a name="l00055"></a><span class="lineno">   55</span>&#160;        ++<a class="code" href="classCohort.html#a235696398051a4c55c14985605d55823">ng</a>;</div><div class="line"><a name="l00056"></a><span class="lineno">   56</span>&#160;        <span class="keywordflow">if</span> (<a class="code" href="classCohort.html#a7f6b247997a218ccbef87a4198abfb76">need_precompute</a>) <a class="code" href="classCohort.html#a5141ee6dc03cb8e1e09708fb222162da">preCompute</a>(<a class="code" href="classCohort.html#a2eb820df167a3841eb71d53d63826999">x</a>,t,_env);</div><div class="line"><a name="l00057"></a><span class="lineno">   57</span>&#160;        <span class="comment">//std::cout &lt;&lt; &quot;cohort growthRate(): &quot;; print(); std::cout &lt;&lt; &quot;\n&quot;;</span></div><div class="line"><a name="l00058"></a><span class="lineno">   58</span>&#160;        <span class="keywordflow">return</span> Ind::growthRate(<a class="code" href="classCohort.html#a2eb820df167a3841eb71d53d63826999">x</a>,t,_env);   </div><div class="line"><a name="l00059"></a><span class="lineno">   59</span>&#160;    }</div><div class="ttc" id="classCohort_html_a2eb820df167a3841eb71d53d63826999"><div class="ttname"><a href="classCohort.html#a2eb820df167a3841eb71d53d63826999">Cohort::x</a></div><div class="ttdeci">double x</div><div class="ttdef"><b>Definition:</b> <a href="cohort_8h_source.html#l00011">cohort.h:11</a></div></div>
+<div class="ttc" id="classCohort_html_a7f6b247997a218ccbef87a4198abfb76"><div class="ttname"><a href="classCohort.html#a7f6b247997a218ccbef87a4198abfb76">Cohort::need_precompute</a></div><div class="ttdeci">bool need_precompute</div><div class="ttdef"><b>Definition:</b> <a href="cohort_8h_source.html#l00018">cohort.h:18</a></div></div>
+<div class="ttc" id="classCohort_html_a5141ee6dc03cb8e1e09708fb222162da"><div class="ttname"><a href="classCohort.html#a5141ee6dc03cb8e1e09708fb222162da">Cohort::preCompute</a></div><div class="ttdeci">void preCompute(double x, double t, void *_env)</div><div class="ttdef"><b>Definition:</b> <a href="cohort_8h_source.html#l00047">cohort.h:47</a></div></div>
+<div class="ttc" id="classCohort_html_a235696398051a4c55c14985605d55823"><div class="ttname"><a href="classCohort.html#a235696398051a4c55c14985605d55823">Cohort::ng</a></div><div class="ttdeci">static int ng</div><div class="ttdef"><b>Definition:</b> <a href="cohort_8h_source.html#l00009">cohort.h:9</a></div></div>
+</div><!-- fragment --><div class="dynheader">
+Here is the caller graph for this function:</div>
+<div class="dyncontent">
+<div class="center"><iframe scrolling="no" frameborder="0" src="classCohort_a2bcde3a746dea351fd36ffd77f7c8665_icgraph.svg" width="388" height="206"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
+</div>
+
+</div>
+</div>
+<a id="a30709315cd5e4db121e86deac183c4b8"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a30709315cd5e4db121e86deac183c4b8">&#9670;&nbsp;</a></span>mortalityRate()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;class Ind&gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">double <a class="el" href="classCohort.html">Cohort</a>&lt; Ind &gt;::mortalityRate </td>
+          <td>(</td>
+          <td class="paramtype">double&#160;</td>
+          <td class="paramname"><em>x</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double&#160;</td>
+          <td class="paramname"><em>t</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">void *&#160;</td>
+          <td class="paramname"><em>_env</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="cohort_8h_source.html#l00061">61</a> of file <a class="el" href="cohort_8h_source.html">cohort.h</a>.</p>
+<div class="fragment"><div class="line"><a name="l00061"></a><span class="lineno">   61</span>&#160;                                                         {</div><div class="line"><a name="l00062"></a><span class="lineno">   62</span>&#160;        ++<a class="code" href="classCohort.html#ae31de75be883084451b9f61b3d21e224">nm</a>;</div><div class="line"><a name="l00063"></a><span class="lineno">   63</span>&#160;        <span class="keywordflow">if</span> (<a class="code" href="classCohort.html#a7f6b247997a218ccbef87a4198abfb76">need_precompute</a>) <a class="code" href="classCohort.html#a5141ee6dc03cb8e1e09708fb222162da">preCompute</a>(<a class="code" href="classCohort.html#a2eb820df167a3841eb71d53d63826999">x</a>,t,_env);</div><div class="line"><a name="l00064"></a><span class="lineno">   64</span>&#160;        <span class="comment">//std::cout &lt;&lt; &quot;cohort mortRate(): &quot;; print(); std::cout &lt;&lt; &quot;\n&quot;;</span></div><div class="line"><a name="l00065"></a><span class="lineno">   65</span>&#160;        <span class="keywordflow">return</span> Ind::mortalityRate(<a class="code" href="classCohort.html#a2eb820df167a3841eb71d53d63826999">x</a>,t,_env);    </div><div class="line"><a name="l00066"></a><span class="lineno">   66</span>&#160;    }</div><div class="ttc" id="classCohort_html_ae31de75be883084451b9f61b3d21e224"><div class="ttname"><a href="classCohort.html#ae31de75be883084451b9f61b3d21e224">Cohort::nm</a></div><div class="ttdeci">static int nm</div><div class="ttdef"><b>Definition:</b> <a href="cohort_8h_source.html#l00009">cohort.h:9</a></div></div>
+<div class="ttc" id="classCohort_html_a2eb820df167a3841eb71d53d63826999"><div class="ttname"><a href="classCohort.html#a2eb820df167a3841eb71d53d63826999">Cohort::x</a></div><div class="ttdeci">double x</div><div class="ttdef"><b>Definition:</b> <a href="cohort_8h_source.html#l00011">cohort.h:11</a></div></div>
+<div class="ttc" id="classCohort_html_a7f6b247997a218ccbef87a4198abfb76"><div class="ttname"><a href="classCohort.html#a7f6b247997a218ccbef87a4198abfb76">Cohort::need_precompute</a></div><div class="ttdeci">bool need_precompute</div><div class="ttdef"><b>Definition:</b> <a href="cohort_8h_source.html#l00018">cohort.h:18</a></div></div>
+<div class="ttc" id="classCohort_html_a5141ee6dc03cb8e1e09708fb222162da"><div class="ttname"><a href="classCohort.html#a5141ee6dc03cb8e1e09708fb222162da">Cohort::preCompute</a></div><div class="ttdeci">void preCompute(double x, double t, void *_env)</div><div class="ttdef"><b>Definition:</b> <a href="cohort_8h_source.html#l00047">cohort.h:47</a></div></div>
+</div><!-- fragment --><div class="dynheader">
+Here is the caller graph for this function:</div>
+<div class="dyncontent">
+<div class="center"><iframe scrolling="no" frameborder="0" src="classCohort_a30709315cd5e4db121e86deac183c4b8_icgraph.svg" width="410" height="88"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
+</div>
+
+</div>
+</div>
+<a id="a5141ee6dc03cb8e1e09708fb222162da"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a5141ee6dc03cb8e1e09708fb222162da">&#9670;&nbsp;</a></span>preCompute()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;class Ind&gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void <a class="el" href="classCohort.html">Cohort</a>&lt; Ind &gt;::preCompute </td>
+          <td>(</td>
+          <td class="paramtype">double&#160;</td>
+          <td class="paramname"><em>x</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double&#160;</td>
+          <td class="paramname"><em>t</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">void *&#160;</td>
+          <td class="paramname"><em>_env</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="cohort_8h_source.html#l00047">47</a> of file <a class="el" href="cohort_8h_source.html">cohort.h</a>.</p>
+<div class="fragment"><div class="line"><a name="l00047"></a><span class="lineno">   47</span>&#160;                                                    {</div><div class="line"><a name="l00048"></a><span class="lineno">   48</span>&#160;        ++<a class="code" href="classCohort.html#a3109241268a3a56dc4ddc4fa318192da">np</a>;</div><div class="line"><a name="l00049"></a><span class="lineno">   49</span>&#160;        <span class="comment">//std::cout &lt;&lt; &quot;cohort precompute: &quot;; print(); std::cout &lt;&lt; &quot;\n&quot;;</span></div><div class="line"><a name="l00050"></a><span class="lineno">   50</span>&#160;        Ind::preCompute(<a class="code" href="classCohort.html#a2eb820df167a3841eb71d53d63826999">x</a>,t,_env);  </div><div class="line"><a name="l00051"></a><span class="lineno">   51</span>&#160;        <a class="code" href="classCohort.html#a7f6b247997a218ccbef87a4198abfb76">need_precompute</a> = <span class="keyword">false</span>;   <span class="comment">// Once precompute is called, no need to further precompute until necessary</span></div><div class="line"><a name="l00052"></a><span class="lineno">   52</span>&#160;    }</div><div class="ttc" id="classCohort_html_a3109241268a3a56dc4ddc4fa318192da"><div class="ttname"><a href="classCohort.html#a3109241268a3a56dc4ddc4fa318192da">Cohort::np</a></div><div class="ttdeci">static int np</div><div class="ttdef"><b>Definition:</b> <a href="cohort_8h_source.html#l00009">cohort.h:9</a></div></div>
+<div class="ttc" id="classCohort_html_a2eb820df167a3841eb71d53d63826999"><div class="ttname"><a href="classCohort.html#a2eb820df167a3841eb71d53d63826999">Cohort::x</a></div><div class="ttdeci">double x</div><div class="ttdef"><b>Definition:</b> <a href="cohort_8h_source.html#l00011">cohort.h:11</a></div></div>
+<div class="ttc" id="classCohort_html_a7f6b247997a218ccbef87a4198abfb76"><div class="ttname"><a href="classCohort.html#a7f6b247997a218ccbef87a4198abfb76">Cohort::need_precompute</a></div><div class="ttdeci">bool need_precompute</div><div class="ttdef"><b>Definition:</b> <a href="cohort_8h_source.html#l00018">cohort.h:18</a></div></div>
+</div><!-- fragment --><div class="dynheader">
+Here is the caller graph for this function:</div>
+<div class="dyncontent">
+<div class="center"><iframe scrolling="no" frameborder="0" src="classCohort_a5141ee6dc03cb8e1e09708fb222162da_icgraph.svg" width="406" height="139"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
+</div>
+
+</div>
+</div>
 <a id="a7c06d97557cc7c09a796d53b484b3a1a"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a7c06d97557cc7c09a796d53b484b3a1a">&#9670;&nbsp;</a></span>print()</h2>
 
@@ -228,8 +467,8 @@ template&lt;class Ind&gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="cohort_8h_source.html#l00029">29</a> of file <a class="el" href="cohort_8h_source.html">cohort.h</a>.</p>
-<div class="fragment"><div class="line"><a name="l00029"></a><span class="lineno">   29</span>&#160;                                         {</div><div class="line"><a name="l00030"></a><span class="lineno">   30</span>&#160;        <a class="code" href="classCohort.html#aabdc89005cf23c8bf149cac3cd8c19c6">print_xu</a>(out);</div><div class="line"><a name="l00031"></a><span class="lineno">   31</span>&#160;        Ind::print(out);</div><div class="line"><a name="l00032"></a><span class="lineno">   32</span>&#160;    }</div><div class="ttc" id="classCohort_html_aabdc89005cf23c8bf149cac3cd8c19c6"><div class="ttname"><a href="classCohort.html#aabdc89005cf23c8bf149cac3cd8c19c6">Cohort::print_xu</a></div><div class="ttdeci">void print_xu(std::ostream &amp;out=std::cout)</div><div class="ttdef"><b>Definition:</b> <a href="cohort_8h_source.html#l00025">cohort.h:25</a></div></div>
+<p class="definition">Definition at line <a class="el" href="cohort_8h_source.html#l00033">33</a> of file <a class="el" href="cohort_8h_source.html">cohort.h</a>.</p>
+<div class="fragment"><div class="line"><a name="l00033"></a><span class="lineno">   33</span>&#160;                                         {</div><div class="line"><a name="l00034"></a><span class="lineno">   34</span>&#160;        <a class="code" href="classCohort.html#aabdc89005cf23c8bf149cac3cd8c19c6">print_xu</a>(out);</div><div class="line"><a name="l00035"></a><span class="lineno">   35</span>&#160;        Ind::print(out);</div><div class="line"><a name="l00036"></a><span class="lineno">   36</span>&#160;    }</div><div class="ttc" id="classCohort_html_aabdc89005cf23c8bf149cac3cd8c19c6"><div class="ttname"><a href="classCohort.html#aabdc89005cf23c8bf149cac3cd8c19c6">Cohort::print_xu</a></div><div class="ttdeci">void print_xu(std::ostream &amp;out=std::cout)</div><div class="ttdef"><b>Definition:</b> <a href="cohort_8h_source.html#l00029">cohort.h:29</a></div></div>
 </div><!-- fragment -->
 </div>
 </div>
@@ -259,15 +498,14 @@ template&lt;class Ind&gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="cohort_8h_source.html#l00025">25</a> of file <a class="el" href="cohort_8h_source.html">cohort.h</a>.</p>
-<div class="fragment"><div class="line"><a name="l00025"></a><span class="lineno">   25</span>&#160;                                            {</div><div class="line"><a name="l00026"></a><span class="lineno">   26</span>&#160;        out &lt;&lt; <a class="code" href="classCohort.html#ab78cd0669466a364f122f884a987731e">birth_time</a> &lt;&lt; <span class="stringliteral">&quot;\t&quot;</span> &lt;&lt; <a class="code" href="classCohort.html#a2eb820df167a3841eb71d53d63826999">x</a> &lt;&lt; <span class="stringliteral">&quot;\t&quot;</span> &lt;&lt; <a class="code" href="classCohort.html#a59ef45c3138e1d1eee01161eeb98714e">u</a> &lt;&lt; <span class="stringliteral">&quot;\t&quot;</span>; </div><div class="line"><a name="l00027"></a><span class="lineno">   27</span>&#160;    }</div><div class="ttc" id="classCohort_html_a2eb820df167a3841eb71d53d63826999"><div class="ttname"><a href="classCohort.html#a2eb820df167a3841eb71d53d63826999">Cohort::x</a></div><div class="ttdeci">double x</div><div class="ttdef"><b>Definition:</b> <a href="cohort_8h_source.html#l00009">cohort.h:9</a></div></div>
-<div class="ttc" id="classCohort_html_ab78cd0669466a364f122f884a987731e"><div class="ttname"><a href="classCohort.html#ab78cd0669466a364f122f884a987731e">Cohort::birth_time</a></div><div class="ttdeci">double birth_time</div><div class="ttdef"><b>Definition:</b> <a href="cohort_8h_source.html#l00013">cohort.h:13</a></div></div>
-<div class="ttc" id="classCohort_html_a59ef45c3138e1d1eee01161eeb98714e"><div class="ttname"><a href="classCohort.html#a59ef45c3138e1d1eee01161eeb98714e">Cohort::u</a></div><div class="ttdeci">double u</div><div class="ttdef"><b>Definition:</b> <a href="cohort_8h_source.html#l00010">cohort.h:10</a></div></div>
+<p class="definition">Definition at line <a class="el" href="cohort_8h_source.html#l00029">29</a> of file <a class="el" href="cohort_8h_source.html">cohort.h</a>.</p>
+<div class="fragment"><div class="line"><a name="l00029"></a><span class="lineno">   29</span>&#160;                                            {</div><div class="line"><a name="l00030"></a><span class="lineno">   30</span>&#160;        out &lt;&lt; <a class="code" href="classCohort.html#ab78cd0669466a364f122f884a987731e">birth_time</a> &lt;&lt; <span class="stringliteral">&quot;\t&quot;</span> &lt;&lt; <a class="code" href="classCohort.html#a2eb820df167a3841eb71d53d63826999">x</a> &lt;&lt; <span class="stringliteral">&quot;\t&quot;</span> &lt;&lt; <a class="code" href="classCohort.html#a59ef45c3138e1d1eee01161eeb98714e">u</a> &lt;&lt; <span class="stringliteral">&quot;\t&quot;</span>; </div><div class="line"><a name="l00031"></a><span class="lineno">   31</span>&#160;    }</div><div class="ttc" id="classCohort_html_a2eb820df167a3841eb71d53d63826999"><div class="ttname"><a href="classCohort.html#a2eb820df167a3841eb71d53d63826999">Cohort::x</a></div><div class="ttdeci">double x</div><div class="ttdef"><b>Definition:</b> <a href="cohort_8h_source.html#l00011">cohort.h:11</a></div></div>
+<div class="ttc" id="classCohort_html_ab78cd0669466a364f122f884a987731e"><div class="ttname"><a href="classCohort.html#ab78cd0669466a364f122f884a987731e">Cohort::birth_time</a></div><div class="ttdeci">double birth_time</div><div class="ttdef"><b>Definition:</b> <a href="cohort_8h_source.html#l00015">cohort.h:15</a></div></div>
+<div class="ttc" id="classCohort_html_a59ef45c3138e1d1eee01161eeb98714e"><div class="ttname"><a href="classCohort.html#a59ef45c3138e1d1eee01161eeb98714e">Cohort::u</a></div><div class="ttdeci">double u</div><div class="ttdef"><b>Definition:</b> <a href="cohort_8h_source.html#l00012">cohort.h:12</a></div></div>
 </div><!-- fragment --><div class="dynheader">
 Here is the caller graph for this function:</div>
 <div class="dyncontent">
-<div class="center"><iframe scrolling="no" frameborder="0" src="classCohort_aabdc89005cf23c8bf149cac3cd8c19c6_icgraph.svg" width="327" height="38"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe>
-</div>
+<div class="center"><iframe scrolling="no" frameborder="0" src="classCohort_aabdc89005cf23c8bf149cac3cd8c19c6_icgraph.svg" width="327" height="38"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
 </div>
 
 </div>
@@ -298,13 +536,13 @@ template&lt;class Ind&gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="cohort_8h_source.html#l00034">34</a> of file <a class="el" href="cohort_8h_source.html">cohort.h</a>.</p>
-<div class="fragment"><div class="line"><a name="l00034"></a><span class="lineno">   34</span>&#160;                            {</div><div class="line"><a name="l00035"></a><span class="lineno">   35</span>&#160;        <a class="code" href="classCohort.html#a2eb820df167a3841eb71d53d63826999">x</a> = _x;</div><div class="line"><a name="l00036"></a><span class="lineno">   36</span>&#160;        Ind::set_size(<a class="code" href="classCohort.html#a2eb820df167a3841eb71d53d63826999">x</a>);</div><div class="line"><a name="l00037"></a><span class="lineno">   37</span>&#160;    }   </div><div class="ttc" id="classCohort_html_a2eb820df167a3841eb71d53d63826999"><div class="ttname"><a href="classCohort.html#a2eb820df167a3841eb71d53d63826999">Cohort::x</a></div><div class="ttdeci">double x</div><div class="ttdef"><b>Definition:</b> <a href="cohort_8h_source.html#l00009">cohort.h:9</a></div></div>
+<p class="definition">Definition at line <a class="el" href="cohort_8h_source.html#l00038">38</a> of file <a class="el" href="cohort_8h_source.html">cohort.h</a>.</p>
+<div class="fragment"><div class="line"><a name="l00038"></a><span class="lineno">   38</span>&#160;                            {</div><div class="line"><a name="l00039"></a><span class="lineno">   39</span>&#160;        <a class="code" href="classCohort.html#a2eb820df167a3841eb71d53d63826999">x</a> = _x;</div><div class="line"><a name="l00040"></a><span class="lineno">   40</span>&#160;        <a class="code" href="classCohort.html#a7f6b247997a218ccbef87a4198abfb76">need_precompute</a> = <span class="keyword">true</span>; <span class="comment">// when size is updated, next rate calc will need precompute</span></div><div class="line"><a name="l00041"></a><span class="lineno">   41</span>&#160;        Ind::set_size(<a class="code" href="classCohort.html#a2eb820df167a3841eb71d53d63826999">x</a>);</div><div class="line"><a name="l00042"></a><span class="lineno">   42</span>&#160;    }</div><div class="ttc" id="classCohort_html_a2eb820df167a3841eb71d53d63826999"><div class="ttname"><a href="classCohort.html#a2eb820df167a3841eb71d53d63826999">Cohort::x</a></div><div class="ttdeci">double x</div><div class="ttdef"><b>Definition:</b> <a href="cohort_8h_source.html#l00011">cohort.h:11</a></div></div>
+<div class="ttc" id="classCohort_html_a7f6b247997a218ccbef87a4198abfb76"><div class="ttname"><a href="classCohort.html#a7f6b247997a218ccbef87a4198abfb76">Cohort::need_precompute</a></div><div class="ttdeci">bool need_precompute</div><div class="ttdef"><b>Definition:</b> <a href="cohort_8h_source.html#l00018">cohort.h:18</a></div></div>
 </div><!-- fragment --><div class="dynheader">
 Here is the caller graph for this function:</div>
 <div class="dyncontent">
-<div class="center"><iframe scrolling="no" frameborder="0" src="classCohort_af684d203ee2a31b98f767fd6f1362ae0_icgraph.svg" width="382" height="206"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe>
-</div>
+<div class="center"><iframe scrolling="no" frameborder="0" src="classCohort_af684d203ee2a31b98f767fd6f1362ae0_icgraph.svg" width="382" height="206"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
 </div>
 
 </div>
@@ -324,7 +562,7 @@ template&lt;class Ind&gt; </div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="cohort_8h_source.html#l00013">13</a> of file <a class="el" href="cohort_8h_source.html">cohort.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="cohort_8h_source.html#l00015">15</a> of file <a class="el" href="cohort_8h_source.html">cohort.h</a>.</p>
 
 </div>
 </div>
@@ -342,7 +580,129 @@ template&lt;class Ind&gt; </div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="cohort_8h_source.html#l00011">11</a> of file <a class="el" href="cohort_8h_source.html">cohort.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="cohort_8h_source.html#l00013">13</a> of file <a class="el" href="cohort_8h_source.html">cohort.h</a>.</p>
+
+</div>
+</div>
+<a id="a7f6b247997a218ccbef87a4198abfb76"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7f6b247997a218ccbef87a4198abfb76">&#9670;&nbsp;</a></span>need_precompute</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;class Ind&gt; </div>
+      <table class="memname">
+        <tr>
+          <td class="memname">bool <a class="el" href="classCohort.html">Cohort</a>&lt; Ind &gt;::need_precompute = true</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="cohort_8h_source.html#l00018">18</a> of file <a class="el" href="cohort_8h_source.html">cohort.h</a>.</p>
+
+</div>
+</div>
+<a id="a896ae04ce4b64dc327e8d44838a4ebaf"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a896ae04ce4b64dc327e8d44838a4ebaf">&#9670;&nbsp;</a></span>nf</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;class Ind&gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">int <a class="el" href="classCohort.html">Cohort</a>&lt; Ind &gt;::nf</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="cohort_8h_source.html#l00009">9</a> of file <a class="el" href="cohort_8h_source.html">cohort.h</a>.</p>
+
+</div>
+</div>
+<a id="a235696398051a4c55c14985605d55823"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a235696398051a4c55c14985605d55823">&#9670;&nbsp;</a></span>ng</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;class Ind&gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">int <a class="el" href="classCohort.html">Cohort</a>&lt; Ind &gt;::ng</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="cohort_8h_source.html#l00009">9</a> of file <a class="el" href="cohort_8h_source.html">cohort.h</a>.</p>
+
+</div>
+</div>
+<a id="ae31de75be883084451b9f61b3d21e224"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae31de75be883084451b9f61b3d21e224">&#9670;&nbsp;</a></span>nm</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;class Ind&gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">int <a class="el" href="classCohort.html">Cohort</a>&lt; Ind &gt;::nm</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="cohort_8h_source.html#l00009">9</a> of file <a class="el" href="cohort_8h_source.html">cohort.h</a>.</p>
+
+</div>
+</div>
+<a id="a3109241268a3a56dc4ddc4fa318192da"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3109241268a3a56dc4ddc4fa318192da">&#9670;&nbsp;</a></span>np</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;class Ind&gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">int <a class="el" href="classCohort.html">Cohort</a>&lt; Ind &gt;::np</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="cohort_8h_source.html#l00009">9</a> of file <a class="el" href="cohort_8h_source.html">cohort.h</a>.</p>
 
 </div>
 </div>
@@ -360,7 +720,7 @@ template&lt;class Ind&gt; </div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="cohort_8h_source.html#l00014">14</a> of file <a class="el" href="cohort_8h_source.html">cohort.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="cohort_8h_source.html#l00016">16</a> of file <a class="el" href="cohort_8h_source.html">cohort.h</a>.</p>
 
 </div>
 </div>
@@ -378,7 +738,7 @@ template&lt;class Ind&gt; </div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="cohort_8h_source.html#l00010">10</a> of file <a class="el" href="cohort_8h_source.html">cohort.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="cohort_8h_source.html#l00012">12</a> of file <a class="el" href="cohort_8h_source.html">cohort.h</a>.</p>
 
 </div>
 </div>
@@ -396,7 +756,7 @@ template&lt;class Ind&gt; </div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="cohort_8h_source.html#l00009">9</a> of file <a class="el" href="cohort_8h_source.html">cohort.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="cohort_8h_source.html#l00011">11</a> of file <a class="el" href="cohort_8h_source.html">cohort.h</a>.</p>
 
 </div>
 </div>

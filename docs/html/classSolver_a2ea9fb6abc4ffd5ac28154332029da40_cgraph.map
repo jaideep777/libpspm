@@ -1,3 +1,9 @@
 <map id="Solver::calcRates_FMU" name="Solver::calcRates_FMU">
-<area shape="rect" id="node2" href="$fmu_8cpp.html#af0b176a8634995ec9711c803bb30743a" title="phi" alt="" coords="216,5,255,32"/>
+<area shape="rect" id="node2" href="$classSpecies__Base.html#abe98e190e76cfd39eee7ef3d30141d53" title="Species_Base::growthRate" alt="" coords="225,5,406,32"/>
+<area shape="rect" id="node3" href="$classSpecies__Base.html#ae267209e533ed4d38908c2e2c1925417" title="Species_Base::growthRate\lOffset" alt="" coords="225,57,406,98"/>
+<area shape="rect" id="node4" href="$classSpecies__Base.html#aad4cefae53644171dfcd12639d2e0e63" title="Species_Base::establishment\lProbability" alt="" coords="218,122,413,163"/>
+<area shape="rect" id="node5" href="$classSpecies__Base.html#a0954e7ce15766c2bae1731fe5d8decd2" title="Species_Base::calc\l_boundary_u" alt="" coords="246,187,385,229"/>
+<area shape="rect" id="node6" href="$fmu_8cpp.html#af0b176a8634995ec9711c803bb30743a" title="phi" alt="" coords="296,253,335,280"/>
+<area shape="rect" id="node7" href="$classSpecies__Base.html#a59ab3c647c48a819f1911957e5724d5e" title="Species_Base::mortalityRate" alt="" coords="219,304,411,331"/>
+<area shape="rect" id="node8" href="$classSpecies__Base.html#a1c47d1905fa4da0a1f203f641f6ed2af" title="Species_Base::getExtraRates" alt="" coords="216,355,415,381"/>
 </map>

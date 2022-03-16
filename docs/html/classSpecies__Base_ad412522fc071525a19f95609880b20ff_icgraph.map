@@ -1,11 +1,13 @@
 <map id="Species_Base::getU" name="Species_Base::getU">
-<area shape="rect" id="node2" href="$classSolver.html#a23be16428b7ba399bfd2f06555547f6b" title="Solver::calcRates_EBT" alt="" coords="210,5,369,32"/>
-<area shape="rect" id="node5" href="$classSolver.html#a9172d0d2dc6399ada494ef23020943d5" title="Computes the partial integral &#160;for the specified species. " alt="" coords="212,57,367,98"/>
-<area shape="rect" id="node6" href="$classSolver.html#a2a6ca7647a4cde1195789132f3873c0b" title="Computes the integral &#160;for the specified species. For details, see integrate_wudx_above. " alt="" coords="224,123,355,149"/>
-<area shape="rect" id="node10" href="$classSolver.html#ac108d0e9de32ef14e68a176ff9969c38" title="Solver::copyCohortsToState" alt="" coords="196,173,383,200"/>
-<area shape="rect" id="node3" href="$classSolver.html#af4c8f6565df94ed6a058a224196b9c2b" title="Solver::step_to" alt="" coords="471,5,581,32"/>
-<area shape="rect" id="node4" href="$classSolver.html#a06cf82d0a99490279ab20d2ad6b876db" title="Solver::step_to" alt="" coords="688,5,799,32"/>
-<area shape="rect" id="node7" href="$classSolver.html#aa5f2d1d48f6b4db83dbb257325924d2c" title="Solver::calcSpeciesBirthFlux" alt="" coords="431,123,621,149"/>
-<area shape="rect" id="node8" href="$classSolver.html#ae9cbf50e5db34626f54298c75fc64188" title="Solver::newborns_out" alt="" coords="669,123,817,149"/>
-<area shape="rect" id="node9" href="$classSolver.html#a40c9ebb8d585e07d8f65c4ac5ada6420" title="Solver::u0_out" alt="" coords="865,123,972,149"/>
+<area shape="rect" id="node2" href="$classSolver.html#ab712f582d6f785adb8620cb40bbb3de4" title="Solver::calcRates_CM" alt="" coords="212,5,367,32"/>
+<area shape="rect" id="node5" href="$classSolver.html#a23be16428b7ba399bfd2f06555547f6b" title="Solver::calcRates_EBT" alt="" coords="210,56,369,83"/>
+<area shape="rect" id="node6" href="$classSolver.html#a8f96f44ff535452912b2a3a2fc43e60e" title="Solver::stepU_iFMU" alt="" coords="219,107,360,133"/>
+<area shape="rect" id="node7" href="$classSolver.html#a9172d0d2dc6399ada494ef23020943d5" title="Computes the partial integral &#160;for the specified species. " alt="" coords="212,158,367,199"/>
+<area shape="rect" id="node8" href="$classSolver.html#a2a6ca7647a4cde1195789132f3873c0b" title="Computes the integral &#160;for the specified species. For details, see integrate_wudx_above. " alt="" coords="224,224,355,251"/>
+<area shape="rect" id="node12" href="$classSolver.html#ac108d0e9de32ef14e68a176ff9969c38" title="Solver::copyCohortsToState" alt="" coords="196,275,383,301"/>
+<area shape="rect" id="node3" href="$classSolver.html#af4c8f6565df94ed6a058a224196b9c2b" title="Solver::step_to" alt="" coords="471,56,581,83"/>
+<area shape="rect" id="node4" href="$classSolver.html#a06cf82d0a99490279ab20d2ad6b876db" title="Solver::step_to" alt="" coords="688,56,799,83"/>
+<area shape="rect" id="node9" href="$classSolver.html#aa5f2d1d48f6b4db83dbb257325924d2c" title="Solver::calcSpeciesBirthFlux" alt="" coords="431,224,621,251"/>
+<area shape="rect" id="node10" href="$classSolver.html#ae9cbf50e5db34626f54298c75fc64188" title="Solver::newborns_out" alt="" coords="669,224,817,251"/>
+<area shape="rect" id="node11" href="$classSolver.html#a40c9ebb8d585e07d8f65c4ac5ada6420" title="Solver::u0_out" alt="" coords="865,224,972,251"/>
 </map>

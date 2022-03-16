@@ -1,3 +1,4 @@
 <map id="Species::mortalityRateGradient" name="Species::mortalityRateGradient">
-<area shape="rect" id="node2" href="$classCohort.html#af684d203ee2a31b98f767fd6f1362ae0" title="Cohort::set_size" alt="" coords="257,5,376,32"/>
+<area shape="rect" id="node2" href="$classCohort.html#af684d203ee2a31b98f767fd6f1362ae0" title="Cohort::set_size" alt="" coords="271,5,390,32"/>
+<area shape="rect" id="node3" href="$classCohort.html#a30709315cd5e4db121e86deac183c4b8" title="Cohort::mortalityRate" alt="" coords="257,56,404,83"/>
 </map>

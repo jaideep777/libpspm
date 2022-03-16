@@ -1,6 +1,0 @@
-<map id="Solver::preComputeSpecies" name="Solver::preComputeSpecies">
-<area shape="rect" id="node2" href="$classSolver.html#ae9cbf50e5db34626f54298c75fc64188" title="Solver::newborns_out" alt="" coords="239,5,387,32"/>
-<area shape="rect" id="node4" href="$classSolver.html#af4c8f6565df94ed6a058a224196b9c2b" title="Solver::step_to" alt="" coords="257,56,368,83"/>
-<area shape="rect" id="node3" href="$classSolver.html#a40c9ebb8d585e07d8f65c4ac5ada6420" title="Solver::u0_out" alt="" coords="437,5,543,32"/>
-<area shape="rect" id="node5" href="$classSolver.html#a06cf82d0a99490279ab20d2ad6b876db" title="Solver::step_to" alt="" coords="435,56,545,83"/>
-</map>

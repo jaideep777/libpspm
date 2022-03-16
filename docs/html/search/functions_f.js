@@ -11,7 +11,6 @@ var searchData=
   ['resize',['resize',['../classRKCK45.html#a219b69e8759b799b422d5c6b97509fd0',1,'RKCK45::resize()'],['../classSpecies__Base.html#ad12fddce95c7fcbca4142f056a38d670',1,'Species_Base::resize()'],['../classSpecies.html#a0201a77487709f27bf1f88b66bd39206',1,'Species::resize()']]],
   ['resize_5fsystem',['resize_system',['../classLSODA.html#a6f118c16d754b66d7ee9220037260978',1,'LSODA']]],
   ['resizestatefromspecies',['resizeStateFromSpecies',['../classSolver.html#abd9eb317756b34b97ebe6ece348681f3',1,'Solver']]],
-  ['restorecohort',['restoreCohort',['../classSpecies__Base.html#a002b4aa2f35d9fe9b1b1682c7ce4662a',1,'Species_Base::restoreCohort()'],['../classSpecies.html#a28f1dca9ccad2f294e3257ff580b1c63',1,'Species::restoreCohort()']]],
   ['rkck45',['RKCK45',['../classRKCK45.html#a5c6c48b1123ece39f43811912a2b947f',1,'RKCK45']]],
   ['rkstep',['RKStep',['../classRKCK45.html#adfa11ff7b8da1b21aea9e457ac4e9d1c',1,'RKCK45']]],
   ['rktry',['RKTry',['../classRKCK45.html#aa61f9dd524bbc30f9c5480a868378c1f',1,'RKCK45']]]

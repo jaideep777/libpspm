@@ -1,5 +1,7 @@
 <map id="Species_Base::getExtraRates" name="Species_Base::getExtraRates">
-<area shape="rect" id="node2" href="$classSolver.html#a23be16428b7ba399bfd2f06555547f6b" title="Solver::calcRates_EBT" alt="" coords="252,5,411,32"/>
-<area shape="rect" id="node3" href="$classSolver.html#af4c8f6565df94ed6a058a224196b9c2b" title="Solver::step_to" alt="" coords="459,5,569,32"/>
-<area shape="rect" id="node4" href="$classSolver.html#a06cf82d0a99490279ab20d2ad6b876db" title="Solver::step_to" alt="" coords="617,5,728,32"/>
+<area shape="rect" id="node2" href="$classSolver.html#ab712f582d6f785adb8620cb40bbb3de4" title="Solver::calcRates_CM" alt="" coords="256,5,411,32"/>
+<area shape="rect" id="node5" href="$classSolver.html#a23be16428b7ba399bfd2f06555547f6b" title="Solver::calcRates_EBT" alt="" coords="254,56,413,83"/>
+<area shape="rect" id="node6" href="$classSolver.html#a2ea9fb6abc4ffd5ac28154332029da40" title="Solver::calcRates_FMU" alt="" coords="252,107,415,133"/>
+<area shape="rect" id="node3" href="$classSolver.html#af4c8f6565df94ed6a058a224196b9c2b" title="Solver::step_to" alt="" coords="463,56,573,83"/>
+<area shape="rect" id="node4" href="$classSolver.html#a06cf82d0a99490279ab20d2ad6b876db" title="Solver::step_to" alt="" coords="621,56,732,83"/>
 </map>

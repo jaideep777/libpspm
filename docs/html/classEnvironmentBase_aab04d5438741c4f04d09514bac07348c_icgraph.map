@@ -1,7 +1,8 @@
 <map id="EnvironmentBase::computeEnv" name="EnvironmentBase::computeEnv">
 <area shape="rect" id="node2" href="$classEnvironmentBase.html#ae8661cf24cd1402c62718d7584608df6" title="EnvironmentBase::~EnvironmentBase" alt="" coords="260,5,504,32"/>
-<area shape="rect" id="node3" href="$classSolver.html#ae9cbf50e5db34626f54298c75fc64188" title="Solver::newborns_out" alt="" coords="308,56,456,83"/>
-<area shape="rect" id="node5" href="$classSolver.html#af4c8f6565df94ed6a058a224196b9c2b" title="Solver::step_to" alt="" coords="327,107,437,133"/>
-<area shape="rect" id="node4" href="$classSolver.html#a40c9ebb8d585e07d8f65c4ac5ada6420" title="Solver::u0_out" alt="" coords="554,56,661,83"/>
-<area shape="rect" id="node6" href="$classSolver.html#a06cf82d0a99490279ab20d2ad6b876db" title="Solver::step_to" alt="" coords="552,107,663,133"/>
+<area shape="rect" id="node3" href="$classSolver.html#ac737953d0d5a3ade1893f1f80b3f4791" title="Solver::updateEnv" alt="" coords="317,56,447,83"/>
+<area shape="rect" id="node4" href="$classSolver.html#ae9cbf50e5db34626f54298c75fc64188" title="Solver::newborns_out" alt="" coords="552,31,700,57"/>
+<area shape="rect" id="node6" href="$classSolver.html#af4c8f6565df94ed6a058a224196b9c2b" title="Solver::step_to" alt="" coords="571,81,681,108"/>
+<area shape="rect" id="node5" href="$classSolver.html#a40c9ebb8d585e07d8f65c4ac5ada6420" title="Solver::u0_out" alt="" coords="750,31,857,57"/>
+<area shape="rect" id="node7" href="$classSolver.html#a06cf82d0a99490279ab20d2ad6b876db" title="Solver::step_to" alt="" coords="748,81,859,108"/>
 </map>

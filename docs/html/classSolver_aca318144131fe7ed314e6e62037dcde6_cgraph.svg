@@ -8,45 +8,45 @@
  viewBox="0.00 0.00 562.00 263.50" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
 <g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(4 259.5)">
 <title>Solver::getDensitySpecies_EBT</title>
-<!-- Node67 -->
+<!-- Node83 -->
 <g id="node1" class="node">
-<title>Node67</title>
+<title>Node83</title>
 <polygon fill="#bfbfbf" stroke="#000000" points="0,-88.5 0,-107.5 158,-107.5 158,-88.5 0,-88.5"/>
 <text text-anchor="middle" x="79" y="-95.5" font-family="Helvetica,sans-Serif" font-size="10.00" fill="#000000">Solver::getDensitySpecies_EBT</text>
 </g>
-<!-- Node68 -->
+<!-- Node84 -->
 <g id="node2" class="node">
-<title>Node68</title>
+<title>Node84</title>
 <g id="a_node2"><a xlink:href="classSpline.html#a42eec80590bdc7fa338c4643cf307344" target="_top" xlink:title="Spline::set_points">
 <polygon fill="none" stroke="#000000" points="194,-156.5 194,-175.5 289,-175.5 289,-156.5 194,-156.5"/>
 <text text-anchor="middle" x="241.5" y="-163.5" font-family="Helvetica,sans-Serif" font-size="10.00" fill="#000000">Spline::set_points</text>
 </a>
 </g>
 </g>
-<!-- Node67&#45;&gt;Node68 -->
+<!-- Node83&#45;&gt;Node84 -->
 <g id="edge1" class="edge">
-<title>Node67&#45;&gt;Node68</title>
+<title>Node83&#45;&gt;Node84</title>
 <path fill="none" stroke="#191970" d="M101.9376,-107.5985C130.0045,-119.3434 177.6924,-139.299 209.3935,-152.5647"/>
 <polygon fill="#191970" stroke="#191970" points="208.1031,-155.8187 218.6791,-156.4503 210.8053,-149.3613 208.1031,-155.8187"/>
 </g>
-<!-- Node73 -->
+<!-- Node89 -->
 <g id="node7" class="node">
-<title>Node73</title>
+<title>Node89</title>
 <g id="a_node7"><a xlink:href="classSpline.html#aac2008c210497336b1b4b9992ccde22f" target="_top" xlink:title="Spline::eval">
 <polygon fill="none" stroke="#000000" points="207.5,-66.5 207.5,-85.5 275.5,-85.5 275.5,-66.5 207.5,-66.5"/>
 <text text-anchor="middle" x="241.5" y="-73.5" font-family="Helvetica,sans-Serif" font-size="10.00" fill="#000000">Spline::eval</text>
 </a>
 </g>
 </g>
-<!-- Node67&#45;&gt;Node73 -->
+<!-- Node83&#45;&gt;Node89 -->
 <g id="edge6" class="edge">
-<title>Node67&#45;&gt;Node73</title>
+<title>Node83&#45;&gt;Node89</title>
 <path fill="none" stroke="#191970" d="M149.3298,-88.4784C165.4812,-86.2918 182.219,-84.0257 196.9273,-82.0345"/>
 <polygon fill="#191970" stroke="#191970" points="197.8011,-85.4482 207.2411,-80.6381 196.862,-78.5115 197.8011,-85.4482"/>
 </g>
-<!-- Node69 -->
+<!-- Node85 -->
 <g id="node3" class="node">
-<title>Node69</title>
+<title>Node85</title>
 <g id="a_node3"><a xlink:href="classSpline.html#a387b90e40d7bc335fed9163123f45827" target="_top" xlink:title="Spline::solve_coeffs\l_cubic">
 <polygon fill="none" stroke="#000000" points="330.5,-225 330.5,-255 435.5,-255 435.5,-225 330.5,-225"/>
 <text text-anchor="start" x="338.5" y="-243" font-family="Helvetica,sans-Serif" font-size="10.00" fill="#000000">Spline::solve_coeffs</text>
@@ -54,15 +54,15 @@
 </a>
 </g>
 </g>
-<!-- Node68&#45;&gt;Node69 -->
+<!-- Node84&#45;&gt;Node85 -->
 <g id="edge2" class="edge">
-<title>Node68&#45;&gt;Node69</title>
+<title>Node84&#45;&gt;Node85</title>
 <path fill="none" stroke="#191970" d="M256.5732,-175.6108C273.0566,-185.9383 300.4088,-202.5449 325,-215 328.7966,-216.9229 332.7752,-218.8374 336.7933,-220.7019"/>
 <polygon fill="#191970" stroke="#191970" points="335.6196,-224.0122 346.1735,-224.9417 338.5027,-217.6336 335.6196,-224.0122"/>
 </g>
-<!-- Node71 -->
+<!-- Node87 -->
 <g id="node5" class="node">
-<title>Node71</title>
+<title>Node87</title>
 <g id="a_node5"><a xlink:href="classSpline.html#af8963e6ffac552d5d4401411d6db7cef" target="_top" xlink:title="Spline::solve_coeffs\l_linear">
 <polygon fill="none" stroke="#000000" points="330.5,-176 330.5,-206 435.5,-206 435.5,-176 330.5,-176"/>
 <text text-anchor="start" x="338.5" y="-194" font-family="Helvetica,sans-Serif" font-size="10.00" fill="#000000">Spline::solve_coeffs</text>
@@ -70,15 +70,15 @@
 </a>
 </g>
 </g>
-<!-- Node68&#45;&gt;Node71 -->
+<!-- Node84&#45;&gt;Node87 -->
 <g id="edge4" class="edge">
-<title>Node68&#45;&gt;Node71</title>
+<title>Node84&#45;&gt;Node87</title>
 <path fill="none" stroke="#191970" d="M289.0111,-174.3942C298.9893,-176.1571 309.6613,-178.0426 320.1024,-179.8873"/>
 <polygon fill="#191970" stroke="#191970" points="319.5554,-183.3448 330.0119,-181.6381 320.7734,-176.4516 319.5554,-183.3448"/>
 </g>
-<!-- Node72 -->
+<!-- Node88 -->
 <g id="node6" class="node">
-<title>Node72</title>
+<title>Node88</title>
 <g id="a_node6"><a xlink:href="classSpline.html#a5bf7d2457cf9635742b921a1380ea88f" target="_top" xlink:title="Spline::solve_coeffs\l_constrained_cubic">
 <polygon fill="none" stroke="#000000" points="330.5,-127 330.5,-157 435.5,-157 435.5,-127 330.5,-127"/>
 <text text-anchor="start" x="338.5" y="-145" font-family="Helvetica,sans-Serif" font-size="10.00" fill="#000000">Spline::solve_coeffs</text>
@@ -86,45 +86,45 @@
 </a>
 </g>
 </g>
-<!-- Node68&#45;&gt;Node72 -->
+<!-- Node84&#45;&gt;Node88 -->
 <g id="edge5" class="edge">
-<title>Node68&#45;&gt;Node72</title>
+<title>Node84&#45;&gt;Node88</title>
 <path fill="none" stroke="#191970" d="M289.0111,-157.9416C298.9893,-156.2492 309.6613,-154.4391 320.1024,-152.6682"/>
 <polygon fill="#191970" stroke="#191970" points="320.738,-156.1104 330.0119,-150.9874 319.5674,-149.209 320.738,-156.1104"/>
 </g>
-<!-- Node70 -->
+<!-- Node86 -->
 <g id="node4" class="node">
-<title>Node70</title>
+<title>Node86</title>
 <g id="a_node4"><a xlink:href="cubic__spline_8h.html#a2c5f148ad4f2ebdf6888836c97369d90" target="_top" xlink:title="thomas_solve">
 <polygon fill="none" stroke="#000000" points="477,-230.5 477,-249.5 554,-249.5 554,-230.5 477,-230.5"/>
 <text text-anchor="middle" x="515.5" y="-237.5" font-family="Helvetica,sans-Serif" font-size="10.00" fill="#000000">thomas_solve</text>
 </a>
 </g>
 </g>
-<!-- Node69&#45;&gt;Node70 -->
+<!-- Node85&#45;&gt;Node86 -->
 <g id="edge3" class="edge">
-<title>Node69&#45;&gt;Node70</title>
+<title>Node85&#45;&gt;Node86</title>
 <path fill="none" stroke="#191970" d="M435.7482,-240C445.925,-240 456.5457,-240 466.5938,-240"/>
 <polygon fill="#191970" stroke="#191970" points="466.8152,-243.5001 476.8151,-240 466.8151,-236.5001 466.8152,-243.5001"/>
 </g>
-<!-- Node74 -->
+<!-- Node90 -->
 <g id="node8" class="node">
-<title>Node74</title>
+<title>Node90</title>
 <g id="a_node8"><a xlink:href="classSpline.html#afe3049e4171a08ee6b7070b633d27c7a" target="_top" xlink:title="Spline::extrapolate_left">
 <polygon fill="none" stroke="#000000" points="325,-88.5 325,-107.5 441,-107.5 441,-88.5 325,-88.5"/>
 <text text-anchor="middle" x="383" y="-95.5" font-family="Helvetica,sans-Serif" font-size="10.00" fill="#000000">Spline::extrapolate_left</text>
 </a>
 </g>
 </g>
-<!-- Node73&#45;&gt;Node74 -->
+<!-- Node89&#45;&gt;Node90 -->
 <g id="edge7" class="edge">
-<title>Node73&#45;&gt;Node74</title>
+<title>Node89&#45;&gt;Node90</title>
 <path fill="none" stroke="#191970" d="M275.7532,-81.3256C287.4852,-83.1496 301.061,-85.2604 314.5266,-87.354"/>
 <polygon fill="#191970" stroke="#191970" points="314.3511,-90.8686 324.7701,-88.9466 315.4266,-83.9517 314.3511,-90.8686"/>
 </g>
-<!-- Node75 -->
+<!-- Node91 -->
 <g id="node9" class="node">
-<title>Node75</title>
+<title>Node91</title>
 <g id="a_node9"><a xlink:href="classSpline.html#adcca0503450f150a788112f7685b9654" target="_top" xlink:title="Spline::extrapolate\l_right">
 <polygon fill="none" stroke="#000000" points="334,-39 334,-69 432,-69 432,-39 334,-39"/>
 <text text-anchor="start" x="342" y="-57" font-family="Helvetica,sans-Serif" font-size="10.00" fill="#000000">Spline::extrapolate</text>
@@ -132,24 +132,24 @@
 </a>
 </g>
 </g>
-<!-- Node73&#45;&gt;Node75 -->
+<!-- Node89&#45;&gt;Node91 -->
 <g id="edge8" class="edge">
-<title>Node73&#45;&gt;Node75</title>
+<title>Node89&#45;&gt;Node91</title>
 <path fill="none" stroke="#191970" d="M275.7532,-70.6744C290.1805,-68.4313 307.396,-65.7547 323.7663,-63.2095"/>
 <polygon fill="#191970" stroke="#191970" points="324.4738,-66.6416 333.8174,-61.6468 323.3983,-59.7247 324.4738,-66.6416"/>
 </g>
-<!-- Node76 -->
+<!-- Node92 -->
 <g id="node10" class="node">
-<title>Node76</title>
+<title>Node92</title>
 <g id="a_node10"><a xlink:href="cubic__spline_8h.html#a7e40d975b9c8e0ee31c4639fd4f0e2d1" target="_top" xlink:title="my_lower_bound">
 <polygon fill="none" stroke="#000000" points="338,-.5 338,-19.5 428,-19.5 428,-.5 338,-.5"/>
 <text text-anchor="middle" x="383" y="-7.5" font-family="Helvetica,sans-Serif" font-size="10.00" fill="#000000">my_lower_bound</text>
 </a>
 </g>
 </g>
-<!-- Node73&#45;&gt;Node76 -->
+<!-- Node89&#45;&gt;Node92 -->
 <g id="edge9" class="edge">
-<title>Node73&#45;&gt;Node76</title>
+<title>Node89&#45;&gt;Node92</title>
 <path fill="none" stroke="#191970" d="M256.4264,-66.4109C272.7843,-56.1881 300.0299,-39.9903 325,-29 329.9703,-26.8124 335.2751,-24.7392 340.5812,-22.8223"/>
 <polygon fill="#191970" stroke="#191970" points="341.7512,-26.1211 350.0617,-19.5496 339.467,-19.5043 341.7512,-26.1211"/>
 </g>

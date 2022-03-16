@@ -15,7 +15,7 @@ var searchData=
   ['miter',['miter',['../classLSODA.html#a1d4e87c54ca65af467a16a9eae6d591d',1,'LSODA']]],
   ['ml',['ml',['../classLSODA.html#ac39fd36e1c6076e2a5d7fa397cd8c8e3',1,'LSODA']]],
   ['mord',['mord',['../classLSODA.html#a4886fd30cda453dac3516116250e34f3',1,'LSODA']]],
-  ['mortalityrate',['mortalityRate',['../classIndividualBase.html#a74b794d45bc34a84529b1cc8898e77e1',1,'IndividualBase::mortalityRate()'],['../classSpecies__Base.html#a59ab3c647c48a819f1911957e5724d5e',1,'Species_Base::mortalityRate()'],['../classSpecies.html#a11f2e15a662e03a0c09c032586912f8c',1,'Species::mortalityRate()']]],
+  ['mortalityrate',['mortalityRate',['../classCohort.html#a30709315cd5e4db121e86deac183c4b8',1,'Cohort::mortalityRate()'],['../classIndividualBase.html#a74b794d45bc34a84529b1cc8898e77e1',1,'IndividualBase::mortalityRate()'],['../classSpecies__Base.html#a59ab3c647c48a819f1911957e5724d5e',1,'Species_Base::mortalityRate()'],['../classSpecies.html#a11f2e15a662e03a0c09c032586912f8c',1,'Species::mortalityRate()']]],
   ['mortalityrategradient',['mortalityRateGradient',['../classSpecies__Base.html#a83ff45fc4f334241eeae08d523d343b5',1,'Species_Base::mortalityRateGradient()'],['../classSpecies.html#a070336f0725472a8bfb59da72f40197a',1,'Species::mortalityRateGradient()']]],
   ['msbp',['msbp',['../classLSODA.html#a4b42cc5f6084610ac4ee40044d4c8629',1,'LSODA']]],
   ['mu',['mu',['../classLSODA.html#a517cd075e203416fbc7bcd28e8928a11',1,'LSODA']]],

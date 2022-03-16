@@ -1,5 +1,8 @@
 <map id="Species_Base::establishmentProbability" name="Species_Base::establishmentProbability">
-<area shape="rect" id="node2" href="$classSolver.html#a23be16428b7ba399bfd2f06555547f6b" title="Solver::calcRates_EBT" alt="" coords="248,13,407,39"/>
-<area shape="rect" id="node3" href="$classSolver.html#af4c8f6565df94ed6a058a224196b9c2b" title="Solver::step_to" alt="" coords="455,13,565,39"/>
-<area shape="rect" id="node4" href="$classSolver.html#a06cf82d0a99490279ab20d2ad6b876db" title="Solver::step_to" alt="" coords="613,13,724,39"/>
+<area shape="rect" id="node2" href="$classSolver.html#ab712f582d6f785adb8620cb40bbb3de4" title="Solver::calcRates_CM" alt="" coords="252,5,407,32"/>
+<area shape="rect" id="node5" href="$classSolver.html#a23be16428b7ba399bfd2f06555547f6b" title="Solver::calcRates_EBT" alt="" coords="250,56,409,83"/>
+<area shape="rect" id="node6" href="$classSolver.html#a2ea9fb6abc4ffd5ac28154332029da40" title="Solver::calcRates_FMU" alt="" coords="248,107,411,133"/>
+<area shape="rect" id="node7" href="$classSolver.html#a8f96f44ff535452912b2a3a2fc43e60e" title="Solver::stepU_iFMU" alt="" coords="259,157,400,184"/>
+<area shape="rect" id="node3" href="$classSolver.html#af4c8f6565df94ed6a058a224196b9c2b" title="Solver::step_to" alt="" coords="459,81,569,108"/>
+<area shape="rect" id="node4" href="$classSolver.html#a06cf82d0a99490279ab20d2ad6b876db" title="Solver::step_to" alt="" coords="617,81,728,108"/>
 </map>

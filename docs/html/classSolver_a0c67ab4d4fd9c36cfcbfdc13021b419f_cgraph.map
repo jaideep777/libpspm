@@ -1,8 +1,9 @@
 <map id="Solver::initialize" name="Solver::initialize">
 <area shape="rect" id="node2" href="$classSpecies__Base.html#a25a20f843be73c25744dd0e860c11c6f" title="Species_Base::set_xb" alt="" coords="188,5,341,32"/>
-<area shape="rect" id="node3" href="$classSpecies__Base.html#ab2156ad0734e670ffecbefc0001e3f2d" title="Species_Base::set_birthTime" alt="" coords="168,56,361,83"/>
-<area shape="rect" id="node4" href="$classSpecies__Base.html#af3f776b8c56e133a0b260e2281a27178" title="Species_Base::init\l_density" alt="" coords="199,107,330,149"/>
-<area shape="rect" id="node5" href="$classSpecies__Base.html#a86a04ae53b3f25c4e90b01a8eaed3bfd" title="Species_Base::setX" alt="" coords="194,173,335,200"/>
-<area shape="rect" id="node6" href="$classSpecies__Base.html#ad9ddab41ba3c6e242f1b3a8a50ed7a36" title="Species_Base::setU" alt="" coords="193,224,336,251"/>
-<area shape="rect" id="node7" href="$classSpecies__Base.html#adf095940796f9d83366de5f1acb60047" title="Species_Base::initAndCopy\lExtraState" alt="" coords="172,275,357,317"/>
+<area shape="rect" id="node3" href="$classSpecies__Base.html#a6f5bcd038896a23f44cd453d004d34d0" title="Species_Base::set_ub" alt="" coords="188,56,341,83"/>
+<area shape="rect" id="node4" href="$classSpecies__Base.html#ab2156ad0734e670ffecbefc0001e3f2d" title="Species_Base::set_birthTime" alt="" coords="168,107,361,133"/>
+<area shape="rect" id="node5" href="$classSpecies__Base.html#af3f776b8c56e133a0b260e2281a27178" title="Species_Base::init\l_density" alt="" coords="199,158,330,199"/>
+<area shape="rect" id="node6" href="$classSpecies__Base.html#a86a04ae53b3f25c4e90b01a8eaed3bfd" title="Species_Base::setX" alt="" coords="194,224,335,251"/>
+<area shape="rect" id="node7" href="$classSpecies__Base.html#ad9ddab41ba3c6e242f1b3a8a50ed7a36" title="Species_Base::setU" alt="" coords="193,275,336,301"/>
+<area shape="rect" id="node8" href="$classSpecies__Base.html#adf095940796f9d83366de5f1acb60047" title="Species_Base::initAndCopy\lExtraState" alt="" coords="172,326,357,367"/>
 </map>

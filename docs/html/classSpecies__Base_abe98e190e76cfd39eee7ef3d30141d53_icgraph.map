@@ -1,5 +1,8 @@
 <map id="Species_Base::growthRate" name="Species_Base::growthRate">
-<area shape="rect" id="node2" href="$classSolver.html#a23be16428b7ba399bfd2f06555547f6b" title="Solver::calcRates_EBT" alt="" coords="235,5,393,32"/>
-<area shape="rect" id="node3" href="$classSolver.html#af4c8f6565df94ed6a058a224196b9c2b" title="Solver::step_to" alt="" coords="441,5,552,32"/>
-<area shape="rect" id="node4" href="$classSolver.html#a06cf82d0a99490279ab20d2ad6b876db" title="Solver::step_to" alt="" coords="600,5,711,32"/>
+<area shape="rect" id="node2" href="$classSolver.html#ab712f582d6f785adb8620cb40bbb3de4" title="Solver::calcRates_CM" alt="" coords="239,5,393,32"/>
+<area shape="rect" id="node5" href="$classSolver.html#a23be16428b7ba399bfd2f06555547f6b" title="Solver::calcRates_EBT" alt="" coords="237,56,395,83"/>
+<area shape="rect" id="node6" href="$classSolver.html#a2ea9fb6abc4ffd5ac28154332029da40" title="Solver::calcRates_FMU" alt="" coords="235,107,397,133"/>
+<area shape="rect" id="node7" href="$classSolver.html#a8f96f44ff535452912b2a3a2fc43e60e" title="Solver::stepU_iFMU" alt="" coords="245,157,387,184"/>
+<area shape="rect" id="node3" href="$classSolver.html#af4c8f6565df94ed6a058a224196b9c2b" title="Solver::step_to" alt="" coords="445,81,556,108"/>
+<area shape="rect" id="node4" href="$classSolver.html#a06cf82d0a99490279ab20d2ad6b876db" title="Solver::step_to" alt="" coords="604,81,715,108"/>
 </map>

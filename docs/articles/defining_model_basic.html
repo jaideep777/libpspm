@@ -65,6 +65,8 @@
   </a>
   <div class="dropdown-menu" aria-labelledby="dropdown--developer">
     <a class="dropdown-item" href="../articles/size_integral_dev.html">Size integrals</a>
+    <a class="dropdown-item" href="../articles/ode_flow_dev.html">Logic flowchart</a>
+    <a class="dropdown-item" href="../articles/faq_dev.html">FAQs for developers</a>
   </div>
 </li>
 <li class="nav-item">
@@ -202,6 +204,75 @@ be defined in your individual class, like so:</p>
 <span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>  <span class="co">// other functions</span></span>
 <span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>  <span class="co">// ...</span></span>
 <span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+</div>
+<div class="section level3">
+<h3 id="creating-a-species-of-individuals">Creating a species of individuals<a class="anchor" aria-label="anchor" href="#creating-a-species-of-individuals"></a>
+</h3>
+<p>Once you have defined the individual class, the next step is to
+create a species of individuals that can be simulated by the Solver.
+libpspm provides a templated Species class for this purpose, which can
+be used to create a species as follows:</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>Species<span class="op">&lt;</span>MyIndividual<span class="op">&gt;</span> spp<span class="op">;</span></span></code></pre></div>
+</div>
+<div class="section level3">
+<h3 id="creating-an-environment-object">Creating an Environment object<a class="anchor" aria-label="anchor" href="#creating-an-environment-object"></a>
+</h3>
+<p>You also need to instantiate an environment object which the PSPM
+Solver can use, as follows</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>MyEnvironment E<span class="op">;</span></span></code></pre></div>
+</div>
+<div class="section level3">
+<h3 id="creating-a-pspm-solver">Creating a PSPM solver<a class="anchor" aria-label="anchor" href="#creating-a-pspm-solver"></a>
+</h3>
+<p>The core task of simulating your model is performed by a PSPM
+<code>Solver</code> provided by libpspm. A solver can be created by
+specifying the PSPM method and the ODE solver method. For example, if we
+want to use the EBT method with an LSODA ODE solver, we can write</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>Solver S<span class="op">(</span>SOLVER_EBT<span class="op">,</span> <span class="st">"lsoda"</span><span class="op">)</span></span></code></pre></div>
+<p>The PSPM method can be one of the following: <code>SOLVER_FMU</code>,
+<code>SOLVER_IFMU</code>, <code>SOVLER_EBT</code>, or
+<code>SOLVER_CM</code>.</p>
+<p>The ODE stepper can be either <code>"rk45ck"</code> or
+<code>"lsoda"</code>.</p>
+</div>
+<div class="section level3">
+<h3 id="adding-the-species-and-the-environment-to-the-solver">Adding the species and the environment to the solver<a class="anchor" aria-label="anchor" href="#adding-the-species-and-the-environment-to-the-solver"></a>
+</h3>
+<p>We then add our species and the environment object to the solver, so
+that they can be simulated. While adding a species to the solver, a
+number of details regarding the i-state must be specified, as described
+below.</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>S<span class="op">.</span>setEnv<span class="op">(</span>E<span class="op">);</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>S<span class="op">.</span>addSpecies<span class="op">(</span><span class="dv">25</span><span class="op">,</span>     <span class="co">//  the (initial) number of cohorts to simulate</span></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>             <span class="dv">1</span><span class="op">,</span>      <span class="co">//  the i-state at birth</span></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>             <span class="fl">1e4</span><span class="op">,</span>    <span class="co">//  the maximum i-state value</span></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>             <span class="kw">false</span><span class="op">,</span>  <span class="co">//  whether the i-state axis should be on log scale</span></span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>             <span class="op">&amp;</span>spp<span class="op">,</span>   <span class="co">//  a pointer to the species object </span></span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>             <span class="dv">0</span><span class="op">,</span>      <span class="co">//  number of extra x-linked i-state variables</span></span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>             <span class="dv">1</span>       <span class="co">//  the input flux of newborns</span></span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a><span class="op">)</span></span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a>S<span class="op">.</span>resetState<span class="op">(</span><span class="dv">0</span><span class="op">);</span>     <span class="co">//  argument is the start time</span></span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a>S<span class="op">.</span>initialize<span class="op">();</span>      <span class="co">//  compute the initial condition</span></span></code></pre></div>
+<p>With this, we are set to run the simulation.</p>
+</div>
+<div class="section level3">
+<h3 id="simulating-the-pspm">Simulating the PSPM<a class="anchor" aria-label="anchor" href="#simulating-the-pspm"></a>
+</h3>
+<p>To simulate the PSPM, the solver provides a <code>step_to()</code>
+function. For example, to simulate 100 time units, do</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>S<span class="op">.</span>step_to<span class="op">(</span><span class="dv">100</span><span class="op">);</span></span></code></pre></div>
+</div>
+<div class="section level3">
+<h3 id="getting-system-properties-from-the-solver">Getting system properties from the solver<a class="anchor" aria-label="anchor" href="#getting-system-properties-from-the-solver"></a>
+</h3>
+<p>After simulating the PSPM, we are interested in computing emergent
+system properties. The solver provides two functions to get the state
+density distribution and the output flux of newborns:</p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>S<span class="op">.</span>newborns_out<span class="op">(</span><span class="dv">100</span><span class="op">);</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>S<span class="op">.</span>getDensitySpecies_EBT<span class="op">(</span>breaks<span class="op">);</span></span></code></pre></div>
+<p>Other emergent properties can be calculated using the state integral
+function as described in the next tutorial.</p>
 </div>
   </main>
 </div>
