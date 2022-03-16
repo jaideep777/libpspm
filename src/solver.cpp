@@ -468,32 +468,6 @@ void Solver::updateEnv(double t, std::vector<double>::iterator S, std::vector<do
 }
 
 
-void Solver::preComputeSpecies(int k, double t){
-	auto spp = species_vec[k];
-
-	if (method == SOLVER_EBT){ // for EBT, we need to pi0-cohort too.
-		// backup and real-ize pi0-cohort
-		// get pi0, N0 from last cohort
-		double pi0  =  spp->getX(spp->J-1);
-		double N0   =  spp->getU(spp->J-1);
-		
-		// update pi0-cohort with actual x0 value
-		double x0 = spp->xb + pi0/(N0+1e-12);
-		spp->setX(spp->J-1, x0);
-	
-		// precompute cohorts
-		spp->preComputeAllCohorts(t,env);
-
-		// restore pi0-cohort
-		spp->setX(spp->J-1, pi0);
-	}
-	else{
-		spp->preComputeAllCohorts(t,env);
-	}
-	
-}
-
-
 // k = species_id
 double Solver::calcSpeciesBirthFlux(int k, double t){
 	auto spp = species_vec[k];	

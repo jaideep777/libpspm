@@ -92,8 +92,6 @@ class Species_Base{
 
 	// TODO: argument x can probably be removed from these functions
 	virtual void triggerPreCompute() = 0;
-	virtual void preComputeAllCohorts(double t, void * env) = 0;
-	virtual void preCompute(int i, double t, void * env) = 0;
 	virtual double growthRate(int i, double x, double t, void * env) = 0;
 	virtual double growthRateOffset(int i, double x, double t, void * env) = 0;
 	virtual std::vector<double> growthRateGradient(int i, double x, double t, void * env, double grad_dx) = 0;
@@ -110,9 +108,9 @@ class Species_Base{
 	virtual void removeDenseCohorts(double dxcut) = 0;
 	virtual void removeDeadCohorts(double ucut) = 0;
 
-	virtual void backupCohort(int j) = 0;
-	virtual void restoreCohort(int j) = 0;
-	virtual void copyBoundaryCohortTo(int j) = 0;
+//	virtual void backupCohort(int j) = 0;
+//	virtual void restoreCohort(int j) = 0;
+//	virtual void copyBoundaryCohortTo(int j) = 0;
 };
 
 
@@ -155,8 +153,6 @@ class Species : public Species_Base{
 	double get_boundary_u();
 	
 	void triggerPreCompute();
-	void preComputeAllCohorts(double t, void * env);
-	void preCompute(int i, double t, void * env);
 	double growthRate(int i, double x, double t, void * env);
 	double growthRateOffset(int i, double x, double t, void * env);
 	std::vector<double> growthRateGradient(int i, double x, double t, void * env, double grad_dx);
@@ -173,9 +169,9 @@ class Species : public Species_Base{
 	void removeDenseCohorts(double dxcut);
 	void removeDeadCohorts(double ucut);
 	
-	void backupCohort(int j);
-	void restoreCohort(int j);
-	void copyBoundaryCohortTo(int j);
+//	void backupCohort(int j);
+//	void restoreCohort(int j);
+//	void copyBoundaryCohortTo(int j);
 
 	public:
 	Cohort<Model>& getCohort(int i);

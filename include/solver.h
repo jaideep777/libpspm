@@ -23,13 +23,11 @@ class Solver{
 	OdeSolver odeStepper;
 	EnvironmentBase * env;
 	
-	public:
 	// The current state of the system, {t, S, dS/dt} 
+	double current_time;			// these are synced with ODE solver only after a successful step
 	std::vector <double> state;		// +-- They are NOT synced during the ODE solver's internal steps
 	std::vector <double> rates; 
-	double current_time;			// these are synced with ODE solver only after a successful step
 
-	public:
 	std::vector<Species_Base*> species_vec;	
 
 	struct{
@@ -62,7 +60,6 @@ class Solver{
 
 	void setEnvironment(EnvironmentBase * _env);
 
-	//int setupLayout(Species<Model> &s);
 	void resetState(double t0 = 0); 	
 	void resizeStateFromSpecies();
 
@@ -94,11 +91,9 @@ class Solver{
 
 	void step_to(double tstop);
 
-	void preComputeSpecies(int k, double t);
 	double calcSpeciesBirthFlux(int k, double t);
 	std::vector<double> newborns_out(double t);  // This is the actual system reproduction (fitness) hence biologically relevant
 	std::vector<double> u0_out(double t);        // This is used for equilibrium solving, because in general, u0 rather than birthFlux, will approach a constant value
-	////double get_u0_out();	// just returns from history without recomputing
 
 	void print();
 	

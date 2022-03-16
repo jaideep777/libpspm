@@ -203,20 +203,6 @@ void Species<Model>::triggerPreCompute(){
 
 
 template <class Model>
-void Species<Model>::preCompute(int i, double t, void * env){
-	Cohort<Model> &c = (i<0)? boundaryCohort : cohorts[i];
-	c.preCompute(c.x,t,env);	
-}
-
-
-template <class Model>
-void Species<Model>::preComputeAllCohorts(double t, void * env){
-	for (auto& c : cohorts) c.preCompute(c.x, t, env);
-	boundaryCohort.preCompute(boundaryCohort.x, t, env);
-}
-
-
-template <class Model>
 double Species<Model>::establishmentProbability(double t, void * env){
 	return boundaryCohort.establishmentProbability(t, env);
 }
@@ -396,20 +382,20 @@ void Species<Model>::removeDeadCohorts(double ucut){
 }
 
 
-template <class Model>
-void Species<Model>::backupCohort(int j){
-	savedCohort = cohorts[j];
-}
+//template <class Model>
+//void Species<Model>::backupCohort(int j){
+//	savedCohort = cohorts[j];
+//}
 
-template <class Model>
-void Species<Model>::restoreCohort(int j){
-	cohorts[j] = savedCohort;
-}
+//template <class Model>
+//void Species<Model>::restoreCohort(int j){
+//	cohorts[j] = savedCohort;
+//}
 
-template <class Model>
-void Species<Model>::copyBoundaryCohortTo(int j){
-	cohorts[j] = boundaryCohort;
-}
+//template <class Model>
+//void Species<Model>::copyBoundaryCohortTo(int j){
+//	cohorts[j] = boundaryCohort;
+//}
 
 //template <class Model>
 //void Species<Model>::backupBoundaryCohort(){
