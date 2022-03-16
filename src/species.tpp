@@ -31,20 +31,6 @@ double Species<Model>::get_maxSize(){ // TODO ALERT: make sure this sees the lat
 }
 
 
-//template<class Model>
-//std::vector<std::string> Species<Model>::get_varnames(){
-//    return varnames;
-//}
-
-
-//template<class Model>
-//IteratorSet<std::vector<double>::iterator> Species<Model>::get_iterators(std::vector<double> &v){
-//    IteratorSet<std::vector<double>::iterator> iset(v.begin()+start_index, varnames, J, offsets, strides);
-//    if (!X.empty()) iset.push_back("X", X.begin(), 1);
-//    return iset;
-//}
-
-
 // FIXME: this constructor should  be corrected or removed.
 template<class Model>
 Species<Model>::Species(std::vector<double> breaks){

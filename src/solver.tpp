@@ -1,4 +1,10 @@
-// current_time is updated by the ODE solver at every (internal) step
+// Note 1: current_time is updated by the ODE solver at every (internal) step
+//
+// Note 2: after the last ODE step, the state vector is updated but cohorts still hold an intenal ODE state (y+k5*h etc).
+// normally, this will not be a problem because state will be copied to cohorts before rates call of the next timestep. 
+// But since add/remove cohort after step_to will rewrite the state from cohorts, the updated state vector will be lost.
+// To avoid this, we should ensure that the state is copied to cohorts afert completion of every step.
+// This is achieved by the afterStep function
 template<typename AfterStepFunc>
 void Solver::step_to(double tstop, AfterStepFunc &afterStep_user){
 	// do nothing if tstop is <= current_time
@@ -7,24 +13,18 @@ void Solver::step_to(double tstop, AfterStepFunc &afterStep_user){
 	auto after_step = [this, afterStep_user](double t, std::vector<double>::iterator S){
 		//std::cout << "After step: t = " << t << "\n";
 		copyStateToCohorts(S);
-		//for (int k = 0; k<species_vec.size(); ++k) preComputeSpecies(k,t);	// FIXME: Check if this is needed
-		//for (auto spp : species_vec) spp->afterStep(t, env);
 		afterStep_user(t);
 	};
 
 	
 	if (method == SOLVER_FMU){	
 		auto derivs = [this](double t, std::vector<double>::iterator S, std::vector<double>::iterator dSdt, void* params){
-			copyStateToCohorts(S);
+			copyStateToCohorts(S); 
 			updateEnv(t, S, dSdt);
-			// precompute all species (prepare for rate calcs)
-			//for (int k = 0; k<species_vec.size(); ++k) preComputeSpecies(k,t);	
-
 			this->calcRates_FMU(t, S, dSdt);
 		};
 		
 		odeStepper.step_to(tstop, current_time, state, derivs, after_step); // rk4_stepsize is only used if method is "rk4"
-//		copyStateToCohorts(state.begin());
 	}
 	
 	
@@ -35,9 +35,6 @@ void Solver::step_to(double tstop, AfterStepFunc &afterStep_user){
 			//copyStateToCohorts(state.begin()); // not needed here because it is called by the odestepper below
 			updateEnv(current_time, state.begin(), rates.begin());
 			std::vector<double> rates_prev(rates.begin(), rates.begin()+n_statevars_system);  // save system variable rates
-			
-			// precompute all species (prepare for rate calcs)
-			//for (int k = 0; k<species_vec.size(); ++k) preComputeSpecies(k,current_time);	
 			
 			// use implicit stepper to advance u
 			stepU_iFMU(current_time, state, rates, dt);
@@ -62,38 +59,19 @@ void Solver::step_to(double tstop, AfterStepFunc &afterStep_user){
 			// this step below will do afterstep. FIXME: But what if there are no extra state variables? 
 			odeStepper.step_to(current_time+dt, current_time, state, derivs, after_step); // rk4_stepsize is only used if method is "rk4"
 	
-//			copyStateToCohorts(state.begin());
 		}
 
 	}
 	
-	//if (method == SOLVER_MMU){
-	//}
-	
-	
 	if (method == SOLVER_EBT){
 		auto derivs = [this](double t, std::vector<double>::iterator S, std::vector<double>::iterator dSdt, void* params){
-			// copy state std::vector to cohorts
 			copyStateToCohorts(S);
-			
-			// compute environment
 			updateEnv(t, S, dSdt);
-
-			// precompute all species (prepare for rate calcs)
-			//for (int k = 0; k<species_vec.size(); ++k) preComputeSpecies(k,t);	
-
-			// get rates
 			calcRates_EBT(t, S, dSdt);
 		};
 		
 		// integrate 
 		odeStepper.step_to(tstop, current_time, state, derivs, after_step); // rk4_stepsize is only used if method is "rk4"
-		
-		// after the last ODE step, the state vector is updated but cohorts still hold an intenal ODE state (y+k5*h etc).
-		// normally, this will be no problem since state will be copied to cohorts in the next rates call. 
-		// But since add/remove cohort below will rewrite the state from cohorts, the updated state vector will be lost
-		// rewrite the cohorts now to avoid this.
-//		copyStateToCohorts(state.begin());
 		
 		// update cohorts
 		removeDeadCohorts_EBT();
@@ -103,32 +81,15 @@ void Solver::step_to(double tstop, AfterStepFunc &afterStep_user){
 	
 	if (method == SOLVER_CM){
 		auto derivs = [this](double t, std::vector<double>::iterator S, std::vector<double>::iterator dSdt, void* params){
-			// copy state vector to cohorts
 			copyStateToCohorts(S);  // this triggers precompute
-
-			// update u0 (u of boundary cohort)
 			for (auto s : species_vec) s->get_u0(t, env);
-			
-			// compute environment
 			updateEnv(t, S, dSdt);
-
-			// precompute all species (prepare for rate calcs)
-			//for (int k = 0; k<species_vec.size(); ++k) preComputeSpecies(k,t);	
-
-			// get rates
 			calcRates_CM(t, S, dSdt);
 		};
 		
 		// integrate 
 		odeStepper.step_to(tstop, current_time, state, derivs, after_step); // rk4_stepsize is only used if method is "rk4"
 		
-		// after the last ODE step, the state vector is updated but cohorts still hold an intenal ODE state (y+k5*h etc).
-		// normally, this will be no problem since state will be copied to cohorts in the next rates call. 
-		// But since add/remove cohort below will rewrite the state from cohorts, the updated state vector will be lost
-		// rewrite the cohorts now to avoid this.
-		// Note: This is likely no longer required because afterStep() does a copy
-		//copyStateToCohorts(state.begin());
-
 		// update cohorts
 		if (control.update_cohorts){
 			addCohort_CM();		// add before so that it becomes boundary cohort and first internal cohort can be (potentially) removed

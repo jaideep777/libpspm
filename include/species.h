@@ -13,18 +13,12 @@ class Solver;
 
 
 class Species_Base{
-	// All kinds of Solvers should be friends of Species
+	// Solver should be able to access Species' privates
 	friend class Solver;
 
 	protected: // private members
-	//int start_index;
 	int J;	
 	int n_extra_statevars = 0;
-	//std::vector<std::string> varnames;			// state has internal variables (x, u) and possibly extra variables 
-	//std::vector<std::string> varnames_extra;		//   +-- which will be created in the state in this order (for each species)
-	//std::vector<int> strides;				// defines how the variables are packed into the state vector
-	//std::vector<int> offsets;				// 
-	
 
 	std::list<double> birth_flux_out_history;                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    
 	
@@ -36,26 +30,18 @@ class Species_Base{
 	std::vector <double> h;
 	std::vector <double> schedule; // used only by CM/EBT
 
-	//public:
-	//double u0_save;
-
 	public:
 	double birth_flux_in;
 	
 	//debug only
 	bool bfin_is_u0in = false;
 	
-	//private: // private functions
-	//int addVar(std::string name, int stride, int offset);
-	//void clearVars();
 
 	public: // public members
-	double xb; //, xm;  // FIXME. Dangerous because xm is never updated
+	double xb; 
 	bool is_resident;
 	
-	//Model * mod = nullptr;
-	public:
-
+	
 	public: // public functions
 
 	virtual ~Species_Base() = 0;
@@ -90,8 +76,9 @@ class Species_Base{
 	virtual double get_u0(double t, void * env) = 0;
 	virtual double get_boundary_u() = 0;
 
-	// TODO: argument x can probably be removed from these functions
 	virtual void triggerPreCompute() = 0;
+
+	// TODO: argument x can probably be removed from these functions
 	virtual double growthRate(int i, double x, double t, void * env) = 0;
 	virtual double growthRateOffset(int i, double x, double t, void * env) = 0;
 	virtual std::vector<double> growthRateGradient(int i, double x, double t, void * env, double grad_dx) = 0;
@@ -124,7 +111,7 @@ class Species : public Species_Base{
 	Cohort<Model> savedCohort; // a cohort to save a backup of any other cohort
 
 	public:
-	// TODO: make these virtual?
+	// TODO: make these virtual? - not needed. They are virtual by default.
 	Species(std::vector<double> breaks = std::vector<double>());
 	Species(Model M);
 	

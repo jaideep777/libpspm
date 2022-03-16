@@ -111,9 +111,6 @@ class Solver{
 };
 
 #include "../src/solver.tpp"
-//#include "../src/mu.tpp"
-//#include "../src/ebt.tpp"
-//#include "../src/cm.tpp"
 #include "../src/size_integrals.tpp"
 
 
