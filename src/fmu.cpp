@@ -29,35 +29,15 @@ void Solver::calcRates_FMU(double t, vector<double>::iterator S, vector<double>:
 		growthArray[0] = spp->growthRate(-1, x[0], t, env); // growth rate of boundary cohort
 		for (int i=1; i<J+1; ++i) growthArray[i] = spp->growthRateOffset(i-1, x[i], t, env);
 
-	//	#define growth(i) growthRate(x[i], mod->evalEnv(x[i],t))
-		//#define growth(i) growthArray[i]
-
-		//for (int i=0; i<J+1; ++i){
-			//std::cout << x[i] << " " << growthArray[i] << "\n";
-		//}
-
 		vector <double> u(J+1);
 		
 		// i=0
 		if (spp->birth_flux_in < 0){	
 			double birthFlux = calcSpeciesBirthFlux(s,t) * spp->establishmentProbability(t, env);
-			//double birthFlux = integrate_x([this, s](int i, double t){
-												//return species_vec[s]->birthRate(i,species_vec[s]->getX(i),t, env);
-											//}, t, s);
-											
 			u[0] = birthFlux/(growthArray[0]+1e-12); // Q: is this correct? or g(X0,env)? - A: It is g(xb,env) - growthArray[] indexes x, so (0) is xb. Hence correct. 
 		}
 		else{
 			u[0] = spp->get_u0(t, env);
-			//double g = spp.mod->growthRate(spp.xb, current_time, env);
-			//// --- debug ---
-			//if (spp.bfin_is_u0in)
-				//u[0] = spp.birth_flux_in;
-			//else{
-			//// -------------
-				//double d = (g>0)? spp.birth_flux_in * spp.mod->establishmentProbability(current_time, env)/g  : 0;
-				//u[0] = d; 
-			//}
 		}
 
 		// i=1 (calc u1 assuming linear u(x) in first interval)

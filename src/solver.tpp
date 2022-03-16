@@ -25,9 +25,10 @@ void Solver::step_to(double tstop, AfterStepFunc &afterStep_user){
 		auto derivs = [this](double t, std::vector<double>::iterator S, std::vector<double>::iterator dSdt, void* params){
 			copyStateToCohorts(S); 
 			updateEnv(t, S, dSdt);
-			this->calcRates_FMU(t, S, dSdt);
+			calcRates_FMU(t, S, dSdt);
 		};
 		
+		// integrate
 		odeStepper.step_to(tstop, current_time, state, derivs, after_step); // rk4_stepsize is only used if method is "rk4"
 	}
 	
@@ -86,7 +87,7 @@ void Solver::step_to(double tstop, AfterStepFunc &afterStep_user){
 	if (method == SOLVER_CM){
 		auto derivs = [this](double t, std::vector<double>::iterator S, std::vector<double>::iterator dSdt, void* params){
 			copyStateToCohorts(S);  // this triggers precompute
-			for (auto s : species_vec) s->get_u0(t, env);
+			for (auto s : species_vec) s->get_u0(t, env); // TODO: should this be done before or after updateEnv? 
 			updateEnv(t, S, dSdt);
 			calcRates_CM(t, S, dSdt);
 		};
