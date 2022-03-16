@@ -48,10 +48,10 @@ navbar:
       menu:
         - text: Size integrals
           href: articles/size_integral_dev.html
-        - text: Precompute
-          href: articles/precompute_dev.html
-        - text: Why templates?
-          href: articles/template_vs_virtual_dev.html
+        - text: Logic flowchart
+          href: articles/ode_flow_dev.html
+        - text: FAQs for developers
+          href: articles/faq_dev.html
     api:
       text: API
       icon: fa-code fa-lg

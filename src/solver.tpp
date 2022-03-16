@@ -1,6 +1,8 @@
 /// @param tstop   The time until which the ODE solver should be stepped. 
 ///                The stepper will stop exactly at tstop, for which the final step size is truncated if necessary.
 /// @param afterStep_user  A function of the form `f(double t)` to be called after every _successful_ ODE step. 
+///
+/// \image html ode_flow.png width=700cm 
 /// @note 1. `current_time` is updated by the ODE solver at every (internal) step
 ///
 /// @note 2. After the last ODE step, the state vector is updated but cohorts still hold an intenal ODE state (y+k5*h etc).

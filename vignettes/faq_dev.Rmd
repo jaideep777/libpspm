@@ -29,6 +29,3 @@ The Solver called `precompute` in the following situations:
   - `preCompute` was NOT called in `afterStep.` <span style="color: red;">This may not have been okay.</span>
 
 
-### Where should calculation of boundary u be done? 
-
-Currently, it is done **after** `updateEnv` in FMU and EBT, and **before** `updateEnv` in CM.
