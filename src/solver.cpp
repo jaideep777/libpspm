@@ -392,7 +392,6 @@ vector<double> Solver::u0_out(double t){
 	vector <double> u0out;
 	vector <double> newbornsout = newborns_out(t);
 	for (int k=0; k < species_vec.size(); ++k){
-		//species_vec[k]->preCompute(-1, t, env); // not req because precomputeAllCohorts called in newborns_out() precomputes BC too.	
 		u0out.push_back(newbornsout[k]/species_vec[k]->growthRate(-1, species_vec[k]->xb, t, env));
 	}
 	return u0out;
@@ -510,7 +509,7 @@ std::vector<double> Solver::getDensitySpecies(int k, vector<double> breaks){
 		
 		Spline spl;
 		spl.splineType = Spline::LINEAR; //Spline::CONSTRAINED_CUBIC;
-		spl.extrapolate = Spline::QUADRATIC;
+		spl.extrapolate = Spline::ZERO;
 		spl.set_points(xx, uu);
 		 
 		vector <double> dens;

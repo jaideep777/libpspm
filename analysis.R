@@ -16,3 +16,4 @@ plot1("/home/jaideep/codes/libpspm/cm_testmodel_equil.txt", "CM")
 plot1("/home/jaideep/codes/libpspm/ebt_testmodel_equil.txt", "EBT")
 plot1("/home/jaideep/codes/libpspm/fmu_testmodel_equil.txt", "FMU")
 plot1("/home/jaideep/codes/libpspm/ifmu_testmodel_equil.txt", "IFMU")
+
