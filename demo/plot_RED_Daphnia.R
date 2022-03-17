@@ -23,7 +23,7 @@ Ueq = function(x){
   return(n0*(x/m0)^(-phiG)*exp(mu0/(1-phiG)*(1-(x/m0)^(1-phiG)))*10000)
 }
 
-plot = function(file, N, title){
+plot1 = function(file, N, title){
   dat = read.delim(file, header=F)
   dat = dat[,-ncol(dat)]
   x = exp(seq(log(1), log(1e6), length.out=N))
@@ -34,9 +34,9 @@ plot = function(file, N, title){
   points(x=xeq, y= Ueq(xeq))
 }
 
-plot("RED_model/fmu_Redmodel.txt", 150, "FMU")
-plot("RED_model/ifmu_Redmodel.txt", 150, "IFMU")
-plot("RED_model/ebt_Redmodel.txt", 150, "EBT")
+plot1("RED_model/fmu_Redmodel.txt", 150, "FMU")
+plot1("RED_model/ifmu_Redmodel.txt", 150, "IFMU")
+plot1("RED_model/ebt_Redmodel.txt", 150, "EBT")
 
 
 
@@ -49,7 +49,7 @@ K = 3
 xstar = (mu*(1+mu)*(2+mu)/2/a)^(1/3)
 sstar = xstar/(1-xstar)
 
-plot = function(file, N, title){
+plot2 = function(file, N, title){
   dat = read.delim(file, header=F)
   dat = dat[,-ncol(dat)]
   x=seq(0,1,length.out = N)
@@ -63,9 +63,9 @@ plot = function(file, N, title){
   # plot(dat$V2~dat$V1, type="l")
 }
 
-plot("Daphina_model/fmu_Daphnia.txt", 300, "FMU")
-plot("Daphina_model/ifmu_Daphnia.txt", 300, "IFMU")
-plot("Daphina_model/ebt_Daphnia.txt", 300, "EBT")
+plot2("Daphina_model/fmu_Daphnia.txt", 300, "FMU")
+plot2("Daphina_model/ifmu_Daphnia.txt", 300, "IFMU")
+plot2("Daphina_model/ebt_Daphnia.txt", 300, "EBT")
 
 dev.off()
 
