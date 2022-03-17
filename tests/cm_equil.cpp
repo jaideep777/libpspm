@@ -7,6 +7,12 @@ using namespace std;
 
 #include "test_model_2_ms.h"
 
+std::vector <double> myseq(double from, double to, int len){
+	std::vector<double> x(len);
+	for (size_t i=0; i<len; ++i) x[i] = from + i*(to-from)/(len-1);
+	return x;
+}
+
 int main(){
 
 	Species<TestModel> spp;
@@ -26,15 +32,17 @@ int main(){
 
 	ofstream fout("cm_testmodel_equil.txt");
 
-	fout << S.current_time << "\t" << 0 << "\t";
-	for (auto y : S.state){fout << y << "\t";} fout << "\n";
+	//fout << S.current_time << "\t" << 0 << "\t";
+	//for (auto y : S.state){fout << y << "\t";} fout << "\n";
 	for (double t=0.05; t <= 8; t=t+0.05) {
 		S.step_to(t);
 		fout << S.current_time << "\t" << S.u0_out(t)[0] << "\t";
 		cout << S.current_time << "\t" << S.u0_out(t)[0] << "\n";
 		//cout << S.current_time << "\t" << S.species_vec[0]->xsize() << " " << S.u0_out()[0] << "\t" << S.species_vec[0]->get_boundary_u() << "\n";
 		//cout << S.u0_out() << "\n";
-		for (auto y : S.state) fout << y << "\t";
+		vector<double> breaks = myseq(0,1,26);
+		vector<double> v = S.getDensitySpecies(0, breaks);
+		for (auto y : v) fout << y << "\t";
 		fout << endl;
 	}
 

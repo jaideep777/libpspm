@@ -427,8 +427,9 @@ struct point{
 	int    count = 0;
 };	
 
-std::vector<double> Solver::getDensitySpecies_EBT(int k, vector<double> breaks){
+std::vector<double> Solver::getDensitySpecies(int k, vector<double> breaks){
 	auto spp = species_vec[k];
+	vector <double> xx, uu;
 
 	if (method == SOLVER_EBT){
 		double xm = spp->getX(0)+1e-6;
@@ -473,33 +474,56 @@ std::vector<double> Solver::getDensitySpecies_EBT(int k, vector<double> breaks){
 			for (int i=1; i<h.size()-1; ++i) h[i] = (points[i+1].xmean - points[i-1].xmean)/2;
 			h[h.size()-1] = xm - (points[h.size()-1].xmean+points[h.size()-2].xmean)/2;
 
-			vector <double> xx, uu;
 			xx.reserve(points.size());
 			uu.reserve(points.size());
 			for (int i=0; i<points.size(); ++i){
 				xx.push_back(points[i].xmean);
 				uu.push_back(points[i].abund / h[i]);
 			}
-			
-			Spline spl;
-			spl.splineType = Spline::LINEAR; //Spline::CONSTRAINED_CUBIC;
-			spl.extrapolate = Spline::ZERO;
-			spl.set_points(xx, uu);
-			
-			vector <double> dens;
-			dens.reserve(points.size());
-			for (int i=0; i<breaks.size(); ++i){
-				dens.push_back(spl.eval(breaks[i]));			
-			}
-			
-			return dens;
 		}
-		else return vector<double>(breaks.size(), 0);
-	}
-	else {
-		throw std::runtime_error("This function can only be called for the EBT solver");
 	}
 
+	else if (method == SOLVER_CM){
+		xx.reserve(spp->J);
+		uu.reserve(spp->J);
+		for (int i=spp->J-1; i>=0; --i){
+			xx.push_back(spp->getX(i));
+			uu.push_back(spp->getU(i));
+		}
+		
+	}	
+	
+	else {
+		xx.reserve(spp->J);
+		uu.reserve(spp->J);
+		for (int i=0; i<spp->J-1; ++i){
+			xx.push_back(spp->getX(i));
+			uu.push_back(spp->getU(i));
+		}
+		
+	}	
+//	else {
+//		throw std::runtime_error("This function can only be called for the EBT solver");
+//	}
+
+	if (xx.size() >= 2){ 
+		
+		Spline spl;
+		spl.splineType = Spline::LINEAR; //Spline::CONSTRAINED_CUBIC;
+		spl.extrapolate = Spline::QUADRATIC;
+		spl.set_points(xx, uu);
+		 
+		vector <double> dens;
+		dens.reserve(xx.size());
+		for (int i=0; i<breaks.size(); ++i){
+			dens.push_back(spl.eval(breaks[i]));			
+		}
+		
+		return dens;
+	}
+	else {
+		return vector<double>(breaks.size(), 0);
+	}
 }
 
 

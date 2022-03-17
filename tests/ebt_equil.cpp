@@ -51,11 +51,8 @@ int main(){
 		S.step_to(t);
 		fout << S.current_time << "\t" << S.u0_out(t)[0] << "\t";
 
-		//cout << "HERE" << endl;	
-		vector<double> v = S.getDensitySpecies_EBT(0, breaks);
-				
-		cout << S.current_time << " " << S.species_vec[0]->xsize() << " " << S.u0_out(t)[0] << endl;
-		//for (auto y : S.state) fout << y << "\t";
+		vector<double> breaks = myseq(0,1,26);
+		vector<double> v = S.getDensitySpecies(0, breaks);
 		for (auto y : v) fout << y << "\t";
 		fout << endl;
 	}

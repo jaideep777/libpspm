@@ -40,7 +40,7 @@ int main(){
 		fout << S.current_time << "\t" << S.newborns_out(t)[0] << "\t" << E.S << "\t";
 		cout << S.current_time << " " << S.state[0] << " " << S.species_vec[0]->xsize() << "\n";
 		
-		vector <double> dist = S.getDensitySpecies_EBT(0, seq(0,1,300));
+		vector <double> dist = S.getDensitySpecies(0, seq(0,1,300));
 		for (auto y : dist) fout << y << "\t";
 		
 		fout << endl;
