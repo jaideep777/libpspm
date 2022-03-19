@@ -17,7 +17,7 @@ void Solver::step_to(double tstop, AfterStepFunc &afterStep_user){
 	if (tstop <= current_time) return;
 	
 	auto after_step = [this, afterStep_user](double t, std::vector<double>::iterator S){
-		std::cout << "After step: t = " << t << "\n";
+		if (debug) std::cout << "After step: t = " << t << "\n";
 		copyStateToCohorts(S);
 		afterStep_user(t);
 	};
@@ -88,7 +88,7 @@ void Solver::step_to(double tstop, AfterStepFunc &afterStep_user){
 	
 	if (method == SOLVER_CM){
 		auto derivs = [this](double t, std::vector<double>::iterator S, std::vector<double>::iterator dSdt, void* params){
-			std::cout << "derivs()\n";
+			if (debug) std::cout << "derivs()\n";
 			copyStateToCohorts(S);  // this triggers precompute
 			updateEnv(t, S, dSdt);
 			calcRates_CM(t, S, dSdt);

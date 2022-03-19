@@ -12,8 +12,8 @@ plot1 = function(file, title){
 }
 
 par(mfrow = c(2,2), mar=c(4,4,4,1), oma=c(1,1,1,1), cex.lab=1.2, cex.axis=1.2)
-plot1("/home/jaideep/codes/libpspm/cm_testmodel_equil.txt", "CM")
-plot1("/home/jaideep/codes/libpspm/ebt_testmodel_equil.txt", "EBT")
-plot1("/home/jaideep/codes/libpspm/fmu_testmodel_equil.txt", "FMU")
-plot1("/home/jaideep/codes/libpspm/ifmu_testmodel_equil.txt", "IFMU")
+plot1("~/codes/libpspm/cm_testmodel_equil.txt", "CM")
+plot1("~/codes/libpspm/ebt_testmodel_equil.txt", "EBT")
+plot1("~/codes/libpspm/fmu_testmodel_equil.txt", "FMU")
+plot1("~/codes/libpspm/ifmu_testmodel_equil.txt", "IFMU")
 

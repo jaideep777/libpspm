@@ -14,6 +14,7 @@ enum PSPM_SolverType {SOLVER_FMU, SOLVER_MMU, SOLVER_CM, SOLVER_EBT, SOLVER_IFMU
 
 class Solver{
 	private:
+	const bool debug = false;
 	PSPM_SolverType method;
 
 	int n_statevars_internal = 0;		// number of internal i-state variables (x and/or u)
@@ -72,17 +73,19 @@ class Solver{
 
 	void updateEnv(double t, std::vector<double>::iterator S, std::vector<double>::iterator dSdt);
 
+	/// @brief calculate \f$du/dt\f$ using the FMU solver
 	void calcRates_FMU(double t, std::vector<double>::iterator S, std::vector<double>::iterator dSdt);
 	
 	void calcRates_iFMU(double t, std::vector<double>::iterator S, std::vector<double>::iterator dSdt);
 	void stepU_iFMU(double t, std::vector<double> &S, std::vector<double> &dSdt, double dt);
 	
+	/// @brief calculate \f$du/dt\f$ using the EBT solver
 	void calcRates_EBT(double t, std::vector<double>::iterator S, std::vector<double>::iterator dSdt);
 	void addCohort_EBT();
 	void removeDeadCohorts_EBT();
 
+	/// @brief calculate \f$du/dt\f$ using the CM solver
 	void calcRates_CM(double t, std::vector<double>::iterator S, std::vector<double>::iterator dSdt);
-	//double calc_u0_CM();
 	void addCohort_CM();
 	void removeCohort_CM();
 	

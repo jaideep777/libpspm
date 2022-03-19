@@ -8,6 +8,16 @@ double phi(double r){
 }
 
 
+/// This solver uses the upwind scheme to discretize the McKendrick von-Foerster PDE.
+/// \f[
+/// \frac{\partial u}{\partial t} = - \frac{\partial}{\partial x}(gu) - \mu u
+/// \f]
+/// This yields:
+/// The grid is set up from the vector of edges \f$x\f$, as specified during initialization.
+/// Each point in the grid corresponds to a cell edge 
+/// \f[
+/// 
+/// \f]
 void Solver::calcRates_FMU(double t, vector<double>::iterator S, vector<double>::iterator dSdt){
 
 	vector<double>::iterator its = S    + n_statevars_system; // Skip system variables
@@ -41,22 +51,29 @@ void Solver::calcRates_FMU(double t, vector<double>::iterator S, vector<double>:
 			u[0] = spp->calc_boundary_u(growthArray[0], pe);
 		}
 
-		// i=1 (calc u1 assuming linear u(x) in first interval)
-		u[1] = 2*U[0]-u[0];  // NOTE: for g(x) < 0 this can be calculated with upwind scheme 
+		// i=1 (calc u1 assuming linear u(x) in first interval) // NO: Horrible idea - leads to negative densities when u0 is very high
+		// calc u[1] using first order method, i.e., u[1]=U[0]
+		// FIXME: Need to account for g in u1, uJ-1, and uJ
+		u[1] = U[0]; //2*U[0]-u[0];  // NOTE: for g(x) < 0 this can be calculated with upwind scheme 
 		
 		for (int i=2; i<J-1; ++i){ // dU[i] ~ u[i+1] <-- U[i],U[i-1], u[i] <-- U[i-1],U[i-2]
 			if(growthArray[i] >=0){
-				double rMinus = ((U[i]-U[i-1])/(x[i]-x[i-1]))/((U[i-1]-U[i-2]+1e-12)/(x[i-1]-x[i-2]));
-				u[i] = U[i-1] + phi(rMinus)*(U[i-1]-U[i-2])*(x[i]-x[i-1])/(x[i+1]-x[i-1]); 
+				//double rMinus = ((U[i]-U[i-1])/(x[i]-x[i-1]))/((U[i-1]-U[i-2]+1e-12)/(x[i-1]-x[i-2]));
+				//u[i] = U[i-1] + phi(rMinus)*(U[i-1]-U[i-2])*(x[i]-x[i-1])/(x[i+1]-x[i-1]); 
+				double r_down = ((U[i]-U[i-1])/(x[i+1]-x[i-1]));
+				double r_up = ((U[i-1]-U[i-2])/(x[i]-x[i-2]));
+				double r = r_down/r_up;
+				u[i] = U[i-1] + phi(r)*(U[i-1]-U[i-2])*(x[i]-x[i-1])/(x[i]-x[i-2]); 
 			}   
 			else{
+				throw std::runtime_error("");
 				double rPlus  = ((U[i]-U[i-1])/(x[i]-x[i-1]))/((U[i+1]-U[i]+1e-12)/(x[i+1]-x[i]));
 				u[i] = U[i] - phi(rPlus)*(U[i+1]-U[i])*(x[i+1]-x[i])/(x[i+2]-x[i]); 
 			}
 		}
 		
-		u[J-1] = 2*U[J-2] - u[J-2];	// NOTE: for g(x) > 0 This can be calc with upwind scheme
-		u[J] = 2*U[J-1] - u[J-1];
+		u[J-1] = U[J-2]; //2*U[J-2] - u[J-2];	// NOTE: for g(x) > 0 This can be calc with upwind scheme
+		u[J] = U[J-1]; //2*U[J-1] - u[J-1];
 
 		// [S S S u u u u u a b c a b c a b c a b c a b c] <--- full SV for species is this
 		//        ^ itr, its. Therefore, advance 1 at a time while setting dUdt, and advance its by 3*5 after.

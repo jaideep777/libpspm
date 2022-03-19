@@ -1,5 +1,5 @@
 
-setwd("/home/jaideep/codes/libpspm/demo/")
+setwd("~/codes/libpspm/demo/")
 
 png("RED_Daphnia.png", width = 900*3, height=680*3, res=300)
 
@@ -68,5 +68,4 @@ plot2("Daphina_model/ifmu_Daphnia.txt", 300, "IFMU")
 plot2("Daphina_model/ebt_Daphnia.txt", 300, "EBT")
 
 dev.off()
-
 

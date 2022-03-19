@@ -254,7 +254,7 @@ void Solver::initialize(){
 
 
 void Solver::copyStateToCohorts(std::vector<double>::iterator state_begin){
-	std::cout << "state ---> cohorts\n";
+	if (debug) std::cout << "state ---> cohorts\n";
 	std::vector<double>::iterator it = state_begin + n_statevars_system; // no need to copy system state
 	
 	for (int k=0; k<species_vec.size(); ++k){
@@ -295,7 +295,7 @@ void Solver::copyStateToCohorts(std::vector<double>::iterator state_begin){
 
 
 void Solver::copyCohortsToState(){
-	std::cout << "state <--- cohorts\n";
+	if (debug) std::cout << "state <--- cohorts\n";
 	vector<double>::iterator it = state.begin() + n_statevars_system; // no need to copy system state
 	
 	for (int k=0; k<species_vec.size(); ++k){
@@ -342,7 +342,7 @@ void Solver::step_to(double tstop){
 
 
 void Solver::updateEnv(double t, std::vector<double>::iterator S, std::vector<double>::iterator dSdt){
-	std::cout << "update Env...\n";
+	if (debug) std::cout << "update Env...\n";
 	for (auto spp : species_vec) spp->triggerPreCompute();
 	env->computeEnv(t, this, S, dSdt);
 }
@@ -350,7 +350,7 @@ void Solver::updateEnv(double t, std::vector<double>::iterator S, std::vector<do
 
 // k = species_id
 double Solver::calcSpeciesBirthFlux(int k, double t){
-	std::cout << "calc birthFlux...\n";
+	if (debug) std::cout << "calc birthFlux...\n";
 	auto spp = species_vec[k];	
 	auto newborns_production = [this, spp](int i, double _t){
 		double b1 = spp->birthRate(i, spp->getX(i), _t, env);
@@ -509,7 +509,7 @@ std::vector<double> Solver::getDensitySpecies(int k, vector<double> breaks){
 		
 		Spline spl;
 		spl.splineType = Spline::LINEAR; //Spline::CONSTRAINED_CUBIC;
-		spl.extrapolate = Spline::ZERO;
+		spl.extrapolate = Spline::QUADRATIC; //Spline::ZERO;
 		spl.set_points(xx, uu);
 		 
 		vector <double> dens;

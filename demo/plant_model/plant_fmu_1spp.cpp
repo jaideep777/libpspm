@@ -163,8 +163,10 @@ int main(){
 	S.resetState();
 	S.initialize();
 
-	S.print();
+	//for (int i=0; i<S.species_vec.size(); ++i) S.species_vec[i]->setU(0,1);
+	//S.copyCohortsToState();	
 	
+	S.print();
 
 	vector <double> times = generateDefaultCohortSchedule(105.32);
 	for (auto t : times) cout << t << " "; cout << endl;

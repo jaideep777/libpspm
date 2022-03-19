@@ -203,7 +203,7 @@ double Species<Model>::establishmentProbability(double t, void * env){
 // FIXME: Should be renamed as "calc_boundary_u"
 template <class Model>
 double Species<Model>::calc_boundary_u(double gb, double pe){
-	std::cout << "calc_boundary_u\n";
+	//std::cout << "calc_boundary_u\n";
 	if (bfin_is_u0in){
 		boundaryCohort.u = birth_flux_in;
 	}
