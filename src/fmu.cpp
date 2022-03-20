@@ -41,7 +41,7 @@ void Solver::calcRates_FMU(double t, vector<double>::iterator S, vector<double>:
 
 		vector <double> u(J+1);
 		
-		// i=0
+		// i=0 -- set u0 from boundary condition
 		double pe = spp->establishmentProbability(t, env);
 		if (spp->birth_flux_in < 0){	
 			double birthFlux = calcSpeciesBirthFlux(s,t) * pe;
@@ -53,34 +53,42 @@ void Solver::calcRates_FMU(double t, vector<double>::iterator S, vector<double>:
 
 		// i=1 (calc u1 assuming linear u(x) in first interval) // NO: Horrible idea - leads to negative densities when u0 is very high
 		// calc u[1] using first order method, i.e., u[1]=U[0]
-		// FIXME: Need to account for g in u1, uJ-1, and uJ
-		u[1] = U[0]; //2*U[0]-u[0];  // NOTE: for g(x) < 0 this can be calculated with upwind scheme 
+		u[1] = (growthArray[0] >= 0)? U[0] : U[1]; //2*U[0]-u[0];  // NOTE: for g(x) < 0 this can be calculated with upwind scheme 
 		
+		// i = 2 -- J-2
 		for (int i=2; i<J-1; ++i){ // dU[i] ~ u[i+1] <-- U[i],U[i-1], u[i] <-- U[i-1],U[i-2]
 			if(growthArray[i] >=0){
 				//double rMinus = ((U[i]-U[i-1])/(x[i]-x[i-1]))/((U[i-1]-U[i-2]+1e-12)/(x[i-1]-x[i-2]));
 				//u[i] = U[i-1] + phi(rMinus)*(U[i-1]-U[i-2])*(x[i]-x[i-1])/(x[i+1]-x[i-1]); 
-				double r_down = ((U[i]-U[i-1])/(x[i+1]-x[i-1]));
-				double r_up = ((U[i-1]-U[i-2])/(x[i]-x[i-2]));
+				double r_down = (U[i]-U[i-1]) / (x[i+1]-x[i-1]); // factor of 2 not included because it will be cancelled in the ratio
+				double r_up   = (U[i-1]-U[i-2]) / (x[i]-x[i-2]);
 				double r = r_down/r_up;
 				u[i] = U[i-1] + phi(r)*(U[i-1]-U[i-2])*(x[i]-x[i-1])/(x[i]-x[i-2]); 
 			}   
 			else{
 				throw std::runtime_error("");
-				double rPlus  = ((U[i]-U[i-1])/(x[i]-x[i-1]))/((U[i+1]-U[i]+1e-12)/(x[i+1]-x[i]));
-				u[i] = U[i] - phi(rPlus)*(U[i+1]-U[i])*(x[i+1]-x[i])/(x[i+2]-x[i]); 
+				//double rPlus  = ((U[i]-U[i-1])/(x[i]-x[i-1]))/((U[i+1]-U[i]+1e-12)/(x[i+1]-x[i]));
+				//u[i] = U[i] - phi(rPlus)*(U[i+1]-U[i])*(x[i+1]-x[i])/(x[i+2]-x[i]); 
+				double r_down = (U[i]-U[i-1]) / (x[i+1]-x[i-1]); // factor of 2 not included because it will be cancelled in the ratio 
+				double r_up   = (U[i+1]-U[i]) / (x[i+2]-x[i]);
+				double r = r_down/r_up;
+				u[i] = U[i] - phi(r)*(U[i+1]-U[i])*(x[i+1]-x[i])/(x[i+2]-x[i]); 
 			}
 		}
 		
-		u[J-1] = U[J-2]; //2*U[J-2] - u[J-2];	// NOTE: for g(x) > 0 This can be calc with upwind scheme
+		// i = J-1 and i = J
+		u[J-1] = (growthArray[J-1]>=0)? U[J-2] : U[J-1]; //2*U[J-2] - u[J-2];	// NOTE: for g(x) > 0 This can be calc with upwind scheme
 		u[J] = U[J-1]; //2*U[J-1] - u[J-1];
 
+		// core rates
 		// [S S S u u u u u a b c a b c a b c a b c a b c] <--- full SV for species is this
 		//        ^ itr, its. Therefore, advance 1 at a time while setting dUdt, and advance its by 3*5 after.
 		for (int i=0; i<spp->J; ++i){ // dU[i] ~ u[i+1] <-- U[i],U[i-1], u[i] <-- U[i-1],U[i-2]
 			dUdt[i] = -spp->mortalityRate(i,X[i], t, env)*U[i] - (growthArray[i+1]*u[i+1] - growthArray[i]*u[i])/h[i];
 			++itr; ++its;
 		}
+		
+		// extra rates
 		if (spp->n_extra_statevars > 0){
 			auto itr_prev = itr;
 			spp->getExtraRates(itr);
