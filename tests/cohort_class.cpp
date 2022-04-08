@@ -195,7 +195,7 @@ int main(){
 	sol.print();	
 	cout << "Insect BF = " << sol.calcSpeciesBirthFlux(1,0) << "\n";
 	
-	sol.preComputeSpecies(1,0);
+//	sol.preComputeSpecies(1,0);
 	sol.print();	
 	cout << "Insect BF (after precompute) = " << sol.calcSpeciesBirthFlux(1,0) << "\n";
 

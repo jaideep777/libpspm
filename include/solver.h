@@ -14,6 +14,7 @@ enum PSPM_SolverType {SOLVER_FMU, SOLVER_MMU, SOLVER_CM, SOLVER_EBT, SOLVER_IFMU
 
 class Solver{
 	private:
+	const bool debug = false;
 	PSPM_SolverType method;
 
 	int n_statevars_internal = 0;		// number of internal i-state variables (x and/or u)
@@ -23,13 +24,11 @@ class Solver{
 	OdeSolver odeStepper;
 	EnvironmentBase * env;
 	
-	public:
 	// The current state of the system, {t, S, dS/dt} 
+	double current_time;			// these are synced with ODE solver only after a successful step
 	std::vector <double> state;		// +-- They are NOT synced during the ODE solver's internal steps
 	std::vector <double> rates; 
-	double current_time;			// these are synced with ODE solver only after a successful step
 
-	public:
 	std::vector<Species_Base*> species_vec;	
 
 	struct{
@@ -62,7 +61,6 @@ class Solver{
 
 	void setEnvironment(EnvironmentBase * _env);
 
-	//int setupLayout(Species<Model> &s);
 	void resetState(double t0 = 0); 	
 	void resizeStateFromSpecies();
 
@@ -73,17 +71,21 @@ class Solver{
 	
 	double maxSize();
 
+	void updateEnv(double t, std::vector<double>::iterator S, std::vector<double>::iterator dSdt);
+
+	/// @brief calculate \f$du/dt\f$ using the FMU solver
 	void calcRates_FMU(double t, std::vector<double>::iterator S, std::vector<double>::iterator dSdt);
 	
 	void calcRates_iFMU(double t, std::vector<double>::iterator S, std::vector<double>::iterator dSdt);
 	void stepU_iFMU(double t, std::vector<double> &S, std::vector<double> &dSdt, double dt);
 	
+	/// @brief calculate \f$du/dt\f$ using the EBT solver
 	void calcRates_EBT(double t, std::vector<double>::iterator S, std::vector<double>::iterator dSdt);
 	void addCohort_EBT();
 	void removeDeadCohorts_EBT();
 
+	/// @brief calculate \f$du/dt\f$ using the CM solver
 	void calcRates_CM(double t, std::vector<double>::iterator S, std::vector<double>::iterator dSdt);
-	//double calc_u0_CM();
 	void addCohort_CM();
 	void removeCohort_CM();
 	
@@ -92,11 +94,9 @@ class Solver{
 
 	void step_to(double tstop);
 
-	void preComputeSpecies(int k, double t);
 	double calcSpeciesBirthFlux(int k, double t);
 	std::vector<double> newborns_out(double t);  // This is the actual system reproduction (fitness) hence biologically relevant
 	std::vector<double> u0_out(double t);        // This is used for equilibrium solving, because in general, u0 rather than birthFlux, will approach a constant value
-	////double get_u0_out();	// just returns from history without recomputing
 
 	void print();
 	
@@ -109,14 +109,10 @@ class Solver{
 	template<typename wFunc>
 	double integrate_wudx_above(wFunc w, double t, double xlow, int species_id);
 
-
-	std::vector<double> getDensitySpecies_EBT(int k, std::vector<double> breaks);
+	std::vector<double> getDensitySpecies(int k, std::vector<double> breaks);
 };
 
 #include "../src/solver.tpp"
-//#include "../src/mu.tpp"
-//#include "../src/ebt.tpp"
-//#include "../src/cm.tpp"
 #include "../src/size_integrals.tpp"
 
 

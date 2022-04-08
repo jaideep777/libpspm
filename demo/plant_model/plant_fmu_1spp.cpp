@@ -152,6 +152,7 @@ int main(){
 	//S.control.ifmu_centered_grids = false; //true;
 	S.use_log_densities = true;
 	S.control.ode_eps = 1e-4;
+	S.control.integral_interpolate = false;
 	S.setEnvironment(&env);
 	//    S.createSizeStructuredVariables({"mort", "fec", "heart_area", "heart_mass"});
     
@@ -162,8 +163,10 @@ int main(){
 	S.resetState();
 	S.initialize();
 
-	S.print();
+	//for (int i=0; i<S.species_vec.size(); ++i) S.species_vec[i]->setU(0,1);
+	//S.copyCohortsToState();	
 	
+	S.print();
 
 	vector <double> times = generateDefaultCohortSchedule(105.32);
 	for (auto t : times) cout << t << " "; cout << endl;
@@ -210,8 +213,10 @@ int main(){
 	sio.closeStreams();
 	int nga=0, nma=0, nfa=0, npa=0;
 
-	for (auto spp : S.species_vec) { nga += spp->ng; nma += spp->nm; nfa += spp->nf; npa += spp->np;}
-	cout << "Number of calls to p/g/m/f functions: " << npa << " " << nga << " " << nma << " " << nfa << endl;
+//	for (auto spp : S.species_vec) {spp->fnEvals(); nga += spp->ng; nma += spp->nm; nfa += spp->nf; npa += spp->np;}
+//	cout << "Number of calls to p/g/m/f functions: " << npa << " " << nga << " " << nma << " " << nfa << endl;
+	cout << "Number of calls to p/g/m/f (static) : " << Cohort<PSPM_Plant>::np << " " << Cohort<PSPM_Plant>::ng << " " << Cohort<PSPM_Plant>::nm << " " << Cohort<PSPM_Plant>::nf << endl;
+	cout << "Number of calls to derivs           : " << S.odeStepper.get_fn_evals() << endl;
 
 	for (int s=0; s< S.n_species(); ++s){
 		cout << "Seed rain for Species " << s << " (Lindh 18) = " << pn::integrate_trapezium(times, seeds_out[s]) << endl;

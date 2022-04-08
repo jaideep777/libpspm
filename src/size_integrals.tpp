@@ -85,10 +85,12 @@ double Solver::integrate_wudx_above(wFunc w, double t, double xlow, int species_
 			// boundary at xb
 			double u0 = spp->get_boundary_u();
 			double x_lo = spp->xb;
-			double f_lo =  w(-1, t)*u0; // -1 is boundary cohort
-			double f = (control.integral_interpolate)? f_lo + (f_hi-f_lo)/(x_hi-x_lo)*(xlow - x_lo) : f_lo;  
-			double x = (control.integral_interpolate)? xlow : x_lo;
-			I += (x_hi-x)*(f_hi+f);
+			if (x_hi > x_lo){ 
+				double f_lo =  w(-1, t)*u0; // -1 is boundary cohort
+				double f = (control.integral_interpolate)? f_lo + (f_hi-f_lo)/(x_hi-x_lo)*(xlow - x_lo) : f_lo;  
+				double x = (control.integral_interpolate)? xlow : x_lo;
+				I += (x_hi-x)*(f_hi+f);
+			}
 		}
 		
 		return I*0.5;

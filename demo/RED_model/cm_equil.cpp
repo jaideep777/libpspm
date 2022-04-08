@@ -19,26 +19,26 @@ int main(){
 	Species<RED_Plant> spp;
 	LightEnvironment E;
 
-	Solver S(SOLVER_EBT);
+	Solver S(SOLVER_CM);
 	S.addSpecies(100, 1, 1e6, true, &spp, 0);
 	//S.get_species(0)->set_bfin_is_u0in(true);	// say that input_birth_flux is u0
-	S.control.ebt_ucut = 1e-20;
+//	S.control.max_cohorts = 1000;
 	S.resetState();
 	S.initialize();
 	S.setEnvironment(&E);
 	//S.print();
 	
 	
-	ofstream fout("ebt_Redmodel.txt");
+	ofstream fout("cm_Redmodel.txt");
 
-	for (double t=0; t <= 5000; t=t+10) {
+	for (double t=0; t <= 5000; t=t+15) {
 		S.step_to(t);
 		fout << S.current_time << "\t" << S.newborns_out(t)[0] << "\t";
 		cout << S.current_time << " " << S.species_vec[0]->xsize() << "\n";
 		//cout << S.current_time << " " [><< S.u0_out()<] << "\n";
 		
-		vector <double> dist = S.getDensitySpecies(0, logseq(1, 1e6, 150));
-		for (auto y : dist) fout << y << "\t";
+//		vector <double> dist = S.getDensitySpecies_EBT(0, logseq(1, 1e6, 150));
+//		for (auto y : dist) fout << y << "\t";
 		fout << endl;
 	}
 

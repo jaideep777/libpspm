@@ -37,7 +37,7 @@ int main(){
 		cout << S.current_time << " " << S.species_vec[0]->xsize() << "\n";
 		//cout << S.current_time << " " [><< S.u0_out()<] << "\n";
 		
-		vector <double> dist = S.getDensitySpecies_EBT(0, logseq(1, 1e6, 150));
+		vector <double> dist = S.getDensitySpecies(0, logseq(1, 1e6, 150));
 		for (auto y : dist) fout << y << "\t";
 		fout << endl;
 	}

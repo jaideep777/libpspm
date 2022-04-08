@@ -31,6 +31,7 @@ int main(){
 	for (double t=0.05; t <= 8; t=t+0.05) {
 		S.step_to(t);
 		fout << S.current_time << "\t" << S.u0_out(t)[0] << "\t";
+		cout << S.current_time << "\t" << S.u0_out(t)[0] << "\n";
 		//cout << S.current_time << "\t" << S.species_vec[0]->xsize() << " " << S.u0_out()[0] << "\t" << S.species_vec[0]->get_boundary_u() << "\n";
 		//cout << S.u0_out() << "\n";
 		for (auto y : S.state) fout << y << "\t";
