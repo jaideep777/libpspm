@@ -139,6 +139,19 @@ double Solver::integrate_wudx_above(wFunc w, double t, double xlow, int species_
 		return I;
 	}
 	
+	else if (method == SOLVER_ABM){
+		// sort cohorts descending - this is important in ABM because traits may vary
+		spp->sortCohortsDescending(); 
+		// calculate integral
+		double I = 0;
+		for (int i=0; i<spp->J; ++i){       // in ABM, cohorts are sorted descending
+		   	if (spp->getX(i) < xlow) break; // if X == xlow, we still include it in the intgral
+			else I += w(i, t)*spp->getU(i);
+		}
+		
+		return I;
+	}
+	
 	else{
 		throw std::runtime_error("Unsupported solver method");
 	}
@@ -211,6 +224,16 @@ double Solver::integrate_x(wFunc w, double t, int species_id){
 		I += (x_hi-x_lo)*(f_hi+f_lo);
 		
 		return I*0.5;
+	}
+	
+	else if (method == SOLVER_ABM){
+		// calculate integral. Sorting is not required here because all cohorts will be touched anyway
+		double I = 0;
+		for (int i=0; i<spp->J; ++i){       // in ABM, cohorts are sorted descending
+			I += w(i, t)*spp->getU(i);
+		}
+		
+		return I;
 	}
 	
 	else{

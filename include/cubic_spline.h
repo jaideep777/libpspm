@@ -4,7 +4,7 @@
 #include <vector>
 #include <cassert>
 #include <iomanip>
-
+#include <limits>
 typedef double Float;
 
 
@@ -124,7 +124,7 @@ class Spline{
 	
 	enum Type{LINEAR, CUBIC, CONSTRAINED_CUBIC};
 	Type splineType = CUBIC;
-	enum Extr{ZERO, CONSTANT, QUADRATIC};
+	enum Extr{ZERO, CONSTANT, QUADRATIC, NA};
 	Extr extrapolate = CONSTANT;
 
 //	bool extrapolate_constant = true;
@@ -251,6 +251,7 @@ class Spline{
 		  double h=x-m_x[0];
 		  // extrapolation to the left
 		  if (extrapolate == ZERO) return 0;	// zero
+		  else if (extrapolate == NA) return std::numeric_limits<double>::quiet_NaN();	// nan
 		  else if (extrapolate == CONSTANT) return m_y[0];	// constant
 		  else return ((m_b[0])*h + m_c[0])*h + m_y[0];  // quadratic
 	}

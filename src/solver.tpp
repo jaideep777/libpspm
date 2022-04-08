@@ -104,5 +104,30 @@ void Solver::step_to(double tstop, AfterStepFunc &afterStep_user){
 		}
 		//env->computeEnv(current_time, this); // is required here IF rescaleEnv is used in derivs
 	}
+	
+	if (method == SOLVER_ABM){	
+		while (current_time < tstop){
+			double dt = std::min(control.abm_stepsize, tstop-current_time);
+			
+			//copyStateToCohorts(state.begin()); // not needed here because it is called by the odestepper below
+			updateEnv(current_time, state.begin(), rates.begin());
+			std::vector<double> rates_prev(rates.begin(), rates.begin()+n_statevars_system);  // save system variable rates
+			
+			// use implicit stepper to advance u
+			stepABM(current_time, dt);  // this will step all variables, including extra_istate
+			current_time += dt; 
+			
+			if (n_statevars_system > 0){
+				updateEnv(current_time, state.begin(), rates.begin());  // recompute env with updated u
+				// FIXME: use fully implicit stepper here?
+				for (int i=0; i<n_statevars_system; ++i){
+					state[i] += (rates_prev[i]+rates[i])/2*dt;  // use average of old and updated rates for stepping system vars
+				}
+			}
+
+		}
+
+	}
+
 }
 
