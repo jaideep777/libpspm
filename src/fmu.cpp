@@ -52,8 +52,9 @@ void Solver::calcRates_FMU(double t, vector<double>::iterator S, vector<double>:
 		}
 
 		// i=1 (calc u1 assuming linear u(x) in first interval) // NO: Horrible idea - leads to negative densities when u0 is very high
-		// calc u[1] using first order method, i.e., u[1]=U[0]
-		u[1] = (growthArray[0] >= 0)? U[0] : U[1]; //2*U[0]-u[0];  // NOTE: for g(x) < 0 this can be calculated with upwind scheme 
+		// calc u[1] using first order method: u[1]=U[0] OR 2nd order method: u[1] = 2*U[0]-u[0]
+		double u1_plus = fmax(2*U[0]-u[0], 0); // U[0] for constant interpolation, 2*U[0]-u[0] for linear
+		u[1] = (growthArray[0] >= 0)? u1_plus : U[1]; 
 		
 		// i = 2 -- J-2
 		for (int i=2; i<J-1; ++i){ // dU[i] ~ u[i+1] <-- U[i],U[i-1], u[i] <-- U[i-1],U[i-2]
@@ -66,7 +67,7 @@ void Solver::calcRates_FMU(double t, vector<double>::iterator S, vector<double>:
 				u[i] = U[i-1] + phi(r)*(U[i-1]-U[i-2])*(x[i]-x[i-1])/(x[i]-x[i-2]); 
 			}   
 			else{
-				throw std::runtime_error("");
+				//throw std::runtime_error("");
 				//double rPlus  = ((U[i]-U[i-1])/(x[i]-x[i-1]))/((U[i+1]-U[i]+1e-12)/(x[i+1]-x[i]));
 				//u[i] = U[i] - phi(rPlus)*(U[i+1]-U[i])*(x[i+1]-x[i])/(x[i+2]-x[i]); 
 				double r_down = (U[i]-U[i-1]) / (x[i+1]-x[i-1]); // factor of 2 not included because it will be cancelled in the ratio 
