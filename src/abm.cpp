@@ -4,8 +4,6 @@ using namespace std;
 
 void Solver::stepABM(double t, double dt){
 
-	vector<double>::iterator its = state.begin() + n_statevars_system; // Skip system variables
-	vector<double>::iterator itr = rates.begin() + n_statevars_system;
 		
 	// 1. Take implicit step for U
 	for (int s = 0; s<species_vec.size(); ++s){
@@ -48,11 +46,12 @@ void Solver::stepABM(double t, double dt){
 			spp->setX(i, spp->getX(i) + growthArray[i]*dt);
 		}
 
-		itr += spp->J; its += spp->J;  // incremented for U
 
 		// step extra variables
 		// these will be in order abc abc abc... 
 		// extra rates
+		vector<double>::iterator its = state.begin() + n_statevars_system; // Skip system variables
+		vector<double>::iterator itr = rates.begin() + n_statevars_system;
 		if (spp->n_extra_statevars > 0){
 			auto itr_prev = itr;
 			auto its_prev = its;
@@ -64,7 +63,7 @@ void Solver::stepABM(double t, double dt){
 
 			itr = itr_prev; its = its_prev; // so bring them back
 			
-			for (int i=0; i<spp->J; ++i){
+			for (int i=0; i< spp->n_extra_statevars*spp->J; ++i){
 				*its += (*itr)*dt;
 				++its; ++itr;
 			}
@@ -75,6 +74,9 @@ void Solver::stepABM(double t, double dt){
 		
 		// add recruits		
 		spp->addCohort(noff);
+		
+		// resize state - this matters only if extra istate is specified
+		resizeStateFromSpecies();
 	}
 	
 	//print();

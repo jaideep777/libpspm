@@ -557,7 +557,7 @@ std::vector<double> Solver::getDensitySpecies(int k, vector<double> breaks){
 		
 		Spline spl;
 		spl.splineType = Spline::LINEAR; //Spline::CONSTRAINED_CUBIC;
-		spl.extrapolate = Spline::NA; //Spline::ZERO;
+		spl.extrapolate = Spline::ZERO; //Spline::ZERO;
 		spl.set_points(xx, uu);
 		 
 		vector <double> dens;

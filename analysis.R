@@ -11,7 +11,7 @@ plot1 = function(file, title){
   points(x=x, y=Ueq(x))
 }
 
-png("~/codes/libpspm/testmodel.png", width=950*3, height = 740*3, res=300)
+# png("~/codes/libpspm/testmodel.png", width=950*3, height = 740*3, res=300)
 par(mfrow = c(2,3), mar=c(4,4,4,1), oma=c(1,1,1,1), cex.lab=1.2, cex.axis=1.2)
 plot1("~/codes/libpspm/cm_testmodel_equil.txt", "CM")
 plot1("~/codes/libpspm/ebt_testmodel_equil.txt", "EBT")
@@ -31,6 +31,6 @@ lines(dat3$V2~dat3$V1, type="l", col="red")
 lines(dat4$V2~dat4$V1, type="l", col="blue")
 lines(dat5$V2~dat5$V1, type="l", col="green3")
 lines(dat6$V2~dat6$V1, type="l", col="green")
-dev.off()
+# dev.off()
 
 
