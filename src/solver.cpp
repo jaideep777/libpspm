@@ -7,7 +7,7 @@
 #include <string>
 #include <algorithm>
 #include <functional>
-
+#include <fstream>
 
 using namespace std;
 
@@ -43,7 +43,7 @@ void Solver::addSpecies(std::vector<double> xbreaks, Species_Base* s, int n_extr
 	s->set_inputBirthFlux(input_birth_flux);
 	s->n_extra_statevars = n_extra_vars;
 
-	if (method == SOLVER_FMU || method == SOLVER_IFMU){
+	if (method == SOLVER_FMU || method == SOLVER_IFMU || method == SOLVER_ABM){
 		std::sort(xbreaks.begin(), xbreaks.end(), std::less<double>());  // sort cohorts ascending for FMU
 		s->xb = *xbreaks.begin();
 	}
@@ -58,13 +58,14 @@ void Solver::addSpecies(std::vector<double> xbreaks, Species_Base* s, int n_extr
 	else if (method == SOLVER_MMU)  J = xbreaks.size()-1;  
 	else if (method == SOLVER_CM )  J = xbreaks.size();
 	else if (method == SOLVER_EBT)  J = xbreaks.size();
+	else if (method == SOLVER_ABM)  J = control.abm_n0;
 	else    throw std::runtime_error("Unsupported method");
 
 	s->x = xbreaks;
 	s->resize(J);
 
-	// FMU has only 1 internal state variable (x), reset have 2 (x,u)
-	bool cond = (method == SOLVER_FMU || method == SOLVER_IFMU);
+	// FMU and ABM have only 1 internal state variable (x), rest have 2 (x,u)
+	bool cond = (method == SOLVER_FMU || method == SOLVER_IFMU || method == SOLVER_ABM);
 	n_statevars_internal = (cond)? 1:2;
 	
 	int state_size = s->J*(n_statevars_internal + n_extra_vars);    // x/u and extra vars
@@ -157,7 +158,14 @@ int Solver::n_species(){
 
 double Solver::maxSize(){
 	double maxsize = 0;
-	for (auto spp : species_vec) maxsize = std::max(maxsize, spp->get_maxSize());
+	if (method == SOLVER_ABM){
+		for (auto spp : species_vec){
+			for (int i=0; i<spp->J; ++i) maxsize = std::max(maxsize, spp->getX(i));
+		}
+	}
+	else {
+		for (auto spp : species_vec) maxsize = std::max(maxsize, spp->get_maxSize());
+	}
 	return maxsize;
 }
 
@@ -166,7 +174,7 @@ double Solver::maxSize(){
 
 void Solver::print(){
 	std::cout << ">> SOLVER \n";
-	string types[] = {"FMU", "MMU", "CM", "EBT", "Implicit FMU"};
+	string types[] = {"FMU", "MMU", "CM", "EBT", "Implicit FMU", "ABM"};
 	std::cout << "+ Type: " << types[method] << std::endl;
 
 	std::cout << "+ State size = " << state.size() << "\n";
@@ -203,7 +211,7 @@ void Solver::initialize(){
 		s->set_ub(0);     // set initial density of boundary cohort to 0.
 		
 		// set birth time for each cohort to current_time
-		for (int i=0; i<s->J; ++i) s->set_birthTime(i, current_time);
+		for (int i=0; i<s->J; ++i) s->set_birthTime(i, current_time); // FIXME: doesnt make sense, but birthTime is not used anyways
 
 		// set x, u for all cohorts
 		if (method == SOLVER_FMU || method == SOLVER_IFMU){
@@ -215,6 +223,7 @@ void Solver::initialize(){
 				*it++ = U;		// u in state (only)
 			}
 		}
+		
 		if (method == SOLVER_CM){
 			for (size_t i=0; i<s->J; ++i){
 				double X = s->x[i];
@@ -225,6 +234,7 @@ void Solver::initialize(){
 				*it++ = (use_log_densities)? log(U) : U;	// u in state 
 			}
 		}
+		
 		if (method == SOLVER_EBT){
 			// x, u for internal cohorts in state and it cohorts
 			for (size_t i=0; i<s->J-1; ++i){
@@ -239,6 +249,41 @@ void Solver::initialize(){
 			*it++ = 0; *it++ = 0;
 			s->setX(s->J-1,0); // TODO: should this be set to xb for init_state and set to 0 again later? maybe not, as init_state is not expected to be x dependent
 			s->setU(s->J-1,0); 		
+		}
+		
+		if (method == SOLVER_ABM){
+			// Create the initial density distribution from which we will draw individuals
+			vector<double> Uvec;
+			Uvec.reserve(s->x.size()-1);
+			for (size_t i=0; i<s->x.size()-1; ++i){
+				double X = s->x[i];
+				double U = s->init_density(i, X, env)*(s->x[i+1]-s->x[i]); 
+				Uvec.push_back(U);	
+			}
+			//cout << "HERE\n";
+			for (size_t i=0; i<s->x.size()-1; ++i) cout << s->x[i] << " " << Uvec[i] << "\n";
+			
+			std::discrete_distribution<int> distribution(Uvec.begin(), Uvec.end()); // for drawing intervals
+			std::uniform_real_distribution<> distribution2(0,1);                         // for drawing X within interval
+
+			double Utot = std::accumulate(Uvec.begin(), Uvec.end(), 0.0, std::plus<double>());			
+			s->set_ub(Utot/s->J);
+			for (int i=0; i<s->J; ++i){
+				int id = distribution(generator);
+				//cout << id << " ";
+				double xi = s->x[id] + distribution2(generator)*(s->x[id+1]-s->x[id]);
+				//cout << xi << "\n";
+				s->setX(i, xi);
+				s->setU(i, Utot/s->J);
+			}
+
+			s->sortCohortsDescending();
+			
+//			ofstream fout("abm_init.txt");
+//			for (int i=0; i<s->J; ++i){
+//				fout << s->getX(i) << "\t" << s->getU(i) << "\n";
+//			}		
+//			fout.close();	
 		}
 
 		// initialize extra state for each cohort and copy it to state
@@ -429,8 +474,10 @@ struct point{
 std::vector<double> Solver::getDensitySpecies(int k, vector<double> breaks){
 	auto spp = species_vec[k];
 	vector <double> xx, uu;
+	
+	if (method == SOLVER_ABM) spp->sortCohortsDescending(); // ABM needs sorted cohorts
 
-	if (method == SOLVER_EBT){
+	if (method == SOLVER_EBT || method == SOLVER_ABM){ // EBT and ABM have very simular structure so use the same density calculation algo
 		double xm = spp->getX(0)+1e-6;
 
 		vector<point> points(breaks.size()-1);
@@ -441,7 +488,7 @@ std::vector<double> Solver::getDensitySpecies(int k, vector<double> breaks){
 		for (int i=0; i<spp->J; ++i){ // loop over all cohorts except boundary cohort
 			double x = spp->getX(i);
 			double N = spp->getU(i);
-			if (i == spp->J-1) x = spp->xb + x/(N+1e-12); // real-ize x if it's boundary cohort
+			if (method == SOLVER_EBT) if (i == spp->J-1) x = spp->xb + x/(N+1e-12); // For EBT, real-ize x if it's boundary cohort
 			
 			while(breaks[current_interval]>x) --current_interval; // decrement interval until x fits
 			//cout << current_interval << ", x = " << x << "(" << N << ") in [" << breaks[current_interval] << ", " << breaks[current_interval+1] << "]\n"; cout.flush();
@@ -501,6 +548,7 @@ std::vector<double> Solver::getDensitySpecies(int k, vector<double> breaks){
 		}
 		
 	}	
+
 //	else {
 //		throw std::runtime_error("This function can only be called for the EBT solver");
 //	}
@@ -509,7 +557,7 @@ std::vector<double> Solver::getDensitySpecies(int k, vector<double> breaks){
 		
 		Spline spl;
 		spl.splineType = Spline::LINEAR; //Spline::CONSTRAINED_CUBIC;
-		spl.extrapolate = Spline::QUADRATIC; //Spline::ZERO;
+		spl.extrapolate = Spline::ZERO; //Spline::ZERO;
 		spl.set_points(xx, uu);
 		 
 		vector <double> dens;

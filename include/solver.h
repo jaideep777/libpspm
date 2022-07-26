@@ -5,12 +5,13 @@
 #include <list>
 #include <map>
 #include <string>
+#include <random>
 
 #include "environment_base.h"
 #include "species.h"
 #include "ode_solver.h"
 
-enum PSPM_SolverType {SOLVER_FMU, SOLVER_MMU, SOLVER_CM, SOLVER_EBT, SOLVER_IFMU};
+enum PSPM_SolverType {SOLVER_FMU, SOLVER_MMU, SOLVER_CM, SOLVER_EBT, SOLVER_IFMU, SOLVER_ABM};
 
 class Solver{
 	private:
@@ -19,6 +20,8 @@ class Solver{
 
 	int n_statevars_internal = 0;		// number of internal i-state variables (x and/or u)
 	int n_statevars_system = 0;			// number of s-state variables 
+
+	std::default_random_engine generator; // random number generator
 
 	public:	
 	OdeSolver odeStepper;
@@ -45,6 +48,8 @@ class Solver{
 		double ode_ifmu_stepsize = 0.1;
 		bool ifmu_centered_grids = true;
 		bool integral_interpolate = true;
+		double abm_n0 = 100;
+		double abm_stepsize = 0.02;
 	} control;
 	
 	bool use_log_densities = true;
@@ -88,6 +93,8 @@ class Solver{
 	void calcRates_CM(double t, std::vector<double>::iterator S, std::vector<double>::iterator dSdt);
 	void addCohort_CM();
 	void removeCohort_CM();
+
+	void stepABM(double t, double dt);
 	
 	template<typename AfterStepFunc>
 	void step_to(double tstop, AfterStepFunc &afterStep_user);

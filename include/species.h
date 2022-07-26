@@ -89,13 +89,17 @@ class Species_Base{
 	virtual double birthRate(int i, double x, double t, void * env) = 0;
 	virtual void getExtraRates(std::vector<double>::iterator &it) = 0;
 
-	virtual void addCohort() = 0;
+	virtual void addCohort(int n = 1) = 0;
 	template<class T> void addCohort(T bc);
 
+	virtual void markCohortForRemoval(int i) = 0;
+	virtual void removeMarkedCohorts() = 0;
 	virtual void removeDensestCohort() = 0;
 	virtual void removeDenseCohorts(double dxcut) = 0;
 	virtual void removeDeadCohorts(double ucut) = 0;
 
+	virtual void sortCohortsDescending() = 0;
+	
 //	virtual void backupCohort(int j) = 0;
 //	virtual void restoreCohort(int j) = 0;
 //	virtual void copyBoundaryCohortTo(int j) = 0;
@@ -151,12 +155,16 @@ class Species : public Species_Base{
 	double birthRate(int i, double x, double t, void * env);
 	void getExtraRates(std::vector<double>::iterator &it);
 
-	void addCohort();
+	void addCohort(int n = 1);
 	void addCohort(Cohort<Model> bc);
 
+	void markCohortForRemoval(int i);
+	void removeMarkedCohorts();
 	void removeDensestCohort();
 	void removeDenseCohorts(double dxcut);
 	void removeDeadCohorts(double ucut);
+	
+	void sortCohortsDescending();
 	
 //	void backupCohort(int j);
 //	void restoreCohort(int j);

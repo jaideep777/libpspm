@@ -302,9 +302,12 @@ void Species<Model>::getExtraRates(std::vector<double>::iterator &it){
 
 
 template <class Model>
-void Species<Model>::addCohort(){
-	cohorts.push_back(boundaryCohort);
-	++J;
+void Species<Model>::addCohort(int n){
+	cohorts.reserve(cohorts.size()+n);
+	for (int i=0; i<n; ++i){
+		cohorts.push_back(boundaryCohort);
+		++J;
+	}
 }
 
 
@@ -316,6 +319,22 @@ void Species<Model>::addCohort(Cohort<Model> bc){
 	cohorts.push_back(bc);
 	++J;
 	// FIXME: add option to sort cohorts here.
+}
+
+
+template <class Model>
+void Species<Model>::markCohortForRemoval(int i){
+	cohorts[i].remove = true;
+}
+
+template <class Model>
+void Species<Model>::removeMarkedCohorts(){
+	// remove marked cohorts
+	auto it_end = std::remove_if(cohorts.begin(), cohorts.end(), [](Cohort<Model> &c){return c.remove;});
+	cohorts.erase(it_end, cohorts.end());
+	
+	// reset size
+	J = cohorts.size();
 }
 
 
@@ -371,6 +390,11 @@ void Species<Model>::removeDeadCohorts(double ucut){
 	J = cohorts.size();
 }
 
+
+template <class Model>
+void Species<Model>::sortCohortsDescending(){
+	std::sort(cohorts.begin(), cohorts.end(), [](const Cohort<Model> &a, const Cohort<Model> &b){return a.x > b.x;});
+}
 
 //template <class Model>
 //void Species<Model>::backupCohort(int j){

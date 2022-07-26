@@ -1,9 +1,9 @@
 
 setwd("~/codes/libpspm/demo/")
 
-png("RED_Daphnia.png", width = 900*3, height=680*3, res=300)
+# png("RED_Daphnia.png", width = 900*3, height=680*3, res=300)
 
-par(mfrow = c(2,3), mar=c(4,4,4,1), oma=c(1,1,1,1), cex.lab=1.2, cex.axis=1.2)
+par(mfrow = c(2,4), mar=c(4,4,4,1), oma=c(1,1,1,1), cex.lab=1.2, cex.axis=1.2)
 
 ### RED ####
 # Analytical calculation of equilibrium distribution, if available
@@ -37,6 +37,7 @@ plot1 = function(file, N, title){
 plot1("RED_model/fmu_Redmodel.txt", 150, "FMU")
 plot1("RED_model/ifmu_Redmodel.txt", 150, "IFMU")
 plot1("RED_model/ebt_Redmodel.txt", 150, "EBT")
+plot1("RED_model/abm_Redmodel.txt", 150, "ABM")
 
 
 
@@ -66,6 +67,7 @@ plot2 = function(file, N, title){
 plot2("Daphina_model/fmu_Daphnia.txt", 300, "FMU")
 plot2("Daphina_model/ifmu_Daphnia.txt", 300, "IFMU")
 plot2("Daphina_model/ebt_Daphnia.txt", 300, "EBT")
+plot2("Daphina_model/abm_Daphnia.txt", 300, "ABM")
 
-dev.off()
+# dev.off()
 
