@@ -149,8 +149,8 @@ int main(){
     Solver S(SOLVER_ABM, "rk45ck");
     S.use_log_densities = true;
 	S.control.ode_eps = 1e-4;
-	S.control.abm_n0 = 3000;
-	S.control.abm_stepsize = 1;
+	S.control.abm_n0 = 1000;
+	S.control.abm_stepsize = 0.05;
 	//S.control.ode_rk4_stepsize = 0.5;
 	S.setEnvironment(&env);
 	//    S.createSizeStructuredVariables({"mort", "fec", "heart_area", "heart_mass"});

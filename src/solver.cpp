@@ -260,7 +260,7 @@ void Solver::initialize(){
 				double U = s->init_density(i, X, env)*(s->x[i+1]-s->x[i]); 
 				Uvec.push_back(U);	
 			}
-			cout << "HERE\n";
+			//cout << "HERE\n";
 			for (size_t i=0; i<s->x.size()-1; ++i) cout << s->x[i] << " " << Uvec[i] << "\n";
 			
 			std::discrete_distribution<int> distribution(Uvec.begin(), Uvec.end()); // for drawing intervals
@@ -270,20 +270,20 @@ void Solver::initialize(){
 			s->set_ub(Utot/s->J);
 			for (int i=0; i<s->J; ++i){
 				int id = distribution(generator);
-				cout << id << " ";
+				//cout << id << " ";
 				double xi = s->x[id] + distribution2(generator)*(s->x[id+1]-s->x[id]);
-				cout << xi << "\n";
+				//cout << xi << "\n";
 				s->setX(i, xi);
 				s->setU(i, Utot/s->J);
 			}
 
 			s->sortCohortsDescending();
 			
-			ofstream fout("abm_init.txt");
-			for (int i=0; i<s->J; ++i){
-				fout << s->getX(i) << "\t" << s->getU(i) << "\n";
-			}		
-			fout.close();	
+//			ofstream fout("abm_init.txt");
+//			for (int i=0; i<s->J; ++i){
+//				fout << s->getX(i) << "\t" << s->getU(i) << "\n";
+//			}		
+//			fout.close();	
 		}
 
 		// initialize extra state for each cohort and copy it to state
