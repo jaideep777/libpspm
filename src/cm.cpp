@@ -17,7 +17,7 @@ void Solver::calcRates_CM(double t, vector<double>::iterator S, vector<double>::
 
 	for (int s = 0; s<species_vec.size(); ++s){
 		Species_Base* spp = species_vec[s];
-		cout << "calcRates(species = " << s << ")\n";
+		//cout << "calcRates(species = " << s << ")\n";
 		
 		double pe = spp->establishmentProbability(t, env);
 		double gb = spp->growthRate(-1, spp->xb, t, env);
@@ -56,7 +56,7 @@ void Solver::calcRates_CM(double t, vector<double>::iterator S, vector<double>::
 
 
 void Solver::addCohort_CM(){
-	cout << ".......... add cohorts ...............\n";
+	//cout << ".......... add cohorts ...............\n";
 	updateEnv(current_time, state.begin(), rates.begin());
 	
 	for (int s = 0; s< species_vec.size(); ++s){
@@ -91,7 +91,7 @@ void Solver::removeCohort_CM(){
 	
 	resizeStateFromSpecies();
 	copyCohortsToState();
-	cout << "........................................\n";
+	//cout << "........................................\n";
 	
 }
 

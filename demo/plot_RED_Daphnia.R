@@ -64,10 +64,10 @@ plot2 = function(file, N, title){
   # plot(dat$V2~dat$V1, type="l")
 }
 
-plot2("Daphina_model/fmu_Daphnia.txt", 300, "FMU")
-plot2("Daphina_model/ifmu_Daphnia.txt", 300, "IFMU")
-plot2("Daphina_model/ebt_Daphnia.txt", 300, "EBT")
-plot2("Daphina_model/abm_Daphnia.txt", 300, "ABM")
+plot2("Daphnia_model/fmu_Daphnia.txt", 300, "FMU")
+plot2("Daphnia_model/ifmu_Daphnia.txt", 300, "IFMU")
+plot2("Daphnia_model/ebt_Daphnia.txt", 300, "EBT")
+plot2("Daphnia_model/abm_Daphnia.txt", 300, "ABM")
 
 # dev.off()
 

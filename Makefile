@@ -109,6 +109,23 @@ recheck: testclean check
 .PHONY: $(TEST_RUNS) run_tests clean testclean
 # ------------------------------------------------------------------------------
 
+demos:
+	cd demo/Daphnia_model && $(MAKE) clean all FILE=fmu_equil.cpp && ./fmu_equil.exec
+	cd demo/Daphnia_model && $(MAKE) clean all FILE=ifmu_equil.cpp && ./ifmu_equil.exec
+	cd demo/Daphnia_model && $(MAKE) clean all FILE=ebt_equil.cpp && ./ebt_equil.exec
+	cd demo/Daphnia_model && $(MAKE) clean all FILE=abm_equil.cpp && ./abm_equil.exec
+	cd demo/RED_model && $(MAKE) clean all FILE=fmu_equil.cpp && ./fmu_equil.exec
+	cd demo/RED_model && $(MAKE) clean all FILE=ifmu_equil.cpp && ./ifmu_equil.exec
+	cd demo/RED_model && $(MAKE) clean all FILE=ebt_equil.cpp && ./ebt_equil.exec
+	cd demo/RED_model && $(MAKE) clean all FILE=abm_equil.cpp && ./abm_equil.exec
+
+plant_demo:
+	cd demo/Plant_model && $(MAKE) clean all FILE=plant_fmu_1spp.cpp && ./plant_fmu_1spp.exec
+	cd demo/Plant_model && $(MAKE) clean all FILE=plant_ifmu_1spp.cpp && ./plant_ifmu_1spp.exec
+	cd demo/Plant_model && $(MAKE) clean all FILE=plant_ebt_1spp.cpp && ./plant_ebt_1spp.exec
+	cd demo/Plant_model && $(MAKE) clean all FILE=plant_cm_1spp.cpp && ./plant_cm_1spp.exec
+
+
 website:
 	R -e "Sys.setenv(RSTUDIO_PANDOC='/usr/lib/rstudio/bin/pandoc'); pkgdown::clean_site(); pkgdown::init_site(); pkgdown::build_home(); pkgdown::build_articles(); pkgdown::build_tutorials(); pkgdown::build_news()"
 

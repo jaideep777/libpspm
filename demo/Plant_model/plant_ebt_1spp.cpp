@@ -86,7 +86,7 @@ class SolverIO{
 			for (int i=0; i<streams[s].size(); ++i) streams[s][i] << S->current_time << "\t";
 
 			vector<double> breaks = my_log_seq(spp->xb, 20, 100);
-			vector<double> dist = S->getDensitySpecies_EBT(s, breaks);
+			vector<double> dist = S->getDensitySpecies(s, breaks);
 			//cout << "here: " << breaks.size() << " " << dist.size() << endl;
 
 			for (int i=0; i<100; ++i){
