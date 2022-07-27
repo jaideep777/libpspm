@@ -30,6 +30,8 @@ class Species_Base{
 	std::vector <double> h;
 	std::vector <double> schedule; // used only by CM/EBT
 
+	double noff_abm = 0; // used by ABM solver to insert offspring
+
 	public:
 	double birth_flux_in;
 	

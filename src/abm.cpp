@@ -29,9 +29,10 @@ void Solver::stepABM(double t, double dt){
 			spp->set_ub(ub);
 		}
 
-		int noff = birthFlux*dt/spp->get_boundary_u();  // number of offspring = birthflux / density of each superindividual
-		if (noff == 0) noff = 1;
-
+		double noff = birthFlux*dt/spp->get_boundary_u();  // number of offspring = birthflux / density of each superindividual
+		//cout << "noff: " << spp->noff_abm << " | " << noff << " " << birthFlux << " " << dt << " " << spp->get_boundary_u() << endl;
+		spp->noff_abm += noff;
+		
 		// implement mortality
 		for (int i=0; i<spp->J; ++i){
 			double mortRate = spp->mortalityRate(i, spp->getX(i), t, env);
@@ -72,8 +73,17 @@ void Solver::stepABM(double t, double dt){
 			spp->copyExtraStateToCohorts(its);
 		}
 		
-		// add recruits		
-		spp->addCohort(noff);
+		// add recruits once they have accumulated to > 1
+		if (spp->noff_abm > 1){
+			int nadd = int(spp->noff_abm);	
+			spp->addCohort(nadd);
+			spp->noff_abm -= nadd;
+		}
+		// also add a recruit in anticipation if the whole populaiton is dead
+		if (spp->J == 0){
+			spp->addCohort(1);
+			//--spp->noff_abm;
+		}
 		
 		// resize state - this matters only if extra istate is specified
 		resizeStateFromSpecies();

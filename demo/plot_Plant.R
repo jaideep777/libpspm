@@ -1,4 +1,5 @@
-dir = "~/codes/libpspm/demo/plant_model/"
+dir = "~/codes/libpspm/demo/Plant_model/"
+setwd(dir)
 
 plot_dists = function(folder, title, mtext = F){
   setwd(paste0(dir, "/", folder))
@@ -41,7 +42,8 @@ plot_dists("outputs/fmu_120pts", "FMU", T)
 plot_dists("outputs/ifmu_100pts", "IFMU (100 pts)")
 plot_dists("outputs/ifmu_1000pts", "IFMU (1000 pts)")
 plot_dists("outputs/ebt", "EBT")
-plot_dists("outputs/abm_n1000_dt0.05", "ABM")
+plot_dists("outputs/abm_n1000_dt0.05_2", "ABM")
+setwd(dir)
 # dev.off()
 
 setwd(dir)
@@ -49,16 +51,15 @@ seeds_fmu = read.delim("outputs/fmu_120pts/seed_rains.txt", header = F)
 seeds_ifmu = read.delim("outputs/ifmu_100pts/seed_rains.txt", header = F)
 seeds_ifmu1000 = read.delim("outputs/ifmu_1000pts/seed_rains.txt", header = F)
 seeds_ebt = read.delim("outputs/ebt/seed_rains.txt", header = F)
-seeds_abm = read.delim("outputs/abm_n1000_dt0.05/seed_rains.txt", header = F)
+seeds_abm = read.delim("outputs/abm_n1000_dt0.05_2/seed_rains.txt", header = F)
 
 plot_seeds = function(y, title, ...){
   matplot(y = y, x=seeds_fmu$V1, type="l", lty=1, lwd=2, col=scales::alpha(c("purple", "green3", "mediumspringgreen", "cyan3", "darkgoldenrod2"), alpha=0.7), ylab="Seed rain", ...)
   mtext(title, line=1)
 }
 
-setwd("outputs/")
-# png("seed_rains.png", width = 1000*3, height=400*3, res=300)
-par(mfrow=c(3,1), oma = c(1,1,4,1), cex.lab=1.2, cex.axis=1.2)
+# png("../seed_rains.png", width = 660*3, height=766*3, res=300)
+par(mfrow=c(3,1), mar = c(4,4,1,1), oma = c(1,1,4,1), cex.lab=1.2, cex.axis=1.2)
 plot_seeds(cbind(seeds_fmu$V2, seeds_ifmu$V2, seeds_ifmu1000$V2, seeds_ebt$V2, seeds_abm$V2), "Species 1", xlab="")
 plot_seeds(cbind(seeds_fmu$V3, seeds_ifmu$V3, seeds_ifmu1000$V3, seeds_ebt$V3, seeds_abm$V3), "Species 2", xlab="")
 plot_seeds(cbind(seeds_fmu$V4, seeds_ifmu$V4, seeds_ifmu1000$V4, seeds_ebt$V4, seeds_abm$V4), "Species 3", xlab="Time (years)")

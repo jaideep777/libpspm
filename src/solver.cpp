@@ -261,7 +261,7 @@ void Solver::initialize(){
 				Uvec.push_back(U);	
 			}
 			//cout << "HERE\n";
-			for (size_t i=0; i<s->x.size()-1; ++i) cout << s->x[i] << " " << Uvec[i] << "\n";
+			//for (size_t i=0; i<s->x.size()-1; ++i) cout << s->x[i] << " " << Uvec[i] << "\n";
 			
 			std::discrete_distribution<int> distribution(Uvec.begin(), Uvec.end()); // for drawing intervals
 			std::uniform_real_distribution<> distribution2(0,1);                         // for drawing X within interval

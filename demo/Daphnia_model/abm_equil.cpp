@@ -21,11 +21,11 @@ int main(){
 
 	Solver S(SOLVER_ABM);
 	S.setEnvironment(&E);
+	S.control.abm_n0 = 100;
 
 	S.addSpecies(100, 0, 1, false, &spp, 0, -1);
 	S.addSystemVariables(1);  // this can be done either before or after addSpecies()
 
-	S.control.ebt_ucut = 1e-20;
 
 	S.resetState();
 	S.initialize();

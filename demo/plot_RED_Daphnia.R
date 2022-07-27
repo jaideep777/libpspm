@@ -1,3 +1,4 @@
+library(tidyverse)
 
 setwd("~/codes/libpspm/demo/")
 
@@ -23,6 +24,12 @@ Ueq = function(x){
   return(n0*(x/m0)^(-phiG)*exp(mu0/(1-phiG)*(1-(x/m0)^(1-phiG)))*10000)
 }
 
+xeq = exp(seq(log(1), log(1e6), length.out=30))
+ueq = Ueq(xeq)
+
+N = integrate(Ueq, 1, 1e6, abs.tol = 1e-6, rel.tol = 1e-6)
+B = integrate(function(x){x*Ueq(x)}, 1, 1e6, abs.tol = 1e-6, rel.tol = 1e-6)
+
 plot1 = function(file, N, title){
   dat = read.delim(file, header=F)
   dat = dat[,-ncol(dat)]
@@ -30,8 +37,8 @@ plot1 = function(file, N, title){
   
   matplot(x=x, y = t(dat[seq(1,nrow(dat),by=1),-c(1,2)]), col=rainbow(nrow(dat)/1, start=0, end=0.9, alpha=10/nrow(dat)), 
           type="l", lty=1, log="xy", ylim=c(1e-20, 1e4), xlab="Size", ylab="Density", main=title)
-  xeq = exp(seq(log(1), log(1e6), length.out=30))
-  points(x=xeq, y= Ueq(xeq))
+  
+  points(x=xeq, y= ueq)
 }
 
 plot1("RED_model/fmu_Redmodel.txt", 150, "FMU")
@@ -47,8 +54,17 @@ a = 0.75
 mu = 0.1
 r = 0.5
 K = 3
+
 xstar = (mu*(1+mu)*(2+mu)/2/a)^(1/3)
 sstar = xstar/(1-xstar)
+xeq = seq(0,1,length.out = 30)
+u_equil = function(x){
+  a*r*sstar*(1-sstar/K)*(xstar-x)^(mu-1)/xstar^mu
+} 
+ueq = u_equil(xeq)
+
+N = integrate(u_equil, 0, xstar*0.99999999999, abs.tol = 1e-6, rel.tol = 1e-6)
+B = integrate(function(x){x*u_equil(x)}, 0, xstar*0.99999999999, abs.tol = 1e-6, rel.tol = 1e-6)
 
 plot2 = function(file, N, title){
   dat = read.delim(file, header=F)
@@ -59,8 +75,8 @@ plot2 = function(file, N, title){
   matplot(x=x, y = t(dat[seq(1,nrow(dat),by=1),-c(1,2,3)]), col=rainbow(nrow(dat)/1, start=0, end=0.9, alpha=10/nrow(dat)), 
           type="l", lty=1, log="y", ylim=c(0.1, 1e4), xlab="Size", ylab="Density", main=title)
   abline(v=xstar, col="grey")
-  xeq = seq(0,1,length.out = 30)
-  points(x=xeq, y= a*r*sstar*(1-sstar/K)*(xstar-xeq)^(mu-1)/xstar^mu)
+  
+  points(x=xeq, y=ueq)
   # plot(dat$V2~dat$V1, type="l")
 }
 
@@ -70,4 +86,3 @@ plot2("Daphnia_model/ebt_Daphnia.txt", 300, "EBT")
 plot2("Daphnia_model/abm_Daphnia.txt", 300, "ABM")
 
 # dev.off()
-
