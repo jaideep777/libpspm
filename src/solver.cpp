@@ -483,7 +483,7 @@ std::vector<double> Solver::getDensitySpecies(int k, vector<double> breaks){
 		vector<point> points(breaks.size()-1);
 
 		// assuming breaks are sorted ascending
-		// cohorts are sorted descending
+		// and cohorts are sorted descending
 		int current_interval = breaks.size()-2;
 		for (int i=0; i<spp->J; ++i){ // loop over all cohorts except boundary cohort
 			double x = spp->getX(i);
@@ -499,10 +499,10 @@ std::vector<double> Solver::getDensitySpecies(int k, vector<double> breaks){
 			}
 		}
 
-		
+		// Compute mean x in each interval (each point corresponds to 1 interval)
 		for (int i=0; i<points.size(); ++i) if (points[i].count>0) points[i].xmean /= points[i].abund;
 		
-		// remove 0-count points
+		// remove 0-count points (i.e., delete intervals with no cohorts)
 		auto pred = [this](const point& p) -> bool {
 			return p.count == 0; 
 		};
@@ -514,6 +514,8 @@ std::vector<double> Solver::getDensitySpecies(int k, vector<double> breaks){
 		//for (int i=0; i<points.size(); ++i) cout << i << "\t" << points[i].count << "\t" << points[i].xmean << "\t" << points[i].abund << "\n";	
 		//cout << "--\n";
 
+		// Now treat xmean as the x vector and calculate the width spanned by each point
+		// to get u, divide abundance by width for each point
 		if (points.size() > 2){
 			vector<double> h(points.size());
 			h[0] = (points[1].xmean+points[0].xmean)/2 - spp->xb;
@@ -549,10 +551,7 @@ std::vector<double> Solver::getDensitySpecies(int k, vector<double> breaks){
 		
 	}	
 
-//	else {
-//		throw std::runtime_error("This function can only be called for the EBT solver");
-//	}
-
+	// interpolate density at each value in breaks from uu
 	if (xx.size() >= 2){ 
 		
 		Spline spl;

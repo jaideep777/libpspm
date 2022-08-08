@@ -2,7 +2,7 @@ library(tidyverse)
 
 setwd("~/codes/libpspm/demo/")
 
-# png("RED_Daphnia.png", width = 900*3, height=680*3, res=300)
+png("RED_Daphnia.png", width = 900*3, height=680*3, res=300)
 
 par(mfrow = c(2,4), mar=c(4,4,4,1), oma=c(1,1,1,1), cex.lab=1.2, cex.axis=1.2)
 
@@ -85,4 +85,4 @@ plot2("Daphnia_model/ifmu_Daphnia.txt", 300, "IFMU")
 plot2("Daphnia_model/ebt_Daphnia.txt", 300, "EBT")
 plot2("Daphnia_model/abm_Daphnia.txt", 300, "ABM")
 
-# dev.off()
+dev.off()
