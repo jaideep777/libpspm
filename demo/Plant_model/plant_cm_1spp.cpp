@@ -8,6 +8,12 @@ using namespace std;
 #include "pspm_environment.h"
 #include "pspm_plant.h"
 
+vector<double> my_log_seq(double x0, double xf, int N){
+	vector<double> grid;
+	for (int i=0; i<N; ++i) grid.push_back(exp(log(x0) + (double(i)/(N-1))*(log(xf)-log(x0))));
+	return grid;
+}
+
 std::vector <double> myseq(double from, double to, int len){
 	std::vector<double> x(len);
 	for (size_t i=0; i<len; ++i) x[i] = from + i*(to-from)/(len-1);
@@ -79,10 +85,21 @@ class SolverIO{
 
 			for (int i=0; i<streams[s].size(); ++i) streams[s][i] << S->current_time << "\t";
 
+			vector<double> breaks = my_log_seq(spp->xb, 20, 100);
+			vector<double> dist = S->getDensitySpecies(s, breaks);
+			//cout << "here: " << breaks.size() << " " << dist.size() << endl;
+
+			for (int i=0; i<100; ++i){
+				//cout << i << " " << "here" << endl;
+				
+				streams[s][0] << breaks[i] << "\t";
+				streams[s][1] << dist[i] << "\t";
+			}
+
 			for (int j=0; j<spp->xsize(); ++j){
 				auto& C = spp->getCohort(j);
-				streams[s][0] << C.x << "\t";
-				streams[s][1] << C.u << "\t";
+				// streams[s][0] << C.x << "\t";
+				// streams[s][1] << C.u << "\t";
 				streams[s][2] << C.vars.mortality << "\t";
 				streams[s][3] << C.viable_seeds << "\t";
 				streams[s][4] << C.vars.area_heartwood << "\t";
@@ -146,7 +163,7 @@ int main(){
 	S.print();
 	
 
-	vector <double> times = generateDefaultCohortSchedule(105.32);
+	vector <double> times = generateDefaultCohortSchedule(205.32);
 	for (auto t : times) cout << t << " "; cout << endl;
 
 	
@@ -155,6 +172,7 @@ int main(){
 	sio.openStreams({"mort", "fec", "heart", "sap"});
 
 	ofstream fli("light_profile_ind_plant.txt");
+	ofstream fseed("seed_rains.txt");
 	
 	vector <vector<double>> seeds_out(S.species_vec.size());
 
@@ -172,6 +190,10 @@ int main(){
 		for (int i=0; i<S.n_species(); ++i) cout << seeds[i] << " ";
 		cout << " | " << env.light_profile.npoints << "\n";
 
+		fseed << times[i] << "\t";
+		for (int i=0; i<S.n_species(); ++i) fseed << seeds[i] << "\t";
+		fseed << "\n";
+
 		vector<double> xl = myseq(0, 20, 200);
 		for (auto h : xl) fli << env.canopy_openness(h) << "\t";
 		fli << endl;
@@ -182,6 +204,7 @@ int main(){
 	
 	fli.close();
 	sio.closeStreams();
+	fseed.close();
 	int nga=0, nma=0, nfa=0, npa=0;
 
 //	for (auto spp : S.species_vec) {spp->fnEvals(); nga += spp->ng; nma += spp->nm; nfa += spp->nf; npa += spp->np;}

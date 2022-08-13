@@ -154,9 +154,9 @@ int main(){
 	S.setEnvironment(&env);
 	//    S.createSizeStructuredVariables({"mort", "fec", "heart_area", "heart_mass"});
    
-	S.addSpecies(vector<double>(2, p1.vars.height), &s1, 4, 1);
-	S.addSpecies(vector<double>(2, p2.vars.height), &s2, 4, 1);
-	S.addSpecies(vector<double>(2, p3.vars.height), &s3, 4, 1);
+	S.addSpecies({p1.vars.height, p1.vars.height+1e-4}, &s1, 4, 1);
+	S.addSpecies({p2.vars.height, p1.vars.height+1e-4}, &s2, 4, 1);
+	S.addSpecies({p3.vars.height, p1.vars.height+1e-4}, &s3, 4, 1);
 	
 	S.resetState();
 	S.initialize();
@@ -164,7 +164,7 @@ int main(){
 	S.print();
 	
 
-	vector <double> times = generateDefaultCohortSchedule(105.32);
+	vector <double> times = generateDefaultCohortSchedule(205.32);
 	for (auto t : times) cout << t << " "; cout << endl;
 
 	
@@ -204,6 +204,7 @@ int main(){
 	}
 	
 	fli.close();
+	fseed.close();
 	sio.closeStreams();
 	int nga=0, nma=0, nfa=0, npa=0;
 

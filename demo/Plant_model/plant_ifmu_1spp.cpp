@@ -8,7 +8,7 @@ using namespace std;
 #include "pspm_environment.h"
 #include "pspm_plant.h"
 
-vector<double> fmu_create_grid(double xmin, double xmax, double dxmin = 1e-2, double dxmax=0.2, double multiplier=1.1){
+vector<double> fmu_create_grid(double xmin, double xmax, double dxmin = 1e-4, double dxmax=0.1, double multiplier=1.1){
 	vector <double> xvec;
 	double x = xmin, dx = dxmin;
 	while(x<xmax){
@@ -156,17 +156,21 @@ int main(){
 	//    S.createSizeStructuredVariables({"mort", "fec", "heart_area", "heart_mass"});
     
     // use 1000 for precise, 100 for fast
-	S.addSpecies(my_log_seq(p1.vars.height, 20, 100), &s1, 4, 1);
-	S.addSpecies(my_log_seq(p2.vars.height, 20, 100), &s2, 4, 1);
-	S.addSpecies(my_log_seq(p3.vars.height, 20, 100), &s3, 4, 1);
+	S.addSpecies(fmu_create_grid(p1.vars.height, 20), &s1, 4, 1);
+	S.addSpecies(fmu_create_grid(p2.vars.height, 20), &s2, 4, 1);
+	S.addSpecies(fmu_create_grid(p3.vars.height, 20), &s3, 4, 1);
 	
 	S.resetState();
 	S.initialize();
 
-	S.print();
-	
+	// ensure that only 1st cohort has finite density
+	for (int k=0; k<S.species_vec.size(); ++k) 
+		for (int i=1; i<S.species_vec[k]->xsize(); ++i) S.species_vec[k]->setU(i,0);
+	S.copyCohortsToState();	
 
-	vector <double> times = generateDefaultCohortSchedule(105.32);
+	S.print();
+
+	vector <double> times = generateDefaultCohortSchedule(205.32);
 	for (auto t : times) cout << t << " "; cout << endl;
 
 	

@@ -22,6 +22,7 @@ void Solver::calcRates_iFMU(double t, vector<double>::iterator S, vector<double>
 
 }
 
+// Note: This IFMU solver works only for non-negative growth functions
 void Solver::stepU_iFMU(double t, vector<double> &S, vector<double> &dSdt, double dt){
 		
 	vector<double>::iterator its = S.begin() + n_statevars_system; // Skip system variables

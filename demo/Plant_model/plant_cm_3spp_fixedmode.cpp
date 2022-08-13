@@ -8,18 +8,6 @@ using namespace std;
 #include "pspm_environment.h"
 #include "pspm_plant.h"
 
-vector<double> fmu_create_grid(double xmin, double xmax, double dxmin = 1e-2, double dxmax=0.15, double multiplier=1.1){
-	vector <double> xvec;
-	double x = xmin, dx = dxmin;
-	while(x<xmax){
-		xvec.push_back(x);	
-		dx = std::min(dx*multiplier, dxmax);
-		x += dx;
-	}
-	xvec.push_back(xmax);
-	return xvec; 
-}
-
 vector<double> my_log_seq(double x0, double xf, int N){
 	vector<double> grid;
 	for (int i=0; i<N; ++i) grid.push_back(exp(log(x0) + (double(i)/(N-1))*(log(xf)-log(x0))));
@@ -97,10 +85,21 @@ class SolverIO{
 
 			for (int i=0; i<streams[s].size(); ++i) streams[s][i] << S->current_time << "\t";
 
+			vector<double> breaks = my_log_seq(spp->xb, 20, 100);
+			vector<double> dist = S->getDensitySpecies(s, breaks);
+			//cout << "here: " << breaks.size() << " " << dist.size() << endl;
+
+			for (int i=0; i<100; ++i){
+				//cout << i << " " << "here" << endl;
+				
+				streams[s][0] << breaks[i] << "\t";
+				streams[s][1] << dist[i] << "\t";
+			}
+
 			for (int j=0; j<spp->xsize(); ++j){
 				auto& C = spp->getCohort(j);
-				streams[s][0] << C.x << "\t";
-				streams[s][1] << C.u << "\t";
+				// streams[s][0] << C.x << "\t";
+				// streams[s][1] << C.u << "\t";
 				streams[s][2] << C.vars.mortality << "\t";
 				streams[s][3] << C.viable_seeds << "\t";
 				streams[s][4] << C.vars.area_heartwood << "\t";
@@ -147,30 +146,24 @@ int main(){
 	
 	//exit(1);
 
-    Solver S(SOLVER_FMU, "rk45ck");
-    //S.control.ode_ifmu_stepsize = 0.1;
-	//S.control.ifmu_centered_grids = false; //true;
-	S.use_log_densities = true;
+    Solver S(SOLVER_CM, "rk45ck");
+    S.use_log_densities = true;
 	S.control.ode_eps = 1e-4;
 	S.control.integral_interpolate = false;
 	S.setEnvironment(&env);
 	//    S.createSizeStructuredVariables({"mort", "fec", "heart_area", "heart_mass"});
     
-	S.addSpecies(fmu_create_grid(p1.vars.height, 20), &s1, 4, 1);
-	S.addSpecies(fmu_create_grid(p1.vars.height, 20), &s2, 4, 1);
-	S.addSpecies(fmu_create_grid(p1.vars.height, 20), &s3, 4, 1);
+	S.addSpecies(vector<double>(1, p1.vars.height), &s1, 4, 1);
+	S.addSpecies(vector<double>(1, p2.vars.height), &s2, 4, 1);
+	S.addSpecies(vector<double>(1, p3.vars.height), &s3, 4, 1);
 	
 	S.resetState();
 	S.initialize();
 
-	// ensure that only 1st cohort has finite density
-	for (int k=0; k<S.species_vec.size(); ++k) 
-		for (int i=1; i<S.species_vec[k]->xsize(); ++i) S.species_vec[k]->setU(i,0);
-	S.copyCohortsToState();	
-	
 	S.print();
+	
 
-	vector <double> times = generateDefaultCohortSchedule(205.32);
+	vector <double> times = generateDefaultCohortSchedule(105.32);
 	for (auto t : times) cout << t << " "; cout << endl;
 
 	
@@ -201,7 +194,6 @@ int main(){
 		for (int i=0; i<S.n_species(); ++i) fseed << seeds[i] << "\t";
 		fseed << "\n";
 
-
 		vector<double> xl = myseq(0, 20, 200);
 		for (auto h : xl) fli << env.canopy_openness(h) << "\t";
 		fli << endl;
@@ -211,8 +203,8 @@ int main(){
 	}
 	
 	fli.close();
-	fseed.close();
 	sio.closeStreams();
+	fseed.close();
 	int nga=0, nma=0, nfa=0, npa=0;
 
 //	for (auto spp : S.species_vec) {spp->fnEvals(); nga += spp->ng; nma += spp->nm; nfa += spp->nf; npa += spp->np;}
@@ -224,20 +216,20 @@ int main(){
 		cout << "Seed rain for Species " << s << " (Lindh 18) = " << pn::integrate_trapezium(times, seeds_out[s]) << endl;
 	}
 
-//	for (int s=0; s< S.n_species(); ++s){
-//		auto spp = S.species_vec[s];
-//		vector <double> fec_vec;
-//		fec_vec.reserve(spp->xsize());
-//		for (int i=0; i<spp->xsize(); ++i){
-//			auto C = ((Species<PSPM_Plant>*)spp)->getCohort(i);
-//			double patch_age_density = env.patch_age_density(times[i]);
-//			double S_D = 0.25;
-//			double output_seeds = spp->birth_flux_in * S_D * patch_age_density * C.viable_seeds;
-//			//cout << times[i] << " " << M.input_seed_rain << " " << S_D << " " << patch_age_density << " " << (*itf) << " | " << output_seeds << endl;
-//			fec_vec.push_back(output_seeds);
-//		}
-//		cout << "Seed rain for Species " << s << " (Falster 17) = " << pn::integrate_trapezium(times, fec_vec) << endl;
-//	}
+	for (int s=0; s< S.n_species(); ++s){
+		auto spp = S.species_vec[s];
+		vector <double> fec_vec;
+		fec_vec.reserve(spp->xsize());
+		for (int i=0; i<spp->xsize(); ++i){
+			auto C = ((Species<PSPM_Plant>*)spp)->getCohort(i);
+			double patch_age_density = env.patch_age_density(times[i]);
+			double S_D = 0.25;
+			double output_seeds = spp->birth_flux_in * S_D * patch_age_density * C.viable_seeds;
+			//cout << times[i] << " " << M.input_seed_rain << " " << S_D << " " << patch_age_density << " " << (*itf) << " | " << output_seeds << endl;
+			fec_vec.push_back(output_seeds);
+		}
+		cout << "Seed rain for Species " << s << " (Falster 17) = " << pn::integrate_trapezium(times, fec_vec) << endl;
+	}
 	
 
 }
