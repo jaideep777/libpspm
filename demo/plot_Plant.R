@@ -1,10 +1,9 @@
 
 plot_dists = function(folder, title, mtext = F){
-  setwd(paste0(dir, "/", folder))
   
-  up1 = read.delim("species_0_u.txt", header=F)
-  up2 = read.delim("species_1_u.txt", header=F)
-  up3 = read.delim("species_2_u.txt", header=F)
+  up1 = read.delim(paste0(dir, "/", folder, "/species_0_u.txt"), header=F)
+  up2 = read.delim(paste0(dir, "/", folder, "/species_1_u.txt"), header=F)
+  up3 = read.delim(paste0(dir, "/", folder, "/species_2_u.txt"), header=F)
   
   up1 = as.matrix(up1[,-ncol(up1)])
   up2 = as.matrix(up2[,-ncol(up2)])
@@ -13,9 +12,9 @@ plot_dists = function(folder, title, mtext = F){
   up2[up2<0]=0
   up3[up3<0]=0
   
-  hp1 = read.delim("species_0_X.txt", header=F)
-  hp2 = read.delim("species_1_X.txt", header=F)
-  hp3 = read.delim("species_2_X.txt", header=F)
+  hp1 = read.delim(paste0(dir, "/", folder, "/species_0_X.txt"), header=F)
+  hp2 = read.delim(paste0(dir, "/", folder, "/species_1_X.txt"), header=F)
+  hp3 = read.delim(paste0(dir, "/", folder, "/species_2_X.txt"), header=F)
   
   hp1 = as.matrix(hp1[,-ncol(hp1)])
   hp2 = as.matrix(hp2[,-ncol(hp2)])
@@ -80,33 +79,54 @@ plot_seeds(cbind(seeds_fmu$V4, seeds_ifmu$V4, seeds_ifmu1000$V4, seeds_ebt$V4, s
 dir = "~/codes/libpspm/demo/Plant_model"
 setwd(dir)
 
-# png("../size_dists.png", width = 1000*3, height=750*3, res=300)
+png("../size_dists_withFeedback.png", width = 1000*3, height=750*3, res=300)
 par(mar=c(4,4,1,1), oma = c(1,4,2,1), cex.lab=1.2, cex.axis=1.2)
-layout(mat = matrix(1:12, nrow=3, byrow=F))
+layout(mat = matrix(1:15, nrow=3, byrow=F))
+  
+plot_dists("outputs/fmu_new_f/", "FMU", T)
+plot_dists("outputs/ifmu_new_f", "IFMU")
+plot_dists("outputs/ifmu2_new_f", "IFMU(O2)")
+plot_dists("outputs/ebt_new_f/", "EBT")
+plot_dists("outputs/cm_new_f/", "CM")
+dev.off()
 
-plot_dists("outputs/fmu", "FMU", T)
-plot_dists("outputs/ifmu", "IFMU")
-plot_dists("outputs/ebt", "EBT")
-plot_dists("outputs/cm", "CM")
-# dev.off()
 
 
-
-
+  
 setwd(dir)
-seeds_fmu = read.delim("outputs/fmu/seed_rains.txt", header = F)
-seeds_ifmu = read.delim("outputs/ifmu/seed_rains.txt", header = F)
-seeds_ebt = read.delim("outputs/ebt/seed_rains.txt", header = F)
-seeds_cm = read.delim("outputs/cm/seed_rains.txt", header = F)
+seeds_fmu = read.delim("outputs/fmu_new_f/seed_rains.txt", header = F)
+seeds_ebt = read.delim("outputs/ebt_new_f/seed_rains.txt", header = F)
+seeds_ifmu = read.delim("outputs/ifmu_new_f/seed_rains.txt", header = F)
+seeds_ifmu2 = read.delim("outputs/ifmu2_new_f/seed_rains.txt", header = F)
+seeds_cm = read.delim("outputs/cm_new_f/seed_rains.txt", header = F)
 
 plot_seeds = function(y, title, ...){
-  matplot(y = y, x=seeds_fmu$V1, type="l", lty=1, lwd=2, col=scales::alpha(c("purple", "green3", "mediumspringgreen", "darkgoldenrod2"), alpha=0.7), ylab="Seed rain", ...)
+  matplot(y = y, x=seeds_fmu$V1, type="l", lty=1, lwd=2, col=scales::alpha(c("purple", "green3", "mediumspringgreen", "darkgoldenrod2", "magenta"), alpha=0.7), ylab="Seed rain", ...)
   mtext(title, line=1)
 }
 
+png("../seed_rains_withFeedback.png", width = 660*3, height=766*3, res=300)
+par(mfrow=c(3,1), mar = c(4,4,1,1), oma = c(1,1,4,1), cex.lab=1.2, cex.axis=1.2)
+plot_seeds(cbind(seeds_fmu$V2, seeds_ifmu$V2, seeds_ifmu2$V2, seeds_ebt$V2, seeds_cm$V2), "Species 1", xlab="")
+plot_seeds(cbind(seeds_fmu$V3, seeds_ifmu$V3, seeds_ifmu2$V3, seeds_ebt$V3, seeds_cm$V3), "Species 2", xlab="")
+plot_seeds(cbind(seeds_fmu$V4, seeds_ifmu$V4, seeds_ifmu2$V4, seeds_ebt$V4, seeds_cm$V4), "Species 3", xlab="Time (years)")
+dev.off()
+
+
+par(mfrow=c(3,1), mar = c(4,4,1,1), oma = c(1,1,4,1), cex.lab=1.2, cex.axis=1.2)
+plot_seeds(cbind(seeds_fmu$V2, seeds_ebt$V2), "Species 1", xlab="", log="")
+plot_seeds(cbind(seeds_fmu$V3, seeds_ebt$V3), "Species 2", xlab="", log="")
+plot_seeds(cbind(seeds_fmu$V4, seeds_ebt$V4), "Species 3", xlab="Time (years)", log="")
+
+
+par(mfrow=c(3,1), mar = c(4,4,1,1), oma = c(1,1,4,1), cex.lab=1.2, cex.axis=1.2)
+plot_seeds(cbind(seeds_fmu$V2), "Species 1", xlab="")
+plot_seeds(cbind(seeds_fmu$V3), "Species 2", xlab="")
+plot_seeds(cbind(seeds_fmu$V4), "Species 3", xlab="Time (years)")
+
 # png("../seed_rains.png", width = 660*3, height=766*3, res=300)
 par(mfrow=c(3,1), mar = c(4,4,1,1), oma = c(1,1,4,1), cex.lab=1.2, cex.axis=1.2)
-plot_seeds(cbind(seeds_fmu$V2, seeds_ifmu$V2, seeds_ebt$V2, seeds_cm$V2), "Species 1", xlab="")
-plot_seeds(cbind(seeds_fmu$V3, seeds_ifmu$V3, seeds_ebt$V3, seeds_cm$V3), "Species 2", xlab="")
-plot_seeds(cbind(seeds_fmu$V4, seeds_ifmu$V4, seeds_ebt$V4, seeds_cm$V4), "Species 3", xlab="Time (years)")
+plot_seeds(cbind(seeds_fmu$V2, seeds_ebt$V2, seeds_cm$V2), "Species 1", xlab="")
+plot_seeds(cbind(seeds_fmu$V3, seeds_ebt$V3, seeds_cm$V3), "Species 2", xlab="")
+plot_seeds(cbind(seeds_fmu$V4, seeds_ebt$V4, seeds_cm$V4), "Species 3", xlab="Time (years)")
 # dev.off()

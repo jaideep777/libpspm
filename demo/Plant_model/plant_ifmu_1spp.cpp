@@ -156,9 +156,9 @@ int main(){
 	//    S.createSizeStructuredVariables({"mort", "fec", "heart_area", "heart_mass"});
     
     // use 1000 for precise, 100 for fast
-	S.addSpecies(fmu_create_grid(p1.vars.height, 20), &s1, 4, 1);
-	S.addSpecies(fmu_create_grid(p2.vars.height, 20), &s2, 4, 1);
-	S.addSpecies(fmu_create_grid(p3.vars.height, 20), &s3, 4, 1);
+	S.addSpecies(fmu_create_grid(p1.vars.height, 20), &s1, 4, -1);
+	S.addSpecies(fmu_create_grid(p2.vars.height, 20), &s2, 4, -1);
+	S.addSpecies(fmu_create_grid(p3.vars.height, 20), &s3, 4, -1);
 	
 	S.resetState();
 	S.initialize();

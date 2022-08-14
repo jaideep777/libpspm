@@ -56,14 +56,45 @@ void Solver::stepU_iFMU(double t, vector<double> &S, vector<double> &dSdt, doubl
 		U[0] = C0/B0;
 //		std::cout << "U0 = " << U[0] << endl; 
 
-		for (int w = 1; w < J; ++w){
+		// // O1 scheme
+		// for (int w = 1; w < J; ++w){
+		// 	double Aw = -growthArray[w-1]*dt/h[w];
+		// 	double Bw  = 1 + dt/h[w]*growthArray[w] + dt*spp->mortalityRate(w, spp->getX(w), t, env);
+		// 	double Cw = spp->getU(w);
+
+		// 	U[w] = (Cw - Aw*U[w-1])/Bw;
+		// }
+
+		// *** O2 scheme ****
+		// O1 scheme for w = 0,1
+		for (int w = 1; w < 2; ++w){
 			double Aw = -growthArray[w-1]*dt/h[w];
 			double Bw  = 1 + dt/h[w]*growthArray[w] + dt*spp->mortalityRate(w, spp->getX(w), t, env);
 			double Cw = spp->getU(w);
 
 			U[w] = (Cw - Aw*U[w-1])/Bw;
 		}
-		
+		for (int w = 2; w < J; ++w){
+
+			// O1 scheme
+			double Aw = -growthArray[w-1]*dt/h[w];
+			double Bw  = 1 + dt/h[w]*growthArray[w] + dt*spp->mortalityRate(w, spp->getX(w), t, env);
+			double Cw = spp->getU(w);
+
+			double Uw1 = (Cw - Aw*U[w-1])/Bw;
+
+			// O2 scheme
+			double A2w = 1 + 3*dt/2/h[w]*growthArray[w] + dt*spp->mortalityRate(w, spp->getX(w), t, env);
+			double B2w = -4*growthArray[w-1]*dt/2/h[w];
+			double C2w = growthArray[w-2]*dt/2/h[w];
+			double D2w = spp->getU(w);
+
+			double Uw2 = (D2w - B2w*U[w-1] - C2w*U[w-2])/A2w;
+
+			U[w] = (Uw2 < 0)? Uw1 : Uw2;
+		}
+
+
 		its += J*(1+spp->n_extra_statevars);
 
 	}

@@ -149,14 +149,15 @@ int main(){
     Solver S(SOLVER_EBT, "rk45ck");
     S.use_log_densities = true;
 	S.control.ode_eps = 1e-4;
+	S.control.ebt_ucut = 1e-6;
 	//S.control.ode_method = "rk4";
 	//S.control.ode_rk4_stepsize = 0.5;
 	S.setEnvironment(&env);
 	//    S.createSizeStructuredVariables({"mort", "fec", "heart_area", "heart_mass"});
    
-	S.addSpecies({p1.vars.height, p1.vars.height+1e-4}, &s1, 4, 1);
-	S.addSpecies({p2.vars.height, p1.vars.height+1e-4}, &s2, 4, 1);
-	S.addSpecies({p3.vars.height, p1.vars.height+1e-4}, &s3, 4, 1);
+	S.addSpecies({p1.vars.height, p1.vars.height+1e-4}, &s1, 4, -1);
+	S.addSpecies({p2.vars.height, p1.vars.height+1e-4}, &s2, 4, -1);
+	S.addSpecies({p3.vars.height, p1.vars.height+1e-4}, &s3, 4, -1);
 	
 	S.resetState();
 	S.initialize();
@@ -177,9 +178,14 @@ int main(){
 	
 	vector <vector<double>> seeds_out(S.species_vec.size());
 
-	for (size_t i=0; i < times.size(); ++i){
+	for (size_t i=1; i < times.size(); ++i){
 
-		S.step_to(times[i]);		
+		double dt_c = 0.25;
+		for (double t = fmin(times[i-1]+dt_c, times[i]); t <= times[i]; t += dt_c){
+			cout << "   sub step to: " << t << endl;
+			S.step_to(t);
+		}
+//		S.step_to(times[i]);
 		
 		vector<double> seeds = S.newborns_out(times[i]);
 		for (int s=0; s< S.species_vec.size(); ++s){
@@ -187,7 +193,7 @@ int main(){
 			seeds_out[s].push_back(seeds[s] * S_D * env.patch_age_density(times[i]));
 		}
 
-		cout << times[i] << " " << S.species_vec[0]->xsize() << " ";
+		cout << times[i] << " (" << S.species_vec[0]->xsize() << " " << S.species_vec[1]->xsize() << " " << S.species_vec[2]->xsize() << ") ";
 		for (int i=0; i<S.n_species(); ++i) cout << seeds[i] << " ";
 		cout << " | " << env.light_profile.npoints << "\n";
 

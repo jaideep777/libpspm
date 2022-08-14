@@ -153,9 +153,9 @@ int main(){
 	S.setEnvironment(&env);
 	//    S.createSizeStructuredVariables({"mort", "fec", "heart_area", "heart_mass"});
     
-	S.addSpecies(vector<double>(1, p1.vars.height), &s1, 4, 1);
-	S.addSpecies(vector<double>(1, p2.vars.height), &s2, 4, 1);
-	S.addSpecies(vector<double>(1, p3.vars.height), &s3, 4, 1);
+	S.addSpecies(vector<double>(1, p1.vars.height), &s1, 4, -1);
+	S.addSpecies(vector<double>(1, p2.vars.height), &s2, 4, -1);
+	S.addSpecies(vector<double>(1, p3.vars.height), &s3, 4, -1);
 	
 	S.resetState();
 	S.initialize();
@@ -176,10 +176,15 @@ int main(){
 	
 	vector <vector<double>> seeds_out(S.species_vec.size());
 
-	for (size_t i=0; i < times.size(); ++i){
+	for (size_t i=1; i < times.size(); ++i){
 
-		S.step_to(times[i]);		
-		
+		double dt_c = 0.25;
+		for (double t = fmin(times[i-1]+dt_c, times[i]); t <= times[i]; t += dt_c){
+			cout << "   sub step to: " << t << endl;
+			S.step_to(t);
+		}
+//		S.step_to(times[i]);
+
 		vector<double> seeds = S.newborns_out(times[i]);
 		for (int s=0; s< S.species_vec.size(); ++s){
 			double S_D = 0.25;

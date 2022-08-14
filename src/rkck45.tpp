@@ -20,7 +20,7 @@ void RKCK45::RKStep(container& y, container& dydx, double& x, double htry,
 		errmax=0.0;                               // Evaluate accuracy.
 		for (int i=0; i<y.size(); i++) errmax=std::max(errmax, fabs(yerr[i]/yscal[i]));
 		//errmax /= eps;                            // Scale relative to required tolerance.
-		//std:: cout << "x = " << x << ", errmax = " << errmax << "\n";
+		// std:: cout << "x = " << x << ", h = " << h << ", errmax = " << errmax << "\n";
 		if (errmax <= 1.1) break;                 // Step succeeded. Compute size of next step.
 		double htemp=h*fmax(SAFETY*pow(errmax,PSHRNK), 0.2); // Truncation error too large, reduce stepsize, max by a factor of 0.2.
 		h=htemp; //(h >= 0.0 ? std::max(htemp,0.1*h) : std::min(htemp,0.1*h)); // No more than a factor of 10.
