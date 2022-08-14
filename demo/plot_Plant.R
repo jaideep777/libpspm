@@ -21,13 +21,15 @@ plot_dists = function(folder, title, mtext = F){
   hp3 = as.matrix(hp3[,-ncol(hp3)])
   
   times = as.numeric(hp1[,1])
-  
-  image(x=times, y=hp1[1,-1],  z=log(1+100*up1[,-1]), col=scales::viridis_pal()(100), ylab="Height", xlab="Time (years)")
+
+  col1 = scales::colour_ramp(colors = c('white','#f1eef6','#a6bddb','#2b8cbe','#045a8d', "cyan", "white"))(seq(0,1,0.01))  
+  col2 = scales::viridis_pal()(100)
+  image(x=times, y=hp1[1,-1],  z=log(1+100*up1[,-1]), col=col1, ylab="Height", xlab="Time (years)")
   mtext(title, side=3, line=1)
   if(mtext) mtext("lma = 0.0825", side=2, line=5)
-  image(x=times, y=hp2[1,-1],  z=log(1+100*up2[,-1]), col=scales::viridis_pal()(100), ylab="Height", xlab="Time (years)")
+  image(x=times, y=hp2[1,-1],  z=log(1+100*up2[,-1]), col=col1, ylab="Height", xlab="Time (years)")
   if(mtext) mtext("lma = 0.2625", side=2, line=5)
-  image(x=times, y=hp3[1,-1],  z=log(1+100*up3[,-1]), col=scales::viridis_pal()(100), ylab="Height", xlab="Time (years)")
+  image(x=times, y=hp3[1,-1],  z=log(1+100*up3[,-1]), col=col1, ylab="Height", xlab="Time (years)")
   if(mtext) mtext("lma = 0.4625", side=2, line=5)
 }
 
@@ -36,39 +38,40 @@ plot_dists = function(folder, title, mtext = F){
 dir = "~/codes/libpspm/demo/Plant_model"
 setwd(dir)
 
-# png("../size_dists.png", width = 1000*3, height=750*3, res=300)
+png("../size_dists_noFeedback.png", width = 1200*3, height=750*3, res=300)
 par(mar=c(4,4,1,1), oma = c(1,4,2,1), cex.lab=1.2, cex.axis=1.2)
-layout(mat = matrix(1:15, nrow=3, byrow=F))
+layout(mat = matrix(1:18, nrow=3, byrow=F))
 
-plot_dists("outputs/fmu_120pts", "FMU", T)
-plot_dists("outputs/ifmu_100pts", "IFMU (100 pts)")
-plot_dists("outputs/ifmu_1000pts", "IFMU (1000 pts)")
+plot_dists("outputs/fmu", "FMU", T)
+plot_dists("outputs/ifmu", "IFMU")
+plot_dists("outputs/ifmu2", "IFMU(O2)")
 plot_dists("outputs/ebt", "EBT")
-plot_dists("outputs/abm_n1000_dt0.05_2", "ABM")
+plot_dists("outputs/cm", "CM")
+plot_dists("outputs/abm", "ABM")
+dev.off()
+
 
 
 setwd(dir)
-# dev.off()
-
-
-setwd(dir)
-seeds_fmu = read.delim("outputs/fmu_120pts/seed_rains.txt", header = F)
-seeds_ifmu = read.delim("outputs/ifmu_100pts/seed_rains.txt", header = F)
-seeds_ifmu1000 = read.delim("outputs/ifmu_1000pts/seed_rains.txt", header = F)
+seeds_fmu = read.delim("outputs/fmu/seed_rains.txt", header = F)
+seeds_ifmu = read.delim("outputs/ifmu/seed_rains.txt", header = F)
+seeds_ifmu1000 = read.delim("outputs/ifmu2/seed_rains.txt", header = F)
 seeds_ebt = read.delim("outputs/ebt/seed_rains.txt", header = F)
-seeds_abm = read.delim("outputs/abm_n1000_dt0.05_2/seed_rains.txt", header = F)
+seeds_cm = read.delim("outputs/cm/seed_rains.txt", header = F)
+seeds_abm = read.delim("outputs/abm/seed_rains.txt", header = F)
 
 plot_seeds = function(y, title, ...){
-  matplot(y = y, x=seeds_fmu$V1, type="l", lty=1, lwd=2, col=scales::alpha(c("purple", "green3", "mediumspringgreen", "cyan3", "darkgoldenrod2"), alpha=0.7), ylab="Seed rain", ...)
+  matplot(y = y, x=seeds_fmu$V1, type="l", lty=1, col=scales::alpha(c("purple", "green3", "mediumspringgreen", "darkgoldenrod2", "pink", "#2b8cbe"), alpha=0.7), ylab="Seed rain", ...)
   mtext(title, line=1)
 }
 
-# png("../seed_rains.png", width = 660*3, height=766*3, res=300)
+png("../seed_rains_noFeedback.png", width = 660*3, height=766*3, res=300)
 par(mfrow=c(3,1), mar = c(4,4,1,1), oma = c(1,1,4,1), cex.lab=1.2, cex.axis=1.2)
-plot_seeds(cbind(seeds_fmu$V2, seeds_ifmu$V2, seeds_ifmu1000$V2, seeds_ebt$V2, seeds_abm$V2), "Species 1", xlab="")
-plot_seeds(cbind(seeds_fmu$V3, seeds_ifmu$V3, seeds_ifmu1000$V3, seeds_ebt$V3, seeds_abm$V3), "Species 2", xlab="")
-plot_seeds(cbind(seeds_fmu$V4, seeds_ifmu$V4, seeds_ifmu1000$V4, seeds_ebt$V4, seeds_abm$V4), "Species 3", xlab="Time (years)")
-# dev.off()
+plot_seeds(cbind(seeds_fmu$V2, seeds_ifmu$V2, seeds_ifmu1000$V2, seeds_ebt$V2, seeds_cm$V2, seeds_abm$V2), "Species 1", xlab="", lwd=c(2,2,2,2,2,0.75))
+legend(x = 80, y=320, legend = c("FMU", "IFMU", "IFMU(O2)", "EBT", "CM", "ABM"), col=c("purple", "green3", "mediumspringgreen", "darkgoldenrod2", "pink", "#2b8cbe"), lwd=c(2,2,2,2,2,0.75), bty = "n", cex=1.3)
+plot_seeds(cbind(seeds_fmu$V3, seeds_ifmu$V3, seeds_ifmu1000$V3, seeds_ebt$V3, seeds_cm$V3, seeds_abm$V3), "Species 2", xlab="", lwd=c(2,2,2,2,2,0.75))
+plot_seeds(cbind(seeds_fmu$V4, seeds_ifmu$V4, seeds_ifmu1000$V4, seeds_ebt$V4, seeds_cm$V4, seeds_abm$V4), "Species 3", xlab="Time (years)", lwd=c(2,2,2,2,2,0.75))
+dev.off()
 
 
 

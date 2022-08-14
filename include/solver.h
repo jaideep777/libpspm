@@ -48,6 +48,7 @@ class Solver{
 		double ode_ifmu_stepsize = 0.1;
 		bool ifmu_centered_grids = true;
 		bool integral_interpolate = true;
+		double ifmu_order = 2;
 		double abm_n0 = 100;
 		double abm_stepsize = 0.02;
 	} control;

@@ -150,7 +150,7 @@ int main(){
     Solver S(SOLVER_IFMU, "rk45ck");
     S.control.ode_ifmu_stepsize = 0.01;
 	S.control.ifmu_centered_grids = false; //true;
-    S.control.ifmu_order = 1;
+    S.control.ifmu_order = 2;
 	S.use_log_densities = true;
 	S.control.ode_eps = 1e-4;
 	S.setEnvironment(&env);

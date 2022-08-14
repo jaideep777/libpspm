@@ -120,10 +120,12 @@ demos:
 	cd demo/RED_model && $(MAKE) clean all FILE=abm_equil.cpp && ./abm_equil.exec
 
 plant_demo:
-	cd demo/Plant_model && $(MAKE) clean all FILE=plant_fmu_1spp.cpp && ./plant_fmu_1spp.exec
-	cd demo/Plant_model && $(MAKE) clean all FILE=plant_ifmu_1spp.cpp && ./plant_ifmu_1spp.exec
-	cd demo/Plant_model && $(MAKE) clean all FILE=plant_ebt_1spp.cpp && ./plant_ebt_1spp.exec
-	cd demo/Plant_model && $(MAKE) clean all FILE=plant_cm_1spp.cpp && ./plant_cm_1spp.exec
+	# cd demo/Plant_model && $(MAKE) FILE=plant_fmu_1spp.cpp && ./plant_fmu_1spp.exec && mkdir -p outputs/fmu && mv *.txt outputs/fmu
+	# cd demo/Plant_model && $(MAKE) FILE=plant_ifmu_1spp.cpp && ./plant_ifmu_1spp.exec  && mkdir -p outputs/ifmu && mv *.txt outputs/ifmu
+	# cd demo/Plant_model && $(MAKE) FILE=plant_ifmu2_1spp.cpp && ./plant_ifmu2_1spp.exec  && mkdir -p outputs/ifmu2 && mv *.txt outputs/ifmu2
+	# cd demo/Plant_model && $(MAKE) FILE=plant_ebt_1spp.cpp && ./plant_ebt_1spp.exec  && mkdir -p outputs/ebt && mv *.txt outputs/ebt
+	cd demo/Plant_model && $(MAKE) clean all FILE=plant_cm_1spp.cpp && ./plant_cm_1spp.exec  && mkdir -p outputs/cm && mv *.txt outputs/cm
+	cd demo/Plant_model && $(MAKE) FILE=plant_abm_1spp.cpp && ./plant_abm_1spp.exec  && mkdir -p outputs/abm && mv *.txt outputs/abm
 
 
 website:

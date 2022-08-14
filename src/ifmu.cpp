@@ -91,7 +91,9 @@ void Solver::stepU_iFMU(double t, vector<double> &S, vector<double> &dSdt, doubl
 
 			double Uw2 = (D2w - B2w*U[w-1] - C2w*U[w-2])/A2w;
 
-			U[w] = (Uw2 < 0)? Uw1 : Uw2;
+			double phi = control.ifmu_order - 1; // 0 for O1, 1 for O2, or in-between
+ 			if (Uw2 < 0) phi = 0; // use O1 if O2 density is negative
+			U[w] = phi*Uw2 + (1-phi)*Uw1;
 		}
 
 
