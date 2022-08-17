@@ -114,7 +114,7 @@ class SolverIO{
 };
 
 
-int main(){
+int main(int argc, char ** argv){
 	
 	
 	LightEnvironment env(1);	
@@ -156,9 +156,13 @@ int main(){
 	S.setEnvironment(&env);
 	//    S.createSizeStructuredVariables({"mort", "fec", "heart_area", "heart_mass"});
     
-	S.addSpecies(fmu_create_grid(p1.vars.height, 20), &s1, 4, 1);
-	S.addSpecies(fmu_create_grid(p1.vars.height, 20), &s2, 4, 1);
-	S.addSpecies(fmu_create_grid(p1.vars.height, 20), &s3, 4, 1);
+	double ip_seed_rain = 1;
+	if (argc > 1) ip_seed_rain = stod(argv[1]);
+	cout << "Simulating with input seed rain = " << ip_seed_rain << endl;
+ 
+ 	S.addSpecies(fmu_create_grid(p1.vars.height, 20), &s1, 4, ip_seed_rain);
+	S.addSpecies(fmu_create_grid(p1.vars.height, 20), &s2, 4, ip_seed_rain);
+	S.addSpecies(fmu_create_grid(p1.vars.height, 20), &s3, 4, ip_seed_rain);
 	
 	S.resetState();
 	S.initialize();
@@ -170,7 +174,9 @@ int main(){
 	
 	S.print();
 
-	vector <double> times = generateDefaultCohortSchedule(105.32);
+	double tmax = 105.32;
+	if (argc > 2) tmax = stod(argv[2]);
+	vector <double> times = generateDefaultCohortSchedule(tmax);
 	for (auto t : times) cout << t << " "; cout << endl;
 
 	

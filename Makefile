@@ -110,22 +110,37 @@ recheck: testclean check
 # ------------------------------------------------------------------------------
 
 demos:
-	cd demo/Daphnia_model && $(MAKE) clean all FILE=fmu_equil.cpp && ./fmu_equil.exec
-	cd demo/Daphnia_model && $(MAKE) clean all FILE=ifmu_equil.cpp && ./ifmu_equil.exec
-	cd demo/Daphnia_model && $(MAKE) clean all FILE=ebt_equil.cpp && ./ebt_equil.exec
-	cd demo/Daphnia_model && $(MAKE) clean all FILE=abm_equil.cpp && ./abm_equil.exec
-	cd demo/RED_model && $(MAKE) clean all FILE=fmu_equil.cpp && ./fmu_equil.exec
-	cd demo/RED_model && $(MAKE) clean all FILE=ifmu_equil.cpp && ./ifmu_equil.exec
-	cd demo/RED_model && $(MAKE) clean all FILE=ebt_equil.cpp && ./ebt_equil.exec
-	cd demo/RED_model && $(MAKE) clean all FILE=abm_equil.cpp && ./abm_equil.exec
+	cd demo/Daphnia_model && $(MAKE) FILE=fmu_equil.cpp && ./fmu_equil.exec
+	cd demo/Daphnia_model && $(MAKE) FILE=ifmu_equil.cpp && ./ifmu_equil.exec
+	cd demo/Daphnia_model && $(MAKE) FILE=ifmu2_equil.cpp && ./ifmu2_equil.exec
+	cd demo/Daphnia_model && $(MAKE) FILE=ebt_equil.cpp && ./ebt_equil.exec
+	cd demo/Daphnia_model && $(MAKE) FILE=abm_equil.cpp && ./abm_equil.exec
+	cd demo/RED_model && $(MAKE) FILE=fmu_equil.cpp && ./fmu_equil.exec
+	cd demo/RED_model && $(MAKE) FILE=ifmu_equil.cpp && ./ifmu_equil.exec
+	cd demo/RED_model && $(MAKE) FILE=ifmu2_equil.cpp && ./ifmu2_equil.exec
+	cd demo/RED_model && $(MAKE) FILE=ebt_equil.cpp && ./ebt_equil.exec
+	cd demo/RED_model && $(MAKE) FILE=abm_equil.cpp && ./abm_equil.exec
 
-plant_demo:
-	# cd demo/Plant_model && $(MAKE) FILE=plant_fmu_1spp.cpp && ./plant_fmu_1spp.exec && mkdir -p outputs/fmu && mv *.txt outputs/fmu
-	# cd demo/Plant_model && $(MAKE) FILE=plant_ifmu_1spp.cpp && ./plant_ifmu_1spp.exec  && mkdir -p outputs/ifmu && mv *.txt outputs/ifmu
-	# cd demo/Plant_model && $(MAKE) FILE=plant_ifmu2_1spp.cpp && ./plant_ifmu2_1spp.exec  && mkdir -p outputs/ifmu2 && mv *.txt outputs/ifmu2
-	# cd demo/Plant_model && $(MAKE) FILE=plant_ebt_1spp.cpp && ./plant_ebt_1spp.exec  && mkdir -p outputs/ebt && mv *.txt outputs/ebt
-	cd demo/Plant_model && $(MAKE) clean all FILE=plant_cm_1spp.cpp && ./plant_cm_1spp.exec  && mkdir -p outputs/cm && mv *.txt outputs/cm
+clean_demos:
+	rm -f demo/Daphnia_model/*.o demo/Daphnia_model/*.exec
+	rm -f demo/RED_model/*.o     demo/RED_model/*.exec
+	rm -f demo/Plant_model/*.o   demo/Plant_model/*.exec
+
+plant_demo_noFeedback:
+	cd demo/Plant_model && $(MAKE) FILE=plant_fmu_1spp.cpp && ./plant_fmu_1spp.exec && mkdir -p outputs/fmu && mv *.txt outputs/fmu
+	cd demo/Plant_model && $(MAKE) FILE=plant_ifmu_1spp.cpp && ./plant_ifmu_1spp.exec  && mkdir -p outputs/ifmu && mv *.txt outputs/ifmu
+	cd demo/Plant_model && $(MAKE) FILE=plant_ifmu2_1spp.cpp && ./plant_ifmu2_1spp.exec  && mkdir -p outputs/ifmu2 && mv *.txt outputs/ifmu2
+	cd demo/Plant_model && $(MAKE) FILE=plant_ebt_1spp.cpp && ./plant_ebt_1spp.exec  && mkdir -p outputs/ebt && mv *.txt outputs/ebt
+	cd demo/Plant_model && $(MAKE) FILE=plant_cm_1spp.cpp && ./plant_cm_1spp.exec  && mkdir -p outputs/cm && mv *.txt outputs/cm
 	cd demo/Plant_model && $(MAKE) FILE=plant_abm_1spp.cpp && ./plant_abm_1spp.exec  && mkdir -p outputs/abm && mv *.txt outputs/abm
+
+plant_demo_withFeedback:
+	cd demo/Plant_model && $(MAKE) FILE=plant_fmu_1spp.cpp && ./plant_fmu_1spp.exec -1 205.32 && mkdir -p outputs/fmu_f && mv *.txt outputs/fmu_f
+	cd demo/Plant_model && $(MAKE) FILE=plant_ifmu_1spp.cpp && ./plant_ifmu_1spp.exec -1 205.32 && mkdir -p outputs/ifmu_f && mv *.txt outputs/ifmu_f
+	cd demo/Plant_model && $(MAKE) FILE=plant_ifmu2_1spp.cpp && ./plant_ifmu2_1spp.exec -1 205.32 && mkdir -p outputs/ifmu2_f && mv *.txt outputs/ifmu2_f
+	cd demo/Plant_model && $(MAKE) FILE=plant_ebt_1spp.cpp && ./plant_ebt_1spp.exec -1 205.32 1.0 && mkdir -p outputs/ebt_f && mv *.txt outputs/ebt_f
+	cd demo/Plant_model && $(MAKE) FILE=plant_cm_1spp.cpp && ./plant_cm_1spp.exec -1 205.32 1.0 && mkdir -p outputs/cm_f && mv *.txt outputs/cm_f
+#	cd demo/Plant_model && $(MAKE) FILE=plant_abm_1spp.cpp && ./plant_abm_1spp.exec -1 && mkdir -p outputs/abm && mv *.txt outputs/abm
 
 
 website:

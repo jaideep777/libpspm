@@ -14,7 +14,7 @@ int main(){
 
 	Solver S(SOLVER_IFMU);
 	S.control.ode_ifmu_stepsize = 0.1;
-	S.control.ifmu_order = 1;
+	S.control.ifmu_order = 2;
 	S.addSpecies(300, 0, 1, false, &spp, 0, -1);
 	S.addSystemVariables(1);  // this can be done either before or after addSpecies()
 
@@ -24,7 +24,7 @@ int main(){
 	S.state[0] = E.K;
 	//S.print();
 	
-	ofstream fout("ifmu_Daphnia.txt");
+	ofstream fout("ifmu2_Daphnia.txt");
 
 	for (double t=0.05; t <= 100; t=t+1) {
 		S.step_to(t);

@@ -31,14 +31,14 @@ int main(){
 	
 	ofstream fout("cm_Redmodel.txt");
 
-	for (double t=0; t <= 5000; t=t+15) {
+	for (double t=0; t <= 5000; t=t+10) {
 		S.step_to(t);
 		fout << S.current_time << "\t" << S.newborns_out(t)[0] << "\t";
 		cout << S.current_time << " " << S.species_vec[0]->xsize() << "\n";
 		//cout << S.current_time << " " [><< S.u0_out()<] << "\n";
 		
-//		vector <double> dist = S.getDensitySpecies_EBT(0, logseq(1, 1e6, 150));
-//		for (auto y : dist) fout << y << "\t";
+		vector <double> dist = S.getDensitySpecies(0, logseq(1, 1e6, 150));
+		for (auto y : dist) fout << y << "\t";
 		fout << endl;
 	}
 
