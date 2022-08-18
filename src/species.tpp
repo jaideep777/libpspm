@@ -351,6 +351,7 @@ void Species<Model>::removeDensestCohort(){
 		}
 	}
 
+	//std::cout << "Removing cohort no. " << i_min << std::endl;
 	cohorts.erase(cohorts.begin()+i_min);
 	--J;
 }

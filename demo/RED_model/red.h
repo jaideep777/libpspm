@@ -81,6 +81,7 @@ class RED_Plant{
 
 	double birthRate(double x, double t, void * env){
 		++nbc;
+		if (x < 0) throw std::runtime_error("x is negative");
 		LightEnvironment* env1 = (LightEnvironment*)env;
 		return 0.1/0.9*g0*pow(x,phiG)*(1-env1->evalEnv(x,t));
 	}
