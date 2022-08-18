@@ -116,7 +116,7 @@ double Solver::integrate_wudx_above(wFunc w, double t, double xlow, int species_
 		return I;
 	}
 	
-	else if (method == SOLVER_EBT){
+	else if (method == SOLVER_EBT || method == SOLVER_IEBT){
 		// set up cohorts to integrate
 		// backup pi0, N0 from last (youngest) cohort <-- cohorts are sorted descending
 		double   pi0  =  spp->getX(spp->J-1);
@@ -178,7 +178,7 @@ double Solver::integrate_x(wFunc w, double t, int species_id){
 		return I;
 	}
 	
-	else if (method == SOLVER_EBT){
+	else if (method == SOLVER_EBT || method == SOLVER_IEBT){
 		// integrate using EBT rule (sum over cohorts)
 		
 		// backup pi0, N0 from last cohort 

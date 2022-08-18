@@ -114,12 +114,14 @@ demos:
 	cd demo/Daphnia_model && $(MAKE) FILE=ifmu_equil.cpp && ./ifmu_equil.exec
 	cd demo/Daphnia_model && $(MAKE) FILE=ifmu2_equil.cpp && ./ifmu2_equil.exec
 	cd demo/Daphnia_model && $(MAKE) FILE=ebt_equil.cpp && ./ebt_equil.exec
+	cd demo/Daphnia_model && $(MAKE) FILE=iebt_equil.cpp && ./iebt_equil.exec
 	cd demo/Daphnia_model && $(MAKE) FILE=cm_equil.cpp && ./cm_equil.exec
 	cd demo/Daphnia_model && $(MAKE) FILE=abm_equil.cpp && ./abm_equil.exec
 	cd demo/RED_model && $(MAKE) FILE=fmu_equil.cpp && ./fmu_equil.exec
 	cd demo/RED_model && $(MAKE) FILE=ifmu_equil.cpp && ./ifmu_equil.exec
 	cd demo/RED_model && $(MAKE) FILE=ifmu2_equil.cpp && ./ifmu2_equil.exec
 	cd demo/RED_model && $(MAKE) FILE=ebt_equil.cpp && ./ebt_equil.exec
+	cd demo/RED_model && $(MAKE) FILE=iebt_equil.cpp && ./iebt_equil.exec
 	cd demo/RED_model && $(MAKE) FILE=cm_equil.cpp && ./cm_equil.exec
 	cd demo/RED_model && $(MAKE) FILE=abm_equil.cpp && ./abm_equil.exec
 
