@@ -86,7 +86,8 @@ void Solver::removeCohort_CM(){
 
 	for (auto& spp : species_vec){
 		if (spp->J > control.max_cohorts) // remove a cohort if number of cohorts in the species exceeds a threshold
-			spp->removeDensestCohort();
+			spp->removeDeadCohorts(control.ebt_ucut);
+			spp->removeDenseCohorts(control.cm_dxcut);
 	}
 	
 	resizeStateFromSpecies();

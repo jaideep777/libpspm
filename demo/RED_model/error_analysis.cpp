@@ -194,7 +194,7 @@ int main(){
 		Solver S(SOLVER_CM);
 		S.addSpecies(N0, 1, 1e6, true, &spp, 0);
 		//S.get_species(0)->set_bfin_is_u0in(true);	// say that input_birth_flux is u0
-		S.control.max_cohorts = N0;
+		//S.control.max_cohorts = N0;
 		S.resetState();
 		S.initialize();
 		S.setEnvironment(&E);
@@ -204,8 +204,8 @@ int main(){
 		auto t1 = high_resolution_clock::now();
 		for (double t=0; t <= 5000; t=t+Dt) {
 			S.step_to(t);
-			cout << S.current_time << "\t" << S.newborns_out(t)[0] << "\t";
-			cout << S.current_time << " " << S.species_vec[0]->xsize() << "\n";
+			// cout << S.current_time << "\t" << S.newborns_out(t)[0] << "\t";
+			// cout << S.current_time << " " << S.species_vec[0]->xsize() << "\n";
 		}
 	    auto t2 = high_resolution_clock::now();
     	duration<double, std::milli> ms_double = t2 - t1;

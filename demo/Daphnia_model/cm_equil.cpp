@@ -24,7 +24,7 @@ int main(){
 	S.addSpecies(100, 0, 1, false, &spp, 0, -1);
 	S.addSystemVariables(1);  // this can be done either before or after addSpecies()
 	S.control.max_cohorts = 200;
-	S.control.ebt_ucut = 1e-20;
+	S.control.ebt_ucut = 1e-10;
 
 	S.resetState();
 	S.initialize();
@@ -52,6 +52,6 @@ int main(){
 	cout << S.newborns_out(100)[0] << endl; 
 	//if (abs(S.u0_out()[0] - 1.468232) < 1e-5) return 0;
 	//else return 1;
-
+	// S.print();
 }
 

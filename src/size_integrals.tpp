@@ -201,7 +201,7 @@ double Solver::integrate_x(wFunc w, double t, int species_id){
 	
 	if (method == SOLVER_CM){
 		// integrate using trapezoidal rule 
-		// Note, new cohorts are inserted at the beginning, so x will be ascending
+		// Note, new cohorts are inserted at the end, so x will be descending
 		double I = 0;
 		double u_hi = spp->getU(0); 
 		double x_hi = spp->getX(0);

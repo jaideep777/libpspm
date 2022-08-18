@@ -41,6 +41,7 @@ class Solver{
 		double cm_grad_dx = 1e-6;
 		bool update_cohorts = true;
 		int  max_cohorts = 500;
+		double cm_dxcut = 1e-10;
 		double ebt_ucut = 1e-10;
 		double ebt_grad_dx = 1e-6;
 		//std::string ode_method = "lsoda";
