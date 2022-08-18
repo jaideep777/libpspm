@@ -98,3 +98,48 @@ plot2("Daphnia_model/cm_Daphnia.txt", 300, "CM")
 plot2("Daphnia_model/abm_Daphnia.txt", 300, "ABM")
 
 dev.off()
+
+
+cols = scales::alpha(c("purple", "green3", "mediumspringgreen", "darkgoldenrod2", "pink", "#2b8cbe"), alpha=0.7)
+
+plotS = function(file, N, title){
+  dat = read.delim(file, header=F)
+  dat = dat[,-ncol(dat)]
+  # plot(x=x, y=exp(-8*x^3), type="l")
+
+  lines(x=dat$V1, y=dat$V3,col=cols[idx], type="l", lwd=2)
+  idx <<- idx+1
+}
+
+par(mfrow=c(1,1), mar=c(4,4,1,1), oma=c(1,1,1,1))
+idx = 1
+plot(x=1,y=NA, xlim=c(0,100), ylim=c(0,3))
+plotS("Daphnia_model/fmu_Daphnia.txt", 300, "FMU")
+plotS("Daphnia_model/ifmu_Daphnia.txt", 300, "IFMU")
+plotS("Daphnia_model/ifmu2_Daphnia.txt", 300, "IFMU(O2)")
+plotS("Daphnia_model/ebt_Daphnia.txt", 300, "IFMU(O2)")
+plotS("Daphnia_model/cm_Daphnia.txt", 300, "IFMU(O2)")
+plotS("Daphnia_model/abm_Daphnia.txt", 300, "IFMU(O2)")
+
+
+
+plot_seeds = function(file, N, title){
+  dat = read.delim(file, header=F)
+  dat = dat[,-ncol(dat)]
+  # plot(x=x, y=exp(-8*x^3), type="l")
+  
+  lines(x=dat$V1, y=dat$V2,col=cols[idx], type="l", lwd=2)
+  idx <<- idx+1
+}
+
+par(mfrow=c(1,1), mar=c(4,4,1,1), oma=c(1,1,1,1))
+idx = 1
+plot(x=1,y=NA, xlim=c(0,100), ylim=c(0,0.5))
+plot_seeds("Daphnia_model/fmu_Daphnia.txt", 300, "FMU")
+plot_seeds("Daphnia_model/ifmu_Daphnia.txt", 300, "IFMU")
+plot_seeds("Daphnia_model/ifmu2_Daphnia.txt", 300, "IFMU(O2)")
+plot_seeds("Daphnia_model/ebt_Daphnia.txt", 300, "IFMU(O2)")
+plot_seeds("Daphnia_model/cm_Daphnia.txt", 300, "IFMU(O2)")
+plot_seeds("Daphnia_model/abm_Daphnia.txt", 300, "IFMU(O2)")
+
+
