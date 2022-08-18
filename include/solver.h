@@ -10,6 +10,7 @@
 #include "environment_base.h"
 #include "species.h"
 #include "ode_solver.h"
+#include "cubic_spline.h"
 
 enum PSPM_SolverType {SOLVER_FMU, SOLVER_MMU, SOLVER_CM, SOLVER_EBT, SOLVER_IFMU, SOLVER_ABM, SOLVER_IEBT};
 
@@ -83,10 +84,9 @@ class Solver{
 	/// @brief calculate \f$du/dt\f$ using the FMU solver
 	void calcRates_FMU(double t, std::vector<double>::iterator S, std::vector<double>::iterator dSdt);
 	
-	void calcRates_iFMU(double t, std::vector<double>::iterator S, std::vector<double>::iterator dSdt);
-	void stepU_iFMU(double t, std::vector<double> &S, std::vector<double> &dSdt, double dt);
+	void calcOdeRatesImplicit(double t, std::vector<double>::iterator S, std::vector<double>::iterator dSdt);
 
-	void calcRates_iEBT(double t, std::vector<double>::iterator S, std::vector<double>::iterator dSdt);
+	void stepU_iFMU(double t, std::vector<double> &S, std::vector<double> &dSdt, double dt);
 	void stepU_iEBT(double t, std::vector<double> &S, std::vector<double> &dSdt, double dt);
 
 	/// @brief calculate \f$du/dt\f$ using the EBT solver
@@ -121,7 +121,7 @@ class Solver{
 	template<typename wFunc>
 	double integrate_wudx_above(wFunc w, double t, double xlow, int species_id);
 
-	std::vector<double> getDensitySpecies(int k, std::vector<double> breaks);
+	std::vector<double> getDensitySpecies(int k, std::vector<double> breaks, Spline::Extr extrapolation_method = Spline::ZERO);
 };
 
 #include "../src/solver.tpp"

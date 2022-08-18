@@ -34,8 +34,7 @@ void Solver::step_to(double tstop, AfterStepFunc &afterStep_user){
 		odeStepper.step_to(tstop, current_time, state, derivs, after_step); // rk4_stepsize is only used if method is "rk4"
 	}
 	
-	
-	if (method == SOLVER_IFMU){	
+	if (method == SOLVER_IEBT || method == SOLVER_IFMU){	
 		while (current_time < tstop){
 			double dt = std::min(control.ode_ifmu_stepsize, tstop-current_time);
 			
@@ -44,7 +43,9 @@ void Solver::step_to(double tstop, AfterStepFunc &afterStep_user){
 			std::vector<double> rates_prev(rates.begin(), rates.begin()+n_statevars_system);  // save system variable rates
 			
 			// use implicit stepper to advance u
-			stepU_iFMU(current_time, state, rates, dt);
+			if      (method == SOLVER_IEBT) stepU_iEBT(current_time, state, rates, dt);
+			else if (method == SOLVER_IFMU) stepU_iFMU(current_time, state, rates, dt);
+			else     throw std::runtime_error("step_to(): Invalid solver method");
 			// current_time += dt; // not needed here, as current time is advanced by the ODE stepper below.
 			
 			if (n_statevars_system > 0){
@@ -61,51 +62,18 @@ void Solver::step_to(double tstop, AfterStepFunc &afterStep_user){
 			auto derivs = [this](double t, std::vector<double>::iterator S, std::vector<double>::iterator dSdt, void* params){
 				copyStateToCohorts(S);
 				// precompute and env computation is not needed here, because it depends on x and u, which are not updated by the solver.
-				calcRates_iFMU(t,S,dSdt);
+				calcOdeRatesImplicit(t,S,dSdt);
 			};
 			// this step below will do afterstep. FIXME: But what if there are no extra state variables? 
 			odeStepper.step_to(current_time+dt, current_time, state, derivs, after_step); // rk4_stepsize is only used if method is "rk4"
 	
 		}
 
-	}
-
-	if (method == SOLVER_IEBT){	
-		while (current_time < tstop){
-			double dt = std::min(control.ode_ifmu_stepsize, tstop-current_time);
-			
-			//copyStateToCohorts(state.begin()); // not needed here because it is called by the odestepper below
-			updateEnv(current_time, state.begin(), rates.begin());
-			std::vector<double> rates_prev(rates.begin(), rates.begin()+n_statevars_system);  // save system variable rates
-			
-			// use implicit stepper to advance u
-			stepU_iEBT(current_time, state, rates, dt);
-			// current_time += dt; // not needed here, as current time is advanced by the ODE stepper below.
-			
-			if (n_statevars_system > 0){
-				copyStateToCohorts(state.begin());   // copy updated u to cohorts 
-				updateEnv(current_time, state.begin(), rates.begin());  // recompute env with updated u
-				// FIXME: use fully implicit stepper here?
-				for (int i=0; i<n_statevars_system; ++i){
-					state[i] += (rates_prev[i]+rates[i])/2*dt;  // use average of old and updated rates for stepping system vars
-				}
-			}
-
-			// use the ODE-stepper for other state variables
-			// this stepper is called even if there are no extra state variables, so copyStateToCohorts is accomplished here
-			auto derivs = [this](double t, std::vector<double>::iterator S, std::vector<double>::iterator dSdt, void* params){
-				copyStateToCohorts(S);
-				// precompute and env computation is not needed here, because it depends on x and u, which are not updated by the solver.
-				calcRates_iEBT(t,S,dSdt);
-			};
-			// this step below will do afterstep. FIXME: But what if there are no extra state variables? 
-			odeStepper.step_to(current_time+dt, current_time, state, derivs, after_step); // rk4_stepsize is only used if method is "rk4"
-	
+		if (method == SOLVER_IEBT){
+			// update cohorts
+			removeDeadCohorts_EBT();
+			addCohort_EBT();  // Add new cohort if N0 > 0. Add after removing dead ones otherwise this will also be removed. 
 		}
-
-		// update cohorts
-		removeDeadCohorts_EBT();
-		addCohort_EBT();  // Add new cohort if N0 > 0. Add after removing dead ones otherwise this will also be removed. 
 
 	}
 

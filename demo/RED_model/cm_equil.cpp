@@ -23,6 +23,7 @@ int main(){
 	S.addSpecies(100, 1, 1e6, true, &spp, 0);
 	//S.get_species(0)->set_bfin_is_u0in(true);	// say that input_birth_flux is u0
 	S.control.max_cohorts = 200;
+	S.control.ebt_ucut = 1e-20;
 	S.resetState();
 	S.initialize();
 	S.setEnvironment(&E);

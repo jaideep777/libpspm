@@ -2,25 +2,6 @@
 #include "solver.h"
 using namespace std;
 
-void Solver::calcRates_iFMU(double t, vector<double>::iterator S, vector<double>::iterator dSdt){
-	vector<double>::iterator its = S    + n_statevars_system; // Skip system variables
-	vector<double>::iterator itr = dSdt + n_statevars_system;
-	
-	for (int s = 0; s<species_vec.size(); ++s){
-		auto spp = species_vec[s];
-		
-		its += spp->J;// skip u 
-		for (int i=0; i<spp->J; ++i) *itr++ = 0; // set du/dt to 0 
-	
-		if (spp->n_extra_statevars > 0){
-			auto itr_prev = itr;
-			spp->getExtraRates(itr); // TODO/FIXME: Does calc of extra rates need t and env?
-			assert(distance(itr_prev, itr) == spp->n_extra_statevars*spp->J);
-			its += spp->n_extra_statevars*spp->J; 	
-		}
-	}
-
-}
 
 // Note: This IFMU solver works only for non-negative growth functions
 void Solver::stepU_iFMU(double t, vector<double> &S, vector<double> &dSdt, double dt){
