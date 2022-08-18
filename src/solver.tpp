@@ -47,11 +47,12 @@ void Solver::step_to(double tstop, AfterStepFunc &afterStep_user){
 			else if (method == SOLVER_IFMU) stepU_iFMU(current_time, state, rates, dt);
 			else     throw std::runtime_error("step_to(): Invalid solver method");
 			// current_time += dt; // not needed here, as current time is advanced by the ODE stepper below.
+			copyStateToCohorts(state.begin());   // copy updated X/U to cohorts 
 			
 			if (n_statevars_system > 0){
-				copyStateToCohorts(state.begin());   // copy updated u to cohorts 
+				// copyStateToCohorts(state.begin());   // not needed here as it's just done above
 				updateEnv(current_time, state.begin(), rates.begin());  // recompute env with updated u
-				// FIXME: use fully implicit stepper here?
+				// .FIXME: use fully implicit stepper here?
 				for (int i=0; i<n_statevars_system; ++i){
 					state[i] += (rates_prev[i]+rates[i])/2*dt;  // use average of old and updated rates for stepping system vars
 				}
@@ -126,7 +127,7 @@ void Solver::step_to(double tstop, AfterStepFunc &afterStep_user){
 			
 			if (n_statevars_system > 0){
 				updateEnv(current_time, state.begin(), rates.begin());  // recompute env with updated u
-				// FIXME: use fully implicit stepper here?
+				// .FIXME: use fully implicit stepper here?
 				for (int i=0; i<n_statevars_system; ++i){
 					state[i] += (rates_prev[i]+rates[i])/2*dt;  // use average of old and updated rates for stepping system vars
 				}
