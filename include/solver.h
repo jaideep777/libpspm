@@ -40,16 +40,16 @@ class Solver{
 		double convergence_eps = 1e-6;
 		double cm_grad_dx = 1e-6;
 		bool update_cohorts = true;
+		bool cm_remove_cohorts = true;
 		int  max_cohorts = 500;
 		double cm_dxcut = 1e-10;
 		double ebt_ucut = 1e-10;
 		double ebt_grad_dx = 1e-6;
-		//std::string ode_method = "lsoda";
 		double ode_rk4_stepsize = 0.1;
 		double ode_ifmu_stepsize = 0.1;
 		bool ifmu_centered_grids = true;
 		bool integral_interpolate = true;
-		double ifmu_order = 2;
+		double ifmu_order = 1;
 		double abm_n0 = 100;
 		double abm_stepsize = 0.02;
 	} control;
