@@ -11,7 +11,7 @@
 #include "species.h"
 #include "ode_solver.h"
 
-enum PSPM_SolverType {SOLVER_FMU, SOLVER_MMU, SOLVER_CM, SOLVER_EBT, SOLVER_IFMU, SOLVER_ABM};
+enum PSPM_SolverType {SOLVER_FMU, SOLVER_MMU, SOLVER_CM, SOLVER_EBT, SOLVER_IFMU, SOLVER_ABM, SOLVER_IEBT};
 
 class Solver{
 	private:
@@ -85,7 +85,10 @@ class Solver{
 	
 	void calcRates_iFMU(double t, std::vector<double>::iterator S, std::vector<double>::iterator dSdt);
 	void stepU_iFMU(double t, std::vector<double> &S, std::vector<double> &dSdt, double dt);
-	
+
+	void calcRates_iEBT(double t, std::vector<double>::iterator S, std::vector<double>::iterator dSdt);
+	void stepU_iEBT(double t, std::vector<double> &S, std::vector<double> &dSdt, double dt);
+
 	/// @brief calculate \f$du/dt\f$ using the EBT solver
 	void calcRates_EBT(double t, std::vector<double>::iterator S, std::vector<double>::iterator dSdt);
 	void addCohort_EBT();

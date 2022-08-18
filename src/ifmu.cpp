@@ -75,16 +75,18 @@ void Solver::stepU_iFMU(double t, vector<double> &S, vector<double> &dSdt, doubl
 			U[w] = (Cw - Aw*U[w-1])/Bw;
 		}
 		for (int w = 2; w < J; ++w){
-
+				
+			double Mw = spp->mortalityRate(w, spp->getX(w), t, env);
+			
 			// O1 scheme
 			double Aw = -growthArray[w-1]*dt/h[w];
-			double Bw  = 1 + dt/h[w]*growthArray[w] + dt*spp->mortalityRate(w, spp->getX(w), t, env);
+			double Bw  = 1 + dt/h[w]*growthArray[w] + dt*Mw;
 			double Cw = spp->getU(w);
 
 			double Uw1 = (Cw - Aw*U[w-1])/Bw;
 
 			// O2 scheme
-			double A2w = 1 + 3*dt/(2*h[w])*growthArray[w] + dt*spp->mortalityRate(w, spp->getX(w), t, env);
+			double A2w = 1 + 3*dt/(2*h[w])*growthArray[w] + dt*Mw;
 			double B2w = -4*growthArray[w-1]*dt/(2*h[w]);
 			double C2w = growthArray[w-2]*dt/(2*h[w]);
 			double D2w = spp->getU(w);
@@ -92,7 +94,7 @@ void Solver::stepU_iFMU(double t, vector<double> &S, vector<double> &dSdt, doubl
 			double Uw2 = (D2w - B2w*U[w-1] - C2w*U[w-2])/A2w;
 
 			double phi = control.ifmu_order - 1; // 0 for O1, 1 for O2, or in-between
- 			if (Uw2 < 0) phi = 0; // use O1 if O2 density is negative
+ 			//if (Uw2 < 0) phi = 0; // use O1 if O2 density is negative. FIXME: this condition causes wrong results in Daphnia model!   
 			U[w] = phi*Uw2 + (1-phi)*Uw1;
 		}
 

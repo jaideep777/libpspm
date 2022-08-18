@@ -58,6 +58,7 @@ void Solver::addSpecies(std::vector<double> xbreaks, Species_Base* s, int n_extr
 	else if (method == SOLVER_MMU)  J = xbreaks.size()-1;  
 	else if (method == SOLVER_CM )  J = xbreaks.size();
 	else if (method == SOLVER_EBT)  J = xbreaks.size();
+	else if (method == SOLVER_IEBT) J = xbreaks.size();
 	else if (method == SOLVER_ABM)  J = control.abm_n0;
 	else    throw std::runtime_error("Unsupported method");
 
@@ -174,7 +175,7 @@ double Solver::maxSize(){
 
 void Solver::print(){
 	std::cout << ">> SOLVER \n";
-	string types[] = {"FMU", "MMU", "CM", "EBT", "Implicit FMU", "ABM"};
+	string types[] = {"FMU", "MMU", "CM", "EBT", "Implicit FMU", "ABM", "Implicit EBT"};
 	std::cout << "+ Type: " << types[method] << std::endl;
 
 	std::cout << "+ State size = " << state.size() << "\n";
@@ -235,7 +236,7 @@ void Solver::initialize(){
 			}
 		}
 		
-		if (method == SOLVER_EBT){
+		if (method == SOLVER_EBT || method == SOLVER_IEBT){
 			// x, u for internal cohorts in state and it cohorts
 			for (size_t i=0; i<s->J-1; ++i){
 				double X = (s->x[i]+s->x[i+1])/2.0;			
@@ -320,7 +321,7 @@ void Solver::copyStateToCohorts(std::vector<double>::iterator state_begin){
 				s->setU(i,U);
 			}
 		}
-		if (method == SOLVER_EBT){
+		if (method == SOLVER_EBT || method == SOLVER_IEBT){
 			// x, u for boundary and internal cohorts
 			for (size_t i=0; i<s->J; ++i){
 				double X = *it++; 
@@ -360,7 +361,7 @@ void Solver::copyCohortsToState(){
 				*it++ = U;	// set u to state
 			}
 		}
-		if (method == SOLVER_EBT){
+		if (method == SOLVER_EBT || method == SOLVER_IEBT){
 			// x, u for boundary and internal cohorts
 			for (size_t i=0; i<s->J; ++i){
 				double X = s->getX(i); 
@@ -477,7 +478,7 @@ std::vector<double> Solver::getDensitySpecies(int k, vector<double> breaks){
 	
 	if (method == SOLVER_ABM) spp->sortCohortsDescending(); // ABM needs sorted cohorts
 
-	if (method == SOLVER_EBT || method == SOLVER_ABM){ // EBT and ABM have very simular structure so use the same density calculation algo
+	if (method == SOLVER_EBT || method == SOLVER_IEBT || method == SOLVER_ABM){ // EBT and ABM have very simular structure so use the same density calculation algo
 		double xm = spp->getX(0)+1e-6;
 
 		vector<point> points(breaks.size()-1);
