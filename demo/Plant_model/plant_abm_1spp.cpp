@@ -145,12 +145,14 @@ int main(int argc, char ** argv){
 	s1.print(); 
 	
 	//exit(1);
+	double n0 = 1000;
+	if (argc > 3) n0 = stod(argv[3]);
 
     Solver S(SOLVER_ABM, "rk45ck");
     S.use_log_densities = true;
 	S.control.ode_eps = 1e-4;
-	S.control.abm_n0 = 1000;
-	S.control.abm_stepsize = 0.05;
+	S.control.abm_n0 = n0;
+	S.control.abm_stepsize = 0.1;
 	//S.control.ode_rk4_stepsize = 0.5;
 	S.setEnvironment(&env);
 	//    S.createSizeStructuredVariables({"mort", "fec", "heart_area", "heart_mass"});
@@ -194,7 +196,7 @@ int main(int argc, char ** argv){
 			seeds_out[s].push_back(seeds[s] * S_D * env.patch_age_density(times[i]));
 		}
 
-		cout << times[i] << " " << S.species_vec[0]->xsize() << " ";
+		cout << times[i] << " " << S.species_vec[0]->xsize()  << " " << S.species_vec[1]->xsize() << " " << S.species_vec[2]->xsize()<< " ";
 		for (int i=0; i<S.n_species(); ++i) cout << seeds[i] << " ";
 		cout << " | " << env.light_profile.npoints << "\n";
 

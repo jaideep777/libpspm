@@ -150,6 +150,9 @@ int main(int argc, char ** argv){
     S.use_log_densities = true;
 	S.control.ode_eps = 1e-4;
 	S.control.integral_interpolate = false;
+	S.control.cm_remove_cohorts = false;
+	S.control.ebt_ucut = 1e-20;
+	S.control.cm_dxcut = 1e-20;
 	S.setEnvironment(&env);
 	//    S.createSizeStructuredVariables({"mort", "fec", "heart_area", "heart_mass"});
     
