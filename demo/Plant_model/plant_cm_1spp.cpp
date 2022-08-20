@@ -8,6 +8,18 @@ using namespace std;
 #include "pspm_environment.h"
 #include "pspm_plant.h"
 
+vector<double> fmu_create_grid(double xmin, double xmax, double dxmin = 1e-4, double dxmax=0.1, double multiplier=1.1){
+	vector <double> xvec;
+	double x = xmin, dx = dxmin;
+	while(x<xmax){
+		xvec.push_back(x);	
+		dx = std::min(dx*multiplier, dxmax);
+		x += dx;
+	}
+	xvec.push_back(xmax);
+	return xvec; 
+}
+
 vector<double> my_log_seq(double x0, double xf, int N){
 	vector<double> grid;
 	for (int i=0; i<N; ++i) grid.push_back(exp(log(x0) + (double(i)/(N-1))*(log(xf)-log(x0))));
@@ -160,10 +172,16 @@ int main(int argc, char ** argv){
 	if (argc > 1) ip_seed_rain = stod(argv[1]);
 	cout << "Simulating with input seed rain = " << ip_seed_rain << endl;
  
+#ifndef USE_INIT_DIST
  	S.addSpecies(vector<double>(1, p1.vars.height), &s1, 4, ip_seed_rain);
 	S.addSpecies(vector<double>(1, p2.vars.height), &s2, 4, ip_seed_rain);
 	S.addSpecies(vector<double>(1, p3.vars.height), &s3, 4, ip_seed_rain);
-	
+#else
+ 	S.addSpecies(fmu_create_grid(p1.vars.height, 20), &s1, 4, ip_seed_rain);
+	S.addSpecies(fmu_create_grid(p1.vars.height, 20), &s2, 4, ip_seed_rain);
+	S.addSpecies(fmu_create_grid(p1.vars.height, 20), &s3, 4, ip_seed_rain);
+#endif	
+
 	S.resetState();
 	S.initialize();
 

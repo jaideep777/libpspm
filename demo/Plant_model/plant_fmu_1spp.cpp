@@ -167,11 +167,13 @@ int main(int argc, char ** argv){
 	S.resetState();
 	S.initialize();
 
+#ifndef USE_INIT_DIST
 	// ensure that only 1st cohort has finite density
 	for (int k=0; k<S.species_vec.size(); ++k) 
 		for (int i=1; i<S.species_vec[k]->xsize(); ++i) S.species_vec[k]->setU(i,0);
 	S.copyCohortsToState();	
-	
+#endif
+
 	S.print();
 
 	double tmax = 105.32;

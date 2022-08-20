@@ -30,7 +30,7 @@ void Solver::stepU_iFMU(double t, vector<double> &S, vector<double> &dSdt, doubl
 			birthFlux = spp->calc_boundary_u(growthArray[0], pe)*growthArray[0];
 		}
 		
-		//cout << t << "\t" << birthFlux/growthArray[0] << " -> " << calcSpeciesBirthFlux(s,t)/growthArray[0] << "\n";
+		//cout << t << "\t | B*pe = " << calcSpeciesBirthFlux(s,t) << " * " << pe << " -> " << birthFlux << "\n";
 		double B0  = 1 + dt/h[0]*growthArray[0] + dt*spp->mortalityRate(0, spp->getX(0), t, env);
 //		std::cout << "B0 = " << B0 << endl; 
 		double C0 = spp->getU(0) + dt/h[0]*birthFlux;

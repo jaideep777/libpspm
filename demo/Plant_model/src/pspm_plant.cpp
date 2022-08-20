@@ -18,11 +18,19 @@ double PSPM_Plant::init_density(double x, void * _env, double input_seed_rain){
 		EnvUsed * env = (EnvUsed*)_env;
 		compute_vars_phys(*env);
 		double u0;
+#ifndef USE_INIT_DIST
 		if (x < 0.5)
 			u0 = fabs(input_seed_rain)*germination_probability(*env)/vars.height_dt;
 		else 
 			u0 = 0;
 		return u0;
+#else
+		// if (lma == 0.0825) u0 = 1e-2;
+		// else if (lma == 0.02625) u0 = 1e-3;
+		// else if (lma == 0.04625) u0 = 1e-4;
+		u0 = 1e-2*germination_probability(*env)/vars.height_dt;
+		return (x>15)? 1e-16 : u0*exp(-5*x/20);
+#endif
 	//}
 	//else return 0;
 }
@@ -47,6 +55,7 @@ double PSPM_Plant::growthRate(double x, double t, void * env){
 		//compute_vars_phys(*env);
 		//++nrc;
 	////}
+	//cout << "x/g = " << x << " " << vars.height_dt << endl;
 	return vars.height_dt;
 		
 }
