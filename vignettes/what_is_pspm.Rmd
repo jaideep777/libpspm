@@ -2,7 +2,9 @@
 title: "What is a PSPM"
 author: "Jaideep Joshi"
 date: "11 March 2022"
-output: html_document
+output:
+  word_document: default
+  html_document: default
 ---
 
 ```{r setup, include=FALSE}
@@ -16,14 +18,14 @@ $$
 $$
 with the boundary condition
 $$
-g(x_b)u(x_b) = s_e \int_{x_b}^{x_m} \beta(x,t,E)u(x,t)dt,
+g(x_\text{b})u(x_\text{b}) = s_\text{e} \int_{x_b}^{x_m} \beta(x,t,E)u(x,t)dt,
 $$
 and a specified initial distribution
 $$
 u(x,0) = u_0(x),
 $$
 
-where $x$ is the physiological state variable, such as size, $u(x)$ is the density of individuals of size $x$ (such that the number of individuals within a small size range $[x, x+dx]$ is $u(x)dx$), $g$, $\mu$, and $\beta$ are the demographic rates of individuals (growth rate $g$, mortality rate $\mu$, and fecundity rate $\beta$) as functions of their size $x$, the environment $E$, and time $t$, $x_b$ is the size of offspring at birth, $x_m$ is the maximum size of individuals, and $s_e$ is the establishment probability of offspring. 
+where $x$ is the physiological state variable, such as size, $u(x)$ is the density of individuals of size $x$ (such that the number of individuals within a small size range $[x, x+dx]$ is $u(x)dx$), $g$, $\mu$, and $\beta$ are the demographic rates of individuals (growth rate $g$, mortality rate $\mu$, and fecundity rate $\beta$) as functions of their size $x$, the environment $E$, and time $t$, $x_\text{b}$ is the size of offspring at birth, $x_m$ is the maximum size of individuals, and $s_\text{e}$ is the establishment probability of offspring. 
 
 The PDE states that within a given size interval, the density of individuals increases because of smaller individuals entering the focal size-range via growth, and decreases by individuals growing out of the size range and by individuals dying. The boundary condition states that the density of individuals at the smallest size $x_b$ is determined by the total number number of offspring that are produced by all individuals in the population, and the proportion of those that establish successfully.
 

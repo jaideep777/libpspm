@@ -174,11 +174,13 @@ dev.off()
 
 dir = "~/codes/libpspm/demo/Plant_model"
 
+png("../size_dists_withFeedback_u0.png", width = 600/1.2*3, height=750/1.2*3, res=300)
 par(mar=c(4,4,1,1), oma = c(1,4,2,1), cex.lab=1.2, cex.axis=1.2)
 layout(mat = matrix(1:6, nrow=3, byrow=F))
 
-plot_dists("outputs/ifmu_u0a", "IFMU")
-plot_dists("outputs/iebt_u0a", "IEBT")
+plot_dists("outputs/ifmu_u0c", "IFMU")
+plot_dists("outputs/iebt_u0c", "IEBT")
+dev.off()
 
 setwd(dir)
 seeds_ifmu = read.delim("outputs/ifmu_u0c/seed_rains.txt", header = F)
