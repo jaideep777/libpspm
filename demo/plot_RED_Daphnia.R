@@ -111,7 +111,8 @@ plot2("Daphnia_model/iebt_Daphnia.txt", 300, "IEBT")
 dev.off()
 
 
-cols = scales::alpha(c("purple", "green3", "mediumspringgreen", "darkgoldenrod2", "pink", "#2b8cbe"), alpha=0.7)
+cols = scales::alpha(c("purple", "green3", "mediumspringgreen", "darkgoldenrod2", "red3", "pink", "#2b8cbe"), alpha=0.7)
+cols = scales::alpha(c("darkgreen", "yellowgreen", "green3", "magenta", "purple", "darkgoldenrod2", "turquoise2"), alpha=0.7)
 
 plotS = function(file, N, title){
   dat = read.delim(file, header=F)
@@ -121,6 +122,7 @@ plotS = function(file, N, title){
   lines(x=dat$V1, y=dat$V3,col=cols[idx], type="l", lwd=2)
   idx <<- idx+1
 }
+
 
 par(mfrow=c(1,1), mar=c(4,4,1,1), oma=c(1,1,1,1))
 idx = 1
@@ -134,7 +136,7 @@ plotS("Daphnia_model/abm_Daphnia.txt", 300, "ABM")
 
 
 
-plot_seeds = function(file, N, title){
+plot_seeds = function(file){
   dat = read.delim(file, header=F)
   dat = dat[,-ncol(dat)]
   # plot(x=x, y=exp(-8*x^3), type="l")
@@ -143,14 +145,31 @@ plot_seeds = function(file, N, title){
   idx <<- idx+1
 }
 
-par(mfrow=c(1,1), mar=c(4,4,1,1), oma=c(1,1,1,1))
+cairo_pdf("RED_Daphnia_reproduction_rate_timeseries.pdf", width = 8.7, height=5)
+
+par(mfrow=c(1,2), mar=c(4,4,1,1), oma=c(1,1,1,1))
 idx = 1
-plot(x=1,y=NA, xlim=c(0,100), ylim=c(0,0.5))
-plot_seeds("Daphnia_model/fmu_Daphnia.txt", 300, "FMU")
-plot_seeds("Daphnia_model/ifmu_Daphnia.txt", 300, "IFMU")
-plot_seeds("Daphnia_model/ifmu2_Daphnia.txt", 300, "IFMU(O2)")
-plot_seeds("Daphnia_model/ebt_Daphnia.txt", 300, "IFMU(O2)")
-plot_seeds("Daphnia_model/cm_Daphnia.txt", 300, "IFMU(O2)")
-plot_seeds("Daphnia_model/abm_Daphnia.txt", 300, "IFMU(O2)")
+plot(x=1,y=NA, xlim=c(0,100), ylim=c(0,0.5), ylab="Reproduction rate", xlab="Time")
+plot_seeds("Daphnia_model/fmu_Daphnia.txt")
+mtext(side=3, line=0.5, text = "Daphnia model")
+plot_seeds("Daphnia_model/ifmu_Daphnia.txt")
+plot_seeds("Daphnia_model/ifmu2_Daphnia.txt")
+plot_seeds("Daphnia_model/ebt_Daphnia.txt")
+plot_seeds("Daphnia_model/iebt_Daphnia.txt")
+plot_seeds("Daphnia_model/cm_Daphnia.txt")
+plot_seeds("Daphnia_model/abm_Daphnia.txt")
 
+idx = 1
+plot(x=1,y=NA, xlim=c(0,5000), ylim=c(0,50), ylab="Reproduction rate", xlab="Time")
+mtext(side=3, line=0.5, text = "RED model")
+plot_seeds("RED_model/fmu_Redmodel.txt")
+plot_seeds("RED_model/ifmu_Redmodel.txt")
+plot_seeds("RED_model/ifmu2_Redmodel.txt")
+plot_seeds("RED_model/ebt_Redmodel.txt")
+plot_seeds("RED_model/iebt_Redmodel.txt")
+plot_seeds("RED_model/cm_Redmodel.txt")
+plot_seeds("RED_model/abm_Redmodel.txt")
+abline(h=37.5845, col="black")
+legend(x = 2500, y=25, legend = c("FMU", "IFMU", "IFMU(O2)", "EBT", "IEBT", "CM", "ABM"), col=cols, lwd=2, bty = "n", cex=1.)
 
+dev.off()

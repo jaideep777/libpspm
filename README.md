@@ -1,3 +1,8 @@
+---
+output:
+  word_document: default
+  html_document: default
+---
 # libpspm
 
 libpspm is a C++ library to simulate Physiologically Structured Population Models (PSPMs).

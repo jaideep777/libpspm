@@ -1,5 +1,4 @@
 #include "solver.h"
-#include "cubic_spline.h"
 
 #include <iostream>
 #include <cmath>
@@ -36,6 +35,7 @@ inline std::vector <double> diff(vector <double> breaks){
 
 Solver::Solver(PSPM_SolverType _method, string ode_method) : odeStepper(ode_method, 0, 1e-6, 1e-6) {
 	method = _method;
+
 }
 
 
@@ -380,6 +380,26 @@ void Solver::copyCohortsToState(){
 }
 
 
+void Solver::calcOdeRatesImplicit(double t, vector<double>::iterator S, vector<double>::iterator dSdt){
+	vector<double>::iterator its = S    + n_statevars_system; // Skip system variables
+	vector<double>::iterator itr = dSdt + n_statevars_system;
+	
+	for (int s = 0; s<species_vec.size(); ++s){
+		auto spp = species_vec[s];
+		
+		its += (n_statevars_internal)*spp->J; // skip x and u 
+		for (int i=0; i<n_statevars_internal*spp->J; ++i) *itr++ = 0; // set dx/dt and du/dt to 0 
+	
+		if (spp->n_extra_statevars > 0){
+			auto itr_prev = itr;
+			spp->getExtraRates(itr); // TODO/FIXME: Does calc of extra rates need t and env?
+			assert(distance(itr_prev, itr) == spp->n_extra_statevars*spp->J);
+			its += spp->n_extra_statevars*spp->J; 	
+		}
+	}
+
+}
+
 
 void Solver::step_to(double tstop){
 	auto func = [](double t){};
@@ -472,7 +492,7 @@ struct point{
 	int    count = 0;
 };	
 
-std::vector<double> Solver::getDensitySpecies(int k, vector<double> breaks){
+std::vector<double> Solver::getDensitySpecies(int k, vector<double> breaks, Spline::Extr extrapolation_method){
 	auto spp = species_vec[k];
 	vector <double> xx, uu;
 	
@@ -557,7 +577,7 @@ std::vector<double> Solver::getDensitySpecies(int k, vector<double> breaks){
 		
 		Spline spl;
 		spl.splineType = Spline::LINEAR; //Spline::CONSTRAINED_CUBIC;
-		spl.extrapolate = Spline::ZERO; //Spline::ZERO;
+		spl.extrapolate = extrapolation_method; //Spline::ZERO; //Spline::ZERO;
 		spl.set_points(xx, uu);
 		 
 		vector <double> dens;

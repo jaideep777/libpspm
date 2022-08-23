@@ -42,7 +42,7 @@ double Plant::assimilation(const Environment& environment,
 	
 	
 	
-	  //std::cout << "assimmilation = " << A << " " << area_leaf << std::endl;
+	//  std::cout << "height = " << height << ", light = " << environment.canopy_openness(height) << ", assimmilation = " << A << " " << area_leaf << std::endl;
   
   return area_leaf * A;
 }
@@ -123,6 +123,7 @@ void Plant::compute_vars_phys(const Environment& environment,
   }
   // [eqn 21] - Instantaneous mortality rate
   vars.mortality_dt = mortality_dt(net_mass_production_dt_ / vars.area_leaf, vars.mortality);
+  //std::cout << "lma | h/g/m/f = " << lma << " | " << vars.height << " -> " << environment.light_profile.eval(vars.height) << " -> " << vars.height_dt << " " << vars.mortality_dt << " " << vars.fecundity_dt << std::endl;
 }
 
 

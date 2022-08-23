@@ -174,6 +174,7 @@ double Solver::integrate_x(wFunc w, double t, int species_id){
 		double I=0;
 		for (unsigned int i=0; i<spp->J; ++i){
 			I += spp->h[i]*w(i, t)*spp->getU(i);  // TODO: Replace with std::transform after profiling
+			//std::cout << "integral: " << w(i, t) << " * " << spp->getU(i) << std::endl;
 		}
 		return I;
 	}

@@ -2,25 +2,25 @@
 #include "solver.h"
 using namespace std;
 
-void Solver::calcRates_iEBT(double t, vector<double>::iterator S, vector<double>::iterator dSdt){
-	vector<double>::iterator its = S    + n_statevars_system; // Skip system variables
-	vector<double>::iterator itr = dSdt + n_statevars_system;
+// void Solver::calcRates_iEBT(double t, vector<double>::iterator S, vector<double>::iterator dSdt){
+// 	vector<double>::iterator its = S    + n_statevars_system; // Skip system variables
+// 	vector<double>::iterator itr = dSdt + n_statevars_system;
 	
-	for (int s = 0; s<species_vec.size(); ++s){
-		auto spp = species_vec[s];
+// 	for (int s = 0; s<species_vec.size(); ++s){
+// 		auto spp = species_vec[s];
 		
-		its += 2*spp->J; // skip x and u 
-		for (int i=0; i<2*spp->J; ++i) *itr++ = 0; // set dx/dt and du/dt to 0 
+// 		its += (n_statevars_internal)*spp->J; // skip x and u 
+// 		for (int i=0; i<n_statevars_internal*spp->J; ++i) *itr++ = 0; // set dx/dt and du/dt to 0 
 	
-		if (spp->n_extra_statevars > 0){
-			auto itr_prev = itr;
-			spp->getExtraRates(itr); // TODO/FIXME: Does calc of extra rates need t and env?
-			assert(distance(itr_prev, itr) == spp->n_extra_statevars*spp->J);
-			its += spp->n_extra_statevars*spp->J; 	
-		}
-	}
+// 		if (spp->n_extra_statevars > 0){
+// 			auto itr_prev = itr;
+// 			spp->getExtraRates(itr); // TODO/FIXME: Does calc of extra rates need t and env?
+// 			assert(distance(itr_prev, itr) == spp->n_extra_statevars*spp->J);
+// 			its += spp->n_extra_statevars*spp->J; 	
+// 		}
+// 	}
 
-}
+// }
 
 
 void Solver::stepU_iEBT(double t, vector<double> &S, vector<double> &dSdt, double dt){

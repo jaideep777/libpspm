@@ -3,7 +3,6 @@
 using namespace std;
 
 void Solver::stepABM(double t, double dt){
-
 		
 	// 1. Take implicit step for U
 	for (int s = 0; s<species_vec.size(); ++s){

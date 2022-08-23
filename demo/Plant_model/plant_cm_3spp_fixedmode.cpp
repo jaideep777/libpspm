@@ -150,6 +150,7 @@ int main(){
     S.use_log_densities = true;
 	S.control.ode_eps = 1e-4;
 	S.control.integral_interpolate = false;
+	S.control.cm_remove_cohorts = false;
 	S.setEnvironment(&env);
 	//    S.createSizeStructuredVariables({"mort", "fec", "heart_area", "heart_mass"});
     

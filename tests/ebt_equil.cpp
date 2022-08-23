@@ -52,7 +52,7 @@ int main(){
 		fout << S.current_time << "\t" << S.u0_out(t)[0] << "\t";
 
 		vector<double> breaks = myseq(0,1,26);
-		vector<double> v = S.getDensitySpecies(0, breaks);
+		vector<double> v = S.getDensitySpecies(0, breaks, Spline::QUADRATIC);
 		for (auto y : v) fout << y << "\t";
 		fout << endl;
 	}
