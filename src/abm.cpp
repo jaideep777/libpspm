@@ -19,17 +19,20 @@ void Solver::stepABM(double t, double dt){
 		double gb = spp->growthRate(-1, spp->xb, t, env);
 		double birthFlux;
 		if (spp->birth_flux_in < 0){	
+			// cout << "Species( " << s << ") | bfin<0: ";
 			birthFlux = calcSpeciesBirthFlux(s,t) * pe;
 		}
 		else{
 			double ub = spp->get_boundary_u(); // backup boundary cohort's density because it will be overwritten by calc
 			double u0 = spp->calc_boundary_u(gb, pe);
+			// cout << "Species( " << s << "): ";
+			// cout << "u0 = bf_in*pe/gb = " << spp->birth_flux_in << " * " << pe << " / " << gb << " = " << spp->get_boundary_u() << endl;
 			birthFlux = u0*gb;
 			spp->set_ub(ub);
 		}
 
 		double noff = birthFlux*dt/spp->get_boundary_u();  // number of offspring = birthflux / density of each superindividual
-		//cout << "noff: " << spp->noff_abm << " | " << noff << " " << birthFlux << " " << dt << " " << spp->get_boundary_u() << endl;
+		// cout << "noff: " << spp->noff_abm << " | " << noff << " " << birthFlux << " " << dt << " " << spp->get_boundary_u() << endl;
 		spp->noff_abm += noff;
 		
 		// implement mortality
@@ -72,20 +75,26 @@ void Solver::stepABM(double t, double dt){
 			spp->copyExtraStateToCohorts(its);
 		}
 		
+		// updated environment needed for initializing cummulative variables in new cohorts
+		updateEnv(t+dt, state.begin(), rates.begin());
 		// add recruits once they have accumulated to > 1
+		// use t and env to initialize (instead of updated values) becaues number of recruits were calculated at the beginning of the step
 		if (spp->noff_abm > 1){
 			int nadd = int(spp->noff_abm);	
+			spp->initBoundaryCohort(t, env);
 			spp->addCohort(nadd);
 			spp->noff_abm -= nadd;
 		}
 		// also add a recruit in anticipation if the whole populaiton is dead
 		if (spp->J == 0){
+			spp->initBoundaryCohort(t, env);
 			spp->addCohort(1);
 			//--spp->noff_abm;
 		}
 		
 		// resize state - this matters only if extra istate is specified
 		resizeStateFromSpecies();
+		copyCohortsToState();
 	}
 	
 	//print();

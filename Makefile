@@ -74,7 +74,7 @@ superclean: clean testclean
 
 ## TESTING SUITE ##
 
-TEST_FILES = $(wildcard tests/*_equil.cpp) 
+TEST_FILES = $(wildcard tests/*.cpp) 
 TEST_OBJECTS = $(patsubst tests/%.cpp, tests/%.o, $(TEST_FILES))
 TEST_TARGETS = $(patsubst tests/%.cpp, tests/%.test, $(TEST_FILES))
 TEST_RUNS = $(patsubst tests/%.cpp, tests/%.run, $(TEST_FILES))

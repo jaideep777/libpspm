@@ -71,8 +71,14 @@ void Solver::stepU_iEBT(double t, vector<double> &S, vector<double> &dSdt, doubl
 		double b2 = 1 - growthGrad*dt + mb*dt;
 		double c2 = pi0;
 
-		XU[2*(J-1)+0] = (a2*c1-a1*c2)/(a2*b1-a1*b2);
-		XU[2*(J-1)+1] = (b2*c1-b1*c2)/(b2*a1-b1*a2);
+		double pinew = (a2*c1-a1*c2)/(a2*b1-a1*b2);
+		double unew = (b2*c1-b1*c2)/(b2*a1-b1*a2);
+
+		if (pinew < 0) throw std::runtime_error("pi0 < 0");
+		if (unew < 0) throw std::runtime_error("u0 < 0");
+		
+		XU[2*(J-1)+0] = pinew;
+		XU[2*(J-1)+1] = unew;
 
 		its += J*(2+spp->n_extra_statevars);
 

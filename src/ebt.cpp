@@ -68,7 +68,7 @@ void Solver::calcRates_EBT(double t, vector<double>::iterator S, vector<double>:
 
 
 void Solver::addCohort_EBT(){
-	
+	// FIXME: is updatEnv needed here? 
 	for (auto spp : species_vec){
 		// 1. internalize the pi0-cohort (this cohort's birth time would have been already set when it was inserted)
 		// - get pi0, N0 from last cohort

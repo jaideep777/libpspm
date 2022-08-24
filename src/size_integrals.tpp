@@ -118,13 +118,7 @@ double Solver::integrate_wudx_above(wFunc w, double t, double xlow, int species_
 	
 	else if (method == SOLVER_EBT || method == SOLVER_IEBT){
 		// set up cohorts to integrate
-		// backup pi0, N0 from last (youngest) cohort <-- cohorts are sorted descending
-		double   pi0  =  spp->getX(spp->J-1);
-		double   N0   =  spp->getU(spp->J-1);
-
-		// real-ize pi0-cohort with actual x0 value
-		double x0 = spp->xb + pi0/(N0+1e-12);
-		spp->setX(spp->J-1, x0);
+		realizeEbtBoundaryCohort(spp);
 
 		// calculate integral
 		double I = 0;
@@ -134,7 +128,7 @@ double Solver::integrate_wudx_above(wFunc w, double t, double xlow, int species_
 		}
 		
 		// restore the original pi0-cohort
-		spp->setX(spp->J-1, pi0);
+		restoreEbtBoundaryCohort(spp);
 
 		return I;
 	}
@@ -181,21 +175,14 @@ double Solver::integrate_x(wFunc w, double t, int species_id){
 	
 	else if (method == SOLVER_EBT || method == SOLVER_IEBT){
 		// integrate using EBT rule (sum over cohorts)
-		
-		// backup pi0, N0 from last cohort 
-		double   pi0  =  spp->getX(spp->J-1);
-		double   N0   =  spp->getU(spp->J-1);
-
-		// real-ize pi0-cohort with actual x0 value
-		double x0 = spp->xb + pi0/(N0+1e-12);
-		spp->setX(spp->J-1, x0);
+		realizeEbtBoundaryCohort(spp);
 
 		// calculate integral
 		double I = 0;
 		for (int i=0; i<spp->J; ++i) I += w(i, t)*spp->getU(i);
 		
 		// restore the original pi0-cohort
-		spp->setX(spp->J-1, pi0);
+		restoreEbtBoundaryCohort(spp);
 
 		return I;
 	}

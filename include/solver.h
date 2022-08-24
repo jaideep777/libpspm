@@ -16,6 +16,8 @@ enum PSPM_SolverType {SOLVER_FMU, SOLVER_MMU, SOLVER_CM, SOLVER_EBT, SOLVER_IFMU
 
 class Solver{
 	private:
+	static std::map<std::string, PSPM_SolverType> methods_map;
+
 	const bool debug = false;
 	PSPM_SolverType method;
 
@@ -57,8 +59,14 @@ class Solver{
 	
 	bool use_log_densities = true;
 
+	private:
+	double pi0, N0;
+	void realizeEbtBoundaryCohort(Species_Base * spp);
+	void restoreEbtBoundaryCohort(Species_Base * spp);
+
 	public:	
 	Solver(PSPM_SolverType _method, std::string ode_method = "rk45ck");
+	Solver(std::string _method, std::string ode_method = "rk45ck");
 
 	void addSystemVariables(int _s);
 	void addSpecies(int _J, double _xb, double _xm, bool log_breaks, Species_Base* _mod, int n_extra_vars, double input_birth_flux = -1);

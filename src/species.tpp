@@ -303,6 +303,9 @@ void Species<Model>::getExtraRates(std::vector<double>::iterator &it){
 
 template <class Model>
 void Species<Model>::addCohort(int n){
+	if (n > cohorts.max_size()){
+		std::cout << "requested n = " << n << " is greater than max_size = " << cohorts.max_size() << std::endl;
+	}
 	cohorts.reserve(cohorts.size()+n);
 	for (int i=0; i<n; ++i){
 		cohorts.push_back(boundaryCohort);

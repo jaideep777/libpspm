@@ -32,10 +32,22 @@ inline std::vector <double> diff(vector <double> breaks){
 
 // ~~~~~~~~~~~ SOLVER ~~~~~~~~~~~~~~~~~~~~~
 
+std::map<std::string, PSPM_SolverType> Solver::methods_map = 
+		{{"FMU",  SOLVER_FMU}, 
+		 {"MMU",  SOLVER_MMU}, 
+		 {"CM",   SOLVER_CM}, 
+		 {"EBT",  SOLVER_EBT}, 
+		 {"IFMU", SOLVER_IFMU}, 
+		 {"ABM",  SOLVER_ABM}, 
+		 {"IEBT", SOLVER_IEBT}};
+
 
 Solver::Solver(PSPM_SolverType _method, string ode_method) : odeStepper(ode_method, 0, 1e-6, 1e-6) {
 	method = _method;
 
+}
+
+Solver::Solver(std::string _method, std::string ode_method) : Solver(methods_map.at(_method), ode_method){
 }
 
 
@@ -288,7 +300,10 @@ void Solver::initialize(){
 		}
 
 		// initialize extra state for each cohort and copy it to state
+		// For EBT, the initialization of extra variables may need state info, so need to realize pi0-cohort
+		if (method == SOLVER_EBT || method == SOLVER_IEBT) realizeEbtBoundaryCohort(s);
 		s->initAndCopyExtraState(current_time, env, it);
+		if (method == SOLVER_EBT || method == SOLVER_IEBT) restoreEbtBoundaryCohort(s);
 		//if (s->n_extra_statevars > 0){  // FIXME: maybe redundant
 			//auto it_prev = it;
 			//s->init_ExtraState(it);  // this also inits the extra state of boundary cohort, but without advancing the iterator
@@ -296,6 +311,23 @@ void Solver::initialize(){
 		//}
 
 	}
+}
+
+
+void Solver::realizeEbtBoundaryCohort(Species_Base * spp){
+	// backup pi0, N0 from last (youngest) cohort <-- cohorts are sorted descending
+	pi0 = spp->getX(spp->J-1);
+	N0  = spp->getU(spp->J-1);
+
+	// real-ize pi0-cohort with actual x0 value
+	double x0 = spp->xb + pi0/(N0+1e-12);
+	spp->setX(spp->J-1, x0);
+}
+
+
+void Solver::restoreEbtBoundaryCohort(Species_Base * spp){
+	// Copy saved value of pi0 back to the pi0-cohort (pi0 cohort is at index J-1)
+	spp->setX(spp->J-1, pi0);
 }
 
 
