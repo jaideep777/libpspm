@@ -4,17 +4,19 @@ using namespace std;
 
 void Solver::stepABM(double t, double dt){
 		
-	// 1. Take implicit step for U
+	// Take implicit step for U
 	for (int s = 0; s<species_vec.size(); ++s){
 		Species_Base* spp = species_vec[s];
 		
+		// Calc growth and mortality rates
 		vector<double> growthArray(spp->J);
+		vector<double> mortalityArray(spp->J);
 		for (int i=0; i<spp->J; ++i){
-			// Calc growth rates
-			growthArray[i] = spp->growthRate(i, spp->getX(i), t, env);
+			growthArray[i]    = spp->growthRate(i, spp->getX(i), t, env);
+			mortalityArray[i] = spp->mortalityRate(i, spp->getX(i), t, env);
 		}
 
-		// implement fecundity
+		// calculate fecundity
 		double pe = spp->establishmentProbability(t, env);
 		double gb = spp->growthRate(-1, spp->xb, t, env);
 		double birthFlux;
@@ -23,36 +25,35 @@ void Solver::stepABM(double t, double dt){
 			birthFlux = calcSpeciesBirthFlux(s,t) * pe;
 		}
 		else{
-			double ub = spp->get_boundary_u(); // backup boundary cohort's density because it will be overwritten by calc
+			double ub = spp->get_boundary_u(); // backup boundary cohort's superindividual density because it will be overwritten by calc
 			double u0 = spp->calc_boundary_u(gb, pe);
 			// cout << "Species( " << s << "): ";
 			// cout << "u0 = bf_in*pe/gb = " << spp->birth_flux_in << " * " << pe << " / " << gb << " = " << spp->get_boundary_u() << endl;
 			birthFlux = u0*gb;
-			spp->set_ub(ub);
+			spp->set_ub(ub); // restore superinvidividual density in boundary cohort
 		}
-
 		double noff = birthFlux*dt/spp->get_boundary_u();  // number of offspring = birthflux / density of each superindividual
 		// cout << "noff: " << spp->noff_abm << " | " << noff << " " << birthFlux << " " << dt << " " << spp->get_boundary_u() << endl;
 		spp->noff_abm += noff;
 		
-		// implement mortality
-		for (int i=0; i<spp->J; ++i){
-			double mortRate = spp->mortalityRate(i, spp->getX(i), t, env);
-			double survival_prob = exp(-mortRate*dt);
-			//cout << "survival prob = " << survival_prob << "\n";
-			if (double(rand())/RAND_MAX >= survival_prob) spp->markCohortForRemoval(i);
-		}
-		spp->removeMarkedCohorts();
-
 		// implement growth
 		for (int i=0; i<spp->J; ++i){
 			spp->setX(i, spp->getX(i) + growthArray[i]*dt);
 		}
 
+		// implement mortality
+		for (int i=0; i<spp->J; ++i){
+			double survival_prob = exp(-mortalityArray[i]*dt);
+			//cout << "survival prob = " << survival_prob << "\n";
+			if (double(rand())/RAND_MAX >= survival_prob) spp->markCohortForRemoval(i);
+		}
+		spp->removeMarkedCohorts();
+	}
 
-		// step extra variables
-		// these will be in order abc abc abc... 
-		// extra rates
+	// step extra variables
+	// these will be in order abc abc abc... 
+	// use the state vector itself to temporarily store and retrive state, since it's not used for x and u (but after system variables)
+	for (auto spp : species_vec){
 		vector<double>::iterator its = state.begin() + n_statevars_system; // Skip system variables
 		vector<double>::iterator itr = rates.begin() + n_statevars_system;
 		if (spp->n_extra_statevars > 0){
@@ -72,11 +73,18 @@ void Solver::stepABM(double t, double dt){
 			}
 			itr = itr_prev; its = its_prev; // so bring them back
 
-			spp->copyExtraStateToCohorts(its);
+			spp->copyExtraStateToCohorts(its); // this will increment its
 		}
-		
-		// updated environment needed for initializing cummulative variables in new cohorts
-		updateEnv(t+dt, state.begin(), rates.begin());
+	}
+
+	// Q: Should updated environment be used for initializing cummulative variables in new cohorts?
+	// No, Should not be done, because recruitment is happening continuously, not necessarily after mortality.
+	// It's best to do recruit initialization at the beginning of the timestep (i.e., with original env and at time t, istead of updating env here and using t+dt)
+	// Also, using updateEnv here gives wrong results! 
+	// updateEnv(t+dt, state.begin(), rates.begin()); // <-- don't do this
+
+	// Insert offspring
+	for (auto spp : species_vec){
 		// add recruits once they have accumulated to > 1
 		// use t and env to initialize (instead of updated values) becaues number of recruits were calculated at the beginning of the step
 		if (spp->noff_abm > 1){
@@ -92,11 +100,11 @@ void Solver::stepABM(double t, double dt){
 			//--spp->noff_abm;
 		}
 		
-		// resize state - this matters only if extra istate is specified
-		resizeStateFromSpecies();
-		copyCohortsToState();
 	}
 	
+	// resize state - this matters only if extra istate is specified
+	resizeStateFromSpecies();
+	copyCohortsToState();
 	//print();
 	
 }

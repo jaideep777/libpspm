@@ -60,8 +60,6 @@ void Solver::step_to(double tstop, AfterStepFunc &afterStep_user){
 		}
 
 		if (method == SOLVER_IEBT){
-			// updated environment needed for initializing cummulative variables
-			updateEnv(current_time, state.begin(), rates.begin());
 			// update cohorts
 			removeDeadCohorts_EBT();
 			addCohort_EBT();  // Add new cohort if N0 > 0. Add after removing dead ones otherwise this will also be removed. 
@@ -90,8 +88,6 @@ void Solver::step_to(double tstop, AfterStepFunc &afterStep_user){
 		// integrate 
 		odeStepper.step_to(tstop, current_time, state, derivs, after_step); // rk4_stepsize is only used if method is "rk4"
 		
-		// updated environment needed for initializing cummulative variables in new cohorts
-		updateEnv(current_time, state.begin(), rates.begin());
 		// update cohorts
 		removeDeadCohorts_EBT();
 		addCohort_EBT();  // Add new cohort if N0 > 0. Add after removing dead ones otherwise this will also be removed. 
@@ -111,8 +107,6 @@ void Solver::step_to(double tstop, AfterStepFunc &afterStep_user){
 		
 		// update cohorts
 		if (control.update_cohorts){
-			// updated environment needed for initializing cummulative variables in new cohorts
-			updateEnv(current_time, state.begin(), rates.begin());
 			addCohort_CM();		// add before so that it becomes boundary cohort and first internal cohort can be (potentially) removed
 			removeCohort_CM();
 		}
@@ -131,6 +125,7 @@ void Solver::step_to(double tstop, AfterStepFunc &afterStep_user){
 			stepABM(current_time, dt);  // this will step all variables, including extra_istate
 			current_time += dt; 
 			
+			// step system vars
 			if (n_statevars_system > 0){
 				updateEnv(current_time, state.begin(), rates.begin());  // recompute env with updated u
 				// .FIXME: use fully implicit stepper here?
@@ -140,7 +135,7 @@ void Solver::step_to(double tstop, AfterStepFunc &afterStep_user){
 			}
 
 			// Need to explicitly call this because ODE solver is not used in ABM
-			// FIXME: Should cohorts be copied to state here?
+			// Should cohorts be copied to state here? - done within stepABM() above
 			after_step(current_time, state.begin());
 		}
 
