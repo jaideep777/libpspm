@@ -101,11 +101,11 @@ par(mfrow = c(2,3), mar=c(4,4,4,1), oma=c(1,1,1,1), cex.lab=1.2, cex.axis=1.2)
 
 
 plot1("RED_model/ifmu_Redmodel.txt", 150, "IFMU")
-plot1("RED_model/ifmu2_Redmodel.txt", 150, "IFMU(O2)")
+plot1("RED_model/ifmu2_Redmodel.txt", 150, "ILUD")
 plot1("RED_model/iebt_Redmodel.txt", 150, "IEBT")
 
 plot2("Daphnia_model/ifmu_Daphnia.txt", 300, "IFMU")
-plot2("Daphnia_model/ifmu2_Daphnia.txt", 300, "IFMU(O2)")
+plot2("Daphnia_model/ifmu2_Daphnia.txt", 300, "ILUD")
 plot2("Daphnia_model/iebt_Daphnia.txt", 300, "IEBT")
 
 dev.off()
@@ -113,6 +113,7 @@ dev.off()
 
 cols = scales::alpha(c("purple", "green3", "mediumspringgreen", "darkgoldenrod2", "red3", "pink", "#2b8cbe"), alpha=0.7)
 cols = scales::alpha(c("darkgreen", "yellowgreen", "green3", "magenta", "purple", "darkgoldenrod2", "turquoise2"), alpha=0.7)
+names = c("FMU", "IFMU", "ILUD", "EBT", "IEBT", "CM", "ABM")
 
 plotS = function(file, N, title){
   dat = read.delim(file, header=F)
@@ -129,7 +130,7 @@ idx = 1
 plot(x=1,y=NA, xlim=c(0,100), ylim=c(0,3))
 plotS("Daphnia_model/fmu_Daphnia.txt", 300, "FMU")
 plotS("Daphnia_model/ifmu_Daphnia.txt", 300, "IFMU")
-plotS("Daphnia_model/ifmu2_Daphnia.txt", 300, "IFMU(O2)")
+plotS("Daphnia_model/ifmu2_Daphnia.txt", 300, "ILUD")
 plotS("Daphnia_model/ebt_Daphnia.txt", 300, "EBT")
 plotS("Daphnia_model/cm_Daphnia.txt", 300, "CM")
 plotS("Daphnia_model/abm_Daphnia.txt", 300, "ABM")
@@ -170,6 +171,6 @@ plot_seeds("RED_model/iebt_Redmodel.txt")
 plot_seeds("RED_model/cm_Redmodel.txt")
 plot_seeds("RED_model/abm_Redmodel.txt")
 abline(h=37.5845, col="black")
-legend(x = 2500, y=25, legend = c("FMU", "IFMU", "IFMU(O2)", "EBT", "IEBT", "CM", "ABM"), col=cols, lwd=2, bty = "n", cex=1.)
+legend(x = 2500, y=25, legend = names, col=cols, lwd=2, bty = "n", cex=1.)
 
 dev.off()

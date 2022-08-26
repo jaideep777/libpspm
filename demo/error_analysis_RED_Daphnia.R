@@ -3,7 +3,7 @@ library(tidyverse)
 setwd("~/codes/libpspm/demo/")
 
 # Error analysis
-methods = c("FMU", "IFMU", "IFMU(O2)", "EBT", "IEBT", "CM", "ABM")
+methods = c("FMU", "IFMU", "ILUD", "EBT", "IEBT", "CM", "ABM")
 cols = scales::alpha(c("purple", "green3", "mediumspringgreen", "darkgoldenrod2", "red3", "pink", "#2b8cbe"), alpha=0.7)
 cols = scales::alpha(c("darkgreen", "yellowgreen", "green3", "magenta", "purple", "darkgoldenrod2", "turquoise2"), alpha=0.7)
 
