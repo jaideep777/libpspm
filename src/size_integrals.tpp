@@ -120,6 +120,9 @@ double Solver::integrate_wudx_above(wFunc w, double t, double xlow, int species_
 		// set up cohorts to integrate
 		realizeEbtBoundaryCohort(spp);
 
+		// sort cohorts, but skip pi0-cohort
+		spp->sortCohortsDescending(1); // FIXME: Add a label to EBT boundary cohort and assert that it is always at J-1
+
 		// calculate integral
 		double I = 0;
 		for (int i=0; i<spp->J; ++i){  // in EBT, cohorts are sorted descending

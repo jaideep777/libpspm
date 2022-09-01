@@ -100,7 +100,7 @@ class Species_Base{
 	virtual void removeDenseCohorts(double dxcut) = 0;
 	virtual void removeDeadCohorts(double ucut) = 0;
 
-	virtual void sortCohortsDescending() = 0;
+	virtual void sortCohortsDescending(int skip=0) = 0;
 	
 //	virtual void backupCohort(int j) = 0;
 //	virtual void restoreCohort(int j) = 0;
@@ -166,7 +166,7 @@ class Species : public Species_Base{
 	void removeDenseCohorts(double dxcut);
 	void removeDeadCohorts(double ucut);
 	
-	void sortCohortsDescending();
+	void sortCohortsDescending(int skip=0);
 	
 //	void backupCohort(int j);
 //	void restoreCohort(int j);

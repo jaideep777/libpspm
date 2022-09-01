@@ -396,8 +396,8 @@ void Species<Model>::removeDeadCohorts(double ucut){
 
 
 template <class Model>
-void Species<Model>::sortCohortsDescending(){
-	std::sort(cohorts.begin(), cohorts.end(), [](const Cohort<Model> &a, const Cohort<Model> &b){return a.x > b.x;});
+void Species<Model>::sortCohortsDescending(int skip){
+	std::sort(cohorts.begin(), cohorts.end()-skip, [](const Cohort<Model> &a, const Cohort<Model> &b){return a.x > b.x;});
 }
 
 //template <class Model>
