@@ -41,7 +41,7 @@ class Species_Base{
 
 	public: // public members
 	double xb; 
-	bool is_resident;
+	//bool is_resident;
 	
 	
 	public: // public functions
@@ -58,6 +58,7 @@ class Species_Base{
 	virtual void resize(int _J) = 0;
 	virtual double get_maxSize() = 0;
 	virtual void print() = 0;
+	virtual void print_extra(); // not pure virtual, by defualt, there is nothing extra to print.
 
 	virtual void set_xb(double _xb) = 0;
 	virtual void set_ub(double _ub) = 0;

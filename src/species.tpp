@@ -1,6 +1,7 @@
 #include <cassert>
 #include <algorithm>
 #include <numeric>
+#include <iomanip>
 
 // *************** Species_Base   ***************  
 
@@ -56,6 +57,7 @@ void Species<Model>::print(){
 	std::cout << "xsize = " << J << "\n";
 	std::cout << "Extra state variables: " << n_extra_statevars << "\n";
 	std::cout << "Input birth flux = " << birth_flux_in << "\n";
+	print_extra();
 	//if (!X.empty()){
 	//    iset.push_back("_X", X.begin(),1);
 	//    iset.push_back("_h", h.begin(),1);
@@ -65,9 +67,11 @@ void Species<Model>::print(){
 	//}
 
 	std::cout << "Cohorts: (" << cohorts.size() << ")\n";
-	std::cout << "t0" << "\tx" << "\t" << "u" << "\t";
+	std::cout << std::setw(6) << "t0" 
+	          << std::setw(12) << "x" 
+			  << std::setw(12) << "u" << " ";
 	if (!cohorts.empty()){
-		for (auto s : cohorts[0].varnames) std::cout << s << "\t";
+		for (auto s : cohorts[0].varnames) std::cout << std::setw(10) << s << " ";
 	}
 	std::cout << "\n";
 	for (auto& c : cohorts) {

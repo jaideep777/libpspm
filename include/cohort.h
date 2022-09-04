@@ -2,6 +2,7 @@
 #define  PSPM_PSPM_COHORT_H_
 
 #include <iostream>
+#include <iomanip>
 
 template<class Ind>
 class Cohort : public Ind {
@@ -27,7 +28,9 @@ class Cohort : public Ind {
 	}
 
 	void print_xu(std::ostream &out = std::cout){
-		out << birth_time << "\t" << x << "\t" << u << "\t"; 
+		out << std::setw(6)  << std::setprecision(4) << birth_time 
+		    << std::setw(12) << std::setprecision(4) << x 
+			<< std::setw(12) << std::setprecision(4) << u; 
 	}
 
 	void print(std::ostream &out = std::cout){

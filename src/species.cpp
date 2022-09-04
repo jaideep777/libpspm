@@ -4,6 +4,9 @@
 Species_Base::~Species_Base(){
 }
 
+void Species_Base::print_extra(){
+}
+
 
 //template<class Model>
 //int Species<Model>::addVar(std::string name, int stride, int offset){
