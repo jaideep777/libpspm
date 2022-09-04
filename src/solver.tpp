@@ -38,7 +38,7 @@ void Solver::step_to(double tstop, AfterStepFunc &afterStep_user){
 			// current_time += dt; // not needed here, as current time is advanced by the ODE stepper below.
 			copyStateToCohorts(state.begin());   // copy updated X/U to cohorts 
 			
-			if (n_statevars_system > 0){
+			if (n_statevars_system > 0){ // FIXME: maybe keep this simple and just use the env and rates at be beginning of the timestep?
 				// copyStateToCohorts(state.begin());   // not needed here as it's just done above
 				updateEnv(current_time, state.begin(), rates.begin());  // recompute env with updated u
 				// .FIXME: use fully implicit stepper here?
@@ -49,14 +49,18 @@ void Solver::step_to(double tstop, AfterStepFunc &afterStep_user){
 
 			// use the ODE-stepper for other state variables
 			// this stepper is called even if there are no extra state variables, so copyStateToCohorts is accomplished here
+			// FIXME: Keep this simple and just take 1 Euler step?
 			auto derivs = [this](double t, std::vector<double>::iterator S, std::vector<double>::iterator dSdt, void* params){
 				copyStateToCohorts(S);
 				// precompute and env computation is not needed here, because it depends on x and u, which are not updated by the solver.
 				calcOdeRatesImplicit(t,S,dSdt);
 			};
-			// this step below will do afterstep. FIXME: But what if there are no extra state variables? 
-			odeStepper.step_to(current_time+dt, current_time, state, derivs, after_step); // rk4_stepsize is only used if method is "rk4"
+			// this step below will do afterstep. -- Now doing explicitly, because when timestep is specified, we want afterstep only after the timestep is complete
+			// FIXME: But what if there are no extra state variables? 
+			auto afterStep_dummy = [](double t, std::vector<double>::iterator S){};
+			odeStepper.step_to(current_time+dt, current_time, state, derivs, afterStep_dummy); // rk4_stepsize is only used if method is "rk4"
 	
+			after_step(current_time, state.begin());
 		}
 
 		if (method == SOLVER_IEBT){
