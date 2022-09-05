@@ -114,7 +114,7 @@ class Solver{
 
 	void step_to(double tstop);
 
-	double calcSpeciesBirthFlux(int k, double t);
+	double calcSpeciesBirthFlux(int k, double t); // TODO: Make this private. Because this does not update Env, so unsafe for users to call. Users should call newborns_out() instead because it does updateEnv + calcSpeciesBirthFlux()
 	std::vector<double> newborns_out(double t);  // This is the actual system reproduction (fitness) hence biologically relevant
 	std::vector<double> u0_out(double t);        // This is used for equilibrium solving, because in general, u0 rather than birthFlux, will approach a constant value
 

@@ -212,6 +212,7 @@ void Solver::print(){
 //  When setting rates, typically a,b,c are calculated one 
 //  after the other for each x.
 // TODO: should this take t0 as an argument, instead of setting to 0? 
+// TODO: maybe make use of copyCohortsToState here instead ofnmanually updating state elements?
 void Solver::initialize(){
 	
 	vector<double>::iterator it = state.begin() + n_statevars_system; // TODO: replace with init_sState() 
@@ -422,6 +423,7 @@ void Solver::calcOdeRatesImplicit(double t, vector<double>::iterator S, vector<d
 		its += (n_statevars_internal)*spp->J; // skip x and u 
 		for (int i=0; i<n_statevars_internal*spp->J; ++i) *itr++ = 0; // set dx/dt and du/dt to 0 
 	
+		// FIXME: Maybe a good idea to realize pi0 cohort before calc extra rates
 		if (spp->n_extra_statevars > 0){
 			auto itr_prev = itr;
 			spp->getExtraRates(itr); // TODO/FIXME: Does calc of extra rates need t and env?

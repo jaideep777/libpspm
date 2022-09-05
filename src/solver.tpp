@@ -47,6 +47,8 @@ void Solver::step_to(double tstop, AfterStepFunc &afterStep_user){
 				}
 			}
 
+			// FIXME: Move this to before system vars update, otherwise, this will see updated Env if sys vars are defined
+			// FIXME: use an if condition to do this only if extra i-state is requested
 			// use the ODE-stepper for other state variables
 			// this stepper is called even if there are no extra state variables, so copyStateToCohorts is accomplished here
 			// FIXME: Keep this simple and just take 1 Euler step?
@@ -56,7 +58,7 @@ void Solver::step_to(double tstop, AfterStepFunc &afterStep_user){
 				calcOdeRatesImplicit(t,S,dSdt);
 			};
 			// this step below will do afterstep. -- Now doing explicitly, because when timestep is specified, we want afterstep only after the timestep is complete
-			// FIXME: But what if there are no extra state variables? 
+			// Q: But what if there are no extra state variables? Still works, because ODE stepper will still step X/U with zero rates
 			auto afterStep_dummy = [](double t, std::vector<double>::iterator S){};
 			odeStepper.step_to(current_time+dt, current_time, state, derivs, afterStep_dummy); // rk4_stepsize is only used if method is "rk4"
 	
