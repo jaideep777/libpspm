@@ -113,6 +113,7 @@ class HashTable{
 		ht = new HashNode<Key,Value> [length];
 		for (int i=0; i<length; ++i) ht[i] = _h.ht[i];
 		__DEBUG_HT_ std::cout << "Assignment called @" << ht << std::endl;
+		return *this;
 	}
 
 	

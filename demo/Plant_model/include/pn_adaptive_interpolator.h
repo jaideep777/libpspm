@@ -165,7 +165,9 @@ class SubdivisionSpline : public Spline{
 			b_error = refine(f);
 		}
 
+		__DEBUG_AI_ std::cout << "Hashing intervals..." << std::endl;
 		hashIntervals();
+		__DEBUG_AI_ std::cout << "... DONE" << std::endl;
 		
 		// print();
 
@@ -294,10 +296,12 @@ class SubdivisionSpline : public Spline{
 	//   binary searching the entire array
 
 	void hashIntervals(){
-		//std::cout << "assignment begins" << std::endl;
+		__DEBUG_AI_ std::cout << "assignment begins" << std::endl;
 		ht = HashTable<int,int> (8093, 0.25);
 		int ix  = 0;
+		__DEBUG_AI_ std::cout << "hastable created" << std::endl;
 		for (auto val : indices){
+			__DEBUG_AI_ std::cout << "hashing " << val << std::endl;
 			ht.hash_insert(val,ix);
 			++ix;
 		}

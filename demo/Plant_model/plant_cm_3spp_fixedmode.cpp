@@ -214,7 +214,7 @@ int main(){
 	cout << "Number of calls to derivs           : " << S.odeStepper.get_fn_evals() << endl;
 
 	for (int s=0; s< S.n_species(); ++s){
-		cout << "Seed rain for Species " << s << " (Lindh 18) = " << pn::integrate_trapezium(times, seeds_out[s]) << endl;
+		cout << setprecision(6) << "Seed rain for Species " << s << " (Lindh 18) = " << pn::integrate_trapezium(times, seeds_out[s]) << endl;
 	}
 
 	for (int s=0; s< S.n_species(); ++s){
@@ -229,7 +229,9 @@ int main(){
 			//cout << times[i] << " " << M.input_seed_rain << " " << S_D << " " << patch_age_density << " " << (*itf) << " | " << output_seeds << endl;
 			fec_vec.push_back(output_seeds);
 		}
-		cout << "Seed rain for Species " << s << " (Falster 17) = " << pn::integrate_trapezium(times, fec_vec) << endl;
+		double sr = pn::integrate_trapezium(times, fec_vec);
+		cout << setprecision(6) << "Seed rain for Species " << s << " (Falster 17) = " << sr << endl;
+		// expected: rk45ck    12.1881    19.8324    3.69066     791,745
 	}
 	
 
