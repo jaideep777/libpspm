@@ -69,7 +69,7 @@ clean:
 	
 re: clean all
 
-superclean: clean testclean
+superclean: clean testclean democlean
 
 
 ## TESTING SUITE ##
@@ -80,7 +80,7 @@ TEST_TARGETS = $(patsubst tests/%.cpp, tests/%.test, $(TEST_FILES))
 TEST_RUNS = $(patsubst tests/%.cpp, tests/%.run, $(TEST_FILES))
 ADD_OBJECTS = 
 
-check: dir $(TARGET) compile_tests clean_log run_tests
+check: dir $(TARGET) compile_tests clean_log run_tests plant_demo_test
 
 compile_tests: $(TEST_TARGETS)
 	
@@ -138,6 +138,10 @@ plant_demo_noFeedback:
 	cd demo/Plant_model && $(MAKE) FILE=plant_iebt_1spp.cpp && ./plant_iebt_1spp.exec  && mkdir -p outputs/iebt && mv *.txt outputs/iebt
 	cd demo/Plant_model && $(MAKE) FILE=plant_cm_1spp.cpp && ./plant_cm_1spp.exec  && mkdir -p outputs/cm && mv *.txt outputs/cm
 	cd demo/Plant_model && $(MAKE) FILE=plant_abm_1spp.cpp && ./plant_abm_1spp.exec  && mkdir -p outputs/abm && mv *.txt outputs/abm
+
+plant_demo_test:
+	cd demo/Plant_model && $(MAKE) FILE=plant_cm_3spp_fixedmode.cpp && ./plant_cm_3spp_fixedmode.exec  && rm *.txt
+
 
 # plant_demo_withFeedback:
 # 	cd demo/Plant_model && $(MAKE) FILE=plant_fmu_1spp.cpp && ./plant_fmu_1spp.exec -1 205.32 && mkdir -p outputs/fmu_f && mv *.txt outputs/fmu_f

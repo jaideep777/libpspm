@@ -51,6 +51,12 @@ Solver::Solver(std::string _method, std::string ode_method) : Solver(methods_map
 }
 
 
+/// @brief Add the given species to the solver. 
+/// @param xbreaks             breaks to use for discretization of the size axis
+/// @param s                   species to add
+/// @param n_extra_vars        number of accumulated variables to add for this species
+/// @param input_birth_flux    The initial input birth flux for the species
+/// @details This function creates metadata associated with the discretized size axis according to the specified solver, such as size at birth, initial number of cohorts/bins, and allocates space for the species in the state vector. 
 void Solver::addSpecies(std::vector<double> xbreaks, Species_Base* s, int n_extra_vars, double input_birth_flux){
 	s->set_inputBirthFlux(input_birth_flux);
 	s->n_extra_statevars = n_extra_vars;
@@ -202,6 +208,10 @@ void Solver::print(){
 }
 
 
+/// @brief      initializes species - sets initial state (x, u, abc) for all cohorts depending on the solver
+/// @param s    species to be initialized
+/// @param it   iterator to the starting element in the state vector for this species
+/// @return     returns the incremented iterator, which can be used as input for initializing the next species
 // Layout of the state vector is as follows:
 //  ------------------------------------------------------------
 // | x : u | x : u | x : u | a : b : c | a : b : c | a : b : c |
@@ -213,19 +223,14 @@ void Solver::print(){
 //  after the other for each x.
 // TODO: should this take t0 as an argument, instead of setting to 0? 
 // TODO: maybe make use of copyCohortsToState here instead ofnmanually updating state elements?
-void Solver::initialize(){
-	
-	vector<double>::iterator it = state.begin() + n_statevars_system; // TODO: replace with init_sState() 
-	
-	for (int k=0; k<species_vec.size(); ++k){
-		Species_Base* s = species_vec[k];
-	
+vector<double>::iterator Solver::initializeSpecies(Species_Base * s, vector<double>::iterator it){
+		// set x and u of boundary cohort
 		// Boundary cohort is not in state, but used as a reference.	
 		s->set_xb(s->xb); // set x of boundary cohort 
 		s->set_ub(0);     // set initial density of boundary cohort to 0.
 		
 		// set birth time for each cohort to current_time
-		for (int i=0; i<s->J; ++i) s->set_birthTime(i, current_time); // FIXME: doesnt make sense, but birthTime is not used anyways
+		for (int i=0; i<s->J; ++i) s->set_birthTime(i, current_time); // FIXME: doesnt make sense, because larger cohorts would have been born earlier, but birthTime is not used anyways
 
 		// set x, u for all cohorts
 		if (method == SOLVER_FMU || method == SOLVER_IFMU){
@@ -311,6 +316,17 @@ void Solver::initialize(){
 			//assert(distance(it_prev, it) == s->n_extra_statevars*s->J); 
 		//}
 
+		return it;
+}
+
+
+void Solver::initialize(){
+	
+	vector<double>::iterator it = state.begin() + n_statevars_system; // TODO: replace with init_sState() 
+	
+	for (int k=0; k<species_vec.size(); ++k){
+		Species_Base* s = species_vec[k];
+		it = initializeSpecies(s, it);
 	}
 }
 

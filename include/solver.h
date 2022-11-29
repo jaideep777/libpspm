@@ -80,6 +80,7 @@ class Solver{
 	void resetState(double t0 = 0); 	
 	void resizeStateFromSpecies();
 
+	std::vector<double>::iterator initializeSpecies(Species_Base * s, std::vector<double>::iterator it);
 	void initialize();
 
 	void copyStateToCohorts(std::vector<double>::iterator state_begin);		////const int size();
