@@ -320,3 +320,17 @@ x = seq(0,20,length.out = 200)
 matplot(y = x, x= t(lep), type="l", lty=1, col= scales::alpha(rainbow(142, end = .8), 0.7), add=T)
 
 dev.off()
+
+## Errors:
+
+print("Maximum scaled error in x / u / m / sa =")
+print(
+  rbind(
+    max(abs(h[1:141,]-hp[1:141,-1])/max(h, na.rm=T), na.rm = T),
+    max(abs(exp(ld[1:141,])-ldp[1:141,-1])/max(exp(ld), na.rm=T), na.rm = T),
+    max(abs(m[1:141,]-mp[1:141,-1])/max(m, na.rm=T), na.rm = T),
+    max(abs(sa[1:141,]-sp[1:141,-1])/max(sa, na.rm=T), na.rm = T)
+  )
+)
+
+

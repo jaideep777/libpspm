@@ -217,6 +217,8 @@ int main(){
 		cout << setprecision(6) << "Seed rain for Species " << s << " (Lindh 18) = " << pn::integrate_trapezium(times, seeds_out[s]) << endl;
 	}
 
+	// expected falster: 
+	vector<double> ex = {12.188123, 19.832202,  3.687228};
 	for (int s=0; s< S.n_species(); ++s){
 		auto spp = S.species_vec[s];
 		vector <double> fec_vec;
@@ -230,7 +232,7 @@ int main(){
 			fec_vec.push_back(output_seeds);
 		}
 		double sr = pn::integrate_trapezium(times, fec_vec);
-		cout << setprecision(6) << "Seed rain for Species " << s << " (Falster 17) = " << sr << endl;
+		cout << setprecision(6) << "Seed rain for Species " << s << " (Falster 17) = " << sr << "\t| (" << ex[s] << ")" << endl;
 		// expected: rk45ck    12.1881    19.8324    3.69066     791,745
 	}
 	

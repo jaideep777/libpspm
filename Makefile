@@ -140,7 +140,11 @@ plant_demo_noFeedback:
 	cd demo/Plant_model && $(MAKE) FILE=plant_abm_1spp.cpp && ./plant_abm_1spp.exec  && mkdir -p outputs/abm && mv *.txt outputs/abm
 
 plant_demo_test:
-	cd demo/Plant_model && $(MAKE) FILE=plant_cm_3spp_fixedmode.cpp && ./plant_cm_3spp_fixedmode.exec  # && rm *.txt
+	cd demo/Plant_model && \
+	$(MAKE) FILE=plant_cm_3spp_fixedmode.cpp && \
+	./plant_cm_3spp_fixedmode.exec && \
+	Rscript plant_cm_3spp_analysis.R && \
+	rm *.txt
 
 
 # plant_demo_withFeedback:
