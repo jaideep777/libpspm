@@ -132,26 +132,30 @@
 
 #### Multispecies test
 
-library(plant)
-p0 <- scm_base_parameters("FF16")
-p1 <- expand_parameters(trait_matrix(0.0825, "lma"), p = p0, mutant = FALSE)
-p1$seed_rain = 1
-p1$control$environment_light_rescale_usually = F
-p2 <- expand_parameters(trait_matrix(0.2625, "lma"), p = p1, mutant = FALSE)
-p3 <- expand_parameters(trait_matrix(0.4625, "lma"), p = p2, mutant = FALSE)
-p2$seed_rain = c(1, 1)*1
-p3$seed_rain = c(1, 1,1)*1
-# p3$cohort_schedule_times
-# p2$control$environment_light_rescale_usually = F
-
+# library(plant)
 # p0 <- scm_base_parameters("FF16")
-# p2 <- expand_parameters(trait_matrix(0.0825, "lma"), p = p0, mutant = FALSE)
-# p2$seed_rain = 1
-# p2$control$environment_light_rescale_usually = F
+# p1 <- expand_parameters(trait_matrix(0.0825, "lma"), p = p0, mutant = FALSE)
+# p1$seed_rain = 1
+# p1$control$environment_light_rescale_usually = F
+# p2 <- expand_parameters(trait_matrix(0.2625, "lma"), p = p1, mutant = FALSE)
+# p3 <- expand_parameters(trait_matrix(0.4625, "lma"), p = p2, mutant = FALSE)
+# p2$seed_rain = c(1, 1)*1
+# p3$seed_rain = c(1, 1,1)*1
+# # p3$cohort_schedule_times
+# # p2$control$environment_light_rescale_usually = F
+# 
+# # p0 <- scm_base_parameters("FF16")
+# # p2 <- expand_parameters(trait_matrix(0.0825, "lma"), p = p0, mutant = FALSE)
+# # p2$seed_rain = 1
+# # p2$control$environment_light_rescale_usually = F
+# 
+# ptm <- proc.time()
+# data1 <- run_scm_collect(p3)
+# proc.time() - ptm
 
-ptm <- proc.time()
-data1 <- run_scm_collect(p3)
-proc.time() - ptm
+setwd("~/codes/libpspm/demo/Plant_model/")
+
+load("plant_test_data.Rdata")
 
 t <- data1$time
 h <- data1$species[[1]]["height", , ]
@@ -163,10 +167,15 @@ vs3 <- data1$species[[3]]["seeds_survival_weighted", , ]
 ld <- data1$species[[1]]["log_density", , ]
 ld2 <- data1$species[[2]]["log_density", , ]
 ld3 <- data1$species[[3]]["log_density", , ]
+m <- data1$species[[1]]["mortality", , ]
+m2 <- data1$species[[2]]["mortality", , ]
+m3 <- data1$species[[3]]["mortality", , ]
+sa <- data1$species[[1]]["area_heartwood", , ]
+sa2 <- data1$species[[2]]["area_heartwood", , ]
+sa3 <- data1$species[[3]]["area_heartwood", , ]
 
-le = data1$env
+le = data1$light_env
 
-setwd("~/codes/pspm_package/demo/plant_model/")
 
 n = 142 # 192 # 
 hp   = read.delim("species_0_X.txt", header=F, col.names = paste0("V", 1:n))
@@ -178,100 +187,136 @@ vsp3 = read.delim("species_2_fec.txt", header=F, col.names = paste0("V", 1:n))
 ldp  = read.delim("species_0_u.txt", header=F, col.names = paste0("V", 1:n))
 ldp2 = read.delim("species_1_u.txt", header=F, col.names = paste0("V", 1:n))
 ldp3 = read.delim("species_2_u.txt", header=F, col.names = paste0("V", 1:n))
+mp  = read.delim("species_0_mort.txt", header=F, col.names = paste0("V", 1:n))
+mp2 = read.delim("species_1_mort.txt", header=F, col.names = paste0("V", 1:n))
+mp3 = read.delim("species_2_mort.txt", header=F, col.names = paste0("V", 1:n))
+sp  = read.delim("species_0_heart.txt", header=F, col.names = paste0("V", 1:n))
+sp2 = read.delim("species_1_heart.txt", header=F, col.names = paste0("V", 1:n))
+sp3 = read.delim("species_2_heart.txt", header=F, col.names = paste0("V", 1:n))
+
 
 lep = read.delim("light_profile_ind_plant.txt")
 lep = lep[,-ncol(lep)]
+# 
+# par(mfrow=c(3,2), mar=c(4,4,1,1), oma=c(1,1,1,1))
+# 
+# 
+# matplot(x=t(lep), y=seq(0,20,length.out=200), type="l", lty=1, col=rainbow(200),
+#         ylab="Height", xlab="Light level")
+# 
+# seed_rain = read.delim("seed_rain.txt", header=F)
+# seed_rain = seed_rain[-ncol(seed_rain)]
+# matplot(seed_rain[,1], seed_rain[,-1], type="l", lty=1, lwd=2, ylim=c(0,3500),
+#         ylab="Seed rain", xlab="time")
+# 
+# hmean = function(h,l){
+#   rowSums(h*exp(l), na.rm = T)/rowSums(exp(l), na.rm=T)  
+# }
+# 
+# hmean1 = hmean(hp[,-1], ldp[,-1])
+# hmean2 = hmean(hp2[,-1], ldp2[,-1])
+# hmean3 = hmean(hp3[,-1], ldp3[,-1])
+# hmean_all = cbind(hp[,1], hmean1, hmean2, hmean3)
+# matplot(hmean_all[,1], hmean_all[,-1], type="l", lty=1, lwd=2, 
+#         ylab="Mean height", xlab="time")
+#   # 
+# matplot(y=cbind(as.numeric(ldp[191,-1]), 
+#                 as.numeric(ldp2[191,-1]), 
+#                 as.numeric(ldp3[191,-1])), x=200-ldp[,1],type="l", lty=1, lwd=2,
+#         xlab="age", ylab="Log density")
 
-par(mfrow=c(2,2), mar=c(4,4,1,1), oma=c(1,1,1,1))
+pdf("plant_3spp_compare.pdf", height = 10, width = 7)
+par(mfrow=c(3,2), mar=c(5,5,1,1), oma=c(1,1,1,1), mgp=c(3.5,1,0))
 
-
-matplot(x=t(lep), y=seq(0,20,length.out=200), type="l", lty=1, col=rainbow(200),
-        ylab="Height", xlab="Light level")
-
-seed_rain = read.delim("seed_rain.txt", header=F)
-seed_rain = seed_rain[-ncol(seed_rain)]
-matplot(seed_rain[,1], seed_rain[,-1], type="l", lty=1, lwd=2, ylim=c(0,3500),
-        ylab="Seed rain", xlab="time")
-
-hmean = function(h,l){
-  rowSums(h*exp(l), na.rm = T)/rowSums(exp(l), na.rm=T)  
-}
-
-hmean1 = hmean(hp[,-1], ldp[,-1])
-hmean2 = hmean(hp2[,-1], ldp2[,-1])
-hmean3 = hmean(hp3[,-1], ldp3[,-1])
-hmean_all = cbind(hp[,1], hmean1, hmean2, hmean3)
-matplot(hmean_all[,1], hmean_all[,-1], type="l", lty=1, lwd=2, 
-        ylab="Mean height", xlab="time")
-  # 
-matplot(y=cbind(as.numeric(ldp[191,-1]), 
-                as.numeric(ldp2[191,-1]), 
-                as.numeric(ldp3[191,-1])), x=200-ldp[,1],type="l", lty=1, lwd=2,
-        xlab="age", ylab="Log density")
-
-par(mfrow=c(2,2), mar=c(4,4,1,1), oma=c(1,1,1,1))
+sr = 1
 
 matplot(t, h, lty=1, col=scales::alpha("black", 0.25), type="l",
-        las=1, xlab="Time (years)", ylab="Height (m)", main = paste0("With p1 | seed rain = ", p1$seed_rain))
+        las=1, xlab="Time (years)", ylab="Height (m)", main = paste0("With p1 | seed rain = ", sr))
 matlines(t, h2, lty=1, col=scales::alpha("blue", 0.25), type="l",
-         las=1, xlab="Time (years)", ylab="Height (m)", main = paste0("With p1 | seed rain = ", p1$seed_rain))
+         las=1, xlab="Time (years)", ylab="Height (m)", main = paste0("With p1 | seed rain = ", sr))
 matlines(t, h3, lty=1, col=scales::alpha("red", 0.25), type="l",
-         las=1, xlab="Time (years)", ylab="Height (m)", main = paste0("With p1 | seed rain = ", p1$seed_rain))
+         las=1, xlab="Time (years)", ylab="Height (m)", main = paste0("With p1 | seed rain = ", sr))
 
-matlines(hp$V1, hp[,-1], lty=1, col=scales::alpha("red", 0.25), type="l",
+matlines(hp$V1, hp[,-1], lty=1, col=scales::alpha("brown", 0.25), type="l",
         las=1, xlab="Time (years)", ylab="Height (m)", main = paste0("With p1 | seed rain = ", 0))
 matlines(hp2$V1, hp2[,-1], lty=1, col=scales::alpha("cyan", 0.25), type="l",
-         las=1, xlab="Time (years)", ylab="Height (m)", main = paste0("With p1 | seed rain = ", p1$seed_rain))
+         las=1, xlab="Time (years)", ylab="Height (m)", main = paste0("With p1 | seed rain = ", sr))
 matlines(hp3$V1, hp3[,-1], lty=1, col=scales::alpha("orange", 0.25), type="l",
-         las=1, xlab="Time (years)", ylab="Height (m)", main = paste0("With p1 | seed rain = ", p1$seed_rain))
+         las=1, xlab="Time (years)", ylab="Height (m)", main = paste0("With p1 | seed rain = ", sr))
 
 matplot(t, vs, lty=1, col=scales::alpha("black", 0.25), type="l",
-        las=1, xlab="Time (years)", ylab="Viable seeds", main = paste0("With p1 | seed rain = ", p1$seed_rain))
+        las=1, xlab="Time (years)", ylab="Viable seeds", main = paste0("With p1 | seed rain = ", sr))
 matlines(t, vs2, lty=1, col=scales::alpha("blue", 0.25), type="l",
-         las=1, xlab="Time (years)", ylab="Viable seeds", main = paste0("With p1 | seed rain = ", p1$seed_rain))
+         las=1, xlab="Time (years)", ylab="Viable seeds", main = paste0("With p1 | seed rain = ", sr))
 matlines(t, vs3, lty=1, col=scales::alpha("red", 0.25), type="l",
-         las=1, xlab="Time (years)", ylab="Viable seeds", main = paste0("With p1 | seed rain = ", p1$seed_rain))
+         las=1, xlab="Time (years)", ylab="Viable seeds", main = paste0("With p1 | seed rain = ", sr))
 
-matlines(vsp$V1, vsp[,-1], lty=1, col=scales::alpha("red", 0.25), type="l",
+matlines(vsp$V1, vsp[,-1], lty=1, col=scales::alpha("brown", 0.25), type="l",
         las=1, xlab="Time (years)", ylab="Viable seeds", main = paste0("With p1 | seed rain = ", 0))
 matlines(vsp2$V1, vsp2[,-1], lty=1, col=scales::alpha("cyan", 0.25), type="l",
-         las=1, xlab="Time (years)", ylab="Viable seeds", main = paste0("With p1 | seed rain = ", p1$seed_rain))
+         las=1, xlab="Time (years)", ylab="Viable seeds", main = paste0("With p1 | seed rain = ", sr))
 matlines(vsp3$V1, vsp3[,-1], lty=1, col=scales::alpha("orange", 0.25), type="l",
-         las=1, xlab="Time (years)", ylab="Viable seeds", main = paste0("With p1 | seed rain = ", p1$seed_rain))
+         las=1, xlab="Time (years)", ylab="Viable seeds", main = paste0("With p1 | seed rain = ", sr))
 
 
 
 
-matplot(t, exp(ld), lty=1, col=scales::alpha("black", 0.25), type="l",
-        las=1, xlab="Time (years)", ylab="Log density", main = paste0("With p1 | seed rain = ", p1$seed_rain))
+matplot(t, exp(ld), lty=1, col=scales::alpha("black", 0.25), type="l", log="y",
+        las=1, xlab="Time (years)", ylab="Log density", main = paste0("With p1 | seed rain = ", sr))
 matlines(t, exp(ld2), lty=1, col=scales::alpha("blue", 0.25), type="l",
-         las=1, xlab="Time (years)", ylab="Log density", main = paste0("With p1 | seed rain = ", p1$seed_rain))
+         las=1, xlab="Time (years)", ylab="Log density", main = paste0("With p1 | seed rain = ", sr))
 matlines(t, exp(ld3), lty=1, col=scales::alpha("red", 0.25), type="l",
-         las=1, xlab="Time (years)", ylab="Log density", main = paste0("With p1 | seed rain = ", p1$seed_rain))
+         las=1, xlab="Time (years)", ylab="Log density", main = paste0("With p1 | seed rain = ", sr))
 
-matlines(ldp$V1, ldp[,-1], lty=1, col=scales::alpha("red", 0.25), type="l",
+matlines(ldp$V1, ldp[,-1], lty=1, col=scales::alpha("brown", 0.25), type="l",
         las=1, xlab="Time (years)", ylab="Log density", main = paste0("With p1 | seed rain = ", 0))
 matlines(ldp2$V1, ldp2[,-1], lty=1, col=scales::alpha("cyan", 0.25), type="l",
-         las=1, xlab="Time (years)", ylab="Log density", main = paste0("With p1 | seed rain = ", p1$seed_rain))
+         las=1, xlab="Time (years)", ylab="Log density", main = paste0("With p1 | seed rain = ", sr))
 matlines(ldp3$V1, ldp3[,-1], lty=1, col=scales::alpha("orange", 0.25), type="l",
-         las=1, xlab="Time (years)", ylab="Log density", main = paste0("With p1 | seed rain = ", p1$seed_rain))
+         las=1, xlab="Time (years)", ylab="Log density", main = paste0("With p1 | seed rain = ", sr))
+
+
+
+matplot(t, m, lty=1, col=scales::alpha("black", 0.25), type="l",
+        las=1, xlab="Time (years)", ylab="Mortality", main = paste0("With p1 | seed rain = ", 0), log="y")
+matlines(t, m2, lty=1, col=scales::alpha("blue", 0.25), type="l",
+         las=1, xlab="Time (years)", ylab="Mortality", main = paste0("With p1 | seed rain = ", sr))
+matlines(t, m3, lty=1, col=scales::alpha("red", 0.25), type="l",
+         las=1, xlab="Time (years)", ylab="Mortality", main = paste0("With p1 | seed rain = ", sr))
+
+
+matlines(mp$V1, mp[,-1], lty=1, col=scales::alpha("brown", 0.25), type="l",
+        las=1, xlab="Time (years)", ylab="Mortality", main = paste0("With p1 | seed rain = ", 0), log="y")
+matlines(mp2$V1, mp2[,-1], lty=1, col=scales::alpha("cyan", 0.25), type="l",
+         las=1, xlab="Time (years)", ylab="Mortality", main = paste0("With p1 | seed rain = ", sr))
+matlines(mp3$V1, mp3[,-1], lty=1, col=scales::alpha("orange", 0.25), type="l",
+         las=1, xlab="Time (years)", ylab="Mortality", main = paste0("With p1 | seed rain = ", sr))
+
+
+
+matplot(t, sa, lty=1, col=scales::alpha("black", 0.25), type="l",
+        las=1, xlab="Time (years)", ylab="Heartwood area", main = paste0("With p1 | seed rain = ", 0), log="y")
+matlines(t, sa2, lty=1, col=scales::alpha("blue", 0.25), type="l",
+         las=1, xlab="Time (years)", ylab="Mortality", main = paste0("With p1 | seed rain = ", sr))
+matlines(t, sa3, lty=1, col=scales::alpha("red", 0.25), type="l",
+         las=1, xlab="Time (years)", ylab="Mortality", main = paste0("With p1 | seed rain = ", sr))
+
+
+matlines(sp$V1, sp[,-1], lty=1, col=scales::alpha("brown", 0.25), type="l",
+         las=1, xlab="Time (years)", ylab="Mortality", main = paste0("With p1 | seed rain = ", 0), log="y")
+matlines(sp2$V1, sp2[,-1], lty=1, col=scales::alpha("cyan", 0.25), type="l",
+         las=1, xlab="Time (years)", ylab="Mortality", main = paste0("With p1 | seed rain = ", sr))
+matlines(sp3$V1, sp3[,-1], lty=1, col=scales::alpha("orange", 0.25), type="l",
+         las=1, xlab="Time (years)", ylab="Mortality", main = paste0("With p1 | seed rain = ", sr))
 
 
 plot(1e20, ylim=c(0,20), xlim=c(0,1))
 for (i in 1:length(le)){
-  lines(le[[i]][,"height"]~le[[i]][,"canopy_openness"], col=make_transparent("black"))
+  lines(le[[i]][,"height"]~le[[i]][,"canopy_openness"], col=scales::alpha("black", 0.5))
   # lines(lez[i,]~leco[i,], col=make_transparent("red"))
 }
 # x = exp(seq(log(0.01),log(18), length.out = 200))
 x = seq(0,20,length.out = 200)
 matplot(y = x, x= t(lep), type="l", lty=1, col= scales::alpha(rainbow(142, end = .8), 0.7), add=T)
 
-
-##### FMU result 
-
-
-#### Debig interpolator
-
-a = read.delim("~/codes/pspm_package_try_simple_plant/interpolator_dump.txt", header=F, sep=" ")
-plot(a$V3~a$V1, type="l", ylim=c(0.4652, 0.4656), xlim=c(0.09985, 0.0999))
-points(a$V2~a$V1, type="l", col="red")
+dev.off()

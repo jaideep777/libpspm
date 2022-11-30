@@ -54,7 +54,7 @@ Solver::Solver(std::string _method, std::string ode_method) : Solver(methods_map
 /// @brief Add the given species to the solver. 
 /// @param xbreaks             breaks to use for discretization of the size axis
 /// @param s                   species to add
-/// @param n_extra_vars        number of accumulated variables to add for this species
+/// @param n_extra_vars        number of cummulative variables to add for this species
 /// @param input_birth_flux    The initial input birth flux for the species
 /// @details This function creates metadata associated with the discretized size axis according to the specified solver, such as size at birth, initial number of cohorts/bins, and allocates space for the species in the state vector. 
 void Solver::addSpecies(std::vector<double> xbreaks, Species_Base* s, int n_extra_vars, double input_birth_flux){
@@ -210,20 +210,9 @@ void Solver::print(){
 
 /// @brief      initializes species - sets initial state (x, u, abc) for all cohorts depending on the solver
 /// @param s    species to be initialized
-/// @param it   iterator to the starting element in the state vector for this species
-/// @return     returns the incremented iterator, which can be used as input for initializing the next species
-// Layout of the state vector is as follows:
-//  ------------------------------------------------------------
-// | x : u | x : u | x : u | a : b : c | a : b : c | a : b : c |
-//  ------------------------------------------------------------
-//  In above layout, the internal variables x and u are tightly
-//  packed first, followed by user variables a, b, c. 
-//  This arrangement is cache friendly because:
-//  When setting rates, typically a,b,c are calculated one 
-//  after the other for each x.
 // TODO: should this take t0 as an argument, instead of setting to 0? 
-// TODO: maybe make use of copyCohortsToState here instead ofnmanually updating state elements?
-vector<double>::iterator Solver::initializeSpecies(Species_Base * s, vector<double>::iterator it){
+// [resolved] todo: maybe make use of copyCohortsToState here instead ofnmanually updating state elements?
+void Solver::initializeSpecies(Species_Base * s){
 		// set x and u of boundary cohort
 		// Boundary cohort is not in state, but used as a reference.	
 		s->set_xb(s->xb); // set x of boundary cohort 
@@ -239,7 +228,7 @@ vector<double>::iterator Solver::initializeSpecies(Species_Base * s, vector<doub
 				double U = s->init_density(i, X, env); 
 				s->setX(i,X); 
 				s->setU(i,U);
-				*it++ = U;		// u in state (only)
+				// *it++ = U;		// u in state (only)
 			}
 		}
 		
@@ -249,24 +238,24 @@ vector<double>::iterator Solver::initializeSpecies(Species_Base * s, vector<doub
 				double U = s->init_density(i, X, env); 
 				s->setX(i,X); 
 				s->setU(i,U);
-				*it++ = X;									// x in state
-				*it++ = (use_log_densities)? log(U) : U;	// u in state 
+				// *it++ = X;									// x in state
+				// *it++ = (use_log_densities)? log(U) : U;	// u in state 
 			}
 		}
 		
 		if (method == SOLVER_EBT || method == SOLVER_IEBT){
-			// x, u for internal cohorts in state and it cohorts
+			// x, u for internal cohorts 
 			for (size_t i=0; i<s->J-1; ++i){
 				double X = (s->x[i]+s->x[i+1])/2.0;			
 				double U = s->init_density(i, X, env)*(s->x[i]-s->x[i+1]); 
 				s->setX(i,X); 
 				s->setU(i,U);
-				*it++ = X;	// x in state
-				*it++ = U;	// u in state 
+				// *it++ = X;	// x in state
+				// *it++ = U;	// u in state 
 			}
 			// set pi0, N0 as x, u for the last cohort. This scheme allows using this last cohort with xb+pi0 in integrals etc 
-			*it++ = 0; *it++ = 0;
-			s->setX(s->J-1,0); // TODO: should this be set to xb for init_state and set to 0 again later? maybe not, as init_state is not expected to be x dependent
+			// *it++ = 0; *it++ = 0;
+			s->setX(s->J-1,0); // [resolved] todo: should this be set to xb for init_state and set to 0 again later? maybe not, as init_state is not expected to be x dependent
 			s->setU(s->J-1,0); 		
 		}
 		
@@ -305,10 +294,10 @@ vector<double>::iterator Solver::initializeSpecies(Species_Base * s, vector<doub
 //			fout.close();	
 		}
 
-		// initialize extra state for each cohort and copy it to state
+		// initialize extra state for each cohort ... previously also copied to state
 		// For EBT, the initialization of extra variables may need state info, so need to realize pi0-cohort
 		if (method == SOLVER_EBT || method == SOLVER_IEBT) realizeEbtBoundaryCohort(s);
-		s->initAndCopyExtraState(current_time, env, it);
+		s->initExtraState(current_time, env);
 		if (method == SOLVER_EBT || method == SOLVER_IEBT) restoreEbtBoundaryCohort(s);
 		//if (s->n_extra_statevars > 0){  // FIXME: maybe redundant
 			//auto it_prev = it;
@@ -316,18 +305,16 @@ vector<double>::iterator Solver::initializeSpecies(Species_Base * s, vector<doub
 			//assert(distance(it_prev, it) == s->n_extra_statevars*s->J); 
 		//}
 
-		return it;
 }
 
 
 void Solver::initialize(){
-	
-	vector<double>::iterator it = state.begin() + n_statevars_system; // TODO: replace with init_sState() 
-	
+//	vector<double>::iterator it = state.begin() + n_statevars_system; // TODO: replace with init_sState() 
 	for (int k=0; k<species_vec.size(); ++k){
 		Species_Base* s = species_vec[k];
-		it = initializeSpecies(s, it);
+		initializeSpecies(s);
 	}
+	copyCohortsToState();
 }
 
 
@@ -348,6 +335,15 @@ void Solver::restoreEbtBoundaryCohort(Species_Base * spp){
 }
 
 
+// Layout of the state vector is as follows:
+//  ------------------------------------------------------------
+// | x : u | x : u | x : u | a : b : c | a : b : c | a : b : c |
+//  ------------------------------------------------------------
+//  In above layout, the internal variables x and u are tightly
+//  packed first, followed by user variables a, b, c. 
+//  This arrangement is cache friendly because:
+//  When setting rates, typically a,b,c are calculated one 
+//  after the other for each x.
 void Solver::copyStateToCohorts(std::vector<double>::iterator state_begin){
 	if (debug) std::cout << "state ---> cohorts\n";
 	std::vector<double>::iterator it = state_begin + n_statevars_system; // no need to copy system state

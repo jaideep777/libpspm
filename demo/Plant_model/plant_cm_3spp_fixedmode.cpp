@@ -85,21 +85,21 @@ class SolverIO{
 
 			for (int i=0; i<streams[s].size(); ++i) streams[s][i] << S->current_time << "\t";
 
-			vector<double> breaks = my_log_seq(spp->xb, 20, 100);
-			vector<double> dist = S->getDensitySpecies(s, breaks);
-			//cout << "here: " << breaks.size() << " " << dist.size() << endl;
+			// vector<double> breaks = my_log_seq(spp->xb, 20, 100);
+			// vector<double> dist = S->getDensitySpecies(s, breaks);
+			// //cout << "here: " << breaks.size() << " " << dist.size() << endl;
 
-			for (int i=0; i<100; ++i){
-				//cout << i << " " << "here" << endl;
+			// for (int i=0; i<100; ++i){
+			// 	//cout << i << " " << "here" << endl;
 				
-				streams[s][0] << breaks[i] << "\t";
-				streams[s][1] << dist[i] << "\t";
-			}
+			// 	streams[s][0] << breaks[i] << "\t";
+			// 	streams[s][1] << dist[i] << "\t";
+			// }
 
 			for (int j=0; j<spp->xsize(); ++j){
 				auto& C = spp->getCohort(j);
-				// streams[s][0] << C.x << "\t";
-				// streams[s][1] << C.u << "\t";
+				streams[s][0] << C.x << "\t";
+				streams[s][1] << C.u << "\t";
 				streams[s][2] << C.vars.mortality << "\t";
 				streams[s][3] << C.viable_seeds << "\t";
 				streams[s][4] << C.vars.area_heartwood << "\t";
