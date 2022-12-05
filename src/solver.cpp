@@ -120,6 +120,7 @@ void Solver::addSpecies(std::vector<double> xbreaks, Species_Base* s, int n_extr
 		}
 	}
 
+	initializeSpecies(s);
 }
 
 
@@ -130,6 +131,20 @@ void Solver::addSpecies(int _J, double _xb, double _xm, bool log_breaks, Species
 	else            xbreaks =    seq(_xb, _xm, _J+1);
 
 	addSpecies(xbreaks, s, n_extra_vars, input_birth_flux);
+}
+
+
+void Solver::removeSpecies(Species_Base * spp){
+	std::vector<Species_Base*>::iterator it = std::find(species_vec.begin(), species_vec.end(), spp);
+	if (it != species_vec.end()){
+		std::cout << "Removing species: " << spp << "\n";
+		// Not freeing memory here: allocation of memory for species is done by user, so freeing should also be done by user
+		species_vec.erase(it);
+		resizeStateFromSpecies();
+	}
+	else{
+		std::cout << "Species " << spp << " not found in the solver.\n";
+	}
 }
 
 
@@ -309,11 +324,12 @@ void Solver::initializeSpecies(Species_Base * s){
 
 
 void Solver::initialize(){
+	// FIXME: Where is initialization of system vars?
 //	vector<double>::iterator it = state.begin() + n_statevars_system; // TODO: replace with init_sState() 
-	for (int k=0; k<species_vec.size(); ++k){
-		Species_Base* s = species_vec[k];
-		initializeSpecies(s);
-	}
+	// for (int k=0; k<species_vec.size(); ++k){
+	// 	Species_Base* s = species_vec[k];
+	// 	initializeSpecies(s);
+	// }
 	copyCohortsToState();
 }
 

@@ -71,6 +71,7 @@ class Solver{
 	void addSystemVariables(int _s);
 	void addSpecies(int _J, double _xb, double _xm, bool log_breaks, Species_Base* _mod, int n_extra_vars, double input_birth_flux = -1);
 	void addSpecies(std::vector<double> xbreaks, Species_Base* _mod, int n_extra_vars, double input_birth_flux = -1);
+	void removeSpecies(Species_Base* spp);
 
 	//Species<Model>* get_species(int id);
 	int n_species();

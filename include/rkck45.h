@@ -1,4 +1,4 @@
-#ifndef PSPM_ODE_RKCK45_H
+#ifndef PSPM_ODE_RKCK45_H_
 #define PSPM_ODE_RKCK45_H_
 
 /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
