@@ -51,6 +51,12 @@ Solver::Solver(std::string _method, std::string ode_method) : Solver(methods_map
 }
 
 
+/// @brief Add the given species to the solver. 
+/// @param xbreaks             breaks to use for discretization of the size axis
+/// @param s                   species to add
+/// @param n_extra_vars        number of cummulative variables to add for this species
+/// @param input_birth_flux    The initial input birth flux for the species
+/// @details This function creates metadata associated with the discretized size axis according to the specified solver, such as size at birth, initial number of cohorts/bins, and allocates space for the species in the state vector. 
 void Solver::addSpecies(std::vector<double> xbreaks, Species_Base* s, int n_extra_vars, double input_birth_flux){
 	s->set_inputBirthFlux(input_birth_flux);
 	s->n_extra_statevars = n_extra_vars;
@@ -114,6 +120,7 @@ void Solver::addSpecies(std::vector<double> xbreaks, Species_Base* s, int n_extr
 		}
 	}
 
+	initializeSpecies(s);
 }
 
 
@@ -124,6 +131,20 @@ void Solver::addSpecies(int _J, double _xb, double _xm, bool log_breaks, Species
 	else            xbreaks =    seq(_xb, _xm, _J+1);
 
 	addSpecies(xbreaks, s, n_extra_vars, input_birth_flux);
+}
+
+
+void Solver::removeSpecies(Species_Base * spp){
+	std::vector<Species_Base*>::iterator it = std::find(species_vec.begin(), species_vec.end(), spp);
+	if (it != species_vec.end()){
+		std::cout << "Removing species: " << spp << "\n";
+		// Not freeing memory here: allocation of memory for species is done by user, so freeing should also be done by user
+		species_vec.erase(it);
+		resizeStateFromSpecies();
+	}
+	else{
+		std::cout << "Species " << spp << " not found in the solver.\n";
+	}
 }
 
 
@@ -202,29 +223,18 @@ void Solver::print(){
 }
 
 
-// Layout of the state vector is as follows:
-//  ------------------------------------------------------------
-// | x : u | x : u | x : u | a : b : c | a : b : c | a : b : c |
-//  ------------------------------------------------------------
-//  In above layout, the internal variables x and u are tightly
-//  packed first, followed by user variables a, b, c. 
-//  This arrangement is cache friendly because:
-//  When setting rates, typically a,b,c are calculated one 
-//  after the other for each x.
+/// @brief      initializes species - sets initial state (x, u, abc) for all cohorts depending on the solver
+/// @param s    species to be initialized
 // TODO: should this take t0 as an argument, instead of setting to 0? 
-void Solver::initialize(){
-	
-	vector<double>::iterator it = state.begin() + n_statevars_system; // TODO: replace with init_sState() 
-	
-	for (int k=0; k<species_vec.size(); ++k){
-		Species_Base* s = species_vec[k];
-	
+// [resolved] todo: maybe make use of copyCohortsToState here instead ofnmanually updating state elements?
+void Solver::initializeSpecies(Species_Base * s){
+		// set x and u of boundary cohort
 		// Boundary cohort is not in state, but used as a reference.	
 		s->set_xb(s->xb); // set x of boundary cohort 
 		s->set_ub(0);     // set initial density of boundary cohort to 0.
 		
 		// set birth time for each cohort to current_time
-		for (int i=0; i<s->J; ++i) s->set_birthTime(i, current_time); // FIXME: doesnt make sense, but birthTime is not used anyways
+		for (int i=0; i<s->J; ++i) s->set_birthTime(i, current_time); // FIXME: doesnt make sense, because larger cohorts would have been born earlier, but birthTime is not used anyways
 
 		// set x, u for all cohorts
 		if (method == SOLVER_FMU || method == SOLVER_IFMU){
@@ -233,7 +243,7 @@ void Solver::initialize(){
 				double U = s->init_density(i, X, env); 
 				s->setX(i,X); 
 				s->setU(i,U);
-				*it++ = U;		// u in state (only)
+				// *it++ = U;		// u in state (only)
 			}
 		}
 		
@@ -243,24 +253,24 @@ void Solver::initialize(){
 				double U = s->init_density(i, X, env); 
 				s->setX(i,X); 
 				s->setU(i,U);
-				*it++ = X;									// x in state
-				*it++ = (use_log_densities)? log(U) : U;	// u in state 
+				// *it++ = X;									// x in state
+				// *it++ = (use_log_densities)? log(U) : U;	// u in state 
 			}
 		}
 		
 		if (method == SOLVER_EBT || method == SOLVER_IEBT){
-			// x, u for internal cohorts in state and it cohorts
+			// x, u for internal cohorts 
 			for (size_t i=0; i<s->J-1; ++i){
 				double X = (s->x[i]+s->x[i+1])/2.0;			
 				double U = s->init_density(i, X, env)*(s->x[i]-s->x[i+1]); 
 				s->setX(i,X); 
 				s->setU(i,U);
-				*it++ = X;	// x in state
-				*it++ = U;	// u in state 
+				// *it++ = X;	// x in state
+				// *it++ = U;	// u in state 
 			}
 			// set pi0, N0 as x, u for the last cohort. This scheme allows using this last cohort with xb+pi0 in integrals etc 
-			*it++ = 0; *it++ = 0;
-			s->setX(s->J-1,0); // TODO: should this be set to xb for init_state and set to 0 again later? maybe not, as init_state is not expected to be x dependent
+			// *it++ = 0; *it++ = 0;
+			s->setX(s->J-1,0); // [resolved] todo: should this be set to xb for init_state and set to 0 again later? maybe not, as init_state is not expected to be x dependent
 			s->setU(s->J-1,0); 		
 		}
 		
@@ -299,10 +309,10 @@ void Solver::initialize(){
 //			fout.close();	
 		}
 
-		// initialize extra state for each cohort and copy it to state
+		// initialize extra state for each cohort ... previously also copied to state
 		// For EBT, the initialization of extra variables may need state info, so need to realize pi0-cohort
 		if (method == SOLVER_EBT || method == SOLVER_IEBT) realizeEbtBoundaryCohort(s);
-		s->initAndCopyExtraState(current_time, env, it);
+		s->initExtraState(current_time, env);
 		if (method == SOLVER_EBT || method == SOLVER_IEBT) restoreEbtBoundaryCohort(s);
 		//if (s->n_extra_statevars > 0){  // FIXME: maybe redundant
 			//auto it_prev = it;
@@ -310,7 +320,17 @@ void Solver::initialize(){
 			//assert(distance(it_prev, it) == s->n_extra_statevars*s->J); 
 		//}
 
-	}
+}
+
+
+void Solver::initialize(){
+	// FIXME: Where is initialization of system vars?
+//	vector<double>::iterator it = state.begin() + n_statevars_system; // TODO: replace with init_sState() 
+	// for (int k=0; k<species_vec.size(); ++k){
+	// 	Species_Base* s = species_vec[k];
+	// 	initializeSpecies(s);
+	// }
+	copyCohortsToState();
 }
 
 
@@ -331,6 +351,15 @@ void Solver::restoreEbtBoundaryCohort(Species_Base * spp){
 }
 
 
+// Layout of the state vector is as follows:
+//  ------------------------------------------------------------
+// | x : u | x : u | x : u | a : b : c | a : b : c | a : b : c |
+//  ------------------------------------------------------------
+//  In above layout, the internal variables x and u are tightly
+//  packed first, followed by user variables a, b, c. 
+//  This arrangement is cache friendly because:
+//  When setting rates, typically a,b,c are calculated one 
+//  after the other for each x.
 void Solver::copyStateToCohorts(std::vector<double>::iterator state_begin){
 	if (debug) std::cout << "state ---> cohorts\n";
 	std::vector<double>::iterator it = state_begin + n_statevars_system; // no need to copy system state
@@ -422,6 +451,7 @@ void Solver::calcOdeRatesImplicit(double t, vector<double>::iterator S, vector<d
 		its += (n_statevars_internal)*spp->J; // skip x and u 
 		for (int i=0; i<n_statevars_internal*spp->J; ++i) *itr++ = 0; // set dx/dt and du/dt to 0 
 	
+		// FIXME: Maybe a good idea to realize pi0 cohort before calc extra rates
 		if (spp->n_extra_statevars > 0){
 			auto itr_prev = itr;
 			spp->getExtraRates(itr); // TODO/FIXME: Does calc of extra rates need t and env?

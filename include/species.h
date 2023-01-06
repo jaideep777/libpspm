@@ -70,6 +70,7 @@ class Species_Base{
 	virtual double getU(int i) = 0;
 
 	virtual double init_density(int i, double x, void * env) = 0;
+	virtual void initExtraState(double t, void * env) = 0;
 	virtual void initAndCopyExtraState(double t, void * env, std::vector<double>::iterator &it) = 0;
 	virtual void initBoundaryCohort(double t, void * env) = 0;
 
@@ -138,6 +139,7 @@ class Species : public Species_Base{
 	double getU(int i);
 	
 	double init_density(int i, double x, void * env);
+	void initExtraState(double t, void * env);
 	void initAndCopyExtraState(double t, void * env, std::vector<double>::iterator &it);
 	void initBoundaryCohort(double t, void * env);
 

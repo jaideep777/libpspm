@@ -85,21 +85,21 @@ class SolverIO{
 
 			for (int i=0; i<streams[s].size(); ++i) streams[s][i] << S->current_time << "\t";
 
-			vector<double> breaks = my_log_seq(spp->xb, 20, 100);
-			vector<double> dist = S->getDensitySpecies(s, breaks);
-			//cout << "here: " << breaks.size() << " " << dist.size() << endl;
+			// vector<double> breaks = my_log_seq(spp->xb, 20, 100);
+			// vector<double> dist = S->getDensitySpecies(s, breaks);
+			// //cout << "here: " << breaks.size() << " " << dist.size() << endl;
 
-			for (int i=0; i<100; ++i){
-				//cout << i << " " << "here" << endl;
+			// for (int i=0; i<100; ++i){
+			// 	//cout << i << " " << "here" << endl;
 				
-				streams[s][0] << breaks[i] << "\t";
-				streams[s][1] << dist[i] << "\t";
-			}
+			// 	streams[s][0] << breaks[i] << "\t";
+			// 	streams[s][1] << dist[i] << "\t";
+			// }
 
 			for (int j=0; j<spp->xsize(); ++j){
 				auto& C = spp->getCohort(j);
-				// streams[s][0] << C.x << "\t";
-				// streams[s][1] << C.u << "\t";
+				streams[s][0] << C.x << "\t";
+				streams[s][1] << C.u << "\t";
 				streams[s][2] << C.vars.mortality << "\t";
 				streams[s][3] << C.viable_seeds << "\t";
 				streams[s][4] << C.vars.area_heartwood << "\t";
@@ -214,9 +214,11 @@ int main(){
 	cout << "Number of calls to derivs           : " << S.odeStepper.get_fn_evals() << endl;
 
 	for (int s=0; s< S.n_species(); ++s){
-		cout << "Seed rain for Species " << s << " (Lindh 18) = " << pn::integrate_trapezium(times, seeds_out[s]) << endl;
+		cout << setprecision(6) << "Seed rain for Species " << s << " (Lindh 18) = " << pn::integrate_trapezium(times, seeds_out[s]) << endl;
 	}
 
+	// expected falster17: 
+	vector<double> ex = {12.188123, 19.832202,  3.687228};
 	for (int s=0; s< S.n_species(); ++s){
 		auto spp = S.species_vec[s];
 		vector <double> fec_vec;
@@ -229,7 +231,9 @@ int main(){
 			//cout << times[i] << " " << M.input_seed_rain << " " << S_D << " " << patch_age_density << " " << (*itf) << " | " << output_seeds << endl;
 			fec_vec.push_back(output_seeds);
 		}
-		cout << "Seed rain for Species " << s << " (Falster 17) = " << pn::integrate_trapezium(times, fec_vec) << endl;
+		double sr = pn::integrate_trapezium(times, fec_vec);
+		cout << setprecision(6) << "Seed rain for Species " << s << " (Falster 17) = " << sr << "\t| (" << ex[s] << ")" << endl;
+		// expected: rk45ck    12.1881    19.8324    3.69066     791,745
 	}
 	
 

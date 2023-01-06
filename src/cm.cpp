@@ -19,6 +19,7 @@ void Solver::calcRates_CM(double t, vector<double>::iterator S, vector<double>::
 		Species_Base* spp = species_vec[s];
 		//cout << "calcRates(species = " << s << ")\n";
 		
+		// Boundary u is not used in rate calcs per se, but needed in size integral. Hence update
 		double pe = spp->establishmentProbability(t, env);
 		double gb = spp->growthRate(-1, spp->xb, t, env);
 		if (spp->birth_flux_in < 0){	
