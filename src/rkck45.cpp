@@ -21,15 +21,18 @@ void RKCK45::resize(int new_size){
 
 
 void RKCK45::save(std::ofstream &fout){
+	fout << "OdeSolver::v1.0\n";
 	fout << yscal.size() << "\n";
 	for (auto yy : yscal) fout << yy << " ";   // scaling factors
 	fout << "\n";
-	for (auto yy : vector<double>{ht
+	for (auto yy : vector<double>{
+		            ht
 	              , eps_rel
 		          , eps_abs 
 	              , xt
-		          , t_stop
-	              , nok
+		          , t_stop}) fout << yy << " ";
+	for (auto yy : vector<int>{
+		            nok
 				  , nbad
 				  , nfe
 				  , sys_size}) fout << yy << " ";
@@ -37,6 +40,7 @@ void RKCK45::save(std::ofstream &fout){
 }
 
 void RKCK45::restore(std::ifstream &fin){
+	string s; fin >> s; // version number (discard)
 	int n;
 	fin >> n;
 	cout << "Restoring state to size " << n << endl;
@@ -46,8 +50,8 @@ void RKCK45::restore(std::ifstream &fin){
 	    >> eps_rel
 	    >> eps_abs 
 	    >> xt
-	    >> t_stop
-	    >> nok
+	    >> t_stop;
+	fin >> nok
 	    >> nbad
 	    >> nfe
 	    >> sys_size;

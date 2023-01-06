@@ -75,6 +75,20 @@ class Cohort : public Ind {
 		return Ind::birthRate(x,t,_env);	
 	}
 	
+	// void save(std::ofstream &fout){
+	// 	for (double xx : vector<double>{id	
+	// 	                              , birth_time
+	// 	                              , remove
+	// 	                              , need_precompute}) fout << xx << " ";
+	// }
+
+	// void restore(std::ifstream &fin){
+	// 	fin >> id
+	// 	     , birth_time
+	// 	     , remove
+	// 	     , need_precompute;
+	// }
+	
 	// FIXME other env dependent rates should also check for precompute
 };
 
