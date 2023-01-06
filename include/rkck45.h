@@ -24,7 +24,7 @@
 #include <cmath>
 #include <vector>
 #include <cassert>
-
+#include <fstream>
 
 
 //using namespace std;
@@ -50,8 +50,8 @@ class RKCK45{
 	static constexpr double PGROW  = -0.2;
 	static constexpr double PSHRNK = -0.25;
 	static constexpr double ERRCON = 1.89e-4;
-	double a_y = 1;
-	double a_dydt = 0;
+	static constexpr double a_y = 1;
+	static constexpr double a_dydt = 0;
 	container yscal;   // scaling factors
 	double ht;         // current time-step
 	double eps_rel, eps_abs;        // Accuracy we check at each step
@@ -95,12 +95,16 @@ class RKCK45{
 	double size(){return sys_size;}
 	int get_fn_evals(){return nfe;}
 
+	void save(std::ofstream &fout);
+	void restore(std::ifstream &fin);
+	
 	private:
 	template <class functor>
 	void RKTry(container& y, container& dydx, double& x, double h, container& yout, container& yerr, functor& derivs);
 	
 	template <class functor>
 	void RKStep(container& y, container& dydx, double& x, double htry, double& hdid, double& hnext, functor& derivs);
+
 };
 
 

@@ -8,6 +8,7 @@
 #include <vector>
 #include <iostream>
 #include <exception>
+#include <fstream>
 
 enum SolverType {ODE_RKCK45, ODE_LSODA};
 
@@ -95,6 +96,15 @@ class OdeSolver{
 		else return -1;
 	}
 
+	void save(std::ofstream &fout){
+		if      (type == ODE_RKCK45) static_cast<RKCK45*>(solver)->save(fout);	
+		else if (type == ODE_LSODA)  throw std::runtime_error("Cannot save the state for LSODA solver.");
+	}
+
+	void restore(std::ifstream &fin){
+		if      (type == ODE_RKCK45) static_cast<RKCK45*>(solver)->restore(fin);	
+		else if (type == ODE_LSODA)  throw std::runtime_error("Cannot restore the state for LSODA solver.");
+	}
 };
 
 
