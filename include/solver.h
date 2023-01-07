@@ -18,7 +18,7 @@ class Solver{
 	private:
 	static std::map<std::string, PSPM_SolverType> methods_map;
 
-	const bool debug = false;
+	static constexpr bool debug = false;
 	PSPM_SolverType method;
 
 	int n_statevars_internal = 0;		// number of internal i-state variables (x and/or u)
@@ -28,10 +28,10 @@ class Solver{
 
 	public:	
 	OdeSolver odeStepper;
-	EnvironmentBase * env;
+	EnvironmentBase * env = nullptr;
 	
 	// The current state of the system, {t, S, dS/dt} 
-	double current_time;			// these are synced with ODE solver only after a successful step
+	double current_time = -999;			// these are synced with ODE solver only after a successful step
 	std::vector <double> state;		// +-- They are NOT synced during the ODE solver's internal steps
 	std::vector <double> rates; 
 
@@ -78,7 +78,7 @@ class Solver{
 
 	void setEnvironment(EnvironmentBase * _env);
 
-	void resetState(double t0 = 0); 	
+	void resetState(double t0 = 0);
 	void resizeStateFromSpecies();
 
 	void initializeSpecies(Species_Base * s);
@@ -132,6 +132,10 @@ class Solver{
 	double integrate_wudx_above(wFunc w, double t, double xlow, int species_id);
 
 	std::vector<double> getDensitySpecies(int k, std::vector<double> breaks, Spline::Extr extrapolation_method = Spline::ZERO);
+
+	void save(std::ofstream &fout);
+	void restore(std::ifstream &fin, Species_Base* spp_proto);
+
 };
 
 #include "../src/solver.tpp"

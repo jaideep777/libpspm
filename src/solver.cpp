@@ -213,13 +213,13 @@ void Solver::print(){
 
 	std::cout << "+ State size = " << state.size() << "\n";
 	std::cout << "+ Rates size = " << rates.size() << "\n";
-	std::cout << "+ Species:\n";
-	std::cout.flush();
+	std::cout << "+ Environment = " << env << "\n";
+	std::cout << "+ Species (" << species_vec.size() << "):\n";
 	for (int i=0; i<species_vec.size(); ++i) {
 		std::cout << "Sp (" << i << "):\n";
 		species_vec[i]->print();
 	}
-	
+	std::cout.flush();
 }
 
 
@@ -656,6 +656,49 @@ std::vector<double> Solver::getDensitySpecies(int k, vector<double> breaks, Spli
 }
 
 
+void Solver::save(std::ofstream &fout){
+	// fout << "Solver::v1\n";
+	// int m = static_cast<int>(method);
+	// fout << std::make_tuple(
+	// 	  m
+	// 	, n_statevars_internal
+	// 	, n_statevars_system
+	// 	, current_time
+	// 	, use_log_densities
+	// 	, pi0
+	// 	, N0);
+	// fout << '\n';
+	// fout << species_vec.size() << '\n';
+	// for (auto spp : species_vec) spp->save(fout);
+	// fout << state;
+	// fout << rates;
+	// odeStepper.save(fout);
+}
 
 
+void Solver::restore(std::ifstream &fin, Species_Base* spp_proto){
+	// string s; fin >> s; // version number (discard)
+	// int m;
+	// fin >> m
+	//     >> n_statevars_internal
+	//     >> n_statevars_system
+	// 	>> current_time
+	// 	>> use_log_densities
+	// 	>> pi0
+	// 	>> N0;
+	// method = PSPM_SolverType(m);
+	// int nspecies;
+	// fin >> nspecies;
+	// species_vec.clear();
+	// for (int i=0; i<nspecies; ++i){
+	// 	species_vec.push_back(spp_proto->create());
+	// }
+	// for (auto spp : species_vec){
+	// 	spp->restore(fin);
+	// }
+	// fin >> state;
+	// fin >> rates;
+	// copyStateToCohorts(state.begin());
+	// odeStepper.restore(fin);
+}
 

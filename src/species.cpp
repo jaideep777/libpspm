@@ -56,3 +56,31 @@ int Species_Base::xsize(){
 //}
 
 
+void Species_Base::save(std::ofstream &fout){
+	fout << "Species_Base::v1\n";
+
+	fout << std::make_tuple(
+		J
+	  , n_extra_statevars
+	  , noff_abm
+	  , birth_flux_in
+	  , bfin_is_u0in
+	  , xb);
+	fout << '\n';
+	fout << X << x << h;
+}
+
+void Species_Base::restore(std::ifstream &fin){
+	std::string s; fin >> s; // version number (discard)
+	fin >> J	
+	    >> n_extra_statevars
+	    >> noff_abm
+	    >> birth_flux_in
+	    >> bfin_is_u0in
+	    >> xb;
+	
+	fin >> X >> x >> h;
+}
+
+
+

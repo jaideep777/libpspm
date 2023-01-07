@@ -1,4 +1,5 @@
 #include "rkck45.h"
+#include "io_utils.h"
 using namespace std;
 
 RKCK45::RKCK45(double t_start_, double accuracy, double h1) :
@@ -21,39 +22,33 @@ void RKCK45::resize(int new_size){
 
 
 void RKCK45::save(std::ofstream &fout){
-	fout << "OdeSolver::v1.0\n";
-	fout << yscal.size() << "\n";
-	for (auto yy : yscal) fout << yy << " ";   // scaling factors
-	fout << "\n";
-	for (auto yy : vector<double>{
-		            ht
-	              , eps_rel
-		          , eps_abs 
-	              , xt
-		          , t_stop}) fout << yy << " ";
-	for (auto yy : vector<int>{
-		            nok
-				  , nbad
-				  , nfe
-				  , sys_size}) fout << yy << " ";
-	fout << "\n";
+	fout << "OdeSolver::v1\n";
+	fout << std::make_tuple(
+			ht
+			, eps_rel
+			, eps_abs 
+			, xt
+			, t_stop
+			, nok
+			, nbad
+			, nfe
+			, sys_size);
+	fout << '\n';
+	fout << yscal;
 }
 
 void RKCK45::restore(std::ifstream &fin){
 	string s; fin >> s; // version number (discard)
-	int n;
-	fin >> n;
-	cout << "Restoring state to size " << n << endl;
-	yscal.resize(n);
-	for (int i=0; i<n; ++i) fin >> yscal[i];
 	fin >> ht
 	    >> eps_rel
 	    >> eps_abs 
 	    >> xt
-	    >> t_stop;
-	fin >> nok
+	    >> t_stop
+	    >> nok
 	    >> nbad
 	    >> nfe
 	    >> sys_size;
 	resize(sys_size);
+	fin >> yscal;
 }
+

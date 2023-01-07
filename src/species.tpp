@@ -13,6 +13,10 @@ void Species_Base::addCohort(T bc){
 
 // *************** Species<Model> ******************
 
+template<class Model>
+Species<Model>* Species<Model>::create(){
+	return new Species<Model>();
+}
 
 
 template<class Model>
@@ -43,7 +47,7 @@ Species<Model>::Species(std::vector<double> breaks){
 
 template<class Model>
 Species<Model>::Species(Model M){
-	boundaryCohort = savedCohort = Cohort<Model>(M); 
+	boundaryCohort = Cohort<Model>(M); 
 }
 
 
@@ -71,7 +75,7 @@ void Species<Model>::print(){
 	          << std::setw(12) << "x" 
 			  << std::setw(12) << "u" << " ";
 	if (!cohorts.empty()){
-		for (auto s : cohorts[0].varnames) std::cout << std::setw(10) << s << " ";
+		for (auto s : cohorts[0].varnames) std::cout << std::setw(12) << s << " ";
 	}
 	std::cout << "\n";
 	for (auto& c : cohorts) {
@@ -414,6 +418,28 @@ template <class Model>
 void Species<Model>::sortCohortsDescending(int skip){
 	std::sort(cohorts.begin(), cohorts.end()-skip, [](const Cohort<Model> &a, const Cohort<Model> &b){return a.x > b.x;});
 }
+
+
+template <class Model>
+void Species<Model>::save(std::ofstream &fout){
+	Species_Base::save(fout);
+
+	fout << "Species<T>::v1\n";
+	boundaryCohort.save(fout, n_extra_statevars);
+	for (auto& C : cohorts) C.save(fout, n_extra_statevars);
+}
+
+template <class Model>
+void Species<Model>::restore(std::ifstream &fin){
+	Species_Base::restore(fin);
+
+	std::string s; fin >> s; // version number (discard)
+	boundaryCohort.restore(fin, n_extra_statevars);
+	cohorts.resize(J);
+	for (auto& C : cohorts) C.restore(fin, n_extra_statevars);
+}
+
+
 
 //template <class Model>
 //void Species<Model>::backupCohort(int j){

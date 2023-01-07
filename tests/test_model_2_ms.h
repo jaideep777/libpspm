@@ -138,7 +138,10 @@ class TestModel : public Plant{
 	}
 
 	void print(std::ostream &out = std::cout){
-		out << mortality << "\t" << viable_seeds << "\t" << heart_mass << "\t" << sap_mass << "\t";
+		out << setw(10) << mortality << "\t"
+		    << setw(10) << viable_seeds << "\t"
+			<< setw(10) << heart_mass << "\t"
+			<< setw(10) << sap_mass << "\t";
 	}
 
 

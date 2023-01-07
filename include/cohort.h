@@ -3,6 +3,8 @@
 
 #include <iostream>
 #include <iomanip>
+#include <fstream>
+#include "io_utils.h"
 
 template<class Ind>
 class Cohort : public Ind {
@@ -75,19 +77,37 @@ class Cohort : public Ind {
 		return Ind::birthRate(x,t,_env);	
 	}
 	
-	// void save(std::ofstream &fout){
-	// 	for (double xx : vector<double>{id	
-	// 	                              , birth_time
-	// 	                              , remove
-	// 	                              , need_precompute}) fout << xx << " ";
-	// }
+	void save(std::ofstream &fout, int n_extra_vars){
+		// We dont save x and u as those will be saved from state vector
+		fout << "Cohort<Ind>::v1" << "   ";
+		fout << std::make_tuple(
+				  id
+				, birth_time
+				, remove
+				, need_precompute);
+		fout << x << ' ' << u << ' ';
 
-	// void restore(std::ifstream &fin){
-	// 	fin >> id
-	// 	     , birth_time
-	// 	     , remove
-	// 	     , need_precompute;
-	// }
+		std::vector<double> ex_state(n_extra_vars);
+		auto it = ex_state.begin();
+		Ind::get_state(it);
+		fout << ex_state;
+	}
+
+	void restore(std::ifstream &fin, int n_extra_vars){
+		std::string s; fin >> s; // discard version number
+		fin >> id
+		    >> birth_time
+		    >> remove
+		    >> need_precompute;
+
+		fin >> x >> u;
+		set_size(x);
+
+		std::vector<double> ex_state(n_extra_vars);
+		fin >> ex_state;
+		auto it = ex_state.begin();
+		Ind::set_state(it);
+	}
 	
 	// FIXME other env dependent rates should also check for precompute
 };
