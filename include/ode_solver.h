@@ -49,20 +49,28 @@ class OdeSolver{
 		deleteSolver();
 	}
 
-	// FIXME: Implement rule of 3 and copy & swap idiom for copy assignment operator
-	// This is temporary hack, works for current purposes. 
+	// FIXME: Implement copy-constructor
+
+	// TODO: Implement this via copy & swap idiom
 	OdeSolver& operator=(const OdeSolver &rhs){
-		std::cout << "OdeSolver::operator= entered\n"; 
-		this->deleteSolver(); // delete current solver
-		// copy solver type and other meta form rhs
-		type = rhs.type;
-		control = rhs.control;
-		nfe_cumm = rhs.nfe_cumm;
-		// copy construct the new solver as per new type
-		if      (type == ODE_RKCK45) solver = new RKCK45(*static_cast<RKCK45*>(rhs.solver));
-		else if (type == ODE_LSODA)  solver = new LSODA(*static_cast<LSODA*>(rhs.solver));
-		else throw std::runtime_error("Fatal: Unknown ODE Solver type " + type);
-		std::cout << "RKCK45 constructor entered: " << solver << '\n';
+		if (this != &rhs){
+			std::cout << "OdeSolver::operator= entered\n"; 
+			// copy construct the new solver as per the rhs's type
+			// do this first, so that if this throws an exception, the lhs object is still valid
+			void * solver2;
+			std::cout << "RKCK45 constructor entered: " << solver << '\n';
+			if      (rhs.type == ODE_RKCK45) solver2 = new RKCK45(*static_cast<RKCK45*>(rhs.solver));
+			else if (rhs.type == ODE_LSODA)  solver2 = new LSODA(*static_cast<LSODA*>(rhs.solver));
+			else throw std::runtime_error("Fatal: Unknown ODE Solver type " + type);
+
+			this->deleteSolver(); // delete current solver (based on current type)
+
+			// copy new solver type and other meta from rhs
+			type = rhs.type;
+			control = rhs.control;
+			nfe_cumm = rhs.nfe_cumm;
+			solver = solver2;
+		}
 		return *this;
 	}
 
