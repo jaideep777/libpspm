@@ -74,7 +74,7 @@ superclean: clean testclean democlean
 
 ## TESTING SUITE ##
 
-TEST_FILES = tests/ebt_save_restore.cpp #$(wildcard tests/*.cpp) 
+TEST_FILES = $(wildcard tests/*.cpp) 
 TEST_OBJECTS = $(patsubst tests/%.cpp, tests/%.o, $(TEST_FILES))
 TEST_TARGETS = $(patsubst tests/%.cpp, tests/%.test, $(TEST_FILES))
 TEST_RUNS = $(patsubst tests/%.cpp, tests/%.run, $(TEST_FILES))

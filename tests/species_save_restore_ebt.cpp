@@ -48,7 +48,7 @@ int main(){
 	vector<double> mids = diff(breaks);
 
 	double t;
-	for (t=0.05; t <= 0.8; t=t+0.05) {
+	for (t=0.05; t <= 4; t=t+0.05) {
 		S.step_to(t);
 		fout << S.current_time << "\t" << S.u0_out(t)[0] << "\t";
 
@@ -71,6 +71,8 @@ int main(){
 	spp.print();
 	spp_restored.print();
 
+	S.species_vec[0] = &spp_restored;
+
 	// fouts.open("solver_state_save.txt");
 	// S.save(fouts);
 	// fouts.close();
@@ -86,23 +88,23 @@ int main(){
 	// S.print();
 	// cout << " ---- HERE ----" << endl;
 
-	// // for (; t <= 8; t=t+0.05) {
-	// // 	S.step_to(t);
-	// // 	fout << S.current_time << "\t" << S.u0_out(t)[0] << "\t";
+	for (; t <= 8; t=t+0.05) {
+		S.step_to(t);
+		fout << S.current_time << "\t" << S.u0_out(t)[0] << "\t";
 
-	// // 	vector<double> breaks = myseq(0,1,26);
-	// // 	vector<double> v = S.getDensitySpecies(0, breaks, Spline::QUADRATIC);
-	// // 	for (auto y : v) fout << y << "\t";
-	// // 	fout << endl;
-	// // }
+		vector<double> breaks = myseq(0,1,26);
+		vector<double> v = S.getDensitySpecies(0, breaks, Spline::QUADRATIC);
+		for (auto y : v) fout << y << "\t";
+		fout << endl;
+	}
 
 
 
-	// // fout.close();
+	fout.close();
 
-	// // S.print();	
-	// // cout << setprecision(10) << S.u0_out(S.current_time)[0] << endl;
-	// // if (abs(S.u0_out(S.current_time)[0]-0.9750400229) < 1e-7) return 0;
-	// // else return 1;
+	S.print();	
+	cout << setprecision(10) << S.u0_out(S.current_time)[0] << endl;
+	if (abs(S.u0_out(S.current_time)[0]-0.9750400229) < 1e-7) return 0;
+	else return 1;
 }
 
