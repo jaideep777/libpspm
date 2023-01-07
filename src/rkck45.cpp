@@ -4,7 +4,11 @@ using namespace std;
 
 RKCK45::RKCK45(double t_start_, double accuracy, double h1) :
 		ht(h1), eps_rel(accuracy), eps_abs(accuracy), xt(t_start_){
-		
+	cout << "RKCK45 constructor entered: " << this << "\n"; cout.flush();
+}
+
+RKCK45::~RKCK45(){
+	cout << "RKCK45 ~destructor entered " << this << "\n"; cout.flush();
 }
 
 void RKCK45::resize(int new_size){
@@ -22,7 +26,7 @@ void RKCK45::resize(int new_size){
 
 
 void RKCK45::save(std::ofstream &fout){
-	fout << "OdeSolver::v1\n";
+	fout << "RKCK45::v1\n";
 	fout << std::make_tuple(
 			ht
 			, eps_rel

@@ -72,7 +72,8 @@ class RKCK45{
 	// 4) accuracy -- desired accuracy
 	// 5) h1       -- trial size of the first step
 	RKCK45(double t_start_, double accuracy, double h1);
-	
+	~RKCK45();
+
 	// Resize the container 
 	void resize(int new_size);
 	

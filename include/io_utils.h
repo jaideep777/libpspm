@@ -5,11 +5,13 @@
 #include <istream>
 #include <tuple>
 #include <vector>
+#include <iomanip>
 
 // print a vector via ofstream
 // prints: size | v1 v2 v3 ...
 template <class T>
 std::ostream& operator << (std::ostream &os, const std::vector<T> &v) {
+	//os << std::setprecision(12);
 	os << v.size() << " | ";
 	for (const auto &x : v) {
 		os << x << ' ';
