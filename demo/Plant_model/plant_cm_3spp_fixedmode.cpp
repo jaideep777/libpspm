@@ -231,6 +231,9 @@ int main(){
 			//cout << times[i] << " " << M.input_seed_rain << " " << S_D << " " << patch_age_density << " " << (*itf) << " | " << output_seeds << endl;
 			fec_vec.push_back(output_seeds);
 		}
+		
+		//cout << times << fec_vec;
+
 		double sr = pn::integrate_trapezium(times, fec_vec);
 		cout << setprecision(6) << "Seed rain for Species " << s << " (Falster 17) = " << sr << "\t| (" << ex[s] << ")" << endl;
 		// expected: rk45ck    12.1881    19.8324    3.69066     791,745

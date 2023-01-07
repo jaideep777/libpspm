@@ -31,7 +31,9 @@ class Solver{
 	EnvironmentBase * env = nullptr;
 	
 	// The current state of the system, {t, S, dS/dt} 
-	double current_time = -999;			// these are synced with ODE solver only after a successful step
+	// FIXME: Setting initial value of current_time to anything other than 0 breaks Falster17 sede rain in Plant model. Investigate. 
+	//  ^ Solution: init of current_time must happen before species_initialization. Maybe via an argument to solver constructor?
+	double current_time = 0;			// these are synced with ODE solver only after a successful step
 	std::vector <double> state;		// +-- They are NOT synced during the ODE solver's internal steps
 	std::vector <double> rates; 
 
