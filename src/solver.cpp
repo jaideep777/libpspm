@@ -687,6 +687,7 @@ void Solver::save(std::ofstream &fout){
 
 void Solver::restore(std::ifstream &fin, vector<Species_Base*> spp_proto){
 	string s; fin >> s; // version number (discard)
+	assert(s == "Solver::v1");
 	int m;
 	fin >> m
 	    >> n_statevars_internal

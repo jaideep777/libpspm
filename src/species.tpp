@@ -13,10 +13,10 @@ void Species_Base::addCohort(T bc){
 
 // *************** Species<Model> ******************
 
-template<class Model>
-Species<Model>* Species<Model>::create(){
-	return new Species<Model>();
-}
+// template<class Model>
+// Species<Model>* Species<Model>::create(){
+// 	return new Species<Model>();
+// }
 
 
 template<class Model>
@@ -422,20 +422,39 @@ void Species<Model>::sortCohortsDescending(int skip){
 
 template <class Model>
 void Species<Model>::save(std::ofstream &fout){
-	Species_Base::save(fout);
-
+//	Species_Base::save(fout);
 	fout << "Species<T>::v1\n";
+	fout << std::make_tuple(
+		J
+	  , n_extra_statevars
+	  , noff_abm
+	  , birth_flux_in
+	  , bfin_is_u0in
+	  , xb);
+	fout << '\n';
+	fout << X << x << h;
+
 	boundaryCohort.save(fout, n_extra_statevars);
 	for (auto& C : cohorts) C.save(fout, n_extra_statevars);
 }
 
 template <class Model>
 void Species<Model>::restore(std::ifstream &fin){
-	Species_Base::restore(fin);
-
+//	Species_Base::restore(fin);
+	std::cout << "Restoring Species<T>" << std::endl;
 	std::string s; fin >> s; // version number (discard)
+	assert(s == "Species<T>::v1");
+	fin >> J	
+	    >> n_extra_statevars
+	    >> noff_abm
+	    >> birth_flux_in
+	    >> bfin_is_u0in
+	    >> xb;
+	
+	fin >> X >> x >> h;
+
 	boundaryCohort.restore(fin, n_extra_statevars);
-	cohorts.resize(J);
+	cohorts.resize(J, boundaryCohort); // cohorts must always be copy-constructed from the boundary cohort
 	for (auto& C : cohorts) C.restore(fin, n_extra_statevars);
 }
 

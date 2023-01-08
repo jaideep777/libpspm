@@ -4,6 +4,7 @@
 #include <solver.h>
 #include <vector>
 #include <environment_base.h>
+#include <individual_base.h>
 using namespace std;
 
 
@@ -89,10 +90,16 @@ class Plant {
 	void print(std::ostream& out = std::cout){
 		out << lma << "|\t" << height << "\t" << crown_area << "\t" << root_mass << "\t";
 	}
+	
+	void save(std::ofstream& fout){
+	}
+	void restore(std::ifstream& fin){
+	}
+	
 };
 
 
-class Insect {
+class Insect : public IndividualBase{
 	public:
 	double wingspan = 10;
 	

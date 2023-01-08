@@ -87,7 +87,7 @@ class Cohort : public Ind {
 				  id
 				, birth_time
 				, remove
-				, need_precompute);
+				, need_precompute); // we actually need not save need_precompute, because set_size() will always set it to 1 during restore
 		fout << x << ' ' << u << ' ';
 
 		std::vector<double> ex_state(n_extra_vars);

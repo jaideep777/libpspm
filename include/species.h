@@ -41,7 +41,7 @@ class Species_Base{
 	double xb; 
 	
 	public: // public functions
-	virtual Species_Base * create() = 0;
+	// virtual Species_Base * create() = 0;
 	virtual ~Species_Base() = 0;
 	
 	int xsize();
@@ -100,8 +100,8 @@ class Species_Base{
 
 	virtual void sortCohortsDescending(int skip=0) = 0;
 	
-	virtual void save(std::ofstream &fout);
-	virtual void restore(std::ifstream &fin);
+	virtual void save(std::ofstream &fout) = 0;
+	virtual void restore(std::ifstream &fin) = 0;
 
 //	virtual void backupCohort(int j) = 0;
 //	virtual void restoreCohort(int j) = 0;
@@ -122,7 +122,7 @@ class Species : public Species_Base{
 	// TODO: make these virtual? - not needed. They are virtual by default.
 	Species(std::vector<double> breaks = std::vector<double>());
 	Species(Model M);
-	Species<Model>* create(); // virtual constructor needed for deserialization
+	// Species<Model>* create(); // virtual constructor needed for deserialization
 
 	
 	void resize(int _J);
