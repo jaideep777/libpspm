@@ -78,7 +78,10 @@ class Cohort : public Ind {
 	}
 	
 	void save(std::ofstream &fout, int n_extra_vars){
-		// We dont save x and u as those will be saved from state vector
+		// Save/restore individual first (for metadata)
+		Ind::save(fout);
+
+		// Then save cohort (for cohort state). This way, Individual metadata will be available when set_size() and set_state() are called in restore()
 		fout << "Cohort<Ind>::v1" << "   ";
 		fout << std::make_tuple(
 				  id
@@ -94,6 +97,8 @@ class Cohort : public Ind {
 	}
 
 	void restore(std::ifstream &fin, int n_extra_vars){
+		Ind::restore(fin);
+
 		std::string s; fin >> s; // discard version number
 		fin >> id
 		    >> birth_time

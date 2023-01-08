@@ -156,6 +156,13 @@ class TestModel : public Plant{
 			<< std::setw(10) << sap_mass << "\t";
 	}
 
+	void save(std::ofstream& fout){
+		fout << "TestModel::v1 ";
+	}
+
+	void restore(std::ifstream& fin){
+		std::string s; fin >> s; // discard version number 
+	}
 
 };
 

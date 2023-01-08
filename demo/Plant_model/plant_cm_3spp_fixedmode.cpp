@@ -219,6 +219,8 @@ int main(){
 
 	// expected falster17: 
 	vector<double> ex = {12.188123, 19.832202,  3.687228};
+	// expected from this code to declare pass/fail:
+	vector<double> ex_here = {12.1883, 19.8322, 3.6867};
 	for (int s=0; s< S.n_species(); ++s){
 		auto spp = S.species_vec[s];
 		vector <double> fec_vec;
@@ -237,8 +239,10 @@ int main(){
 		double sr = pn::integrate_trapezium(times, fec_vec);
 		cout << setprecision(6) << "Seed rain for Species " << s << " (Falster 17) = " << sr << "\t| (" << ex[s] << ")" << endl;
 		// expected: rk45ck    12.1881    19.8324    3.69066     791,745
+
+		if (fabs(sr - ex_here[s]) > 1e-4) return 1;
 	}
 	
-
+	return 0;
 }
 

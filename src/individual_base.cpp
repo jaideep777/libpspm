@@ -33,3 +33,8 @@ vector<double>::iterator IndividualBase::get_rates(vector<double>::iterator &it)
 void IndividualBase::print(std::ostream& out){
 }
 
+void IndividualBase::save(std::ofstream &fout){
+}
+
+void IndividualBase::restore(std::ifstream &fin){
+}

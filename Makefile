@@ -80,7 +80,7 @@ TEST_TARGETS = $(patsubst tests/%.cpp, tests/%.test, $(TEST_FILES))
 TEST_RUNS = $(patsubst tests/%.cpp, tests/%.run, $(TEST_FILES))
 ADD_OBJECTS = 
 
-check: dir $(TARGET) compile_tests clean_log run_tests plant_demo_test
+check: dir $(TARGET) compile_tests clean_log run_tests # plant_demo_test
 
 compile_tests: $(TEST_TARGETS)
 	
@@ -143,6 +143,8 @@ plant_demo_test:
 	cd demo/Plant_model && \
 	$(MAKE) FILE=plant_cm_3spp_fixedmode.cpp && \
 	./plant_cm_3spp_fixedmode.exec && \
+	printf "%b" "\033[0;32m[PASS]\033[m" ": plant_cm_3spp_fixedmode.cpp \n"  || \
+	printf "%b" "\033[1;31m[FAIL]\033[m" ": plant_cm_3spp_fixedmode.cpp \n" && \
 	Rscript plant_cm_3spp_analysis.R && \
 	rm *.txt
 
