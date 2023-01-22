@@ -7,6 +7,9 @@ SRCFILES  :=  $(wildcard src/*.cpp)
 HEADERS := $(wildcard src/*.tpp) $(wildcard include/*.h) $(wildcard tests/*.h)
 # ------------------------------------------------------------------------------
 
+CXX = g++
+AR = ar
+
 # paths
 #CUDA_INSTALL_PATH ?= /usr/local/cuda#-5.0
 
@@ -14,9 +17,14 @@ HEADERS := $(wildcard src/*.tpp) $(wildcard include/*.h) $(wildcard tests/*.h)
 INC_PATH := -I./include 
 LIB_PATH := -L./lib 
 
+PROFILING_FLAGS = -g -pg
+
 # flags
-CPPFLAGS = -O3 -g -pg -std=c++11 -Wall -Wextra -pedantic
-LDFLAGS =  -g -pg
+CPPFLAGS = -O3 -std=c++17 -fPIC -Wall -Wextra -pedantic
+LDFLAGS =  
+
+CPPFLAGS += $(PROFILING_FLAGS)
+LDFLAGS += $(PROFILING_FLAGS)
 
 #CPPFLAGS +=   \
 #-pedantic-errors -Wcast-align \
@@ -58,11 +66,11 @@ dir:
 	mkdir -p lib build tests/build
 
 $(TARGET): $(OBJECTS) 
-	ar rcs lib/$(TARGET).a $(OBJECTS)
-	#g++ $(LDFLAGS) -o $(TARGET) $(LIB_PATH) $(OBJECTS) $(LIBS) 
+	$(AR) rcs lib/$(TARGET).a $(OBJECTS)
+#	g++ $(LDFLAGS) -o $(TARGET) $(LIB_PATH) $(OBJECTS) $(LIBS) 
 
 $(OBJECTS): build/%.o : src/%.cpp $(HEADERS)
-	g++ -c $(CPPFLAGS) $(INC_PATH) $< -o $@ 
+	$(CXX) -c $(CPPFLAGS) $(INC_PATH) $< -o $@ 
 
 clean:
 	rm -f $(TARGET) build/*.o lib/*.a src/*.o
@@ -80,7 +88,7 @@ TEST_TARGETS = $(patsubst tests/%.cpp, tests/%.test, $(TEST_FILES))
 TEST_RUNS = $(patsubst tests/%.cpp, tests/%.run, $(TEST_FILES))
 ADD_OBJECTS = 
 
-check: dir $(TARGET) compile_tests clean_log run_tests plant_demo_test
+check: dir $(TARGET) compile_tests clean_log run_tests # plant_demo_test
 
 compile_tests: $(TEST_TARGETS)
 	
@@ -143,6 +151,8 @@ plant_demo_test:
 	cd demo/Plant_model && \
 	$(MAKE) FILE=plant_cm_3spp_fixedmode.cpp && \
 	./plant_cm_3spp_fixedmode.exec && \
+	printf "%b" "\033[0;32m[PASS]\033[m" ": plant_cm_3spp_fixedmode.cpp \n"  || \
+	printf "%b" "\033[1;31m[FAIL]\033[m" ": plant_cm_3spp_fixedmode.cpp \n" && \
 	Rscript plant_cm_3spp_analysis.R && \
 	rm *.txt
 

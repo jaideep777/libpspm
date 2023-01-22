@@ -29,6 +29,9 @@ class IndividualBase{
 
 	// printing
 	virtual void print(std::ostream &out = std::cout);
+
+	virtual void save(std::ofstream& fout);
+	virtual void restore(std::ifstream& fin);
 };
 
 

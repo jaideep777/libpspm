@@ -159,6 +159,11 @@ void Solver::resetState(double t0){  // FIXME: This is currently redundant, and 
 	current_time = t0;
 	odeStepper.reset(t0, control.ode_eps, control.ode_eps); // = RKCK45<vector<double>> (0, control.ode_eps, control.ode_initial_step_size);  // this is a cheap operation, but this will empty the internal containers, which will then be (automatically) resized at next 1st ODE step. Maybe add a reset function to the ODE stepper? 
 
+	// set birth time for each cohort to current_time
+	for (auto s : species_vec){
+		for (int i=0; i<s->J; ++i) s->set_birthTime(i, current_time); // FIXME: doesnt make sense, because larger cohorts would have been born earlier, but birthTime is not used anyways
+	}
+
 	std::fill(state.begin(), state.end(), 0); 
 	std::fill(rates.begin(), rates.end(), -999); // DEBUG
 }
@@ -213,13 +218,13 @@ void Solver::print(){
 
 	std::cout << "+ State size = " << state.size() << "\n";
 	std::cout << "+ Rates size = " << rates.size() << "\n";
-	std::cout << "+ Species:\n";
-	std::cout.flush();
+	std::cout << "+ Environment = " << env << "\n";
+	std::cout << "+ Species (" << species_vec.size() << "):\n";
 	for (int i=0; i<species_vec.size(); ++i) {
 		std::cout << "Sp (" << i << "):\n";
 		species_vec[i]->print();
 	}
-	
+	std::cout.flush();
 }
 
 
@@ -234,6 +239,7 @@ void Solver::initializeSpecies(Species_Base * s){
 		s->set_ub(0);     // set initial density of boundary cohort to 0.
 		
 		// set birth time for each cohort to current_time
+		// FIXME: current_time has never been initialized till this point. It is only init in resetState() 
 		for (int i=0; i<s->J; ++i) s->set_birthTime(i, current_time); // FIXME: doesnt make sense, because larger cohorts would have been born earlier, but birthTime is not used anyways
 
 		// set x, u for all cohorts
@@ -656,6 +662,55 @@ std::vector<double> Solver::getDensitySpecies(int k, vector<double> breaks, Spli
 }
 
 
+void Solver::save(std::ofstream &fout){
+	fout << "Solver::v1\n";
+	int m = static_cast<int>(method);
+	fout << std::make_tuple(
+		  m
+		, n_statevars_internal
+		, n_statevars_system
+		, current_time
+		, use_log_densities
+		, pi0
+		, N0);
+	fout << '\n';
+
+	fout << species_vec.size() << '\n';
+	for (auto spp : species_vec) spp->save(fout);
+
+	// we actually dont need the full state vector, as it can be reconstructed from cohorts. We only need the system variables
+	fout << state; 
+
+	odeStepper.save(fout);
+}
 
 
+void Solver::restore(std::ifstream &fin, vector<Species_Base*> spp_proto){
+	string s; fin >> s; // version number (discard)
+	assert(s == "Solver::v1");
+	int m;
+	fin >> m
+	    >> n_statevars_internal
+	    >> n_statevars_system
+		>> current_time
+		>> use_log_densities
+		>> pi0
+		>> N0;
+	method = PSPM_SolverType(m);
+
+	int nspecies;
+	fin >> nspecies;
+	assert(nspecies == spp_proto.size());
+	species_vec = spp_proto;
+
+	for (auto spp : species_vec){
+		spp->restore(fin);
+	}
+	resizeStateFromSpecies(); // this includes system vars
+	
+	fin >> state;
+	copyCohortsToState(); // this will overwrite species state (except system vars), but I guess this is better for sake of consistency
+	
+	odeStepper.restore(fin);
+}
 

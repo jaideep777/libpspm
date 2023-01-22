@@ -1,6 +1,7 @@
 #ifndef DEMO_RED_MODEL_H
 #define DEMO_RED_MODEL_H
 
+#include <individual_base.h>
 
 class LightEnvironment : public EnvironmentBase{
 	
@@ -31,7 +32,7 @@ class LightEnvironment : public EnvironmentBase{
 
 
 
-class RED_Plant{
+class RED_Plant : public IndividualBase{
 	public:
 
 	//double input_seed_rain = 1;	

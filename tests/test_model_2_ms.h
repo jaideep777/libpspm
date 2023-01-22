@@ -138,7 +138,18 @@ class TestModel : public Plant{
 	}
 
 	void print(std::ostream &out = std::cout){
-		out << mortality << "\t" << viable_seeds << "\t" << heart_mass << "\t" << sap_mass << "\t";
+		out << std::setw(10) << mortality << "\t"
+		    << std::setw(10) << viable_seeds << "\t"
+			<< std::setw(10) << heart_mass << "\t"
+			<< std::setw(10) << sap_mass << "\t";
+	}
+
+	void save(std::ofstream& fout){
+		fout << "TestModel::v1 ";
+	}
+
+	void restore(std::ifstream& fin){
+		std::string s; fin >> s; // discard version number 
 	}
 
 

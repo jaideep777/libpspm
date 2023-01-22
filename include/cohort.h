@@ -3,6 +3,8 @@
 
 #include <iostream>
 #include <iomanip>
+#include <fstream>
+#include "io_utils.h"
 
 template<class Ind>
 class Cohort : public Ind {
@@ -73,6 +75,43 @@ class Cohort : public Ind {
 		if (need_precompute) preCompute(x,t,_env);
 		//std::cout << x << " cohort birthRate: "; print(); std::cout << "\n";
 		return Ind::birthRate(x,t,_env);	
+	}
+	
+	void save(std::ofstream &fout, int n_extra_vars){
+		// Save/restore individual first (for metadata)
+		Ind::save(fout);
+
+		// Then save cohort (for cohort state). This way, Individual metadata will be available when set_size() and set_state() are called in restore()
+		fout << "Cohort<Ind>::v1" << "   ";
+		fout << std::make_tuple(
+				  id
+				, birth_time
+				, remove
+				, need_precompute); // we actually need not save need_precompute, because set_size() will always set it to 1 during restore
+		fout << x << ' ' << u << ' ';
+
+		std::vector<double> ex_state(n_extra_vars);
+		auto it = ex_state.begin();
+		Ind::get_state(it);
+		fout << ex_state;
+	}
+
+	void restore(std::ifstream &fin, int n_extra_vars){
+		Ind::restore(fin);
+
+		std::string s; fin >> s; // discard version number
+		fin >> id
+		    >> birth_time
+		    >> remove
+		    >> need_precompute;
+
+		fin >> x >> u;
+		set_size(x);
+
+		std::vector<double> ex_state(n_extra_vars);
+		fin >> ex_state;
+		auto it = ex_state.begin();
+		Ind::set_state(it);
 	}
 	
 	// FIXME other env dependent rates should also check for precompute

@@ -28,7 +28,7 @@ class Species_Base{
 	std::vector <double> X;	
 	std::vector <double> x;
 	std::vector <double> h;
-	std::vector <double> schedule; // used only by CM/EBT
+	// std::vector <double> schedule; // used only by CM/EBT
 
 	double noff_abm = 0; // used by ABM solver to insert offspring
 
@@ -38,14 +38,10 @@ class Species_Base{
 	//debug only
 	bool bfin_is_u0in = false;
 	
-
-	public: // public members
 	double xb; 
-	//bool is_resident;
-	
 	
 	public: // public functions
-
+	// virtual Species_Base * create() = 0;
 	virtual ~Species_Base() = 0;
 	
 	int xsize();
@@ -104,6 +100,9 @@ class Species_Base{
 
 	virtual void sortCohortsDescending(int skip=0) = 0;
 	
+	virtual void save(std::ofstream &fout) = 0;
+	virtual void restore(std::ifstream &fin) = 0;
+
 //	virtual void backupCohort(int j) = 0;
 //	virtual void restoreCohort(int j) = 0;
 //	virtual void copyBoundaryCohortTo(int j) = 0;
@@ -117,12 +116,14 @@ class Species : public Species_Base{
 	std::vector<Cohort<Model>> cohorts;
 	Cohort<Model> boundaryCohort;
 	
-	Cohort<Model> savedCohort; // a cohort to save a backup of any other cohort
+	//Cohort<Model> savedCohort; // a cohort to save a backup of any other cohort
 
 	public:
 	// TODO: make these virtual? - not needed. They are virtual by default.
 	Species(std::vector<double> breaks = std::vector<double>());
 	Species(Model M);
+	// Species<Model>* create(); // virtual constructor needed for deserialization
+
 	
 	void resize(int _J);
 	double get_maxSize();
@@ -171,6 +172,9 @@ class Species : public Species_Base{
 	
 	void sortCohortsDescending(int skip=0);
 	
+	void save(std::ofstream &fout);
+	void restore(std::ifstream &fin);
+
 //	void backupCohort(int j);
 //	void restoreCohort(int j);
 //	void copyBoundaryCohortTo(int j);

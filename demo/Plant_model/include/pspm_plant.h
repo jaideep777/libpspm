@@ -38,6 +38,9 @@ class PSPM_Plant : public plant::Plant {
 	std::vector<double>::iterator get_rates(std::vector<double>::iterator &it);
 	void print(std::ostream &out = std::cout);
 
+	void save(std::ofstream &fout){}
+	void restore(std::ifstream &fin){}
+
 };
 
 

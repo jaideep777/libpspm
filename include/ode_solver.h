@@ -8,6 +8,7 @@
 #include <vector>
 #include <iostream>
 #include <exception>
+#include <fstream>
 
 enum SolverType {ODE_RKCK45, ODE_LSODA};
 
@@ -23,36 +24,62 @@ class OdeSolver{
 		double rel_tol = 1e-8;
 	} control;
 
+	private:
+	inline void deleteSolver(){
+		if      (type == ODE_RKCK45) delete static_cast<RKCK45*>(solver);	
+		else if (type == ODE_LSODA)  delete static_cast<LSODA*>(solver);
+		solver = nullptr;	
+	}
+
+	inline void createSolver(double t_start, double rtol, double atol){
+		if      (type == ODE_RKCK45) solver = new RKCK45(t_start, rtol, 1e-8);
+		else if (type == ODE_LSODA)  solver = new LSODA();
+	}
+
 	public:
 	OdeSolver(std::string method, double t_start, double rtol, double atol){
-		if (method == "rk45ck") type = ODE_RKCK45;
-		else if (method == "lsoda") type = ODE_LSODA;
-		else {
-			throw std::runtime_error("Fatal: Unknown ODE method " + method); //exit(1);
-		}
-		reset(t_start, rtol, atol);
+		if      (method == "rk45ck") type = ODE_RKCK45;
+		else if (method == "lsoda")  type = ODE_LSODA;
+		else throw std::runtime_error("Fatal: Unknown ODE method " + method);
+		
+		createSolver(t_start, rtol, atol);
 	}
 
 	~OdeSolver(){
-		if      (type == ODE_RKCK45) delete static_cast<RKCK45*>(solver);	
-		else if (type == ODE_LSODA)  delete static_cast<LSODA*>(solver);	
+		deleteSolver();
 	}
 
-	
+	// FIXME: Implement copy-constructor
+
+	// TODO: Implement this via copy & swap idiom
+	OdeSolver& operator=(const OdeSolver &rhs){
+		if (this != &rhs){
+			std::cout << "OdeSolver::operator= entered\n"; 
+			// copy construct the new solver as per the rhs's type
+			// do this first, so that if this throws an exception, the lhs object is still valid
+			void * solver2;
+			std::cout << "RKCK45 constructor entered: " << solver << '\n';
+			if      (rhs.type == ODE_RKCK45) solver2 = new RKCK45(*static_cast<RKCK45*>(rhs.solver));
+			else if (rhs.type == ODE_LSODA)  solver2 = new LSODA(*static_cast<LSODA*>(rhs.solver));
+			else throw std::runtime_error("Fatal: Unknown ODE Solver type " + type);
+
+			this->deleteSolver(); // delete current solver (based on current type)
+
+			// copy new solver type and other meta from rhs
+			type = rhs.type;
+			control = rhs.control;
+			nfe_cumm = rhs.nfe_cumm;
+			solver = solver2;
+		}
+		return *this;
+	}
+
 	void reset(double t_start, double rtol, double atol){
 		nfe_cumm = 0;
 		control.abs_tol = atol;
 		control.rel_tol = rtol;
-		if (type == ODE_RKCK45){
-			RKCK45* sol = static_cast<RKCK45*>(solver);
-			delete sol; sol = nullptr;
-			solver = new RKCK45(t_start, rtol, 1e-8);
-		}
-		else if (type == ODE_LSODA){
-			LSODA* sol = static_cast<LSODA*>(solver);
-			delete sol; sol = nullptr;
-			solver = new LSODA();
-		}
+		deleteSolver();
+		createSolver(t_start, rtol, atol);
 	}
 
 
@@ -95,6 +122,36 @@ class OdeSolver{
 		else return -1;
 	}
 
+	void save(std::ofstream &fout){
+		fout << "odeSolver::v1\n";
+
+		fout << control.abs_tol << ' '
+		     << control.rel_tol << ' ';
+
+		fout << static_cast<int>(type) << '\n';
+
+		if      (type == ODE_RKCK45) static_cast<RKCK45*>(solver)->save(fout);	
+		else if (type == ODE_LSODA)  throw std::runtime_error("Cannot save the state for LSODA solver.");
+	}
+
+	void restore(std::ifstream &fin){
+		deleteSolver(); // delete current solver as its type may be different from the saved type...
+
+		std::string s; fin >> s; // discard version number
+
+		fin >> control.abs_tol
+		    >> control.rel_tol;
+
+		int m;
+		fin >> m; 
+		type = SolverType(m);
+
+		// ...then recreate solver based on saved type
+		createSolver(0,0,0); // dummy arguments here are fine, as all variables will be recreated from saved file
+
+		if      (type == ODE_RKCK45) static_cast<RKCK45*>(solver)->restore(fin);	
+		else if (type == ODE_LSODA)  throw std::runtime_error("Cannot restore the state for LSODA solver at this point.");
+	}
 };
 
 

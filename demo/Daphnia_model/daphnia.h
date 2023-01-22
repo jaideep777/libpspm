@@ -1,6 +1,7 @@
 #ifndef DEMO_DAPHNIA_MODEL_H
 #define DEMO_DAPHNIA_MODEL_H
 
+#include <individual_base.h>
 
 class Environment : public EnvironmentBase{
 	
@@ -44,7 +45,7 @@ class Environment : public EnvironmentBase{
 
 
 
-class Daphnia{
+class Daphnia : public IndividualBase{
 	public:
 
 	//double input_seed_rain = 1;	
