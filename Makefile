@@ -7,6 +7,9 @@ SRCFILES  :=  $(wildcard src/*.cpp)
 HEADERS := $(wildcard src/*.tpp) $(wildcard include/*.h) $(wildcard tests/*.h)
 # ------------------------------------------------------------------------------
 
+CXX = g++
+AR = ar
+
 # paths
 #CUDA_INSTALL_PATH ?= /usr/local/cuda#-5.0
 
@@ -14,9 +17,14 @@ HEADERS := $(wildcard src/*.tpp) $(wildcard include/*.h) $(wildcard tests/*.h)
 INC_PATH := -I./include 
 LIB_PATH := -L./lib 
 
+PROFILING_FLAGS = -g -pg
+
 # flags
-CPPFLAGS = -O3 -g -pg -std=c++17 -fPIC -Wall -Wextra -pedantic
-LDFLAGS =  -g -pg
+CPPFLAGS = -O3 -std=c++17 -fPIC -Wall -Wextra -pedantic
+LDFLAGS =  
+
+CPPFLAGS += $(PROFILING_FLAGS)
+LDFLAGS += $(PROFILING_FLAGS)
 
 #CPPFLAGS +=   \
 #-pedantic-errors -Wcast-align \
@@ -58,11 +66,11 @@ dir:
 	mkdir -p lib build tests/build
 
 $(TARGET): $(OBJECTS) 
-	ar rcs lib/$(TARGET).a $(OBJECTS)
-	#g++ $(LDFLAGS) -o $(TARGET) $(LIB_PATH) $(OBJECTS) $(LIBS) 
+	$(AR) rcs lib/$(TARGET).a $(OBJECTS)
+#	g++ $(LDFLAGS) -o $(TARGET) $(LIB_PATH) $(OBJECTS) $(LIBS) 
 
 $(OBJECTS): build/%.o : src/%.cpp $(HEADERS)
-	g++ -c $(CPPFLAGS) $(INC_PATH) $< -o $@ 
+	$(CXX) -c $(CPPFLAGS) $(INC_PATH) $< -o $@ 
 
 clean:
 	rm -f $(TARGET) build/*.o lib/*.a src/*.o
