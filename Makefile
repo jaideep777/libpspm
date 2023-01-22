@@ -15,7 +15,7 @@ INC_PATH := -I./include
 LIB_PATH := -L./lib 
 
 # flags
-CPPFLAGS = -O3 -g -pg -std=c++17 -Wall -Wextra -pedantic
+CPPFLAGS = -O3 -g -pg -std=c++17 -fPIC -Wall -Wextra -pedantic
 LDFLAGS =  -g -pg
 
 #CPPFLAGS +=   \
