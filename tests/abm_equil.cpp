@@ -43,10 +43,10 @@ int main(){
 
 	fout.close();
 
-//	cout << S.u0_out(S.current_time)[0] << endl; 
-//	cout << "Number of fn evaluations = " << S.odeStepper.get_fn_evals() << "\n";
-//	if (abs(S.u0_out(S.current_time)[0] - 0.958418) < 1e-5) return 0;
-//	else return 1;
+	cout << S.u0_out(S.current_time)[0] << endl; 
+	cout << "Number of fn evaluations = " << S.odeStepper.get_fn_evals() << "\n";
+	if (abs(S.u0_out(S.current_time)[0] - 1) < 0.1) return 0;
+	else return 1;
 
 }
 

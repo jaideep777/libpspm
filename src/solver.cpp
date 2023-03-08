@@ -291,19 +291,23 @@ void Solver::initializeSpecies(Species_Base * s){
 			}
 			//cout << "HERE\n";
 			//for (size_t i=0; i<s->x.size()-1; ++i) cout << s->x[i] << " " << Uvec[i] << "\n";
-			
+		
+			s->resize(control.abm_n0); // Once initial density dist has been obtained, resize species to n0
+
 			std::discrete_distribution<int> distribution(Uvec.begin(), Uvec.end()); // for drawing intervals
 			std::uniform_real_distribution<> distribution2(0,1);                         // for drawing X within interval
 
+			// Utot = sum(Uvec) = sum(u[i] * dx[i])
 			double Utot = std::accumulate(Uvec.begin(), Uvec.end(), 0.0, std::plus<double>());			
-			s->set_ub(Utot/s->J);
+			double N_cohort = Utot/s->J;
+			s->set_ub(N_cohort);
 			for (int i=0; i<s->J; ++i){
 				int id = distribution(generator);
 				//cout << id << " ";
 				double xi = s->x[id] + distribution2(generator)*(s->x[id+1]-s->x[id]);
 				//cout << xi << "\n";
 				s->setX(i, xi);
-				s->setU(i, Utot/s->J);
+				s->setU(i, N_cohort);
 			}
 
 			s->sortCohortsDescending();

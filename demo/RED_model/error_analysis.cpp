@@ -308,7 +308,7 @@ int main(){
 	ofstream ferr("abm_error_analysis.txt");
 	ferr << "N0\tNf\tdt\tB\tEb\ttsys\n";
 	
-	for (int i=6; i<11; ++i){
+	for (int i=3; i<11; ++i){
 		int N0 = pow(2,i);
 		cout << "N0 = " << N0 << endl;
 		Species<RED_Plant> spp;

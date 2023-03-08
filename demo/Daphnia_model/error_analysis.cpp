@@ -272,7 +272,52 @@ int main(){
 
 	ferr.close();
 	}
+
+	{
+	cout << "running ICM...\n";
+	// IFMU
+	ofstream ferr("icm_error_analysis.txt");
+	ferr << "N0\tNf\tdt\tB\tEb\ttsys\n";
 	
+	for (int i=3; i<12; ++i){
+		int N0 = pow(2,i);
+		double Dt = 0.2*pow(2, 9-i);
+		cout << "N0 = " << N0 << ", Dt = " << Dt << endl;
+		
+		Species<Daphnia> spp;
+		Environment E;
+
+		Solver S(SOLVER_ICM);
+		S.use_log_densities = false;
+		S.control.max_cohorts = 1000;
+		S.control.cm_remove_cohorts = true;
+		S.control.ebt_ucut = 1e-10;
+		S.control.cm_dxcut = 1e-5;
+
+		S.setEnvironment(&E);
+		S.addSpecies(100, 0, 1, false, &spp, 0, -1);
+		S.addSystemVariables(1);  // this can be done either before or after addSpecies()
+
+		S.resetState();
+		S.initialize();
+		S.state[0] = E.K;
+		//S.print();
+	
+		auto t1 = high_resolution_clock::now();
+		for (double t=0.05; t <= 150; t=t+Dt) {
+			S.step_to(t);
+		}
+	    auto t2 = high_resolution_clock::now();
+    	duration<double, std::milli> ms_double = t2 - t1;
+		
+		
+		double B = S.integrate_x([&S](int i, double t){return S.species_vec[0]->getX(i);}, S.current_time, 0);
+		ferr << N0 << "\t" << S.species_vec[0]->xsize() << "\t" << 0 << "\t" << B << "\t" << fabs(B-1.298077)/1.298077 << "\t" << ms_double.count() << "\n";
+	}
+
+	ferr.close();
+	}
+
 
 	{
 	cout << "running ABM...\n";
