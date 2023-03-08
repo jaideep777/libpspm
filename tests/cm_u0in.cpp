@@ -16,10 +16,10 @@ int main(){
 	S.use_log_densities = true;
 	S.control.cm_grad_dx = 0.001;
 	S.control.max_cohorts = 26;
+	S.setEnvironment(&E);
 	S.addSpecies(25, 0, 1, false, &spp, 4, 2);
 	S.resetState();
 	S.initialize();
-	S.setEnvironment(&E);
 	S.species_vec[0]->set_bfin_is_u0in(true);	// say that input_birth_flux is u0
 	S.print();
 	//for (auto s : S.state) cout << s << " "; cout << endl;

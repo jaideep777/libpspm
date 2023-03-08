@@ -13,6 +13,7 @@ int main(){
 	Species<TestModel> spp;
 
 	Solver S(SOLVER_CM);
+	S.setEnvironment(&E);
 	S.addSpecies(25, 0, 1, false, &spp, 4);
 	S.resetState();
 	S.initialize();

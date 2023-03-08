@@ -43,6 +43,7 @@ int main(){
 
 	Species<TestModel> spp4;
 	Solver S1(SOLVER_CM);
+	S1.setEnvironment(&E);
 	S1.control.max_cohorts = 5;
 	S1.addSpecies({.1,.4,.5,.6,1.0}, &spp4, 4, 10);
 	S1.resetState();

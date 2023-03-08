@@ -10,13 +10,15 @@ int main(){
 
 	Species<TestModel> M;
 	
+	Environment E;
+
 	Solver S(SOLVER_FMU);
+	S.setEnvironment(&E);
 	S.addSpecies(25, 0, 1, false, &M, 4);
 	S.resetState();
 	S.initialize();
 	S.print();
 	
-	Environment E;
 	E.computeEnv(0,&S, S.state.begin(), S.rates.begin());
 	cout << E.evalEnv(0,0) << endl;
 

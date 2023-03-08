@@ -20,11 +20,11 @@ int main(){
 
 	Solver S(SOLVER_FMU, "lsoda");
 	S.control.ode_eps = 1e-4;
+	S.setEnvironment(&E);
 	S.addSpecies(25, 0, 1, false, &spp, 4, -1);
 	S.species_vec[0]->set_bfin_is_u0in(true);	// say that input_birth_flux is u0
 	S.resetState();
 	S.initialize();
-	S.setEnvironment(&E);
 	S.print();
 	
 	ofstream fout("fmu_testmodel_equil.txt");

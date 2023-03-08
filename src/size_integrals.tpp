@@ -47,7 +47,7 @@ double Solver::integrate_wudx_above(wFunc w, double t, double xlow, int species_
 
 	// cohorts are inserted at the end, hence sorted in descending order
 	// FIXME: should there be an optional "sort_cohorts" control parameter? Maybe some freak models are such that cohorts dont remain in sorted order?
-	if (method == SOLVER_CM){
+	if (method == SOLVER_CM || method == SOLVER_ICM){
 		// integrate using trapezoidal rule 
 		// Note, new cohorts are inserted at the end, so x will be descending
 		bool integration_completed = false;
@@ -190,7 +190,7 @@ double Solver::integrate_x(wFunc w, double t, int species_id){
 		return I;
 	}
 	
-	if (method == SOLVER_CM){
+	if (method == SOLVER_CM || method == SOLVER_ICM){
 		// integrate using trapezoidal rule 
 		// Note, new cohorts are inserted at the end, so x will be descending
 		double I = 0;

@@ -19,21 +19,22 @@ int main(){
 	Species<Daphnia> spp;
 	Environment E;
 
-	Solver S(SOLVER_IEBT);
+	Solver S(SOLVER_ICM);
 
 	S.setEnvironment(&E);
 	S.addSpecies(100, 0, 1, false, &spp, 0, -1);
 	S.addSystemVariables(1);  // this can be done either before or after addSpecies()
-
+	S.control.max_cohorts = 200;
 	S.control.ebt_ucut = 1e-20;
-
+	S.use_log_densities = false;
+	
 	S.resetState();
 	S.initialize();
 	S.state[0] = E.K;
 	//S.print();
 	
 	
-	ofstream fout("iebt_Daphnia.txt");
+	ofstream fout("icm_Daphnia.txt");
 
 	for (double t=0.05; t <= 100; t=t+0.5) {
 		S.step_to(t);
