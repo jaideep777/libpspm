@@ -89,12 +89,6 @@ void Solver::addSpecies(std::vector<double> xbreaks, Species_Base* s, int n_extr
 	s->x = xbreaks;
 	s->resize(J);
 	
-	int state_size = s->J*(n_statevars_internal + s->n_extra_statevars);    // x/u and extra vars
-
-	//s->start_index = state.size();	// New species will be appended to the end of state vector
-	state.resize(state.size()+state_size);  // This will resize state for all species additions, but this in only initialization so its okay.
-	rates.resize(rates.size()+state_size);
-
 	species_vec.push_back(s);
 
 	if (method == SOLVER_FMU){	
@@ -342,6 +336,7 @@ void Solver::initialize(){
 	// 	Species_Base* s = species_vec[k];
 	// 	initializeSpecies(s);
 	// }
+	resizeStateFromSpecies();
 	copyCohortsToState();
 }
 
