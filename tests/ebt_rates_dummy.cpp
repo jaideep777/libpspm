@@ -12,6 +12,7 @@ int main(){
 	Environment E;
 
 	Solver S(SOLVER_EBT);
+	S.setEnvironment(&E);
 	S.addSpecies(25, 0, 1, false, &spp, 4, -1);
 	S.resetState();
 	S.initialize();
@@ -20,7 +21,6 @@ int main(){
 	E.computeEnv(0, &S, S.state.begin(), S.rates.begin());
 	cout << E.evalEnv(0,0) << endl;
 
-	S.setEnvironment(&E);
 	S.calcRates_EBT(1, S.state.begin(), S.rates.begin());  // dummy rates calc rates(X=X0, U=U0, t=1, E=E(U0))
 //	S.step_to(1);
 

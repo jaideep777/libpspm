@@ -23,6 +23,7 @@ int main(){
 	S.control.cm_grad_dx = 0.001;
 	S.control.max_cohorts = 26;
 	S.control.ode_ifmu_stepsize = 0.001;
+	S.setEnvironment(&E);
 	S.addSpecies(25, 0, 1, false, &spp, 4, -1);
 	S.species_vec[0]->set_bfin_is_u0in(true);
 	S.resetState();
@@ -32,7 +33,6 @@ int main(){
 	E.computeEnv(0, &S, S.state.begin(), S.rates.begin());
 	cout << E.evalEnv(0,0) << endl;
 
-	S.setEnvironment(&E);
 	S.print();
 
 	ofstream fout("icm_testmodel_equil.txt");
@@ -53,10 +53,10 @@ int main(){
 
 	fout.close();
 
-	cout << S.u0_out(S.current_time)[0] << endl;
+	cout << setprecision(10) << S.u0_out(S.current_time)[0] << endl;
 	// test value is from R code	
 	//if (abs(S.u0_out()[0] - 1.556967) < 1e-5) return 0;  // this is when integrate_x BC is not included
-	if (abs(S.u0_out(S.current_time)[0] - 0.976177) < 1e-5) return 0;  // this is when integrate_x BC IS included
+	if (abs(S.u0_out(S.current_time)[0] - 0.998272) < 1e-5) return 0;  // this is when integrate_x BC IS included
 
 	else return 1;
   

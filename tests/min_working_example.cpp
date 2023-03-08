@@ -71,9 +71,8 @@ int main(){
 	Species<Individual> spp;
 
 	Solver S(SOLVER_FMU, "rk45ck");
-
-	S.addSpecies(25, 0, 1, false, &spp, 0, -1);
 	S.setEnvironment(&E);
+	S.addSpecies(25, 0, 1, false, &spp, 0, -1);
 
 	S.resetState();
 	S.initialize();

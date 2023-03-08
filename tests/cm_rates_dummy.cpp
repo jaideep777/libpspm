@@ -14,6 +14,7 @@ int main(){
 	Species<TestModel> spp;
 
 	Solver S(SOLVER_CM);
+	S.setEnvironment(&E);
 	S.use_log_densities = false;  // FIXME:: Make sure that oder of calling this before/after reset state doesnt matter
 	S.control.cm_grad_dx = 0.001;
 	S.addSpecies(25, 0, 1, false, &spp, 4, 2);
@@ -24,7 +25,6 @@ int main(){
 	E.computeEnv(0,&S, S.state.begin(), S.rates.begin());
 	//cout << E.evalEnv(0,0) << endl;
 
-	S.setEnvironment(&E);
 	S.calcRates_CM(1, S.state.begin(), S.rates.begin());  // dummy rates calc rates(X=X0, U=U0, t=1, E=E(U0))
 	//S.print();
 	//	S.step_to(1);

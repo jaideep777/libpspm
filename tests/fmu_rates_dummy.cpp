@@ -12,11 +12,11 @@ int main(){
 	Environment E;
 
 	Solver S(SOLVER_FMU);
+	S.setEnvironment(&E);
 	S.addSpecies(25, 0, 1, false, &spp, 4, -1);
 	S.species_vec[0]->set_bfin_is_u0in(true);	// say that input_birth_flux is u0
 	S.resetState();
 	S.initialize();
-	S.setEnvironment(&E);
 	S.print();
 	
 	E.computeEnv(0,&S, S.state.begin(), S.rates.begin());

@@ -15,12 +15,13 @@ int main(){
 	Solver S(SOLVER_IFMU);
 	S.control.ode_ifmu_stepsize = 0.1;
 	S.control.ifmu_order = 2;
+
+	S.setEnvironment(&E);
 	S.addSpecies(300, 0, 1, false, &spp, 0, -1);
 	S.addSystemVariables(1);  // this can be done either before or after addSpecies()
 
 	S.resetState();
 	S.initialize();
-	S.setEnvironment(&E);
 	S.state[0] = E.K;
 	//S.print();
 	

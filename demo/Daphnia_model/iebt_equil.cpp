@@ -21,6 +21,7 @@ int main(){
 
 	Solver S(SOLVER_IEBT);
 
+	S.setEnvironment(&E);
 	S.addSpecies(100, 0, 1, false, &spp, 0, -1);
 	S.addSystemVariables(1);  // this can be done either before or after addSpecies()
 
@@ -28,7 +29,6 @@ int main(){
 
 	S.resetState();
 	S.initialize();
-	S.setEnvironment(&E);
 	S.state[0] = E.K;
 	//S.print();
 	

@@ -46,6 +46,10 @@ std::map<std::string, PSPM_SolverType> Solver::methods_map =
 Solver::Solver(PSPM_SolverType _method, string ode_method) : odeStepper(ode_method, 0, 1e-6, 1e-6) {
 	method = _method;
 
+	// FMU and ABM have only 1 internal state variable (x), rest have 2 (x,u)
+	bool cond = (method == SOLVER_FMU || method == SOLVER_IFMU || method == SOLVER_ABM);
+	n_statevars_internal = (cond)? 1:2;
+
 }
 
 Solver::Solver(std::string _method, std::string ode_method) : Solver(methods_map.at(_method), ode_method){
@@ -79,17 +83,13 @@ void Solver::addSpecies(std::vector<double> xbreaks, Species_Base* s, int n_extr
 	else if (method == SOLVER_ICM ) J = xbreaks.size();
 	else if (method == SOLVER_EBT)  J = xbreaks.size();
 	else if (method == SOLVER_IEBT) J = xbreaks.size();
-	else if (method == SOLVER_ABM)  J = control.abm_n0;
+	else if (method == SOLVER_ABM)  J = xbreaks.size();    // For ABM solver, this is a temporary size thats used to generate the initial density distribution. s will be resized during init to abm_n0.
 	else    throw std::runtime_error("Unsupported method");
 
 	s->x = xbreaks;
 	s->resize(J);
-
-	// FMU and ABM have only 1 internal state variable (x), rest have 2 (x,u)
-	bool cond = (method == SOLVER_FMU || method == SOLVER_IFMU || method == SOLVER_ABM);
-	n_statevars_internal = (cond)? 1:2;
 	
-	int state_size = s->J*(n_statevars_internal + n_extra_vars);    // x/u and extra vars
+	int state_size = s->J*(n_statevars_internal + s->n_extra_statevars);    // x/u and extra vars
 
 	//s->start_index = state.size();	// New species will be appended to the end of state vector
 	state.resize(state.size()+state_size);  // This will resize state for all species additions, but this in only initialization so its okay.

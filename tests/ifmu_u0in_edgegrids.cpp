@@ -14,11 +14,11 @@ int main(){
 
 	Solver S(SOLVER_IFMU);
 	S.control.ifmu_centered_grids = false;
+	S.setEnvironment(&E);
 	S.addSpecies(30, 0, 1, false, &spp, 4, -1);
 	S.species_vec[0]->set_bfin_is_u0in(true);	// say that input_birth_flux is u0
 	S.resetState();
 	S.initialize();
-	S.setEnvironment(&E);
 	S.print();
 	
 	E.computeEnv(0, &S, S.state.begin(), S.rates.begin());

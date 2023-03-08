@@ -37,6 +37,7 @@ int main(){
 		Environment E;
 
 		Solver S(SOLVER_EBT);
+		S.setEnvironment(&E);
 
 		S.addSpecies(100, 0, 1, false, &spp, 0, -1);
 		S.addSystemVariables(1);  // this can be done either before or after addSpecies()
@@ -45,7 +46,6 @@ int main(){
 
 		S.resetState();
 		S.initialize();
-		S.setEnvironment(&E);
 		S.state[0] = E.K;
 		//S.print();
 		
@@ -78,6 +78,7 @@ int main(){
 		Environment E;
 
 		Solver S(SOLVER_IEBT);
+		S.setEnvironment(&E);
 
 		S.addSpecies(100, 0, 1, false, &spp, 0, -1);
 		S.addSystemVariables(1);  // this can be done either before or after addSpecies()
@@ -86,7 +87,6 @@ int main(){
 
 		S.resetState();
 		S.initialize();
-		S.setEnvironment(&E);
 		S.state[0] = E.K;
 		//S.print();
 		
@@ -119,13 +119,13 @@ int main(){
 		Environment E;
 
 		Solver S(SOLVER_FMU);
+		S.setEnvironment(&E);
 		
 		S.addSpecies(N0, 0, 1, false, &spp, 0, -1);
 		S.addSystemVariables(1);  // this can be done either before or after addSpecies()
 
 		S.resetState();
 		S.initialize();
-		S.setEnvironment(&E);
 		S.state[0] = E.K;
 		//S.print();
 		
@@ -162,12 +162,12 @@ int main(){
 		S.control.ode_ifmu_stepsize = 0.02;
 		S.control.ifmu_order = 1;
 		
+		S.setEnvironment(&E);
 		S.addSpecies(N0, 0, 1, false, &spp, 0, -1);
 		S.addSystemVariables(1);  // this can be done either before or after addSpecies()
 
 		S.resetState();
 		S.initialize();
-		S.setEnvironment(&E);
 		S.state[0] = E.K;
 		//S.print();
 		
@@ -204,12 +204,12 @@ int main(){
 		S.control.ode_ifmu_stepsize = 0.02;
 		S.control.ifmu_order = 2;
 		
+		S.setEnvironment(&E);
 		S.addSpecies(N0, 0, 1, false, &spp, 0, -1);
 		S.addSystemVariables(1);  // this can be done either before or after addSpecies()
 
 		S.resetState();
 		S.initialize();
-		S.setEnvironment(&E);
 		S.state[0] = E.K;
 		//S.print();
 		
@@ -245,6 +245,7 @@ int main(){
 
 		Solver S(SOLVER_CM);
 
+		S.setEnvironment(&E);
 		S.addSpecies(100, 0, 1, false, &spp, 0, -1);
 		S.addSystemVariables(1);  // this can be done either before or after addSpecies()
 		S.control.max_cohorts = 1000;
@@ -254,7 +255,6 @@ int main(){
 
 		S.resetState();
 		S.initialize();
-		S.setEnvironment(&E);
 		S.state[0] = E.K;
 		//S.print();
 	

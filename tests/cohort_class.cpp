@@ -188,8 +188,10 @@ int main(){
 	//S2->print();
 	cout << "I size: " << S2->get_maxSize() << "\n";
 
+	LightEnv env;
 
 	Solver sol(SOLVER_EBT);
+	sol.setEnvironment(&env);
 	sol.addSpecies(vector<double> {1,2,3,4,5}, &S, 1, 1);
 	sol.addSpecies(vector<double> {1.1,2.1,3.1}, &I, 0, 1);
 	sol.resetState();
@@ -205,9 +207,6 @@ int main(){
 //	sol.preComputeSpecies(1,0);
 	sol.print();	
 	cout << "Insect BF (after precompute) = " << sol.calcSpeciesBirthFlux(1,0) << "\n";
-
-	LightEnv env;
-	sol.setEnvironment(&env);
 
 	Cohort<Plant> C;
 	C.print(); cout << "\n";
