@@ -8,7 +8,7 @@ using namespace std;
 #include "pspm_environment.h"
 #include "pspm_plant.h"
 
-vector<double> fmu_create_grid(double xmin, double xmax, double dxmin = 1e-4, double dxmax=0.1, double multiplier=1.1){
+vector<double> fmu_create_grid(double xmin, double xmax, double dxmin = 1e-4, double dxmax=0.02, double multiplier=1.05){
 	vector <double> xvec;
 	double x = xmin, dx = dxmin;
 	while(x<xmax){
@@ -148,7 +148,7 @@ int main(int argc, char ** argv){
 	//exit(1);
 
     Solver S(SOLVER_IFMU, "rk45ck");
-    S.control.ode_ifmu_stepsize = 0.01;
+    S.control.ode_ifmu_stepsize = 0.005;
 	S.control.ifmu_centered_grids = false; //true;
     S.control.ifmu_order = 1;
 	S.use_log_densities = true;

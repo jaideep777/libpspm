@@ -190,6 +190,7 @@ void Species<Model>::initBoundaryCohort(double t, void * env){
 
 template <class Model>
 double Species<Model>::init_density(int i, double _x, void * _env){
+	// std::cout << " ncoh = " << cohorts.size() << "/" << i << std::endl; 
 	return cohorts[i].init_density(_x, _env, birth_flux_in);
 }
 

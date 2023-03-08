@@ -19,19 +19,18 @@ int main(){
 	Species<RED_Plant> spp;
 	LightEnvironment E;
 
-	Solver S(SOLVER_ABM);
-	S.control.abm_stepsize = 1;
-	S.control.abm_n0 = 1000;
-	S.setEnvironment(&E);
-
+	Solver S(SOLVER_ICM);
 	S.addSpecies(100, 1, 1e6, true, &spp, 0);
 	//S.get_species(0)->set_bfin_is_u0in(true);	// say that input_birth_flux is u0
+	S.use_log_densities = false;
+	S.control.ebt_ucut = 1e-20;
 	S.resetState();
 	S.initialize();
+	S.setEnvironment(&E);
 	//S.print();
 	
 	
-	ofstream fout("abm_Redmodel.txt");
+	ofstream fout("icm_Redmodel.txt");
 
 	for (double t=0; t <= 5000; t=t+10) {
 		S.step_to(t);

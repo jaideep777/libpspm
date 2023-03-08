@@ -39,7 +39,8 @@ std::map<std::string, PSPM_SolverType> Solver::methods_map =
 		 {"EBT",  SOLVER_EBT}, 
 		 {"IFMU", SOLVER_IFMU}, 
 		 {"ABM",  SOLVER_ABM}, 
-		 {"IEBT", SOLVER_IEBT}};
+		 {"IEBT", SOLVER_IEBT},
+		 {"ICM",  SOLVER_ICM}};
 
 
 Solver::Solver(PSPM_SolverType _method, string ode_method) : odeStepper(ode_method, 0, 1e-6, 1e-6) {
@@ -75,6 +76,7 @@ void Solver::addSpecies(std::vector<double> xbreaks, Species_Base* s, int n_extr
 	else if (method == SOLVER_IFMU) J = xbreaks.size()-1;	
 	else if (method == SOLVER_MMU)  J = xbreaks.size()-1;  
 	else if (method == SOLVER_CM )  J = xbreaks.size();
+	else if (method == SOLVER_ICM ) J = xbreaks.size();
 	else if (method == SOLVER_EBT)  J = xbreaks.size();
 	else if (method == SOLVER_IEBT) J = xbreaks.size();
 	else if (method == SOLVER_ABM)  J = control.abm_n0;
@@ -213,7 +215,7 @@ double Solver::maxSize(){
 
 void Solver::print(){
 	std::cout << ">> SOLVER \n";
-	string types[] = {"FMU", "MMU", "CM", "EBT", "Implicit FMU", "ABM", "Implicit EBT"};
+	string types[] = {"FMU", "MMU", "CM", "EBT", "Implicit FMU", "ABM", "Implicit EBT", "Implicit CM"};
 	std::cout << "+ Type: " << types[method] << std::endl;
 
 	std::cout << "+ State size = " << state.size() << "\n";
@@ -233,6 +235,8 @@ void Solver::print(){
 // TODO: should this take t0 as an argument, instead of setting to 0? 
 // [resolved] todo: maybe make use of copyCohortsToState here instead ofnmanually updating state elements?
 void Solver::initializeSpecies(Species_Base * s){
+		if (env == nullptr) throw std::runtime_error("Error: Environment has not been set. You must set it before addSpecies().");
+
 		// set x and u of boundary cohort
 		// Boundary cohort is not in state, but used as a reference.	
 		s->set_xb(s->xb); // set x of boundary cohort 
@@ -253,7 +257,7 @@ void Solver::initializeSpecies(Species_Base * s){
 			}
 		}
 		
-		if (method == SOLVER_CM){
+		if (method == SOLVER_CM || method == SOLVER_ICM){
 			for (size_t i=0; i<s->J; ++i){
 				double X = s->x[i];
 				double U = s->init_density(i, X, env); 
@@ -280,12 +284,14 @@ void Solver::initializeSpecies(Species_Base * s){
 			s->setU(s->J-1,0); 		
 		}
 		
+		// FIXME: abm_n0 and x.size() can be different - we want higher x.size() to get a high-res initial density function, but when we draw from it, we only draw abm_n0 individuals
 		if (method == SOLVER_ABM){
 			// Create the initial density distribution from which we will draw individuals
 			vector<double> Uvec;
 			Uvec.reserve(s->x.size()-1);
 			for (size_t i=0; i<s->x.size()-1; ++i){
 				double X = s->x[i];
+				cout << "i/X = " << i << "/" << X << endl;
 				double U = s->init_density(i, X, env)*(s->x[i+1]-s->x[i]); 
 				Uvec.push_back(U);	
 			}
@@ -379,7 +385,7 @@ void Solver::copyStateToCohorts(std::vector<double>::iterator state_begin){
 				s->setU(i,*it++);
 			}
 		}
-		if (method == SOLVER_CM){
+		if (method == SOLVER_CM || method == SOLVER_ICM){
 			for (size_t i=0; i<s->J; ++i){
 				double X = *it++;	// get x from state
 				double U = *it++;	// get u from state
@@ -419,7 +425,7 @@ void Solver::copyCohortsToState(){
 				*it++ = s->getU(i);
 			}
 		}
-		if (method == SOLVER_CM){
+		if (method == SOLVER_CM || method == SOLVER_ICM){
 			for (size_t i=0; i<s->J; ++i){
 				double X = s->getX(i); 
 				double U = s->getU(i);
@@ -476,7 +482,7 @@ void Solver::step_to(double tstop){
 
 
 void Solver::updateEnv(double t, std::vector<double>::iterator S, std::vector<double>::iterator dSdt){
-	if (debug) std::cout << "update Env...\n";
+	if (debug) std::cout << "update Env..." << std::endl;
 	for (auto spp : species_vec) spp->triggerPreCompute();
 	env->computeEnv(t, this, S, dSdt);
 }
@@ -620,7 +626,7 @@ std::vector<double> Solver::getDensitySpecies(int k, vector<double> breaks, Spli
 		}
 	}
 
-	else if (method == SOLVER_CM){
+	else if (method == SOLVER_CM || method == SOLVER_ICM){
 		xx.reserve(spp->J);
 		uu.reserve(spp->J);
 		for (int i=spp->J-1; i>=0; --i){

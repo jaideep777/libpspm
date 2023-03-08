@@ -12,7 +12,7 @@
 #include "ode_solver.h"
 #include "cubic_spline.h"
 
-enum PSPM_SolverType {SOLVER_FMU, SOLVER_MMU, SOLVER_CM, SOLVER_EBT, SOLVER_IFMU, SOLVER_ABM, SOLVER_IEBT};
+enum PSPM_SolverType {SOLVER_FMU, SOLVER_MMU, SOLVER_CM, SOLVER_EBT, SOLVER_IFMU, SOLVER_ABM, SOLVER_IEBT, SOLVER_ICM};
 
 class Solver{
 	private:
@@ -100,6 +100,7 @@ class Solver{
 
 	void stepU_iFMU(double t, std::vector<double> &S, std::vector<double> &dSdt, double dt);
 	void stepU_iEBT(double t, std::vector<double> &S, std::vector<double> &dSdt, double dt);
+	void stepU_iCM(double t, std::vector<double> &S, std::vector<double> &dSdt, double dt);
 
 	/// @brief calculate \f$du/dt\f$ using the EBT solver
 	void calcRates_EBT(double t, std::vector<double>::iterator S, std::vector<double>::iterator dSdt);

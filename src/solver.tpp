@@ -23,7 +23,7 @@ void Solver::step_to(double tstop, AfterStepFunc &afterStep_user){
 	};
 
 	
-	if (method == SOLVER_IEBT || method == SOLVER_IFMU){	
+	if (method == SOLVER_IEBT || method == SOLVER_IFMU || method == SOLVER_ICM){	
 		while (current_time < tstop){
 			double dt = std::min(control.ode_ifmu_stepsize, tstop-current_time);
 			
@@ -34,6 +34,7 @@ void Solver::step_to(double tstop, AfterStepFunc &afterStep_user){
 			// use implicit stepper to advance u
 			if      (method == SOLVER_IEBT) stepU_iEBT(current_time, state, rates, dt);
 			else if (method == SOLVER_IFMU) stepU_iFMU(current_time, state, rates, dt);
+			else if (method == SOLVER_ICM)  stepU_iCM(current_time, state, rates, dt);
 			else     throw std::runtime_error("step_to(): Invalid solver method");
 			// current_time += dt; // not needed here, as current time is advanced by the ODE stepper below.
 			copyStateToCohorts(state.begin());   // copy updated X/U to cohorts 
@@ -70,6 +71,14 @@ void Solver::step_to(double tstop, AfterStepFunc &afterStep_user){
 			removeDeadCohorts_EBT();
 			addCohort_EBT();  // Add new cohort if N0 > 0. Add after removing dead ones otherwise this will also be removed. 
 		}
+		if (method == SOLVER_ICM){
+			// update cohorts
+			if (control.update_cohorts){
+				addCohort_CM();		// add before so that it becomes boundary cohort and first internal cohort can be (potentially) removed
+				removeCohort_CM();
+			}
+		}
+
 
 	}
 

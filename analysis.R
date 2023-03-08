@@ -20,6 +20,7 @@ plot1("~/codes/libpspm/ifmu_testmodel_equil.txt", "IFMU")
 plot1("~/codes/libpspm/ifmu2_testmodel_equil.txt", "IFMU(O2)")
 plot1("~/codes/libpspm/iebt_testmodel_equil.txt", "IEBT")
 plot1("~/codes/libpspm/abm_testmodel_equil.txt", "ABM")
+plot1("~/codes/libpspm/icm_testmodel_equil.txt", "ICM")
 
 
 
