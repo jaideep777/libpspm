@@ -108,4 +108,12 @@ void Solver::removeDeadCohorts_EBT(){
 
 }
 
+void Solver::mergeCohorts_EBT(){
+	for (auto spp : species_vec){
+		spp->mergeCohortsAddU(control.ebt_merge_dxcut);
+	}
 
+	resizeStateFromSpecies();
+	copyCohortsToState();
+
+}

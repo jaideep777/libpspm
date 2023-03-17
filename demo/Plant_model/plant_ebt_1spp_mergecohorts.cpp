@@ -20,7 +20,6 @@ vector<double> fmu_create_grid(double xmin, double xmax, double dxmin = 1e-4, do
 	return xvec; 
 }
 
-
 vector<double> my_log_seq(double x0, double xf, int N){
 	vector<double> grid;
 	for (int i=0; i<N; ++i) grid.push_back(exp(log(x0) + (double(i)/(N-1))*(log(xf)-log(x0))));
@@ -159,11 +158,11 @@ int main(int argc, char ** argv){
 	
 	//exit(1);
 
-    Solver S(SOLVER_IEBT, "rk45ck");	
+    Solver S(SOLVER_EBT, "rk45ck");
     S.use_log_densities = true;
 	S.control.ode_eps = 1e-4;
-	S.control.ebt_ucut = 1e-10;
-	S.control.ebt_merge_dxcut = 0e-2;
+	S.control.ebt_ucut = 1e-6;
+	S.control.ebt_merge_dxcut = 1e-2;
 	//S.control.ode_method = "rk4";
 	//S.control.ode_rk4_stepsize = 0.5;
 	S.setEnvironment(&env);
@@ -178,9 +177,9 @@ int main(int argc, char ** argv){
 	S.addSpecies({p2.vars.height, p1.vars.height+1e-4}, &s2, 4, ip_seed_rain);
 	S.addSpecies({p3.vars.height, p1.vars.height+1e-4}, &s3, 4, ip_seed_rain);
 #else
- 	S.addSpecies(fmu_create_grid(p1.vars.height, 20), &s1, 4, ip_seed_rain);
-	S.addSpecies(fmu_create_grid(p1.vars.height, 20), &s2, 4, ip_seed_rain);
-	S.addSpecies(fmu_create_grid(p1.vars.height, 20), &s3, 4, ip_seed_rain);
+ 	S.addSpecies(fmu_create_grid(p1.vars.height, 3), &s1, 4, ip_seed_rain);
+	S.addSpecies(fmu_create_grid(p1.vars.height, 3), &s2, 4, ip_seed_rain);
+	S.addSpecies(fmu_create_grid(p1.vars.height, 3), &s3, 4, ip_seed_rain);
 #endif	
 	
 	S.resetState();

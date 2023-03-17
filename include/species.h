@@ -97,6 +97,7 @@ class Species_Base{
 	virtual void removeDensestCohort() = 0;
 	virtual void removeDenseCohorts(double dxcut) = 0;
 	virtual void removeDeadCohorts(double ucut) = 0;
+	virtual void mergeCohortsAddU(double dxcut) = 0;
 
 	virtual void sortCohortsDescending(int skip=0) = 0;
 	
@@ -169,7 +170,8 @@ class Species : public Species_Base{
 	void removeDensestCohort();
 	void removeDenseCohorts(double dxcut);
 	void removeDeadCohorts(double ucut);
-	
+	void mergeCohortsAddU(double dxcut);
+
 	void sortCohortsDescending(int skip=0);
 	
 	void save(std::ofstream &fout);
