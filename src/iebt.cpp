@@ -1,5 +1,7 @@
 #include <cassert>
 #include <string>
+#include <algorithm>
+// #include <execution>
 #include "solver.h"
 using namespace std;
 
@@ -59,10 +61,22 @@ void Solver::stepU_iEBT(double t, vector<double> &S, vector<double> &dSdt, doubl
 		}
 
 		// internal cohorts
-		for (int i=0; i<J-1; ++i){
-			XU[2*i+0] += spp->growthRate(i, spp->getX(i), t, env)*dt;
-			XU[2*i+1] /= 1+spp->mortalityRate(i, spp->getX(i), t, env)*dt;
-		}
+		// for (int i=0; i<J-1; ++i){
+		// 	XU[2*i+0] += spp->growthRate(i, spp->getX(i), t, env)*dt;
+		// 	XU[2*i+1] /= 1+spp->mortalityRate(i, spp->getX(i), t, env)*dt;
+		// }
+		vector<int>a(J-1);
+		std::iota(a.begin(), a.end(), 0);
+		std::for_each(
+//			std::execution::par,
+			a.begin(),
+			a.end(),
+			[this, XU, spp, t, dt](int i){
+				XU[2*i+0] += spp->growthRate(i, spp->getX(i), t, env)*dt;
+				XU[2*i+1] /= 1+spp->mortalityRate(i, spp->getX(i), t, env)*dt;
+			}
+		);
+
 
 		// pi0 cohort
 		double a1 = 1 + mb*dt;
