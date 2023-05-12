@@ -22,7 +22,7 @@ LDFLAGS =  -g -pg
 #CPPFLAGS += -DUSE_INIT_DIST
 
 # libs
-LIBS = 	 #-lgsl -lgslcblas 	# additional libs
+LIBS = 	# -ltbb #-lgsl -lgslcblas 	# additional libs
 #LIBS = -lcudart 			# cuda libs 		
 
 # files

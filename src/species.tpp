@@ -416,6 +416,31 @@ void Species<Model>::removeDeadCohorts(double ucut){
 
 
 template <class Model>
+void Species<Model>::mergeCohortsAddU(double dxcut){
+	// mark cohorts to remove; skip 1st and last cohort
+	for (int i=1; i<J-1; ++i){
+		double dx = cohorts[i-1].x-cohorts[i].x;
+
+		if (dx < dxcut){
+			cohorts[i-1].remove = true;
+			// FIXME: Need to also average extra state?
+			cohorts[i].x = (cohorts[i].x*cohorts[i].u + cohorts[i-1].x*cohorts[i-1].u)/(cohorts[i].u + cohorts[i-1].u);
+			cohorts[i].u = cohorts[i].u + cohorts[i-1].u;
+		}
+	}
+
+	// remove marked cohorts
+	auto it_end = std::remove_if(cohorts.begin(), cohorts.end(), [](Cohort<Model> &c){return c.remove;});
+	cohorts.erase(it_end, cohorts.end());
+
+	// reset size
+	J = cohorts.size();
+
+}
+
+
+
+template <class Model>
 void Species<Model>::sortCohortsDescending(int skip){
 	std::sort(cohorts.begin(), cohorts.end()-skip, [](const Cohort<Model> &a, const Cohort<Model> &b){return a.x > b.x;});
 }

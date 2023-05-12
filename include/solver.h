@@ -50,6 +50,7 @@ class Solver{
 		double cm_dxcut = 1e-10;
 		double ebt_ucut = 1e-10;
 		double ebt_grad_dx = 1e-6;
+		double ebt_merge_dxcut = 0; //1e-6;
 		double ode_rk4_stepsize = 0.1;
 		double ode_ifmu_stepsize = 0.1;
 		bool ifmu_centered_grids = true;
@@ -106,6 +107,7 @@ class Solver{
 	void calcRates_EBT(double t, std::vector<double>::iterator S, std::vector<double>::iterator dSdt);
 	void addCohort_EBT();
 	void removeDeadCohorts_EBT();
+	void mergeCohorts_EBT();
 
 	/// @brief calculate \f$du/dt\f$ using the CM solver
 	void calcRates_CM(double t, std::vector<double>::iterator S, std::vector<double>::iterator dSdt);

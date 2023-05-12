@@ -53,7 +53,7 @@ CPPFLAGS += -Wno-unused-variable -Wno-sign-compare \
 # -Wno-unused-but-set-variable
 
 # libs
-LIBS = 	 #-lgsl -lgslcblas 	# additional libs
+LIBS = 	# -ltbb #-lgsl -lgslcblas 	# additional libs
 #LIBS = -lcudart 			# cuda libs 		
 
 # files
@@ -66,7 +66,7 @@ dir:
 	mkdir -p lib build tests/build
 
 $(TARGET): $(OBJECTS) 
-	$(AR) rcs lib/$(TARGET).a $(OBJECTS)
+	$(AR) rcs lib/$(TARGET).a $(OBJECTS) $(LIBS) 
 #	g++ $(LDFLAGS) -o $(TARGET) $(LIB_PATH) $(OBJECTS) $(LIBS) 
 
 $(OBJECTS): build/%.o : src/%.cpp $(HEADERS)

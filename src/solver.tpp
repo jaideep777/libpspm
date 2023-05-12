@@ -68,6 +68,7 @@ void Solver::step_to(double tstop, AfterStepFunc &afterStep_user){
 
 		if (method == SOLVER_IEBT){
 			// update cohorts
+			mergeCohorts_EBT();
 			removeDeadCohorts_EBT();
 			addCohort_EBT();  // Add new cohort if N0 > 0. Add after removing dead ones otherwise this will also be removed. 
 		}
@@ -104,6 +105,7 @@ void Solver::step_to(double tstop, AfterStepFunc &afterStep_user){
 		odeStepper.step_to(tstop, current_time, state, derivs, after_step); // rk4_stepsize is only used if method is "rk4"
 		
 		// update cohorts
+		mergeCohorts_EBT();
 		removeDeadCohorts_EBT();
 		addCohort_EBT();  // Add new cohort if N0 > 0. Add after removing dead ones otherwise this will also be removed. 
 	}

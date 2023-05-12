@@ -330,6 +330,9 @@ void Solver::initializeSpecies(Species_Base * s){
 			//assert(distance(it_prev, it) == s->n_extra_statevars*s->J); 
 		//}
 
+		resizeStateFromSpecies();
+		copyCohortsToState();
+
 }
 
 
