@@ -27,6 +27,8 @@ class Species_Base{
 	// Kept private so users dont accidently access them for other solvers
 	std::vector <double> X;	
 	std::vector <double> x;
+	std::vector <std::vector <double>> Xn; // multiple state model
+	std::vector <std::vector <double>> xn; // multiple state model
 	std::vector <double> h;
 	// std::vector <double> schedule; // used only by CM/EBT
 
@@ -39,6 +41,7 @@ class Species_Base{
 	bool bfin_is_u0in = false;
 	
 	double xb; 
+	std::vector <double> xnb;
 	
 	public: // public functions
 	// virtual Species_Base * create() = 0;
@@ -57,12 +60,15 @@ class Species_Base{
 	virtual void print_extra(); // not pure virtual, by defualt, there is nothing extra to print.
 
 	virtual void set_xb(double _xb) = 0;
+	virtual void set_xnb(std::vector<double> _xnb) = 0;
 	virtual void set_ub(double _ub) = 0;
 	virtual void set_birthTime(int i, double t0) = 0;
 	virtual void setX(int i, double _x) = 0;
+	virtual void setXn(int i, int k, double _x) = 0;
 	virtual void setU(int i, double _u) = 0;
 
 	virtual double getX(int i) = 0;
+	virtual double getXn(int i, int k) = 0;
 	virtual double getU(int i) = 0;
 
 	virtual double init_density(int i, double x, void * env) = 0;
@@ -132,12 +138,15 @@ class Species : public Species_Base{
 	void print();
 	
 	void set_xb(double _xb);
+	void set_xnb(std::vector <double> _xnb);
 	void set_ub(double _ub);
 	void set_birthTime(int i, double t0);
 	void setX(int i, double _x);
+	void setXn(int i, int k, double _x);
 	void setU(int i, double _u);
 	
 	double getX(int i);
+	double getX(int i, int k);
 	double getU(int i);
 	
 	double init_density(int i, double x, void * env);

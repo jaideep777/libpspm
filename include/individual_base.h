@@ -11,14 +11,18 @@ class IndividualBase{
 	
 	// essential functions which must be defined by user
 	virtual double init_density(double x, void * _env, double bf) = 0;
+	virtual double init_density(std::vector <double> x, void * _env, double bf) = 0; // for now double the functions... should probably replace though soon
 	virtual double growthRate(double x, double t, void * _env) = 0;
+	virtual double growthRate(std::vector <double> x, double t, void * _env) = 0;
 	virtual double mortalityRate(double x, double t, void * _env) = 0;
+	virtual double mortalityRate(std::vector <double> x, double t, void * _env) = 0;
 	virtual double birthRate(double x, double t, void * _env) = 0;
+	virtual double birthRate(std::vector <double> x, double t, void * _env) = 0;
 
 	virtual ~IndividualBase();
 	
-	virtual void   set_size(double _x);
-	virtual void   preCompute(double x, double t, void * _env);
+	virtual void   set_size(std::vector <double> _x);
+	virtual void   preCompute(std::vector <double> x, double t, void * _env);
 	virtual double establishmentProbability(double t, void  * _env);
 
 	// Functions related to additional state variables

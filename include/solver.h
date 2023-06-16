@@ -12,7 +12,7 @@
 #include "ode_solver.h"
 #include "cubic_spline.h"
 
-enum PSPM_SolverType {SOLVER_FMU, SOLVER_MMU, SOLVER_CM, SOLVER_EBT, SOLVER_IFMU, SOLVER_ABM, SOLVER_IEBT, SOLVER_ICM};
+enum PSPM_SolverType {SOLVER_FMU, SOLVER_MMU, SOLVER_CM, SOLVER_EBT, SOLVER_IFMU, SOLVER_ABM, SOLVER_IEBT, SOLVER_ICM, SOLVER_EBTN, SOLVER_IEBTN};
 
 class Solver{
 	private:
@@ -73,7 +73,8 @@ class Solver{
 
 	void addSystemVariables(int _s);
 	void addSpecies(int _J, double _xb, double _xm, bool log_breaks, Species_Base* _mod, int n_extra_vars, double input_birth_flux = -1);
-	void addSpecies(std::vector<double> xbreaks, Species_Base* _mod, int n_extra_vars, double input_birth_flux = -1);
+	void addSpecies(std::vector<int> J, std::vector<double> _xb, std::vector<double> _xm, std::vector<bool> log_breaks, Species_Base* _mod, int n_extra_vars, double input_birth_flux = -1);
+	void addSpecies(std::vector<std::vector<double>> xbreaks, Species_Base* _mod, int n_extra_vars, double input_birth_flux = -1);
 	void removeSpecies(Species_Base* spp);
 
 	//Species<Model>* get_species(int id);

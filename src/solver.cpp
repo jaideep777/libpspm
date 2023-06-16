@@ -40,7 +40,9 @@ std::map<std::string, PSPM_SolverType> Solver::methods_map =
 		 {"IFMU", SOLVER_IFMU}, 
 		 {"ABM",  SOLVER_ABM}, 
 		 {"IEBT", SOLVER_IEBT},
-		 {"ICM",  SOLVER_ICM}};
+		 {"ICM",  SOLVER_ICM},
+		 {"EBTN", SOLVER_EBTN},
+		 {"IEBTN", SOLVER_IEBTN}};
 
 
 Solver::Solver(PSPM_SolverType _method, string ode_method) : odeStepper(ode_method, 0, 1e-6, 1e-6) {
@@ -62,35 +64,47 @@ Solver::Solver(std::string _method, std::string ode_method) : Solver(methods_map
 /// @param n_extra_vars        number of cummulative variables to add for this species
 /// @param input_birth_flux    The initial input birth flux for the species
 /// @details This function creates metadata associated with the discretized size axis according to the specified solver, such as size at birth, initial number of cohorts/bins, and allocates space for the species in the state vector. 
-void Solver::addSpecies(std::vector<double> xbreaks, Species_Base* s, int n_extra_vars, double input_birth_flux){
+void Solver::addSpecies(std::vector<std::vector<double>> xbreaks, Species_Base* s, int n_extra_vars, double input_birth_flux){
 	s->set_inputBirthFlux(input_birth_flux);
 	s->n_extra_statevars = n_extra_vars;
 
 	if (method == SOLVER_FMU || method == SOLVER_IFMU || method == SOLVER_ABM){
-		std::sort(xbreaks.begin(), xbreaks.end(), std::less<double>());  // sort cohorts ascending for FMU
-		s->xb = *xbreaks.begin();
+		for(size_t i = 0; i < xbreaks.size() ; i++){
+			std::sort(xbreaks[i].begin(), xbreaks[i].end(), std::less<double>());  // sort cohorts ascending for FMU
+			s->xnb[i] = *xbreaks[i].begin();
+		}
 	}
 	else {
-		std::sort(xbreaks.begin(), xbreaks.end(), std::greater<double>());  // sort cohorts descending for CM, EBT
-		s->xb = *xbreaks.rbegin();
+		for(size_t i = 0; i < xbreaks.size() ; i++){
+			std::sort(xbreaks[i].begin(), xbreaks[i].end(), std::greater<double>());  // sort cohorts ascending for FMU
+			s->xnb[i] = *xbreaks[i].begin();
+		}
 	}
 
+	// Current assumption: J is the same for all the states
 	int J;
-	if      (method == SOLVER_FMU)  J = xbreaks.size()-1;	
-	else if (method == SOLVER_IFMU) J = xbreaks.size()-1;	
-	else if (method == SOLVER_MMU)  J = xbreaks.size()-1;  
-	else if (method == SOLVER_CM )  J = xbreaks.size();
-	else if (method == SOLVER_ICM ) J = xbreaks.size();
-	else if (method == SOLVER_EBT)  J = xbreaks.size();
-	else if (method == SOLVER_IEBT) J = xbreaks.size();
-	else if (method == SOLVER_ABM)  J = xbreaks.size();    // For ABM solver, this is a temporary size thats used to generate the initial density distribution. s will be resized during init to abm_n0.
+	if      (method == SOLVER_FMU)  J = xbreaks[0].size()-1;	
+	else if (method == SOLVER_IFMU) J = xbreaks[0].size()-1;	
+	else if (method == SOLVER_MMU)  J = xbreaks[0].size()-1;  
+	else if (method == SOLVER_CM )  J = xbreaks[0].size();
+	else if (method == SOLVER_ICM ) J = xbreaks[0].size();
+	else if (method == SOLVER_EBT)  J = xbreaks[0].size();
+	else if (method == SOLVER_IEBT) J = xbreaks[0].size();
+	else if (method == SOLVER_EBTN) {
+		for(size_t i =0; i < xbreaks.size(); i++) J = J+xbreaks[i].size();
+	}
+	else if (method == SOLVER_IEBTN) {
+		for(size_t i =0; i < xbreaks.size(); i++) J = J+xbreaks[i].size();
+	}
+	else if (method == SOLVER_ABM)  J = xbreaks[0].size();    // For ABM solver, this is a temporary size thats used to generate the initial density distribution. s will be resized during init to abm_n0.
 	else    throw std::runtime_error("Unsupported method");
 
-	s->x = xbreaks;
+	s->xn = xbreaks;
 	s->resize(J);
 	
 	species_vec.push_back(s);
 
+	//Not touching this yet because it's not EBT
 	if (method == SOLVER_FMU){	
 		s->X.resize(s->J);
 		for (size_t i=0; i<s->J; ++i) s->X[i] = (s->x[i]+s->x[i+1])/2.0;
@@ -120,11 +134,36 @@ void Solver::addSpecies(std::vector<double> xbreaks, Species_Base* s, int n_extr
 }
 
 
+void Solver::addSpecies(std::vector<int> _J, std::vector<double> _xb, std::vector<double> _xm, std::vector<bool> log_breaks, Species_Base* s, 
+								int n_extra_vars, double input_birth_flux){
+
+	// should log_breaks also be a vector? - probably
+
+	// TODO: make sure that _xb and _xm are the same size
+	if (_xb.size() != _xm.size()){
+		throw std::runtime_error("Error: size of lower boundary and upper boundary for states doesn't match"); // Fix this to be more informative
+	}
+
+	std::vector<std::vector<double>> xbreaks;
+
+	for (int i=0; i< _xb.size(); ++i){
+		if (log_breaks[i]) {
+			xbreaks.push_back(logseq(_xb[i], _xm[i], _J[i]+1));
+		}
+		else {
+			xbreaks.push_back(seq(_xb[i], _xm[i], _J[i]+1));
+		}
+	}
+
+	addSpecies(xbreaks, s, n_extra_vars, input_birth_flux);
+}
+
+
 void Solver::addSpecies(int _J, double _xb, double _xm, bool log_breaks, Species_Base* s,
 							   int n_extra_vars, double input_birth_flux){
-	vector<double> xbreaks;
-	if (log_breaks) xbreaks = logseq(_xb, _xm, _J+1);
-	else            xbreaks =    seq(_xb, _xm, _J+1);
+	std::vector<std::vector<double>> xbreaks;
+	if (log_breaks) xbreaks.push_back(logseq(_xb, _xm, _J+1));
+	else            xbreaks.push_back(seq(_xb, _xm, _J+1));
 
 	addSpecies(xbreaks, s, n_extra_vars, input_birth_flux);
 }
@@ -278,6 +317,22 @@ void Solver::initializeSpecies(Species_Base * s){
 			s->setU(s->J-1,0); 		
 		}
 		
+		if (method == SOLVER_EBTN || method == SOLVER_IEBTN){
+			// x, u for internal cohorts 
+			for (size_t i=0; i<s->J-1; ++i){
+				double X = (s->x[i]+s->x[i+1])/2.0;			
+				double U = s->init_density(i, X, env)*(s->x[i]-s->x[i+1]); 
+				s->setX(i,X); 
+				s->setU(i,U);
+				// *it++ = X;	// x in state
+				// *it++ = U;	// u in state 
+			}
+			// set pi0, N0 as x, u for the last cohort. This scheme allows using this last cohort with xb+pi0 in integrals etc 
+			// *it++ = 0; *it++ = 0;
+			s->setX(s->J-1,0); // [resolved] todo: should this be set to xb for init_state and set to 0 again later? maybe not, as init_state is not expected to be x dependent
+			s->setU(s->J-1,0); 		
+		}
+
 		// FIXME: abm_n0 and x.size() can be different - we want higher x.size() to get a high-res initial density function, but when we draw from it, we only draw abm_n0 individuals
 		if (method == SOLVER_ABM){
 			// Create the initial density distribution from which we will draw individuals

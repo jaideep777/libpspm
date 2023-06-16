@@ -5,10 +5,10 @@ using namespace std;
 IndividualBase::~IndividualBase(){
 }
 
-void IndividualBase::set_size(double _x){
+void IndividualBase::set_size(std::vector <double> _x){
 }
 
-void IndividualBase::preCompute(double x, double t, void * _env){
+void IndividualBase::preCompute(std::vector <double> x, double t, void * _env){
 }
 
 double IndividualBase::establishmentProbability(double t, void  * _env){
