@@ -319,14 +319,21 @@ void Solver::initializeSpecies(Species_Base * s){
 		
 		if (method == SOLVER_EBTN || method == SOLVER_IEBTN){
 			// x, u for internal cohorts 
-			for (size_t i=0; i<s->J-1; ++i){
-				double X = (s->x[i]+s->x[i+1])/2.0;			
-				double U = s->init_density(i, X, env)*(s->x[i]-s->x[i+1]); 
-				s->setX(i,X); 
+			// update the X values first then update U separately
+			for (size_t k=0; k<s->statesize(); ++k){
+				for(size_t i=0; i<(s->xsize(k)); ++i){
+					double X = (s->xn[k][i]+s->xn[k][i+1])/2.0;			
+					s->setXn(i,k,X); 
+				}
+			}
+
+			for (size_t i=0; i<s->cohortsize(); ++i){
+				double U = s->init_density(i, s->getStateAt(i), env) * s->dXn(i);
+			}
+				
 				s->setU(i,U);
 				// *it++ = X;	// x in state
 				// *it++ = U;	// u in state 
-			}
 			// set pi0, N0 as x, u for the last cohort. This scheme allows using this last cohort with xb+pi0 in integrals etc 
 			// *it++ = 0; *it++ = 0;
 			s->setX(s->J-1,0); // [resolved] todo: should this be set to xb for init_state and set to 0 again later? maybe not, as init_state is not expected to be x dependent

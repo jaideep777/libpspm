@@ -47,6 +47,10 @@ class Species_Base{
 	// virtual Species_Base * create() = 0;
 	virtual ~Species_Base() = 0;
 	
+	int xsize(int k);
+	int cohortsize();
+	int statesize();
+
 	int xsize();
 	int size();
 
@@ -71,7 +75,11 @@ class Species_Base{
 	virtual double getXn(int i, int k) = 0;
 	virtual double getU(int i) = 0;
 
+	virtual std::vector <double> getStateAt(int i) = 0;
+	virtual double dXn (int i) = 0;
+
 	virtual double init_density(int i, double x, void * env) = 0;
+	virtual double init_density(int i, std::vector<double> x, void * env) = 0;
 	virtual void initExtraState(double t, void * env) = 0;
 	virtual void initAndCopyExtraState(double t, void * env, std::vector<double>::iterator &it) = 0;
 	virtual void initBoundaryCohort(double t, void * env) = 0;

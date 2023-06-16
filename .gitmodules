@@ -1,0 +1,3 @@
+[submodule "tensorlib"]
+	path = tensorlib
+	url = git@github.com:jaideep777/tensorlib.git
