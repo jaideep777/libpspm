@@ -25,6 +25,15 @@ void Species<Model>::resize(int _J){
 	cohorts.resize(J, boundaryCohort);  // when resizing, always insert copies of boundary cohort
 }
 
+template<class Model>
+void Species<Model>::resize(std::vector<int> xsize){
+	int _J = 1;
+	for(size_t i =0; i < xsize.size(); i++) _J = _J+(xbreaks[i].size()-1);
+	J = _J;
+	// Should we resize x here as well?
+	cohorts.resize(xsize, boundaryCohort);  // when resizing, always insert copies of boundary cohort
+}
+
 
 template<class Model>
 double Species<Model>::get_maxSize(){ // TODO ALERT: make sure this sees the latest state
@@ -110,6 +119,12 @@ double Species<Model>::getX(int i){
 	else return cohorts[i].x;
 }
 
+template <class Model>
+std::vector<double> Species<Model>::getXn(int i){
+	if (i == -1) return boundaryCohort.xn;
+	else return cohorts[i].xn;
+}
+
 
 template <class Model>
 double Species<Model>::getU(int i){
@@ -130,6 +145,12 @@ void Species<Model>::set_xb(double _xb){
 	boundaryCohort.set_size(_xb);
 }
 
+template <class Model>
+void Species<Model>::set_xnb(std::vector<double> _xnb){
+	xnb = _xnb;
+	boundaryCohort.xn = _xnb;
+	boundaryCohort.set_size(_xnb);
+}
 
 template <class Model>
 void Species<Model>::set_ub(double _ub){
@@ -149,10 +170,23 @@ void Species<Model>::setX(int i, double _x){
 	cohorts[i].set_size(_x);
 }
 
+void Species<Model>::setXn(int i, int k, double _x){
+	// cohorts[i].x = _x;
+	// cohorts[i].set_size(_x);
+}
 
 template <class Model>
 void Species<Model>::setU(int i, double _u){
 	cohorts[i].u = _u;
+}
+
+std::vector <double> Species<Model>::getStateAt(int i){
+	std::vector<int> location = cohorts.index(i);
+	std::vector<double> _xn; 
+	for(size_t k = 0; k < location.size(); ++k){
+		_xn.push_back(Xn[k][location[k]]);
+	}
+	return(_xn);
 }
 
 

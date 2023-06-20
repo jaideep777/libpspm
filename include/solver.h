@@ -63,6 +63,7 @@ class Solver{
 	bool use_log_densities = true;
 
 	private:
+	std::vector<double> pin0;
 	double pi0, N0;
 	void realizeEbtBoundaryCohort(Species_Base * spp);
 	void restoreEbtBoundaryCohort(Species_Base * spp);

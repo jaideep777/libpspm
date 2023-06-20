@@ -5,6 +5,8 @@
 #include <list>
 #include <string>
 
+#include "tensor_cohort.h"
+
 //#include "iterator_set.h"
 #include "cohort.h"
 
@@ -27,8 +29,8 @@ class Species_Base{
 	// Kept private so users dont accidently access them for other solvers
 	std::vector <double> X;	
 	std::vector <double> x;
-	std::vector <std::vector <double>> Xn; // multiple state model
-	std::vector <std::vector <double>> xn; // multiple state model
+	std::vector <std::vector<double>> Xn; // multiple state model
+	std::vector <std::vector<double>> xn; // multiple state model
 	std::vector <double> h;
 	// std::vector <double> schedule; // used only by CM/EBT
 
@@ -128,7 +130,7 @@ class Species_Base{
 template <class Model>
 class Species : public Species_Base{
 	protected:
-	std::vector<Cohort<Model>> cohorts;
+	TensorCohort<Cohort<Model>> cohorts;
 	Cohort<Model> boundaryCohort;
 	
 	//Cohort<Model> savedCohort; // a cohort to save a backup of any other cohort
@@ -141,6 +143,7 @@ class Species : public Species_Base{
 
 	
 	void resize(int _J);
+	void resize(std::vector<int> xsize);
 	double get_maxSize();
 	
 	void print();
@@ -154,7 +157,7 @@ class Species : public Species_Base{
 	void setU(int i, double _u);
 	
 	double getX(int i);
-	double getX(int i, int k);
+	std::vector<double> getXn(int i);
 	double getU(int i);
 	
 	double init_density(int i, double x, void * env);

@@ -8,7 +8,7 @@ void Species_Base::print_extra(){
 }
 
 int Species_Base::xsize(int k){
-	return Xn[k].size();
+	return Xn.dim[k].size();
 }
 	
 int Species_Base::cohortsize(){
@@ -17,6 +17,20 @@ int Species_Base::cohortsize(){
 
 int Species_Base::statesize(){
 	return Xn.size();
+}
+
+std::vector <double> Species_Base::getStateAt(int i){
+	Xn.vec[i];
+}
+	
+double Species_Base::dXn (int i){
+	std::vector<int> state_index = index;
+	dxn = 1;
+	for (size_t k = 0; k < statesize(); ++k){
+		dx_k = (Xn[k][index[k]] + Xn[k][index[k] + 1])/2;
+		dxn = dxn * dx_k;
+	}
+	return dxn;
 }
 
 

@@ -82,7 +82,7 @@ void Solver::addSpecies(std::vector<std::vector<double>> xbreaks, Species_Base* 
 	}
 
 	// Current assumption: J is the same for all the states
-	int J;
+	int J = 1;
 	if      (method == SOLVER_FMU)  J = xbreaks[0].size()-1;	
 	else if (method == SOLVER_IFMU) J = xbreaks[0].size()-1;	
 	else if (method == SOLVER_MMU)  J = xbreaks[0].size()-1;  
@@ -91,10 +91,10 @@ void Solver::addSpecies(std::vector<std::vector<double>> xbreaks, Species_Base* 
 	else if (method == SOLVER_EBT)  J = xbreaks[0].size();
 	else if (method == SOLVER_IEBT) J = xbreaks[0].size();
 	else if (method == SOLVER_EBTN) {
-		for(size_t i =0; i < xbreaks.size(); i++) J = J+xbreaks[i].size();
+		for(size_t i =0; i < xbreaks.size(); i++) J = J+(xbreaks[i].size()-1);
 	}
 	else if (method == SOLVER_IEBTN) {
-		for(size_t i =0; i < xbreaks.size(); i++) J = J+xbreaks[i].size();
+		for(size_t i =0; i < xbreaks.size(); i++) J = J+(xbreaks[i].size()-1);
 	}
 	else if (method == SOLVER_ABM)  J = xbreaks[0].size();    // For ABM solver, this is a temporary size thats used to generate the initial density distribution. s will be resized during init to abm_n0.
 	else    throw std::runtime_error("Unsupported method");
@@ -148,10 +148,10 @@ void Solver::addSpecies(std::vector<int> _J, std::vector<double> _xb, std::vecto
 
 	for (int i=0; i< _xb.size(); ++i){
 		if (log_breaks[i]) {
-			xbreaks.push_back(logseq(_xb[i], _xm[i], _J[i]+1));
+			xbreaks.push_back(logseq(_xb[i], _xm[i], _J[i]));
 		}
 		else {
-			xbreaks.push_back(seq(_xb[i], _xm[i], _J[i]+1));
+			xbreaks.push_back(seq(_xb[i], _xm[i], _J[i]));
 		}
 	}
 
@@ -273,10 +273,12 @@ void Solver::initializeSpecies(Species_Base * s){
 		// set x and u of boundary cohort
 		// Boundary cohort is not in state, but used as a reference.	
 		s->set_xb(s->xb); // set x of boundary cohort 
+		s->set_xnb(s->xnb);
 		s->set_ub(0);     // set initial density of boundary cohort to 0.
 		
 		// set birth time for each cohort to current_time
 		// FIXME: current_time has never been initialized till this point. It is only init in resetState() 
+		// Won't work for multi-state - need to resolve tensor array - solved using a TensorCohort array - this may need to be fixed more later
 		for (int i=0; i<s->J; ++i) s->set_birthTime(i, current_time); // FIXME: doesnt make sense, because larger cohorts would have been born earlier, but birthTime is not used anyways
 
 		// set x, u for all cohorts
@@ -321,21 +323,23 @@ void Solver::initializeSpecies(Species_Base * s){
 			// x, u for internal cohorts 
 			// update the X values first then update U separately
 			for (size_t k=0; k<s->statesize(); ++k){
-				for(size_t i=0; i<(s->xsize(k)); ++i){
+				for(size_t i=0; i<(s->(xsize(k)-1)); ++i){
 					double X = (s->xn[k][i]+s->xn[k][i+1])/2.0;			
 					s->setXn(i,k,X); 
 				}
 			}
 
-			for (size_t i=0; i<s->cohortsize(); ++i){
+			for (size_t i=0; i<(s->cohortsize()-1); ++i){
 				double U = s->init_density(i, s->getStateAt(i), env) * s->dXn(i);
+				s->setU(i,U);
 			}
 				
-				s->setU(i,U);
+				
 				// *it++ = X;	// x in state
 				// *it++ = U;	// u in state 
 			// set pi0, N0 as x, u for the last cohort. This scheme allows using this last cohort with xb+pi0 in integrals etc 
 			// *it++ = 0; *it++ = 0;
+			// Now set boundary cohort
 			s->setX(s->J-1,0); // [resolved] todo: should this be set to xb for init_state and set to 0 again later? maybe not, as init_state is not expected to be x dependent
 			s->setU(s->J-1,0); 		
 		}
@@ -384,8 +388,10 @@ void Solver::initializeSpecies(Species_Base * s){
 		// initialize extra state for each cohort ... previously also copied to state
 		// For EBT, the initialization of extra variables may need state info, so need to realize pi0-cohort
 		if (method == SOLVER_EBT || method == SOLVER_IEBT) realizeEbtBoundaryCohort(s);
+		if (method == SOLVER_EBTN || method == SOLVER_IEBTN) realizeEbtnBoundaryCohort(s);
 		s->initExtraState(current_time, env);
 		if (method == SOLVER_EBT || method == SOLVER_IEBT) restoreEbtBoundaryCohort(s);
+		if (method == SOLVER_EBTN || method == SOLVER_IEBTN) restoreEbtnBoundaryCohort(s);
 		//if (s->n_extra_statevars > 0){  // FIXME: maybe redundant
 			//auto it_prev = it;
 			//s->init_ExtraState(it);  // this also inits the extra state of boundary cohort, but without advancing the iterator
@@ -410,6 +416,7 @@ void Solver::initialize(){
 }
 
 
+//everything is just doubled for xn here
 void Solver::realizeEbtBoundaryCohort(Species_Base * spp){
 	// backup pi0, N0 from last (youngest) cohort <-- cohorts are sorted descending
 	pi0 = spp->getX(spp->J-1);
@@ -420,10 +427,29 @@ void Solver::realizeEbtBoundaryCohort(Species_Base * spp){
 	spp->setX(spp->J-1, x0);
 }
 
+//everything is just doubled for xn here
+void Solver::realizeEbtnBoundaryCohort(Species_Base * spp){
+	// backup pi0, N0 from last (youngest) cohort <-- cohorts are sorted descending
+	pin0 = spp->getXn(spp->J-1);
+	N0  = spp->getU(spp->J-1);
+
+	// real-ize pi0-cohort with actual x0 value
+	std::vector<double> x0 = spp->xnb;
+	for(k = 0; k < x0.size(); ++i){
+		x0[k] = x0[k] + pi0[k]/(N0+1e-12);
+	}
+	spp->setXn(spp->J-1, x0);
+}
+
 
 void Solver::restoreEbtBoundaryCohort(Species_Base * spp){
 	// Copy saved value of pi0 back to the pi0-cohort (pi0 cohort is at index J-1)
 	spp->setX(spp->J-1, pi0);
+}
+
+void Solver::restoreEbtBnoundaryCohort(Species_Base * spp){
+	// Copy saved value of pi0 back to the pi0-cohort (pi0 cohort is at index J-1)
+	spp->setX(spp->J-1, pin0);
 }
 
 
