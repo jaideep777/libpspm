@@ -66,7 +66,9 @@ class Solver{
 	std::vector<double> pin0;
 	double pi0, N0;
 	void realizeEbtBoundaryCohort(Species_Base * spp);
+	void realizeEbtnBoundaryCohort(Species_Base * spp);
 	void restoreEbtBoundaryCohort(Species_Base * spp);
+	void restoreEbtnBoundaryCohort(Species_Base * spp);
 
 	public:	
 	Solver(PSPM_SolverType _method, std::string ode_method = "rk45ck");
