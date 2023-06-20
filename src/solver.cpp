@@ -207,7 +207,10 @@ void Solver::resetState(double t0){  // FIXME: This is currently redundant, and 
 void Solver::resizeStateFromSpecies(){
 	int state_size_new = n_statevars_system;
 	for (auto& spp : species_vec){
-		state_size_new += spp->J*(n_statevars_internal + spp->n_extra_statevars);
+		int num_states = spp->J*(spp->statesize() + spp->n_extra_statevars);
+		bool cond = (method == SOLVER_FMU || method == SOLVER_IFMU || method == SOLVER_ABM);
+		num_states = (cond)? num_states : (num_states + spp->J);
+		state_size_new += num_states;
 	}
 	
 	state.resize(state_size_new, -999);
@@ -494,6 +497,19 @@ void Solver::copyStateToCohorts(std::vector<double>::iterator state_begin){
 			}
 		}
 
+		if (method == SOLVER_EBTN || method == SOLVER_IEBTN){
+			// x, u for boundary and internal cohorts
+			for (size_t i=0; i<s->J; ++i){
+				std::vector<double> Xn;
+				for(size_t k=0; k<s->statesize(); ++k){
+					Xn.push_back(*it++);
+				}
+				double U = *it++;
+				s->setXn(i,Xn); 
+				s->setU(i,U);
+			}
+		}
+
 		if (s->n_extra_statevars > 0){  // If extra state variables have been requested, initialize them
 			auto it_prev = it;
 			s->copyExtraStateToCohorts(it);
@@ -530,6 +546,18 @@ void Solver::copyCohortsToState(){
 				double X = s->getX(i); 
 				double U = s->getU(i);
 				*it++ = X; 
+				*it++ = U;
+			}
+		}
+
+		if (method == SOLVER_EBTN || method == SOLVER_IEBTN){
+			// x, u for boundary and internal cohorts
+			for (size_t i=0; i<s->J; ++i){
+				std::vector<double> Xn = s->getXn(i); 
+				for(size_t k = 0; k<k.size(), ++k){
+					*it++ = Xn[k]; 
+				}
+				double U = s->getU(i);
 				*it++ = U;
 			}
 		}
