@@ -54,6 +54,8 @@ template <class T>
 class Tensor{
 	private:
 	std::vector<int> offsets;
+
+	protected:
 	int nelem;
 	
 	public:

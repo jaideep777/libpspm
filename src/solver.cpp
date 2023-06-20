@@ -326,7 +326,7 @@ void Solver::initializeSpecies(Species_Base * s){
 			// x, u for internal cohorts 
 			// update the X values first then update U separately
 			for (size_t k=0; k<s->statesize(); ++k){
-				for(size_t i=0; i<(s->(xsize(k)-1)); ++i){
+				for(size_t i=0; i<(s->xsize(k)-1); ++i){
 					double X = (s->xn[k][i]+s->xn[k][i+1])/2.0;			
 					s->setXn(i,k,X); 
 				}
@@ -438,8 +438,8 @@ void Solver::realizeEbtnBoundaryCohort(Species_Base * spp){
 
 	// real-ize pi0-cohort with actual x0 value
 	std::vector<double> x0 = spp->xnb;
-	for(k = 0; k < x0.size(); ++i){
-		x0[k] = x0[k] + pi0[k]/(N0+1e-12);
+	for(size_t k = 0; k < x0.size(); ++k){
+		x0[k] = x0[k] + pin0[k]/(N0+1e-12);
 	}
 	spp->setXn(spp->J-1, x0);
 }
@@ -450,9 +450,9 @@ void Solver::restoreEbtBoundaryCohort(Species_Base * spp){
 	spp->setX(spp->J-1, pi0);
 }
 
-void Solver::restoreEbtBnoundaryCohort(Species_Base * spp){
+void Solver::restoreEbtnBoundaryCohort(Species_Base * spp){
 	// Copy saved value of pi0 back to the pi0-cohort (pi0 cohort is at index J-1)
-	spp->setX(spp->J-1, pin0);
+	spp->setXn(spp->J-1, pin0);
 }
 
 
@@ -554,7 +554,7 @@ void Solver::copyCohortsToState(){
 			// x, u for boundary and internal cohorts
 			for (size_t i=0; i<s->J; ++i){
 				std::vector<double> Xn = s->getXn(i); 
-				for(size_t k = 0; k<k.size(), ++k){
+				for(size_t k = 0; k<Xn.size(); ++k){
 					*it++ = Xn[k]; 
 				}
 				double U = s->getU(i);

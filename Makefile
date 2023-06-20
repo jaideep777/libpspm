@@ -4,7 +4,8 @@ TARGET := libpspm
 
 # files
 SRCFILES  :=  $(wildcard src/*.cpp) 
-HEADERS := $(wildcard src/*.tpp) $(wildcard include/*.h) $(wildcard tests/*.h)
+TENSORFILES := $(wildcard tensorlib/include/*.h)
+HEADERS := $(wildcard tensorlib/include/*.h) $(wildcard src/*.tpp) $(wildcard include/*.h) $(wildcard tests/*.h) 
 # ------------------------------------------------------------------------------
 
 CXX = g++
@@ -14,7 +15,7 @@ AR = ar
 #CUDA_INSTALL_PATH ?= /usr/local/cuda#-5.0
 
 # include and lib dirs (esp for cuda)
-INC_PATH := -I./include 
+INC_PATH := -I./include -I./tensorlib/include
 LIB_PATH := -L./lib 
 
 PROFILING_FLAGS = -g -pg
@@ -57,20 +58,24 @@ LIBS = 	# -ltbb #-lgsl -lgslcblas 	# additional libs
 #LIBS = -lcudart 			# cuda libs 		
 
 # files
-OBJECTS = $(patsubst src/%.cpp, build/%.o, $(SRCFILES))
+TENSOROBJECTS := $(patsubst tensorlib/include/%.h, tensorlib/build/%.o, $(TENSORFILES))
+OBJECTS := $(patsubst src/%.cpp, build/%.o, $(SRCFILES))
 
 
 all: dir $(TARGET)	
 
 dir: 
-	mkdir -p lib build tests/build
+	mkdir -p lib build tests/build tensorlib.build
 
-$(TARGET): $(OBJECTS) 
+$(TARGET):  $(OBJECTS) 
 	$(AR) rcs lib/$(TARGET).a $(OBJECTS) $(LIBS) 
 #	g++ $(LDFLAGS) -o $(TARGET) $(LIB_PATH) $(OBJECTS) $(LIBS) 
 
 $(OBJECTS): build/%.o : src/%.cpp $(HEADERS)
 	$(CXX) -c $(CPPFLAGS) $(INC_PATH) $< -o $@ 
+
+# $(TENSOROBJECTS): tensorlib/build/%.o : tensorlib/include/%.h $(HEADERS)
+# 	$(CXX) -c $(CPPFLAGS) $(INC_PATH) $< -o $@ 
 
 clean:
 	rm -f $(TARGET) build/*.o lib/*.a src/*.o

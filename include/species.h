@@ -5,6 +5,7 @@
 #include <list>
 #include <string>
 
+#include "tensor.h"
 #include "tensor_cohort.h"
 
 //#include "iterator_set.h"
@@ -71,10 +72,11 @@ class Species_Base{
 	virtual void set_birthTime(int i, double t0) = 0;
 	virtual void setX(int i, double _x) = 0;
 	virtual void setXn(int i, int k, double _x) = 0;
+	virtual void setXn(int i, std::vector<double> _x) = 0;
 	virtual void setU(int i, double _u) = 0;
 
 	virtual double getX(int i) = 0;
-	virtual double getXn(int i, int k) = 0;
+	virtual std::vector<double> getXn(int i) = 0;
 	virtual double getU(int i) = 0;
 
 	virtual std::vector <double> getStateAt(int i) = 0;
@@ -154,11 +156,15 @@ class Species : public Species_Base{
 	void set_birthTime(int i, double t0);
 	void setX(int i, double _x);
 	void setXn(int i, int k, double _x);
+	void setXn(int i, std::vector<double> _x);
 	void setU(int i, double _u);
 	
 	double getX(int i);
 	std::vector<double> getXn(int i);
 	double getU(int i);
+
+	std::vector <double> getStateAt(int i);
+	double dXn (int i);
 	
 	double init_density(int i, double x, void * env);
 	void initExtraState(double t, void * env);

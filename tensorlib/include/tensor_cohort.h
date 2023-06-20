@@ -3,13 +3,13 @@
 #include "tensor.h"
 
 template <class T>
-class TensorCohort : public Tensor{
+class TensorCohort : public Tensor<T> {
 
     public: 
     
-    TensorCohort(std::vector<int> _dim) : Cohort (std::vector<int> _dim){
-        nelem = nelem + 1;
-		vec.resize(nelem);
+    TensorCohort(std::vector<int> _dim) : Tensor<T> (_dim){
+        this->nelem = this->nelem + 1;
+		this->vec.resize(this->nelem);
     }
 
 };
