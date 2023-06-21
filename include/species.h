@@ -5,9 +5,6 @@
 #include <list>
 #include <string>
 
-#include "tensor.h"
-#include "tensor_cohort.h"
-
 //#include "iterator_set.h"
 #include "cohort.h"
 
@@ -99,9 +96,11 @@ class Species_Base{
 	virtual double growthRate(int i, double x, double t, void * env) = 0;
 	virtual double growthRateOffset(int i, double x, double t, void * env) = 0;
 	virtual std::vector<double> growthRateGradient(int i, double x, double t, void * env, double grad_dx) = 0;
+	virtual std::vector<double> growthRateGradient(int i, std::vector<double> x, double t, void * env, std::vector<double> grad_dxn) = 0;
 	virtual std::vector<double> growthRateGradientCentered(int i, double xplus, double xminus, double t, void * env) = 0;
 	virtual double mortalityRate(int i, double x, double t, void * env) = 0;
 	virtual std::vector<double> mortalityRateGradient(int i, double x, double t, void * env, double grad_dx) = 0;
+	virtual std::vector<double> mortalityRateGradient(int i, std::vector<double> x, double t, void * env, std::vector<double> grad_dx) = 0;
 	virtual double birthRate(int i, double x, double t, void * env) = 0;
 	virtual void getExtraRates(std::vector<double>::iterator &it) = 0;
 
@@ -178,12 +177,18 @@ class Species : public Species_Base{
 	
 	void triggerPreCompute();
 	double growthRate(int i, double x, double t, void * env);
+	double growthRate(int i, std::vector<double> x, double t, void * env);
 	double growthRateOffset(int i, double x, double t, void * env);
+	double growthRateOffset(int i, std::vector<double> x, double t, void * env);
 	std::vector<double> growthRateGradient(int i, double x, double t, void * env, double grad_dx);
+	std::vector<double> growthRateGradient(int i, std::vector<double> x, double t, void * env, std::vector<double> grad_dx);
 	std::vector<double> growthRateGradientCentered(int i, double xplus, double xminus, double t, void * env);
 	double mortalityRate(int i, double x, double t, void * env);
+	double mortalityRate(int i, std::vector<double> x, double t, void * env);
 	std::vector<double> mortalityRateGradient(int i, double x, double t, void * env, double grad_dx);
+	std::vector<double> mortalityRateGradient(int i, std::vector<double> x, double t, void * env, std::vector<double> grad_dx);
 	double birthRate(int i, double x, double t, void * env);
+	double birthRate(int i, std::vector<double> x, double t, void * env);
 	void getExtraRates(std::vector<double>::iterator &it);
 
 	void addCohort(int n = 1);

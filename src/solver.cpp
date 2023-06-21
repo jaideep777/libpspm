@@ -202,7 +202,7 @@ void Solver::resetState(double t0){  // FIXME: This is currently redundant, and 
 void Solver::resizeStateFromSpecies(){
 	int state_size_new = n_statevars_system;
 	for (auto& spp : species_vec){
-		int num_states = spp->J*(spp->statesize() + spp->n_extra_statevars);
+		int num_states = spp->J*(spp->xnb.size() + spp->n_extra_statevars);
 		state_size_new += n_statevars_internal * spp->J;
 	}
 	

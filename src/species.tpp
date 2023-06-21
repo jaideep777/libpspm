@@ -201,7 +201,7 @@ template <class Model>
 double Species<Model>::dXn (int i){
 	double dxn = 1;
 	for (size_t k = 0; k < Xn[i].size(); ++k){
-		double dx_k = (Xn[i][k] + Xn[i+1][k];
+		double dx_k = (Xn[i][k] + Xn[i+1][k]);
 		dxn = dxn * dx_k;
 	}
 	return dxn;
@@ -293,6 +293,12 @@ double Species<Model>::growthRate(int i, double x, double t, void * env){
 	return c.growthRate(c.x,t,env);
 }
 
+template <class Model>
+double Species<Model>::growthRate(int i, std::vector<double> x, double t, void * env){
+	Cohort<Model> &c = (i<0)? boundaryCohort : cohorts[i];
+	return c.growthRate(c.xn,t,env);
+}
+
 
 template <class Model>
 double Species<Model>::growthRateOffset(int i, double x, double t, void * env){
@@ -303,6 +309,14 @@ double Species<Model>::growthRateOffset(int i, double x, double t, void * env){
 	return coff.growthRate(coff.x,t,env);
 }
 
+template <class Model>
+double Species<Model>::growthRateOffset(int i, std::vector<double> x, double t, void * env){
+	Cohort<Model> coff = (i<0)? boundaryCohort : cohorts[i];
+	coff.set_size(x);
+	//coff.preCompute(coff.x,t,env);
+
+	return coff.growthRate(coff.xn,t,env);
+}
 
 template <class Model>
 std::vector<double> Species<Model>::growthRateGradient(int i, double x, double t, void * env, double grad_dx){
@@ -316,6 +330,30 @@ std::vector<double> Species<Model>::growthRateGradient(int i, double x, double t
 	double gplus = cplus.growthRate(cplus.x, t, env);
 
 	return {g, (gplus-g)/grad_dx};
+}
+
+
+template <class Model>
+std::vector<double> Species<Model>::growthRateGradient(int i, std::vector<double> x, double t, void * env, std::vector<double> grad_dx){
+	Cohort<Model> &c = (i<0)? boundaryCohort : cohorts[i];
+
+
+	double g = c.growthRate(c.xn,t,env);
+	std::vector<double> gplus;
+
+	for(int k= 0; k < x.size(); ++k){
+		Cohort<Model> cplus = c;
+		std::vector<double> _x = x;
+		_x[k] += grad_dx[k];
+		cplus.set_size(_x);
+		double gplus_k = cplus.growthRate(cplus.xn, t, env);
+		gplus.push_back((gplus_k-g)/grad_dx[k]);
+	}
+	
+	std::vector<double> out;
+	out.push_back(g);
+	out.insert(out.end(), gplus.begin(), gplus.end());
+	return out;
 }
 
 
@@ -345,6 +383,13 @@ double Species<Model>::mortalityRate(int i, double x, double t, void * env){
 	return c.mortalityRate(c.x,t,env);
 }
 	
+template <class Model>
+double Species<Model>::mortalityRate(int i, std::vector<double> x, double t, void * env){
+	assert(i>=0);
+	Cohort<Model> &c = cohorts[i];
+	return c.mortalityRate(c.xn,t,env);
+}
+
 
 template <class Model>
 std::vector<double> Species<Model>::mortalityRateGradient(int i, double x, double t, void * env, double grad_dx){
@@ -359,6 +404,28 @@ std::vector<double> Species<Model>::mortalityRateGradient(int i, double x, doubl
 	
 	return {g, (gplus-g)/grad_dx};
 }
+
+template <class Model>
+std::vector<double> Species<Model>::mortalityRateGradient(int i, std::vector<double> x, double t, void * env, std::vector<double> grad_dx){
+	Cohort<Model> &c = (i<0)? boundaryCohort : cohorts[i];
+
+	double g = c.mortalityRate(c.xn,t,env);
+	std::vector<double> gplus;
+
+	for(int k= 0; k < x.size(); ++k){
+		Cohort<Model> cplus = c;
+		std::vector<double> _x = x;
+		_x[k] += grad_dx[k];
+		cplus.set_size(_x);
+		double gplus_k = cplus.mortalityRate(cplus.xn, t, env);
+		gplus.push_back((gplus_k-g)/grad_dx[k]);
+	}
+	
+	std::vector<double> out;
+	out.push_back(g);
+	out.insert(out.end(), gplus.begin(), gplus.end());
+	return out;
+}
 	
 
 template <class Model>
@@ -366,7 +433,12 @@ double Species<Model>::birthRate(int i, double x, double t, void * env){
 	Cohort<Model> &c = (i<0)? boundaryCohort : cohorts[i];
 	return c.birthRate(c.x,t,env);
 }
-	
+
+template <class Model>
+double Species<Model>::birthRate(int i, std::vector<double> x, double t, void * env){
+	Cohort<Model> &c = (i<0)? boundaryCohort : cohorts[i];
+	return c.birthRate(c.xn,t,env);
+}	
 
 template <class Model>
 void Species<Model>::getExtraRates(std::vector<double>::iterator &it){
