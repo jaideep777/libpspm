@@ -50,10 +50,8 @@ class Species_Base{
 	// virtual Species_Base * create() = 0;
 	virtual ~Species_Base() = 0;
 	
-	int xsize(int k);
 	int cohortsize();
-	int statesize();
-
+	
 	int xsize();
 	int size();
 
@@ -132,7 +130,7 @@ class Species_Base{
 template <class Model>
 class Species : public Species_Base{
 	protected:
-	TensorCohort<Cohort<Model>> cohorts;
+	std::vector<Cohort<Model>> cohorts;
 	Cohort<Model> boundaryCohort;
 	
 	//Cohort<Model> savedCohort; // a cohort to save a backup of any other cohort

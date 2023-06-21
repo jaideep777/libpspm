@@ -6,24 +6,15 @@ Species_Base::~Species_Base(){
 
 void Species_Base::print_extra(){
 }
-
-int Species_Base::xsize(int k){
-	return Xn[k].size();
-}
 	
 int Species_Base::cohortsize(){
 	return J;
 }
 
-int Species_Base::statesize(){
-	return Xn.size();
-}
-
-
 //template<class Model>
 //int Species<Model>::addVar(std::string name, int stride, int offset){
 //    varnames.push_back(name);
-//    strides.push_back(stride);
+//     strides.push_back(stride);
 //    offsets.push_back(offset);
 //}
 

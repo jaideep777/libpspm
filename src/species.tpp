@@ -172,14 +172,14 @@ void Species<Model>::setX(int i, double _x){
 
 template <class Model>
 void Species<Model>::setXn(int i, int k, double _x){
-	// cohorts[i].x = _x;
+	cohorts[i].xn[k] = _x;
 	// cohorts[i].set_size(_x);
 }
 
 template <class Model>
 void Species<Model>::setXn(int i, std::vector<double> _xn){
-	// cohorts[i].x = _x;
-	// cohorts[i].set_size(_x);
+	cohorts[i].xn = _xn;
+	// cohorts[i].set_size(_xn);
 }
 
 template <class Model>
@@ -199,10 +199,9 @@ std::vector <double> Species<Model>::getStateAt(int i){
 
 template <class Model>
 double Species<Model>::dXn (int i){
-	std::vector<int> location = cohorts.index(i);
 	double dxn = 1;
-	for (size_t k = 0; k < statesize(); ++k){
-		double dx_k = (Xn[k][location[k]] + Xn[k][location[k] + 1])/2;
+	for (size_t k = 0; k < Xn[i].size(); ++k){
+		double dx_k = (Xn[i][k] + Xn[i+1][k];
 		dxn = dxn * dx_k;
 	}
 	return dxn;

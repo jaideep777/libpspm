@@ -40,3 +40,5 @@ tags
 1
 
 demo/plant_fate
+
+!git/hooks/commit-msg

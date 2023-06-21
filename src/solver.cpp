@@ -50,7 +50,7 @@ Solver::Solver(PSPM_SolverType _method, string ode_method) : odeStepper(ode_meth
 
 	// FMU and ABM have only 1 internal state variable (x), rest have 2 (x,u)
 	bool cond = (method == SOLVER_FMU || method == SOLVER_IFMU || method == SOLVER_ABM);
-	n_statevars_internal = (cond)? 1:2;
+	n_statevars_internal = (cond)? 0:1; // Now we'll consider this as extra state variables
 
 }
 
@@ -74,6 +74,7 @@ void Solver::addSpecies(std::vector<std::vector<double>> xbreaks, Species_Base* 
 			s->xnb[i] = *xbreaks[i].begin();
 		}
 	}
+	// TODO: fix sorting for multistate 
 	else {
 		for(size_t i = 0; i < xbreaks.size() ; i++){
 			std::sort(xbreaks[i].begin(), xbreaks[i].end(), std::greater<double>());  // sort cohorts ascending for FMU
@@ -90,12 +91,8 @@ void Solver::addSpecies(std::vector<std::vector<double>> xbreaks, Species_Base* 
 	else if (method == SOLVER_ICM ) J = xbreaks[0].size();
 	else if (method == SOLVER_EBT)  J = xbreaks[0].size();
 	else if (method == SOLVER_IEBT) J = xbreaks[0].size();
-	else if (method == SOLVER_EBTN) {
-		for(size_t i =0; i < xbreaks.size(); i++) J = J+(xbreaks[i].size()-1);
-	}
-	else if (method == SOLVER_IEBTN) {
-		for(size_t i =0; i < xbreaks.size(); i++) J = J+(xbreaks[i].size()-1);
-	}
+	else if (method == SOLVER_EBTN) J = xbreaks[0].size();
+	else if (method == SOLVER_IEBTN) J = xbreaks[0].size();
 	else if (method == SOLVER_ABM)  J = xbreaks[0].size();    // For ABM solver, this is a temporary size thats used to generate the initial density distribution. s will be resized during init to abm_n0.
 	else    throw std::runtime_error("Unsupported method");
 
@@ -134,38 +131,36 @@ void Solver::addSpecies(std::vector<std::vector<double>> xbreaks, Species_Base* 
 }
 
 
-void Solver::addSpecies(std::vector<int> _J, std::vector<double> _xb, std::vector<double> _xm, std::vector<bool> log_breaks, Species_Base* s, 
+void Solver::addSpecies(int _J, std::vector<double> _xb, std::vector<double> _xm, std::vector<bool> log_breaks, Species_Base* s, 
 								int n_extra_vars, double input_birth_flux){
-
-	// should log_breaks also be a vector? - probably
 
 	// TODO: make sure that _xb and _xm are the same size
 	if (_xb.size() != _xm.size()){
 		throw std::runtime_error("Error: size of lower boundary and upper boundary for states doesn't match"); // Fix this to be more informative
 	}
 
-	std::vector<std::vector<double>> xbreaks;
+	std::vector<std::vector<double>> xnbreaks(_J+1);
 
-	for (int i=0; i< _xb.size(); ++i){
-		if (log_breaks[i]) {
-			xbreaks.push_back(logseq(_xb[i], _xm[i], _J[i]));
-		}
-		else {
-			xbreaks.push_back(seq(_xb[i], _xm[i], _J[i]));
+	for (int k=0; k< _xb.size(); ++k){
+		std::vector<double> xbreaks(_J+1);
+		if (log_breaks[k]) {
+				xbreaks = logseq(_xb[k], _xm[k], _J + 1);
+			}
+			else {
+				xbreaks = seq(_xb[k], _xm[k], _J + 1);
+			}
+		for (int i = 0; i < xbreaks.size(); ++i){
+			xnbreaks[i].push_back(xbreaks[i]);
 		}
 	}
 
-	addSpecies(xbreaks, s, n_extra_vars, input_birth_flux);
+	addSpecies(xnbreaks, s, n_extra_vars, input_birth_flux);
 }
 
 
 void Solver::addSpecies(int _J, double _xb, double _xm, bool log_breaks, Species_Base* s,
 							   int n_extra_vars, double input_birth_flux){
-	std::vector<std::vector<double>> xbreaks;
-	if (log_breaks) xbreaks.push_back(logseq(_xb, _xm, _J+1));
-	else            xbreaks.push_back(seq(_xb, _xm, _J+1));
-
-	addSpecies(xbreaks, s, n_extra_vars, input_birth_flux);
+	addSpecies(_J, {_xb}, {_xm}, {log_breaks}, s, n_extra_vars, input_birth_flux);
 }
 
 
@@ -208,9 +203,7 @@ void Solver::resizeStateFromSpecies(){
 	int state_size_new = n_statevars_system;
 	for (auto& spp : species_vec){
 		int num_states = spp->J*(spp->statesize() + spp->n_extra_statevars);
-		bool cond = (method == SOLVER_FMU || method == SOLVER_IFMU || method == SOLVER_ABM);
-		num_states = (cond)? num_states : (num_states + spp->J);
-		state_size_new += num_states;
+		state_size_new += n_statevars_internal * spp->J;
 	}
 	
 	state.resize(state_size_new, -999);
@@ -281,7 +274,6 @@ void Solver::initializeSpecies(Species_Base * s){
 		
 		// set birth time for each cohort to current_time
 		// FIXME: current_time has never been initialized till this point. It is only init in resetState() 
-		// Won't work for multi-state - need to resolve tensor array - solved using a TensorCohort array - this may need to be fixed more later
 		for (int i=0; i<s->J; ++i) s->set_birthTime(i, current_time); // FIXME: doesnt make sense, because larger cohorts would have been born earlier, but birthTime is not used anyways
 
 		// set x, u for all cohorts
@@ -325,21 +317,17 @@ void Solver::initializeSpecies(Species_Base * s){
 		if (method == SOLVER_EBTN || method == SOLVER_IEBTN){
 			// x, u for internal cohorts 
 			// update the X values first then update U separately
-			for (size_t k=0; k<s->statesize(); ++k){
-				for(size_t i=0; i<(s->xsize(k)-1); ++i){
-					double X = (s->xn[k][i]+s->xn[k][i+1])/2.0;			
+
+			// TODO also this should be adapted with the multistate maybe...
+
+			for (size_t i=0; i<s->cohortsize()-1; ++i){
+				for(size_t k=0; k<(s->Xn[i].size()-1); ++k){
+					double X = (s->xn[i][k]+s->xn[i+1][k])/2.0;			
 					s->setXn(i,k,X); 
 				}
-			}
-
-			for (size_t i=0; i<(s->cohortsize()-1); ++i){
 				double U = s->init_density(i, s->getStateAt(i), env) * s->dXn(i);
 				s->setU(i,U);
 			}
-				
-				
-				// *it++ = X;	// x in state
-				// *it++ = U;	// u in state 
 			// set pi0, N0 as x, u for the last cohort. This scheme allows using this last cohort with xb+pi0 in integrals etc 
 			// *it++ = 0; *it++ = 0;
 			// Now set boundary cohort
@@ -501,7 +489,7 @@ void Solver::copyStateToCohorts(std::vector<double>::iterator state_begin){
 			// x, u for boundary and internal cohorts
 			for (size_t i=0; i<s->J; ++i){
 				std::vector<double> Xn;
-				for(size_t k=0; k<s->statesize(); ++k){
+				for(size_t k=0; k<s->Xn[i].size(); ++k){
 					Xn.push_back(*it++);
 				}
 				double U = *it++;
