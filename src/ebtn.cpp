@@ -76,12 +76,14 @@ void Solver::calcRates_EBTN(double t, vector<double>::iterator S, vector<double>
 		}
 
 		for (int i=0; i<spp->J-1; ++i){	// go down to the second last cohort (exclude boundary cohort)
-			double dx = spp->growthRate(i, spp->getX(i), t, env);							// dx/dt
+			std::vector<double> dx = spp->growthRate(i, spp->getXn(i), t, env);							// dx/dt
 			double du = -spp->mortalityRate(i, spp->getX(i), t, env) * spp->getU(i);		// du/dt
 			//std::cout << "S/C = " << s << "/" << i << " " << spp->getX(i) << " " << dx << " " << du << "\n";
-			*itr++ = dx;
+			for(int k = 0; k < dx.size(); ++k){
+				*itr++ = dx[k];
+			}
 			*itr++ = du;
-			its += 2; // what is this?
+			its += 1 + dx.size(); 
 		}
 
 		// dpi0/dt and dN0/dt
@@ -97,7 +99,7 @@ void Solver::calcRates_EBTN(double t, vector<double>::iterator S, vector<double>
             *itr++ = dpi0[k];
         }
 		*itr++ = dN0;
-		its += 2; // what is this one?
+		its += 1 + dpi0.size(); // what is this one?
 
 		if (spp->n_extra_statevars > 0){
 			auto itr_prev = itr;

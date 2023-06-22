@@ -94,11 +94,13 @@ class Species_Base{
 
 	// TODO: argument x can probably be removed from these functions
 	virtual double growthRate(int i, double x, double t, void * env) = 0;
+	virtual std::vector<double> growthRate(int i, std::vector<double> x, double t, void * env) = 0;
 	virtual double growthRateOffset(int i, double x, double t, void * env) = 0;
 	virtual std::vector<double> growthRateGradient(int i, double x, double t, void * env, double grad_dx) = 0;
 	virtual std::vector<double> growthRateGradient(int i, std::vector<double> x, double t, void * env, std::vector<double> grad_dxn) = 0;
 	virtual std::vector<double> growthRateGradientCentered(int i, double xplus, double xminus, double t, void * env) = 0;
 	virtual double mortalityRate(int i, double x, double t, void * env) = 0;
+	virtual std::vector<double> mortalityRate(int i, std::vector<double> x, double t, void * env) = 0;
 	virtual std::vector<double> mortalityRateGradient(int i, double x, double t, void * env, double grad_dx) = 0;
 	virtual std::vector<double> mortalityRateGradient(int i, std::vector<double> x, double t, void * env, std::vector<double> grad_dx) = 0;
 	virtual double birthRate(int i, double x, double t, void * env) = 0;
