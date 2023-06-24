@@ -26,16 +26,6 @@ void Species<Model>::resize(int _J){
 }
 
 template<class Model>
-void Species<Model>::resize(std::vector<int> xsize){
-	int _J = 1;
-	for(size_t i =0; i < xsize.size(); i++) _J = _J+(Xn[i].size()-1);
-	J = _J;
-	// Should we resize x here as well?
-	cohorts.resize(xsize, boundaryCohort);  // when resizing, always insert copies of boundary cohort
-}
-
-
-template<class Model>
 double Species<Model>::get_maxSize(){ // TODO ALERT: make sure this sees the latest state
 	if (!X.empty()) return *x.rbegin();	// for FMU, get this from X
 	else if (cohorts.empty()) return 0;
@@ -52,6 +42,8 @@ Species<Model>::Species(std::vector<double> breaks){
 	cohorts.resize(J, boundaryCohort);
 	for (int i=0; i<J; ++i) cohorts[i].x = breaks[i];	
 }
+
+
 
 
 template<class Model>
@@ -171,12 +163,6 @@ void Species<Model>::setX(int i, double _x){
 }
 
 template <class Model>
-void Species<Model>::setXn(int i, int k, double _x){
-	cohorts[i].xn[k] = _x;
-	// cohorts[i].set_size(_x);
-}
-
-template <class Model>
 void Species<Model>::setXn(int i, std::vector<double> _xn){
 	cohorts[i].xn = _xn;
 	// cohorts[i].set_size(_xn);
@@ -189,11 +175,7 @@ void Species<Model>::setU(int i, double _u){
 
 template <class Model>
 std::vector <double> Species<Model>::getStateAt(int i){
-	std::vector<int> location = cohorts.index(i);
-	std::vector<double> _xn; 
-	for(size_t k = 0; k < location.size(); ++k){
-		_xn.push_back(Xn[k][location[k]]);
-	}
+	std::vector<double> _xn = cohorts[i].xn;
 	return(_xn);
 }
 
@@ -247,6 +229,11 @@ double Species<Model>::init_density(int i, double _x, void * _env){
 	return cohorts[i].init_density(_x, _env, birth_flux_in);
 }
 
+template <class Model>
+double Species<Model>::init_density(int i, std::vector<double> _xn, void * env){
+	return cohorts[i].init_density(_xn, env, birth_flux_in);
+}
+
 // TODO: check increment here itself
 template <class Model>
 void Species<Model>::copyExtraStateToCohorts(std::vector<double>::iterator &it){
@@ -294,7 +281,7 @@ double Species<Model>::growthRate(int i, double x, double t, void * env){
 }
 
 template <class Model>
-double Species<Model>::growthRate(int i, std::vector<double> x, double t, void * env){
+std::vector<double> Species<Model>::growthRate(int i, std::vector<double> x, double t, void * env){
 	Cohort<Model> &c = (i<0)? boundaryCohort : cohorts[i];
 	return c.growthRate(c.xn,t,env);
 }
@@ -504,6 +491,30 @@ void Species<Model>::removeDensestCohort(){
 	--J;
 }
 
+template <class Model>
+void Species<Model>::removeDensestCohortN(){
+	if (cohorts.size() < 3) return; // do nothing if there are 2 or fewer cohorts
+	int i_min = 1;
+	std::vector<double> dx_min;
+	for(int k=0; k<cohorts[0].size(); ++k){
+		dx_min.push_back(cohorts[0].xn[k] - cohorts[2].xn[k]);
+	}
+
+	for (int i=1; i<J-1; ++i){ // skip first and last cohorts
+		std::vector<double> dx;
+		for(int k=0; k<cohorts[i-1].size(); ++k){
+			dx.push_back(cohorts[i-1].xn[k] - cohorts[i+1].xn[k]);
+		}
+		if (dx < dx_min){
+			dx_min = dx;
+			i_min = i;
+		}
+	}
+
+	//std::cout << "Removing cohort no. " << i_min << std::endl;
+	cohorts.erase(cohorts.begin()+i_min);
+	--J;
+}
 
 template <class Model>
 void Species<Model>::removeDenseCohorts(double dxcut){
@@ -523,6 +534,28 @@ void Species<Model>::removeDenseCohorts(double dxcut){
 	J = cohorts.size();
 }
 
+
+template <class Model>
+void Species<Model>::removeDenseCohorts(std::vector<double> dxcut){
+	// mark cohorts to remove; skip 1st and last cohort
+	for (int i=1; i<J-1; i+=2){
+		std::vector<double> dx_lo;
+		std::vector<double> dx_hi;
+		for(int k=0; k<cohorts[0].size(); ++k){
+			dx_lo.push_back(cohorts[i-1].xn[k] - cohorts[i].xn[k]);
+			dx_hi.push_back(cohorts[i].xn[k] - cohorts[i+1].xn[k]);
+		}
+
+		if (dx_lo < dxcut || dx_hi < dxcut) cohorts[i].remove = true;
+	}
+
+	// remove marked cohorts
+	auto it_end = std::remove_if(cohorts.begin(), cohorts.end(), [](Cohort<Model> &c){return c.remove;});
+	cohorts.erase(it_end, cohorts.end());
+
+	// reset size
+	J = cohorts.size();
+}
 
 template <class Model>
 void Species<Model>::removeDeadCohorts(double ucut){
@@ -550,6 +583,35 @@ void Species<Model>::mergeCohortsAddU(double dxcut){
 			cohorts[i-1].remove = true;
 			// FIXME: Need to also average extra state?
 			cohorts[i].x = (cohorts[i].x*cohorts[i].u + cohorts[i-1].x*cohorts[i-1].u)/(cohorts[i].u + cohorts[i-1].u);
+			cohorts[i].u = cohorts[i].u + cohorts[i-1].u;
+		}
+	}
+
+	// remove marked cohorts
+	auto it_end = std::remove_if(cohorts.begin(), cohorts.end(), [](Cohort<Model> &c){return c.remove;});
+	cohorts.erase(it_end, cohorts.end());
+
+	// reset size
+	J = cohorts.size();
+
+}
+
+template <class Model>
+void Species<Model>::mergeCohortsAddU(std::vector<double> dxcut){
+	// mark cohorts to remove; skip 1st and last cohort
+	for (int i=1; i<J-1; ++i){
+		std::vector<double> dx;
+		for(int k=0; k<cohorts[0].size(); ++k){
+			dx.push_back(cohorts[i-1].xn[k] - cohorts[i].xn[k]);
+		}
+
+		if (dx < dxcut){
+			cohorts[i-1].remove = true;
+			// FIXME: Need to also average extra state?
+			for(int k=0; k<cohorts[i].size(); ++k){
+				cohorts[i].xn[k] = (cohorts[i].xn[k]*cohorts[i].u + cohorts[i-1].xn[k]*cohorts[i-1].u)/(cohorts[i].u + cohorts[i-1].u);
+			}
+
 			cohorts[i].u = cohorts[i].u + cohorts[i-1].u;
 		}
 	}

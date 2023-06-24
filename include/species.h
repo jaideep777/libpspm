@@ -66,7 +66,6 @@ class Species_Base{
 	virtual void set_ub(double _ub) = 0;
 	virtual void set_birthTime(int i, double t0) = 0;
 	virtual void setX(int i, double _x) = 0;
-	virtual void setXn(int i, int k, double _x) = 0;
 	virtual void setXn(int i, std::vector<double> _x) = 0;
 	virtual void setU(int i, double _u) = 0;
 
@@ -100,10 +99,11 @@ class Species_Base{
 	virtual std::vector<double> growthRateGradient(int i, std::vector<double> x, double t, void * env, std::vector<double> grad_dxn) = 0;
 	virtual std::vector<double> growthRateGradientCentered(int i, double xplus, double xminus, double t, void * env) = 0;
 	virtual double mortalityRate(int i, double x, double t, void * env) = 0;
-	virtual std::vector<double> mortalityRate(int i, std::vector<double> x, double t, void * env) = 0;
+	virtual double mortalityRate(int i, std::vector<double> x, double t, void * env) = 0;
 	virtual std::vector<double> mortalityRateGradient(int i, double x, double t, void * env, double grad_dx) = 0;
 	virtual std::vector<double> mortalityRateGradient(int i, std::vector<double> x, double t, void * env, std::vector<double> grad_dx) = 0;
 	virtual double birthRate(int i, double x, double t, void * env) = 0;
+	virtual double birthRate(int i, std::vector<double> x, double t, void * env) = 0;
 	virtual void getExtraRates(std::vector<double>::iterator &it) = 0;
 
 	virtual void addCohort(int n = 1) = 0;
@@ -112,9 +112,12 @@ class Species_Base{
 	virtual void markCohortForRemoval(int i) = 0;
 	virtual void removeMarkedCohorts() = 0;
 	virtual void removeDensestCohort() = 0;
+	virtual void removeDensestCohortN() = 0;
 	virtual void removeDenseCohorts(double dxcut) = 0;
+	virtual void removeDenseCohorts(std::vector<double> dxcut) = 0;
 	virtual void removeDeadCohorts(double ucut) = 0;
 	virtual void mergeCohortsAddU(double dxcut) = 0;
+	virtual void mergeCohortsAddU(std::vector<double> dxcut) = 0;
 
 	virtual void sortCohortsDescending(int skip=0) = 0;
 	
@@ -144,7 +147,6 @@ class Species : public Species_Base{
 
 	
 	void resize(int _J);
-	void resize(std::vector<int> xsize);
 	double get_maxSize();
 	
 	void print();
@@ -154,7 +156,6 @@ class Species : public Species_Base{
 	void set_ub(double _ub);
 	void set_birthTime(int i, double t0);
 	void setX(int i, double _x);
-	void setXn(int i, int k, double _x);
 	void setXn(int i, std::vector<double> _x);
 	void setU(int i, double _u);
 	
@@ -166,6 +167,7 @@ class Species : public Species_Base{
 	double dXn (int i);
 	
 	double init_density(int i, double x, void * env);
+	double init_density(int i, std::vector<double> x, void * env);
 	void initExtraState(double t, void * env);
 	void initAndCopyExtraState(double t, void * env, std::vector<double>::iterator &it);
 	void initBoundaryCohort(double t, void * env);
@@ -179,7 +181,7 @@ class Species : public Species_Base{
 	
 	void triggerPreCompute();
 	double growthRate(int i, double x, double t, void * env);
-	double growthRate(int i, std::vector<double> x, double t, void * env);
+	std::vector<double> growthRate(int i, std::vector<double> x, double t, void * env);
 	double growthRateOffset(int i, double x, double t, void * env);
 	double growthRateOffset(int i, std::vector<double> x, double t, void * env);
 	std::vector<double> growthRateGradient(int i, double x, double t, void * env, double grad_dx);
@@ -199,9 +201,12 @@ class Species : public Species_Base{
 	void markCohortForRemoval(int i);
 	void removeMarkedCohorts();
 	void removeDensestCohort();
+	void removeDensestCohortN();
 	void removeDenseCohorts(double dxcut);
+	void removeDenseCohorts(std::vector<double> dxcut);
 	void removeDeadCohorts(double ucut);
 	void mergeCohortsAddU(double dxcut);
+	void mergeCohortsAddU(std::vector<double> dxcut);
 
 	void sortCohortsDescending(int skip=0);
 	

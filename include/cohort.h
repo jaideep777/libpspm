@@ -42,6 +42,7 @@ class Cohort : public Ind {
 	}
 
 	void set_size(double _x){
+		x = _x;
 		std::vector<double> _xn;
     	_xn.push_back(x);
 		set_size(_xn);
@@ -57,9 +58,10 @@ class Cohort : public Ind {
 	//  These are defined here so that precompute trigger can be 
 	//  checked before calling user-defined function 
 	void preCompute(double x, double t, void * _env){
-		std::vector<double> _xn;
-    	_xn.push_back(x);
-		preCompute(_xn, t, _env); 
+		++np;
+		//std::cout << "cohort precompute: "; print(); std::cout << "\n";
+		Ind::preCompute(x,t,_env);	
+		need_precompute = false;   // Once precompute is called, no need to further precompute until necessary
 	}
 
 	void preCompute(std::vector <double> xn, double t, void * _env){
@@ -78,7 +80,7 @@ class Cohort : public Ind {
 
 	double growthRate(std::vector<double> xn, double t, void * _env){
 		++ng;
-		if (need_precompute) preCompute(x,t,_env);
+		if (need_precompute) preCompute(xn,t,_env);
 		//std::cout << "cohort growthRate(): "; print(); std::cout << "\n";
 		return Ind::growthRate(xn,t,_env);	
 	}

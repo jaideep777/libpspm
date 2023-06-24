@@ -22,6 +22,7 @@ class IndividualBase{
 	virtual ~IndividualBase();
 	
 	virtual void   set_size(std::vector <double> _x);
+	virtual void   preCompute(double x, double t, void * _env);
 	virtual void   preCompute(std::vector <double> x, double t, void * _env);
 	virtual double establishmentProbability(double t, void  * _env);
 

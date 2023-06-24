@@ -203,7 +203,7 @@ void Solver::resizeStateFromSpecies(){
 	int state_size_new = n_statevars_system;
 	for (auto& spp : species_vec){
 		int num_states = spp->J*(spp->xnb.size() + spp->n_extra_statevars);
-		state_size_new += n_statevars_internal * spp->J;
+		state_size_new += num_states + n_statevars_internal * spp->J;
 	}
 	
 	state.resize(state_size_new, -999);
@@ -321,11 +321,13 @@ void Solver::initializeSpecies(Species_Base * s){
 			// TODO also this should be adapted with the multistate maybe...
 
 			for (size_t i=0; i<s->cohortsize()-1; ++i){
+				std::vector<double> X;
 				for(size_t k=0; k<(s->Xn[i].size()-1); ++k){
-					double X = (s->xn[i][k]+s->xn[i+1][k])/2.0;			
-					s->setXn(i,k,X); 
+					double xk = (s->xn[i][k]+s->xn[i+1][k])/2.0;			
+					X.push_back(xk);	 
 				}
 				double U = s->init_density(i, s->getStateAt(i), env) * s->dXn(i);
+				s->setXn(i,X);
 				s->setU(i,U);
 			}
 			// set pi0, N0 as x, u for the last cohort. This scheme allows using this last cohort with xb+pi0 in integrals etc 

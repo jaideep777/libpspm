@@ -120,12 +120,12 @@ void Solver::addCohort_EBTN(){
 	for (auto spp : species_vec){
 		// 1. internalize the pi0-cohort (this cohort's birth time would have been already set when it was inserted)
 		// - get pi0, N0 from last cohort
-		double   pi0  =  spp->getX(spp->J-1);
+		std::vector<double>   pin0  =  spp->getXn(spp->J-1);
 		double   N0   =  spp->getU(spp->J-1);
 
 		// - update the recently internalized pi0-cohort with actual x0 value
-		double x0 = spp->xb + pi0/(N0+1e-12);
-		spp->setX(spp->J-1, x0);
+		std::vector<double> xn0 = vector_addition(spp->xnb, vector_product(pin0, (1/(N0+1e-12))));
+		spp->setXn(spp->J-1, xn0);
 		spp->setU(spp->J-1, N0);
 
 		// 2. insert a new cohort (copy of boundary cohort, to be the new pi0-cohort)
@@ -133,7 +133,8 @@ void Solver::addCohort_EBTN(){
 		spp->addCohort(); // introduce copy of boundary cohort into species
 
 		// 3. set x,u of the new cohort to 0,0, thus marking it as the new pi0-cohort
-		spp->setX(spp->J-1, 0); 
+		std::vector<double> xn_new(pin0.size(), 0);
+		spp->setXn(spp->J-1, xn_new); 
 		spp->setU(spp->J-1, 0);
 	}
 
