@@ -73,6 +73,9 @@ class TestModel : public Plant{
 	void preCompute(double x, double t, void * _env){
 	}
 
+	void preCompute(std::vector<double> x, double t, void * _env){
+	}
+
 	double growthRate(double x, double t, void * _env){
 		Environment* env = (Environment*)_env;
 		double E = env->evalEnv(x,t);

@@ -68,6 +68,7 @@ void Solver::addSpecies(std::vector<std::vector<double>> xbreaks, Species_Base* 
 	s->set_inputBirthFlux(input_birth_flux);
 	s->n_extra_statevars = n_extra_vars;
 
+	// FIX THIS 
 	if (method == SOLVER_FMU || method == SOLVER_IFMU || method == SOLVER_ABM){
 		for(size_t i = 0; i < xbreaks.size() ; i++){
 			std::sort(xbreaks[i].begin(), xbreaks[i].end(), std::less<double>());  // sort cohorts ascending for FMU
