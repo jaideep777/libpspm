@@ -325,7 +325,7 @@ std::vector<double> Species<Model>::growthRateGradient(int i, std::vector<double
 	Cohort<Model> &c = (i<0)? boundaryCohort : cohorts[i];
 
 
-	double g = c.growthRate(c.xn,t,env);
+	std::vector<double> g = c.growthRate(c.xn,t,env);
 	std::vector<double> gplus;
 
 	for(int k= 0; k < x.size(); ++k){
@@ -333,12 +333,12 @@ std::vector<double> Species<Model>::growthRateGradient(int i, std::vector<double
 		std::vector<double> _x = x;
 		_x[k] += grad_dx[k];
 		cplus.set_size(_x);
-		double gplus_k = cplus.growthRate(cplus.xn, t, env);
-		gplus.push_back((gplus_k-g)/grad_dx[k]);
+		std::vector<double> gplus_k = cplus.growthRate(cplus.xn, t, env);
+		gplus.push_back((gplus_k[k]-g[k])/grad_dx[k]);
 	}
 	
 	std::vector<double> out;
-	out.push_back(g);
+	// out.insert(g.begin(), g.end());
 	out.insert(out.end(), gplus.begin(), gplus.end());
 	return out;
 }

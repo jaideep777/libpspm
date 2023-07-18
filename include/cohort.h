@@ -78,7 +78,7 @@ class Cohort : public Ind {
 		return Ind::growthRate(x,t,_env);	
 	}
 
-	double growthRate(std::vector<double> xn, double t, void * _env){
+	std::vector<double> growthRate(std::vector<double> xn, double t, void * _env){
 		++ng;
 		if (need_precompute) preCompute(xn,t,_env);
 		//std::cout << "cohort growthRate(): "; print(); std::cout << "\n";

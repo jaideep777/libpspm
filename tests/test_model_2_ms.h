@@ -70,6 +70,11 @@ class TestModel : public Plant{
 		return pow(1-x,2)/pow(1+x,4) + (1-x)/pow(1+x,3);
 	}
 
+	double init_density(std::vector<double> xn, void * _env, double bf){
+		double x = xn[0];
+		return pow(1-x,2)/pow(1+x,4) + (1-x)/pow(1+x,3);
+	}
+
 	void preCompute(double x, double t, void * _env){
 	}
 
@@ -83,8 +88,24 @@ class TestModel : public Plant{
 		return 0.225*(1-x*x)*(E/(1+E*E))*t*(1+a*a)/a;
 	}
 
+	double growthRate(std::vector<double> xn, double t, void * _env){
+		Environment* env = (Environment*)_env;
+		double x = xn[0];
+		double E = env->evalEnv(x,t);
+		double a = 0.16+0.22*exp(-0.225*t*t);
+		return 0.225*(1-x*x)*(E/(1+E*E))*t*(1+a*a)/a;
+	}
+
 	double mortalityRate(double x, double t, void * _env){
 		Environment* env = (Environment*)_env;
+		double E = env->evalEnv(x,t);
+		double a = 0.16+0.22*exp(-0.225*t*t);
+		return 1.35*t*E/a;
+	}
+
+	double mortalityRate(std::vector<double> xn, double t, void * _env){
+		Environment* env = (Environment*)_env;
+		double x = xn[0];
 		double E = env->evalEnv(x,t);
 		double a = 0.16+0.22*exp(-0.225*t*t);
 		return 1.35*t*E/a;
@@ -100,12 +121,32 @@ class TestModel : public Plant{
 		return n1*n2;
 	}
 
+	double birthRate(std::vector<double> xn, double t, void * _env){
+		Environment* env = (Environment*)_env;
+		double x = xn[0];
+		double E = env->evalEnv(x,t);
+		double oneplusa = 1.16+0.22*exp(-0.225*t*t);
+		double a = 0.16+0.22*exp(-0.225*t*t);
+		double n1 = 0.225*t*x*x*(1-x)*(1-x)*E/(1+E)/(1+E)*oneplusa*oneplusa/a;
+		double n2 = (1+exp(-0.225*t*t))/(61-88*log(2)+(38*log(2)-79.0/3)*exp(-0.225*t*t));
+		return n1*n2;
+	}
+
 	double establishmentProbability(double t, void  * _env){
 		return 1;
 	}
 
 
 	void set_size(double _x){
+		height = _x;
+		mortality = 0.1*height + 1e-12; //exp(-height);	
+		viable_seeds = 100*height + 1e-13;
+		heart_mass = 1000*height + 1e-14;
+		sap_mass = 10*height + 1e-15;
+	}
+
+	void set_size(std::vector<double> _xn){
+		double _x = _xn[0];
 		height = _x;
 		mortality = 0.1*height + 1e-12; //exp(-height);	
 		viable_seeds = 100*height + 1e-13;
