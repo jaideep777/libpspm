@@ -1,4 +1,5 @@
 #include "solver.h"
+#include "index_utils.h"
 
 #include <iostream>
 #include <cmath>
@@ -68,20 +69,21 @@ void Solver::addSpecies(std::vector<std::vector<double>> xbreaks, Species_Base* 
 	s->set_inputBirthFlux(input_birth_flux);
 	s->n_extra_statevars = n_extra_vars;
 
-	// FIX THIS 
+	std::cout << "Do ordering" << std::endl;
 	if (method == SOLVER_FMU || method == SOLVER_IFMU || method == SOLVER_ABM){
-		for(size_t i = 0; i < xbreaks.size() ; i++){
-			std::sort(xbreaks[i].begin(), xbreaks[i].end(), std::less<double>());  // sort cohorts ascending for FMU
-			s->xnb[i] = *xbreaks[i].begin();
-		}
+		s->xnb = *xbreaks.begin();
+		s->xb = (*xbreaks.begin())[0]; // for 1D case
+		// sort cohorts ascending for FMU : i.e. do nothing
 	}
-	// TODO: fix sorting for multistate 
+
 	else {
-		for(size_t i = 0; i < xbreaks.size() ; i++){
-			std::sort(xbreaks[i].begin(), xbreaks[i].end(), std::greater<double>());  // sort cohorts ascending for FMU
-			s->xnb[i] = *xbreaks[i].begin();
-		}
+		s->xnb = *xbreaks.begin();
+		s->xb = (*xbreaks.begin())[0]; // for 1D case
+		// sort cohorts descending for CM, EBT
+		reverse(xbreaks.begin(), xbreaks.end());
 	}
+
+	std::cout << "Find J" << std::endl;
 
 	// Current assumption: J is the same for all the states
 	int J = 1;
@@ -97,11 +99,15 @@ void Solver::addSpecies(std::vector<std::vector<double>> xbreaks, Species_Base* 
 	else if (method == SOLVER_ABM)  J = xbreaks[0].size();    // For ABM solver, this is a temporary size thats used to generate the initial density distribution. s will be resized during init to abm_n0.
 	else    throw std::runtime_error("Unsupported method");
 
+	std::cout << "Initialise s xn and resize with J" << std::endl;
 	s->xn = xbreaks;
 	s->resize(J);
+
+	std::cout << "Add species vector" << std::endl;
 	
 	species_vec.push_back(s);
 
+	std::cout << "Do FMU stuff" << std::endl;
 	//Not touching this yet because it's not EBT
 	if (method == SOLVER_FMU){	
 		s->X.resize(s->J);
@@ -128,7 +134,16 @@ void Solver::addSpecies(std::vector<std::vector<double>> xbreaks, Species_Base* 
 		}
 	}
 
+	std::cout << "Initialise species" << std::endl;
 	initializeSpecies(s);
+
+	// Test Print out X, x and h from the new species
+
+	std::cout << "Test: Solver::addSpecies: Print Xn/xn/h" << std::endl;
+	std::cout << s->Xn << std::endl;
+	std::cout << s->xn << std::endl;
+	std::cout << s->h << std::endl;
+
 }
 
 
@@ -137,10 +152,24 @@ void Solver::addSpecies(int _J, std::vector<double> _xb, std::vector<double> _xm
 
 	// TODO: make sure that _xb and _xm are the same size
 	if (_xb.size() != _xm.size()){
-		throw std::runtime_error("Error: size of lower boundary and upper boundary for states doesn't match"); // Fix this to be more informative
+		throw std::runtime_error("Error: \nSolver::addSpecies: size of lower boundary and upper boundary for states doesn't match"); // Fix this to be more informative
 	}
+	if (_xb.size() != log_breaks.size()){
+		throw std::runtime_error("Error: \nSolver::addSpecies: size of lower boundary and break information log_breaks for states doesn't match"); // Fix this to be more informative
+	}
+	if (_xb.size()>1 && this->method != SOLVER_EBTN){
+		throw std::runtime_error("Error: \nSolver::addSpecies: nD solver for method not supported"); // Fix this to be more informative
+	}
+	// Initialise as a grid and assume each dimension starts off with _J numbers
 
-	std::vector<std::vector<double>> xnbreaks(_J+1);
+	std::cout << "Initialise as a grid and assume each dimension starts off with _J numbers" << std::endl;
+	std::vector<std::vector<double>> xnbreaks(pow(_J,_xb.size())+1);
+
+	//  Initialise as a grid
+	std::cout << "Initialise as a grid" << std::endl;
+	std::vector<std::vector<double>> breaks;
+	std::cout << "Initialise dimensions" << std::endl;
+	std::vector<int> dims;
 
 	for (int k=0; k< _xb.size(); ++k){
 		std::vector<double> xbreaks(_J+1);
@@ -150,15 +179,26 @@ void Solver::addSpecies(int _J, std::vector<double> _xb, std::vector<double> _xm
 			else {
 				xbreaks = seq(_xb[k], _xm[k], _J + 1);
 			}
-		for (int i = 0; i < xbreaks.size(); ++i){
-			xnbreaks[i].push_back(xbreaks[i]);
-		}
+		breaks.push_back(xbreaks);
+		dims.push_back(_J);
 	}
 
+	std::cout << "Populate Grid" << std::endl;
+	xnbreaks[0] = _xb;
+	for (int i=1; i < xnbreaks.size(); i++){
+		std::vector<int> ind = index(i-1, dims);
+		std::vector<double> xn;
+		for(int k = 0; k < ind.size(); k++){
+			xn.push_back(breaks[k][ind[k]+1]);
+		}
+		xnbreaks[i] = xn;
+	}
+
+	std::cout << "Grid populated" << std::endl;
 	addSpecies(xnbreaks, s, n_extra_vars, input_birth_flux);
 }
 
-
+// Need to test this if it works
 void Solver::addSpecies(int _J, double _xb, double _xm, bool log_breaks, Species_Base* s,
 							   int n_extra_vars, double input_birth_flux){
 	addSpecies(_J, {_xb}, {_xm}, {log_breaks}, s, n_extra_vars, input_birth_flux);
@@ -269,14 +309,20 @@ void Solver::initializeSpecies(Species_Base * s){
 
 		// set x and u of boundary cohort
 		// Boundary cohort is not in state, but used as a reference.	
+
+		std::cout << "Set up boundary" << std::endl;
 		s->set_xb(s->xb); // set x of boundary cohort 
+		std::cout << "Set up boundary xn" << std::endl;
 		s->set_xnb(s->xnb);
+		std::cout << "Set up u at boundary" << std::endl;
 		s->set_ub(0);     // set initial density of boundary cohort to 0.
 		
+		std::cout << "set bithtime" << std::endl;
 		// set birth time for each cohort to current_time
 		// FIXME: current_time has never been initialized till this point. It is only init in resetState() 
 		for (int i=0; i<s->J; ++i) s->set_birthTime(i, current_time); // FIXME: doesnt make sense, because larger cohorts would have been born earlier, but birthTime is not used anyways
 
+		std::cout << "set x and u for all cohorts" << std::endl;
 		// set x, u for all cohorts
 		if (method == SOLVER_FMU || method == SOLVER_IFMU){
 			for (size_t i=0; i<s->J; ++i){
@@ -321,13 +367,20 @@ void Solver::initializeSpecies(Species_Base * s){
 
 			// TODO also this should be adapted with the multistate maybe...
 
+			std::cout << "in solver method" << std::endl;
+
 			for (size_t i=0; i<s->cohortsize()-1; ++i){
+				std::cout << "looking at i = " << i << std::endl;
 				std::vector<double> X;
-				for(size_t k=0; k<(s->Xn[i].size()-1); ++k){
-					double xk = (s->xn[i][k]+s->xn[i+1][k])/2.0;			
+				std::cout << "xn is " << s->xn[i] << std::endl;
+				for(size_t k=0; k<(s->xn[i].size()-1); ++k){
+					std::cout << "state k is" << k << std::endl;
+					double xk = (s->xn[i][k]+s->next_xn_desc(s->xn[i][k], k))/2.0;			
+					std::cout << "xk is" << xk << "for k " << k << std::endl;
 					X.push_back(xk);	 
 				}
-				double U = s->init_density(i, s->getStateAt(i), env) * s->dXn(i);
+				std::cout << "Finished the state loop" << std::endl;
+				double U = s->init_density(i, X, env) * s->dXn(i);
 				s->setXn(i,X);
 				s->setU(i,U);
 			}

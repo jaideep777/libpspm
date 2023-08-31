@@ -77,6 +77,7 @@ class Solver{
 	Solver(std::string _method, std::string ode_method = "rk45ck");
 
 	void addSystemVariables(int _s);
+	// This will be eventually removed (?)
 	void addSpecies(int _J, double _xb, double _xm, bool log_breaks, Species_Base* _mod, int n_extra_vars, double input_birth_flux = -1);
 	void addSpecies(int _J, std::vector<double> _xb, std::vector<double> _xm, std::vector<bool> log_breaks, Species_Base* _mod, int n_extra_vars, double input_birth_flux = -1);
 	void addSpecies(std::vector<std::vector<double>> xbreaks, Species_Base* _mod, int n_extra_vars, double input_birth_flux = -1);

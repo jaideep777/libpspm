@@ -41,6 +41,7 @@ class Cohort : public Ind {
 		Ind::print(out);
 	}
 
+	// This function is temporary until fully transitioned all solvers to multi-state format
 	void set_size(double _x){
 		x = _x;
 		std::vector<double> _xn;
@@ -124,7 +125,7 @@ class Cohort : public Ind {
 				, birth_time
 				, remove
 				, need_precompute); // we actually need not save need_precompute, because set_size() will always set it to 1 during restore
-		fout << x << ' ' << u << ' ';
+		fout << x << ' ' << u << ' '; // TODO Edit to to make it multistate 
 
 		std::vector<double> ex_state(n_extra_vars);
 		auto it = ex_state.begin();
@@ -141,7 +142,7 @@ class Cohort : public Ind {
 		    >> remove
 		    >> need_precompute;
 
-		fin >> x >> u;
+		fin >> x >> u; // TODO Edit to to make it multistate 
 		set_size(x);
 
 		std::vector<double> ex_state(n_extra_vars);

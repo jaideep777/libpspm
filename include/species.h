@@ -75,6 +75,7 @@ class Species_Base{
 
 	virtual std::vector <double> getStateAt(int i) = 0;
 	virtual double dXn (int i) = 0;
+	virtual double next_xn_desc(double xkn, int k) = 0;
 
 	virtual double init_density(int i, double x, void * env) = 0;
 	virtual double init_density(int i, std::vector<double> x, void * env) = 0;
@@ -165,6 +166,7 @@ class Species : public Species_Base{
 
 	std::vector <double> getStateAt(int i);
 	double dXn (int i);
+	double next_xn_desc(double xkn, int k);
 	
 	double init_density(int i, double x, void * env);
 	double init_density(int i, std::vector<double> x, void * env);
@@ -212,6 +214,8 @@ class Species : public Species_Base{
 	
 	void save(std::ofstream &fout);
 	void restore(std::ifstream &fin);
+
+	void printCohortVector();
 
 //	void backupCohort(int j);
 //	void restoreCohort(int j);

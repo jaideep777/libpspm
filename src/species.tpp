@@ -182,13 +182,23 @@ std::vector <double> Species<Model>::getStateAt(int i){
 template <class Model>
 double Species<Model>::dXn (int i){
 	double dxn = 1;
-	for (size_t k = 0; k < Xn[i].size(); ++k){
-		double dx_k = (Xn[i][k] + Xn[i+1][k]);
+	for (size_t k = 0; k < xn[i].size(); ++k){
+		double dx_k = (xn[i][k] - next_xn_desc(xn[i][k], k));
 		dxn = dxn * dx_k;
 	}
 	return dxn;
 }
 
+template <class Model>
+double Species<Model>::next_xn_desc(double xnk, int k){
+	double next_smallest = xnb[k];
+	for(size_t i = 0; i < xn.size(); i++){
+		if(xn[i][k] < xnk && xn[i][k] > next_smallest){
+			next_smallest = xn[i][k];
+		}
+	}
+	return next_smallest;
+}
 
 
 template <class Model>
@@ -496,13 +506,13 @@ void Species<Model>::removeDensestCohortN(){
 	if (cohorts.size() < 3) return; // do nothing if there are 2 or fewer cohorts
 	int i_min = 1;
 	std::vector<double> dx_min;
-	for(int k=0; k<cohorts[0].size(); ++k){
+	for(int k=0; k<xnb.size(); ++k){
 		dx_min.push_back(cohorts[0].xn[k] - cohorts[2].xn[k]);
 	}
 
 	for (int i=1; i<J-1; ++i){ // skip first and last cohorts
 		std::vector<double> dx;
-		for(int k=0; k<cohorts[i-1].size(); ++k){
+		for(int k=0; k<xnb.size(); ++k){
 			dx.push_back(cohorts[i-1].xn[k] - cohorts[i+1].xn[k]);
 		}
 		if (dx < dx_min){
@@ -541,7 +551,7 @@ void Species<Model>::removeDenseCohorts(std::vector<double> dxcut){
 	for (int i=1; i<J-1; i+=2){
 		std::vector<double> dx_lo;
 		std::vector<double> dx_hi;
-		for(int k=0; k<cohorts[0].size(); ++k){
+		for(int k=0; k<xnb.size(); ++k){
 			dx_lo.push_back(cohorts[i-1].xn[k] - cohorts[i].xn[k]);
 			dx_hi.push_back(cohorts[i].xn[k] - cohorts[i+1].xn[k]);
 		}
@@ -601,14 +611,14 @@ void Species<Model>::mergeCohortsAddU(std::vector<double> dxcut){
 	// mark cohorts to remove; skip 1st and last cohort
 	for (int i=1; i<J-1; ++i){
 		std::vector<double> dx;
-		for(int k=0; k<cohorts[0].size(); ++k){
+		for(int k=0; k<xnb.size(); ++k){
 			dx.push_back(cohorts[i-1].xn[k] - cohorts[i].xn[k]);
 		}
 
 		if (dx < dxcut){
 			cohorts[i-1].remove = true;
 			// FIXME: Need to also average extra state?
-			for(int k=0; k<cohorts[i].size(); ++k){
+			for(int k=0; k<xnb.size(); ++k){
 				cohorts[i].xn[k] = (cohorts[i].xn[k]*cohorts[i].u + cohorts[i-1].xn[k]*cohorts[i-1].u)/(cohorts[i].u + cohorts[i-1].u);
 			}
 
@@ -671,7 +681,23 @@ void Species<Model>::restore(std::ifstream &fin){
 	for (auto& C : cohorts) C.restore(fin, n_extra_statevars);
 }
 
-
+template <class Model>
+void Species<Model>::printCohortVector(){
+    std::cout << "Tensor:\n";
+    std::cout << "   dims = "; for (auto d : dim) std::cout << d << " "; std::cout << "\n";
+	if (vals){
+			std::cout << "   vals = \n      "; std::cout.flush();
+			for (int i=0; i<nelem; ++i){
+				std::cout << vec[i] << " "; 
+				bool flag = true;
+				for (int axis=dim.size()-1; axis>0; --axis){
+					flag = flag && (index(i)[axis] == dim[axis]-1);
+					if (flag) std::cout << "\n      ";
+				}
+			}
+		}
+		std::cout << "\n";
+	}
 
 //template <class Model>
 //void Species<Model>::backupCohort(int j){
