@@ -58,6 +58,7 @@ class Species_Base{
 	public:
 	virtual void resize(int _J) = 0;
 	virtual double get_maxSize() = 0;
+	virtual std::vector<double> get_maxSizeN() = 0;
 	virtual void print() = 0;
 	virtual void print_extra(); // not pure virtual, by defualt, there is nothing extra to print.
 
@@ -75,7 +76,12 @@ class Species_Base{
 
 	virtual std::vector <double> getStateAt(int i) = 0;
 	virtual double dXn (int i) = 0;
-	virtual double next_xn_desc(double xkn, int k) = 0;
+	virtual double dXn(std::vector<double> xn1, std::vector<double> xn2) = 0;
+	virtual std::vector<double> cohort_dist(std::vector<double> xn1, std::vector<double> xn2) = 0;
+	virtual double next_xk_desc(double xkn, int k) = 0;
+	virtual double next_xk_asc(double xkn, int k) = 0;
+	virtual std::vector<double> next_xn_desc(std::vector<double> xn) = 0;
+	virtual std::vector<double> next_xn_asc(std::vector<double> xn) = 0;
 
 	virtual double init_density(int i, double x, void * env) = 0;
 	virtual double init_density(int i, std::vector<double> x, void * env) = 0;
@@ -149,6 +155,7 @@ class Species : public Species_Base{
 	
 	void resize(int _J);
 	double get_maxSize();
+	std::vector<double> get_maxSizeN();
 	
 	void print();
 	
@@ -166,7 +173,12 @@ class Species : public Species_Base{
 
 	std::vector <double> getStateAt(int i);
 	double dXn (int i);
-	double next_xn_desc(double xkn, int k);
+	double dXn(std::vector<double> xn1, std::vector<double> xn2);
+	std::vector<double> cohort_dist(std::vector<double> xn1, std::vector<double> xn2);
+	double next_xk_desc(double xkn, int k);
+	double next_xk_asc(double xkn, int k);
+	std::vector<double> next_xn_desc(std::vector<double> xn);
+	std::vector<double> next_xn_asc(std::vector<double> xn);
 	
 	double init_density(int i, double x, void * env);
 	double init_density(int i, std::vector<double> x, void * env);

@@ -27,13 +27,35 @@ void Species<Model>::resize(int _J){
 
 template<class Model>
 double Species<Model>::get_maxSize(){ // TODO ALERT: make sure this sees the latest state
-	if (!X.empty()) return *x.rbegin();	// for FMU, get this from X
+	if (!X.empty()) return *x.rbegin();	// for FMU, get this from X - TODO: will handle FMU later but right no leaving as is. still cohorts.empty() should probably be first argument
 	else if (cohorts.empty()) return 0;
 	else {								// else get from state vector
 		return cohorts[0].x;			// cohorts are sorted descending
 	}
 }
 
+
+template<class Model>
+std::vector<double> Species<Model>::get_maxSizeN(){ // TODO ALERT: make sure this sees the latest state
+	if (!X.empty()) return *x.rbegin();	// for FMU, get this from X - TODO: will handle FMU later but right no leaving as is. still cohorts.empty() should probably be first argument
+	else if (cohorts.empty()) return 0;
+	else {								// else get from state vector
+		std::vector<double> largest = cohorts[0].xn;
+		for (size_t i = 1; i <= J; ++i){ //should I check the boundary cohort too? probably not needed can be i < J
+			bool larger = true;
+			for(size_t k = 0; k < largest.size(); ++k){
+					if(cohorts[0].xn[k] < largest[k]){
+						larget = false;
+						break;
+					}
+			}
+			if(larger){
+				largest = cohorts[i].xn;
+			}
+		}
+		return largest;			// cohorts are sorted descending
+	}
+}
 
 // FIXME: this constructor should  be corrected or removed.
 template<class Model>
@@ -165,7 +187,7 @@ void Species<Model>::setX(int i, double _x){
 template <class Model>
 void Species<Model>::setXn(int i, std::vector<double> _xn){
 	cohorts[i].xn = _xn;
-	// cohorts[i].set_size(_xn);
+	cohorts[i].set_size(_xn);
 }
 
 template <class Model>
@@ -189,8 +211,28 @@ double Species<Model>::dXn (int i){
 	return dxn;
 }
 
+template <class Model> 
+double Species<Model>::dXn(std::vector<double> xn1, std::vector<double> xn2){
+	double _dxn = 1;
+	for (size_t k = 0; k < xn1.size(); ++k){
+		double dx_k = (xn2[k] - xn1[k]);
+		dxn = dxn * dx_k;
+	}
+	return _dxn;
+}
+
+template <class Model> 
+std::vector<double> Species<Model>::cohort_dist(std::vector<double> xn1, std::vector<double> xn2){
+	std::vector<double> _dxn;
+	for (size_t k = 0; k < xn1.size(); ++k){
+		double dx_k = (xn2[k] - xn1[k]);
+		dxn = dxn.push_back(dx_k);
+	}
+	return _dxn;
+}
+
 template <class Model>
-double Species<Model>::next_xn_desc(double xnk, int k){
+double Species<Model>::next_xk_desc(double xnk, int k){
 	double next_smallest = xnb[k];
 	for(size_t i = 0; i < xn.size(); i++){
 		if(xn[i][k] < xnk && xn[i][k] > next_smallest){
@@ -200,6 +242,52 @@ double Species<Model>::next_xn_desc(double xnk, int k){
 	return next_smallest;
 }
 
+template <class Model>
+double Species<Model>::next_xk_asc(double xnk, int k){
+	double next_biggest = get_maxSize();
+	for(size_t i = 0; i < xn.size(); i++){
+		if(xn[i][k] > xnk && xn[i][k] < next_biggest){
+			next_biggest = xn[i][k];
+		}
+	}
+	return next_biggest;
+}
+
+template <class Model>
+std::vector<double> Species<Model>::next_xn_desc(std::vector<double> xn){
+	std::vector<double> next_smallest = xnb;
+	for (size_t i = 1; i <= J; ++i){ //should I check the boundary cohort too? probably not needed can be i < J
+		bool smaller = true;
+		for(size_t k = 0; k < largest.size(); ++k){
+				if(xn[i][k] < xnk && xn[i][k] > next_smallest[k]){
+					smaller = false; 
+					break;
+				}
+		}
+		if(smaller){
+			next_smallest = cohorts[i].xn;
+		}
+	}
+	return next_smallest;
+}
+
+template <class Model>
+std::vector<double> Species<Model>::next_xn_asc(std::vector<double> xn){
+	std::vector<double> next_biggest = get_maxSizeN();
+	for (size_t i = 1; i <= J; ++i){ //should I check the boundary cohort too? probably not needed can be i < J
+		bool bigger = true;
+		for(size_t k = 0; k < largest.size(); ++k){
+			if(xn[i][k] > xnk && xn[i][k] < next_biggest[k]){
+				bigger = false; 
+				break;
+			}
+		}
+		if(bigger){
+			next_biggest = cohorts[i].xn;
+		}
+	}
+	return next_biggest;
+}
 
 template <class Model>
 void Species<Model>::initExtraState(double t, void * env){
@@ -504,17 +592,19 @@ void Species<Model>::removeDensestCohort(){
 template <class Model>
 void Species<Model>::removeDensestCohortN(){
 	if (cohorts.size() < 3) return; // do nothing if there are 2 or fewer cohorts
-	int i_min = 1;
-	std::vector<double> dx_min;
-	for(int k=0; k<xnb.size(); ++k){
-		dx_min.push_back(cohorts[0].xn[k] - cohorts[2].xn[k]);
+	int i_min = 0;
+	double dx_min = dXn(next_xn_asc(cohorts[i_min].xn), next_xn_desc(cohorts[i_min].xn));
+	std::vector<double> maxCohort = get_maxSizeN();
+	if(cohorts[i_min].xn == maxCohort){ //this should be executed at most twice
+		i_min = ++i_min;
+		double dx_min = dXn(next_xn_asc(cohorts[i_min].xn), next_xn_desc(cohorts[i_min].xn));
 	}
 
-	for (int i=1; i<J-1; ++i){ // skip first and last cohorts
-		std::vector<double> dx;
-		for(int k=0; k<xnb.size(); ++k){
-			dx.push_back(cohorts[i-1].xn[k] - cohorts[i+1].xn[k]);
+	for (int i=(i_min + 1); i<J-1; ++i){ // skip first and last cohorts
+		if(maxCohort == cohorts[i].xn){
+			continue;
 		}
+		double dx = dXn(next_xn_asc(cohorts[i].xn), next_xn_desc(cohorts[i].xn));
 		if (dx < dx_min){
 			dx_min = dx;
 			i_min = i;
@@ -548,13 +638,15 @@ void Species<Model>::removeDenseCohorts(double dxcut){
 template <class Model>
 void Species<Model>::removeDenseCohorts(std::vector<double> dxcut){
 	// mark cohorts to remove; skip 1st and last cohort
-	for (int i=1; i<J-1; i+=2){
-		std::vector<double> dx_lo;
-		std::vector<double> dx_hi;
-		for(int k=0; k<xnb.size(); ++k){
-			dx_lo.push_back(cohorts[i-1].xn[k] - cohorts[i].xn[k]);
-			dx_hi.push_back(cohorts[i].xn[k] - cohorts[i+1].xn[k]);
+	if (cohorts.size() < 3) return; // do nothing if there are 2 or fewer cohorts
+	std::vector<double> maxCohort = get_maxSizeN();
+	
+	for (int i=0; i<J-1; i+=2){
+		if(maxCohort == cohorts[i].xn){
+			continue;
 		}
+		std::vector<double> dx_lo = cohort_dist(next_xn_asc(cohorts[i_min].xn), cohorts[i].xn);
+		std::vector<double> dx_hi = cohort_dist(cohorts[i].xn, next_xn_desc(cohorts[i_min].xn));
 
 		if (dx_lo < dxcut || dx_hi < dxcut) cohorts[i].remove = true;
 	}
@@ -609,12 +701,12 @@ void Species<Model>::mergeCohortsAddU(double dxcut){
 template <class Model>
 void Species<Model>::mergeCohortsAddU(std::vector<double> dxcut){
 	// mark cohorts to remove; skip 1st and last cohort
-	for (int i=1; i<J-1; ++i){
-		std::vector<double> dx;
-		for(int k=0; k<xnb.size(); ++k){
-			dx.push_back(cohorts[i-1].xn[k] - cohorts[i].xn[k]);
+	std::vector<double> maxCohort = get_maxSizeN();
+	for (int i=0; i<J-1; i+=2){
+		if(maxCohort == cohorts[i].xn){
+			continue;
 		}
-
+		std::vector<double> dx = cohort_dist(cohorts[i].xn, next_xn_asc(cohorts[i].xn));
 		if (dx < dxcut){
 			cohorts[i-1].remove = true;
 			// FIXME: Need to also average extra state?
@@ -681,6 +773,8 @@ void Species<Model>::restore(std::ifstream &fin){
 	for (auto& C : cohorts) C.restore(fin, n_extra_statevars);
 }
 
+
+//TODO: maybe fix this later
 template <class Model>
 void Species<Model>::printCohortVector(){
     std::cout << "Tensor:\n";

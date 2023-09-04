@@ -594,6 +594,7 @@ void Solver::copyCohortsToState(){
 			}
 		}
 
+		// TODO: double check that this works
 		if (method == SOLVER_EBTN || method == SOLVER_IEBTN){
 			// x, u for boundary and internal cohorts
 			for (size_t i=0; i<s->J; ++i){
@@ -728,6 +729,7 @@ struct point{
 	int    count = 0;
 };	
 
+// TODO: make sure this works for EBTN method
 std::vector<double> Solver::getDensitySpecies(int k, vector<double> breaks, Spline::Extr extrapolation_method){
 	auto spp = species_vec[k];
 	vector <double> xx, uu;

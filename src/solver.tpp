@@ -35,7 +35,7 @@ void Solver::step_to(double tstop, AfterStepFunc &afterStep_user){
 			if      (method == SOLVER_IEBT) stepU_iEBT(current_time, state, rates, dt);
 			else if (method == SOLVER_IFMU) stepU_iFMU(current_time, state, rates, dt);
 			else if (method == SOLVER_ICM)  stepU_iCM(current_time, state, rates, dt);
-			else     throw std::runtime_error("step_to(): Invalid solver method");
+			else     throw std::runtime_error("step_to(): Invalid solver method"); // TODO: This will actually never be reached so we can refactor to remove 
 			// current_time += dt; // not needed here, as current time is advanced by the ODE stepper below.
 			copyStateToCohorts(state.begin());   // copy updated X/U to cohorts 
 			
@@ -108,6 +108,22 @@ void Solver::step_to(double tstop, AfterStepFunc &afterStep_user){
 		mergeCohorts_EBT();
 		removeDeadCohorts_EBT();
 		addCohort_EBT();  // Add new cohort if N0 > 0. Add after removing dead ones otherwise this will also be removed. 
+	}
+	
+	if (method == SOLVER_EBTN){
+		auto derivs = [this](double t, std::vector<double>::iterator S, std::vector<double>::iterator dSdt, void* params){
+			copyStateToCohorts(S);
+			updateEnv(t, S, dSdt);
+			calcRates_EBTN(t, S, dSdt);
+		};
+		
+		// integrate 
+		odeStepper.step_to(tstop, current_time, state, derivs, after_step); // rk4_stepsize is only used if method is "rk4"
+		
+		// update cohorts
+		mergeCohorts_EBTN();
+		removeDeadCohorts_EBTN();
+		addCohort_EBTN();  // Add new cohort if N0 > 0. Add after removing dead ones otherwise this will also be removed. 
 	}
 	
 	
