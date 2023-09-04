@@ -87,16 +87,16 @@ void Solver::addSpecies(std::vector<std::vector<double>> xbreaks, Species_Base* 
 
 	// Current assumption: J is the same for all the states
 	int J = 1;
-	if      (method == SOLVER_FMU)  J = xbreaks[0].size()-1;	
-	else if (method == SOLVER_IFMU) J = xbreaks[0].size()-1;	
-	else if (method == SOLVER_MMU)  J = xbreaks[0].size()-1;  
-	else if (method == SOLVER_CM )  J = xbreaks[0].size();
-	else if (method == SOLVER_ICM ) J = xbreaks[0].size();
-	else if (method == SOLVER_EBT)  J = xbreaks[0].size();
-	else if (method == SOLVER_IEBT) J = xbreaks[0].size();
-	else if (method == SOLVER_EBTN) J = xbreaks[0].size();
-	else if (method == SOLVER_IEBTN) J = xbreaks[0].size();
-	else if (method == SOLVER_ABM)  J = xbreaks[0].size();    // For ABM solver, this is a temporary size thats used to generate the initial density distribution. s will be resized during init to abm_n0.
+	if      (method == SOLVER_FMU)  J = xbreaks.size()-1;	
+	else if (method == SOLVER_IFMU) J = xbreaks.size()-1;	
+	else if (method == SOLVER_MMU)  J = xbreaks.size()-1;  
+	else if (method == SOLVER_CM )  J = xbreaks.size();
+	else if (method == SOLVER_ICM ) J = xbreaks.size();
+	else if (method == SOLVER_EBT)  J = xbreaks.size();
+	else if (method == SOLVER_IEBT) J = xbreaks.size();
+	else if (method == SOLVER_EBTN) J = xbreaks.size();
+	else if (method == SOLVER_IEBTN) J = xbreaks.size();
+	else if (method == SOLVER_ABM)  J = xbreaks.size();    // For ABM solver, this is a temporary size thats used to generate the initial density distribution. s will be resized during init to abm_n0.
 	else    throw std::runtime_error("Unsupported method");
 
 	std::cout << "Initialise s xn and resize with J" << std::endl;
@@ -373,14 +373,16 @@ void Solver::initializeSpecies(Species_Base * s){
 				std::cout << "looking at i = " << i << std::endl;
 				std::vector<double> X;
 				std::cout << "xn is " << s->xn[i] << std::endl;
-				for(size_t k=0; k<(s->xn[i].size()-1); ++k){
+				for(size_t k=0; k<(s->xn[i].size()); ++k){
 					std::cout << "state k is" << k << std::endl;
-					double xk = (s->xn[i][k]+s->next_xn_desc(s->xn[i][k], k))/2.0;			
+					double xk = (s->xn[i][k]+s->next_xk_desc(s->xn[i][k], k))/2.0;			
 					std::cout << "xk is" << xk << "for k " << k << std::endl;
 					X.push_back(xk);	 
 				}
 				std::cout << "Finished the state loop" << std::endl;
+				std::cout << "Printing dXn(i) " << s->dXn(i) << std::endl;
 				double U = s->init_density(i, X, env) * s->dXn(i);
+				std::cout << "Printing U(i) " << U << std::endl;
 				s->setXn(i,X);
 				s->setU(i,U);
 			}
@@ -884,3 +886,16 @@ void Solver::restore(std::ifstream &fin, vector<Species_Base*> spp_proto){
 	odeStepper.restore(fin);
 }
 
+void Solver::printCohortVector(){
+
+	std::ofstream cohortprint;
+	cohortprint.open(std::string("cohort_vector.txt").c_str());
+
+	int i = 0;
+	for (auto s : species_vec){
+		s->printCohortVector(i, cohortprint);		
+		++i;
+	}
+
+	cohortprint.close();
+}

@@ -154,6 +154,8 @@ class Solver{
 	void save(std::ofstream &fout);
 	void restore(std::ifstream &fin, std::vector<Species_Base*> spp_proto);
 
+	void printCohortVector();
+
 };
 
 #include "../src/solver.tpp"

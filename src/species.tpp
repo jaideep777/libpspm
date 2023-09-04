@@ -37,15 +37,15 @@ double Species<Model>::get_maxSize(){ // TODO ALERT: make sure this sees the lat
 
 template<class Model>
 std::vector<double> Species<Model>::get_maxSizeN(){ // TODO ALERT: make sure this sees the latest state
-	if (!X.empty()) return *x.rbegin();	// for FMU, get this from X - TODO: will handle FMU later but right no leaving as is. still cohorts.empty() should probably be first argument
-	else if (cohorts.empty()) return 0;
+	if (!X.empty()) return *xn.rbegin();	// for FMU, get this from X - TODO: will handle FMU later but right no leaving as is. still cohorts.empty() should probably be first argument
+	else if (cohorts.empty()) return {0};
 	else {								// else get from state vector
 		std::vector<double> largest = cohorts[0].xn;
 		for (size_t i = 1; i <= J; ++i){ //should I check the boundary cohort too? probably not needed can be i < J
 			bool larger = true;
 			for(size_t k = 0; k < largest.size(); ++k){
 					if(cohorts[0].xn[k] < largest[k]){
-						larget = false;
+						larger = false;
 						break;
 					}
 			}
@@ -205,7 +205,7 @@ template <class Model>
 double Species<Model>::dXn (int i){
 	double dxn = 1;
 	for (size_t k = 0; k < xn[i].size(); ++k){
-		double dx_k = (xn[i][k] - next_xn_desc(xn[i][k], k));
+		double dx_k = (xn[i][k] - next_xk_desc(xn[i][k], k));
 		dxn = dxn * dx_k;
 	}
 	return dxn;
@@ -216,7 +216,7 @@ double Species<Model>::dXn(std::vector<double> xn1, std::vector<double> xn2){
 	double _dxn = 1;
 	for (size_t k = 0; k < xn1.size(); ++k){
 		double dx_k = (xn2[k] - xn1[k]);
-		dxn = dxn * dx_k;
+		_dxn = _dxn * dx_k;
 	}
 	return _dxn;
 }
@@ -226,7 +226,7 @@ std::vector<double> Species<Model>::cohort_dist(std::vector<double> xn1, std::ve
 	std::vector<double> _dxn;
 	for (size_t k = 0; k < xn1.size(); ++k){
 		double dx_k = (xn2[k] - xn1[k]);
-		dxn = dxn.push_back(dx_k);
+		_dxn.push_back(dx_k);
 	}
 	return _dxn;
 }
@@ -254,12 +254,12 @@ double Species<Model>::next_xk_asc(double xnk, int k){
 }
 
 template <class Model>
-std::vector<double> Species<Model>::next_xn_desc(std::vector<double> xn){
+std::vector<double> Species<Model>::next_xn_desc(std::vector<double> _xni){
 	std::vector<double> next_smallest = xnb;
 	for (size_t i = 1; i <= J; ++i){ //should I check the boundary cohort too? probably not needed can be i < J
 		bool smaller = true;
-		for(size_t k = 0; k < largest.size(); ++k){
-				if(xn[i][k] < xnk && xn[i][k] > next_smallest[k]){
+		for(size_t k = 0; k < next_smallest.size(); ++k){
+				if(xn[i][k] < _xni[k] && xn[i][k] > next_smallest[k]){
 					smaller = false; 
 					break;
 				}
@@ -272,12 +272,12 @@ std::vector<double> Species<Model>::next_xn_desc(std::vector<double> xn){
 }
 
 template <class Model>
-std::vector<double> Species<Model>::next_xn_asc(std::vector<double> xn){
+std::vector<double> Species<Model>::next_xn_asc(std::vector<double> _xni){
 	std::vector<double> next_biggest = get_maxSizeN();
 	for (size_t i = 1; i <= J; ++i){ //should I check the boundary cohort too? probably not needed can be i < J
 		bool bigger = true;
-		for(size_t k = 0; k < largest.size(); ++k){
-			if(xn[i][k] > xnk && xn[i][k] < next_biggest[k]){
+		for(size_t k = 0; k < next_biggest.size(); ++k){
+			if(xn[i][k] > _xni[k] && xn[i][k] < next_biggest[k]){
 				bigger = false; 
 				break;
 			}
@@ -645,8 +645,8 @@ void Species<Model>::removeDenseCohorts(std::vector<double> dxcut){
 		if(maxCohort == cohorts[i].xn){
 			continue;
 		}
-		std::vector<double> dx_lo = cohort_dist(next_xn_asc(cohorts[i_min].xn), cohorts[i].xn);
-		std::vector<double> dx_hi = cohort_dist(cohorts[i].xn, next_xn_desc(cohorts[i_min].xn));
+		std::vector<double> dx_lo = cohort_dist(next_xn_asc(cohorts[i].xn), cohorts[i].xn);
+		std::vector<double> dx_hi = cohort_dist(cohorts[i].xn, next_xn_desc(cohorts[i].xn));
 
 		if (dx_lo < dxcut || dx_hi < dxcut) cohorts[i].remove = true;
 	}
@@ -776,22 +776,15 @@ void Species<Model>::restore(std::ifstream &fin){
 
 //TODO: maybe fix this later
 template <class Model>
-void Species<Model>::printCohortVector(){
-    std::cout << "Tensor:\n";
-    std::cout << "   dims = "; for (auto d : dim) std::cout << d << " "; std::cout << "\n";
-	if (vals){
-			std::cout << "   vals = \n      "; std::cout.flush();
-			for (int i=0; i<nelem; ++i){
-				std::cout << vec[i] << " "; 
-				bool flag = true;
-				for (int axis=dim.size()-1; axis>0; --axis){
-					flag = flag && (index(i)[axis] == dim[axis]-1);
-					if (flag) std::cout << "\n      ";
-				}
-			}
-		}
-		std::cout << "\n";
+void Species<Model>::printCohortVector(int speciesInd, std::ostream &out){
+
+	std::cout << "J is " << J << std::endl;
+	for(int i=0; i < cohorts.size(); ++i){
+		cohorts[i].print(speciesInd,out);	
+		out << "\n";	
 	}
+
+}
 
 //template <class Model>
 //void Species<Model>::backupCohort(int j){

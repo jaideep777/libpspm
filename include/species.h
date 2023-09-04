@@ -131,6 +131,8 @@ class Species_Base{
 	virtual void save(std::ofstream &fout) = 0;
 	virtual void restore(std::ifstream &fin) = 0;
 
+	virtual void printCohortVector(int speciesInd, std::ostream &out) = 0;
+
 //	virtual void backupCohort(int j) = 0;
 //	virtual void restoreCohort(int j) = 0;
 //	virtual void copyBoundaryCohortTo(int j) = 0;
@@ -227,7 +229,7 @@ class Species : public Species_Base{
 	void save(std::ofstream &fout);
 	void restore(std::ifstream &fin);
 
-	void printCohortVector();
+	void printCohortVector(int speciesInd, std::ostream &out);
 
 //	void backupCohort(int j);
 //	void restoreCohort(int j);
