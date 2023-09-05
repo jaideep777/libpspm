@@ -52,16 +52,20 @@ void Solver::calcRates_EBTN(double t, vector<double>::iterator S, vector<double>
 	for (int s = 0; s < species_vec.size(); ++s){
 		Species_Base * spp = species_vec[s];
 
+		// get boundary cohort state and density
 		std::vector<double>   pi0  =  spp->getXn(spp->J-1);	 // last cohort is pi0, N0
 		double   N0   =  spp->getU(spp->J-1);
 		//std::cout << "pi = " << pi0 << ", N0 = " << N0 << "\n";
 
+		// get boundary cohort gradients
 		std::vector<double> g_gx = spp->growthRateGradient(-1, spp->xnb, t, env, control.ebtn_grad_dx);
 		std::vector<double> m_mx = spp->mortalityRateGradient(-1, spp->xnb, t, env, control.ebtn_grad_dx);
 		//std::cout << "g = " << g_gx[0] << ", gx = " << g_gx[1] << "\n";
 		//std::cout << "m = " << m_mx[0] << ", mx = " << m_mx[1] << "\n";
 
+		// first index [0] is value of growth rate / mortality rate at point
 		double mb = m_mx[0], gb = g_gx[0];	
+		// index [1:n] is the value of the gradient along each state axis
 		std::vector<double> mortGrad(m_mx[1], m_mx[m_mx.size()-1]);
         std::vector<double> growthGrad(g_gx[1], g_gx[g_gx.size()-1]);
 
@@ -77,12 +81,14 @@ void Solver::calcRates_EBTN(double t, vector<double>::iterator S, vector<double>
 
 		for (int i=0; i<spp->J-1; ++i){	// go down to the second last cohort (exclude boundary cohort)
 			std::vector<double> dx = spp->growthRate(i, spp->getXn(i), t, env);							// dx/dt
-			double du = -spp->mortalityRate(i, spp->getX(i), t, env) * spp->getU(i);		// du/dt
+			double du = -spp->mortalityRate(i, spp->getXn(i), t, env) * spp->getU(i);		// du/dt
 			//std::cout << "S/C = " << s << "/" << i << " " << spp->getX(i) << " " << dx << " " << du << "\n";
+			// add all the rates to the iterator
 			for(int k = 0; k < dx.size(); ++k){
 				*itr++ = dx[k];
 			}
 			*itr++ = du;
+			// not sure what this is actually
 			its += 1 + dx.size(); 
 		}
 

@@ -35,22 +35,19 @@ double Species<Model>::get_maxSize(){ // TODO ALERT: make sure this sees the lat
 }
 
 
+// TODO: make this comment more sensible
+// Returns an "artificial" vector of largest xk in all the cohorts - no cohort has to actually occupy this point though 
+
 template<class Model>
 std::vector<double> Species<Model>::get_maxSizeN(){ // TODO ALERT: make sure this sees the latest state
-	if (!X.empty()) return *xn.rbegin();	// for FMU, get this from X - TODO: will handle FMU later but right no leaving as is. still cohorts.empty() should probably be first argument
-	else if (cohorts.empty()) return {0};
+	if (cohorts.empty()) return {0};
 	else {								// else get from state vector
 		std::vector<double> largest = cohorts[0].xn;
 		for (size_t i = 1; i <= J; ++i){ //should I check the boundary cohort too? probably not needed can be i < J
-			bool larger = true;
 			for(size_t k = 0; k < largest.size(); ++k){
-					if(cohorts[0].xn[k] < largest[k]){
-						larger = false;
-						break;
+					if(cohorts[0].xn[k] > largest[k]){
+						largest[k] = cohorts[0].xn[k];
 					}
-			}
-			if(larger){
-				largest = cohorts[i].xn;
 			}
 		}
 		return largest;			// cohorts are sorted descending
@@ -202,7 +199,7 @@ std::vector <double> Species<Model>::getStateAt(int i){
 }
 
 template <class Model>
-double Species<Model>::dXn (int i){
+double Species<Model>::dXn(int i){
 	double dxn = 1;
 	for (size_t k = 0; k < xn[i].size(); ++k){
 		double dx_k = (xn[i][k] - next_xk_desc(xn[i][k], k));
@@ -244,7 +241,7 @@ double Species<Model>::next_xk_desc(double xnk, int k){
 
 template <class Model>
 double Species<Model>::next_xk_asc(double xnk, int k){
-	double next_biggest = get_maxSize();
+	double next_biggest = get_maxSizeN()[k];
 	for(size_t i = 0; i < xn.size(); i++){
 		if(xn[i][k] > xnk && xn[i][k] < next_biggest){
 			next_biggest = xn[i][k];
@@ -253,9 +250,10 @@ double Species<Model>::next_xk_asc(double xnk, int k){
 	return next_biggest;
 }
 
+// FIXME: need to rethink this... 
 template <class Model>
 std::vector<double> Species<Model>::next_xn_desc(std::vector<double> _xni){
-	std::vector<double> next_smallest = xnb;
+	std::vector<double> next_smallest = xnb; //boundary is always smaller
 	for (size_t i = 1; i <= J; ++i){ //should I check the boundary cohort too? probably not needed can be i < J
 		bool smaller = true;
 		for(size_t k = 0; k < next_smallest.size(); ++k){
@@ -271,6 +269,7 @@ std::vector<double> Species<Model>::next_xn_desc(std::vector<double> _xni){
 	return next_smallest;
 }
 
+// FIXME: need to rethink this... 
 template <class Model>
 std::vector<double> Species<Model>::next_xn_asc(std::vector<double> _xni){
 	std::vector<double> next_biggest = get_maxSizeN();

@@ -147,7 +147,10 @@ class Cohort : public Ind {
 				, birth_time
 				, remove
 				, need_precompute); // we actually need not save need_precompute, because set_size() will always set it to 1 during restore
-		fout << x << ' ' << u << ' '; // TODO Edit to to make it multistate 
+		for (size_t k = 0; k < xn.size(); k++){
+			fout << xn[k] << ' ';
+		}
+		fout << u << ' ';
 
 		std::vector<double> ex_state(n_extra_vars);
 		auto it = ex_state.begin();
@@ -164,8 +167,11 @@ class Cohort : public Ind {
 		    >> remove
 		    >> need_precompute;
 
-		fin >> x >> u; // TODO Edit to to make it multistate 
-		set_size(x);
+		for (size_t k = 0; k < xn.size(); k++){
+			fin >> xn[k];
+		}
+		fin >> u;
+		set_size(xn);
 
 		std::vector<double> ex_state(n_extra_vars);
 		fin >> ex_state;
