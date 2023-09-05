@@ -1,3 +1,20 @@
+inline bool smaller_than(std::vector<double> x1, std::vector <double> x2){
+    for(int i = 0; i < x1.size(); ++i){
+        if(x1[i] >= x2[i]){
+			return false; 
+		}
+    }
+	return true;
+}
+
+inline bool larger_than(std::vector<double> x1, std::vector <double> x2){
+    for(int i = 0; i < x1.size(); ++i){
+        if(x1[i] <= x2[i]){
+			return false; 
+		}
+    }
+	return true;
+}
 
 /// @param w            A function or function-object of the form `w(int i, double t)` that returns a double. 
 ///                     It can be a lambda. This function should access the 'i'th cohort and compute the weight 
@@ -155,6 +172,62 @@ double Solver::integrate_wudx_above(wFunc w, double t, double xlow, int species_
 }
 
 
+/// @param w            A function or function-object of the form `w(int i, double t)` that returns a double. 
+///                     It can be a lambda. This function should access the 'i'th cohort and compute the weight 
+///                     from the cohort's properties. The function `w` should be able access to the `Solver` in
+///                     order to access cohorts. 
+/// @param t            The current time (corresponding to the current physiological state). This will be passed 
+///                     to `w` to allow the weights to be a direct function of time.
+/// @param xlow         The lower limit of the integral
+/// @param species_id   The id of the species for which the integral should be computed
+///
+/// \image html size_integral.png width=700cm 
+///
+/// the computation of this integral depends on the solver method. For different solvers, the integral is defined as follows:
+///
+/// `EBTN:` \f$\quad I = \sum_{i=i_0}^J w_i N_i\f$, with \f$x_0 = x_b + \pi_0/N_0\f$
+/// 
+//             _xm 
+// Calculate _/ w(z,t)u(z)dz
+//         xlow
+// implementation from orig plant model	
+// ----
+// I += (x_hi - x_lo) * (f_hi + f_lo);
+// x_hi = x_lo;
+// f_hi = f_lo;
+// if (x_lo < xlow) break;
+// ---- 
+template<typename wFunc>
+double Solver::integrate_wudxn_above(wFunc w, double t, std::vector<double> xnlow, std::vector<double> xnhigh, int species_id){
+
+	Species_Base* spp = species_vec[species_id];
+
+	if (method == SOLVER_EBTN || method == SOLVER_IEBTN){
+		// set up cohorts to integrate
+		realizeEbtnBoundaryCohort(spp);
+
+		// sort cohorts, but skip pi0-cohort
+		spp->sortCohortsDescending(1); // FIXME: Add a label to EBT boundary cohort and assert that it is always at J-1
+
+		// calculate integral
+		double I = 0;
+		for (int i=0; i<spp->J; ++i){  // in EBT, cohorts are sorted descending
+		   	if (smaller_than(spp->getXn(i),xnlow) && larger_than(spp->getXn(i),xnhigh)) break; // if X == xlow, we still include it in the intgral
+			else I += w(i, t)*spp->getU(i);
+		}
+		
+		// restore the original pi0-cohort
+		restoreEbtnBoundaryCohort(spp);
+
+		return I;
+	}
+	
+	else{
+		throw std::runtime_error("Unsupported solver method");
+	}
+}
+
+
 
 
 
@@ -186,6 +259,20 @@ double Solver::integrate_x(wFunc w, double t, int species_id){
 		
 		// restore the original pi0-cohort
 		restoreEbtBoundaryCohort(spp);
+
+		return I;
+	}
+
+	else if (method == SOLVER_EBTN || method == SOLVER_IEBTN){
+		// integrate using EBT rule (sum over cohorts)
+		realizeEbtnBoundaryCohort(spp);
+
+		// calculate integral
+		double I = 0;
+		for (int i=0; i<spp->J; ++i) I += w(i, t)*spp->getU(i);
+		
+		// restore the original pi0-cohort
+		restoreEbtnBoundaryCohort(spp);
 
 		return I;
 	}

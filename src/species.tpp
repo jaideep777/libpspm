@@ -28,7 +28,7 @@ void Species<Model>::resize(int _J){
 template<class Model>
 double Species<Model>::get_maxSize(){ // TODO ALERT: make sure this sees the latest state
 	if (!X.empty()) return *x.rbegin();	// for FMU, get this from X - TODO: will handle FMU later but right no leaving as is. still cohorts.empty() should probably be first argument
-	else if (cohorts.empty()) return 0;
+	else if (cohorts.empty()) return xb;
 	else {								// else get from state vector
 		return cohorts[0].x;			// cohorts are sorted descending
 	}
@@ -40,7 +40,9 @@ double Species<Model>::get_maxSize(){ // TODO ALERT: make sure this sees the lat
 
 template<class Model>
 std::vector<double> Species<Model>::get_maxSizeN(){ // TODO ALERT: make sure this sees the latest state
-	if (cohorts.empty()) return {0};
+	if (cohorts.empty()) {
+		return xnb;
+	}
 	else {								// else get from state vector
 		std::vector<double> largest = cohorts[0].xn;
 		for (size_t i = 1; i <= J; ++i){ //should I check the boundary cohort too? probably not needed can be i < J
@@ -198,6 +200,7 @@ std::vector <double> Species<Model>::getStateAt(int i){
 	return(_xn);
 }
 
+//To remove
 template <class Model>
 double Species<Model>::dXn(int i){
 	double dxn = 1;

@@ -22,8 +22,8 @@ class LightEnvironment : public EnvironmentBase{
 		// Calculate _/ w(z,t)u(z,t)dz
 		//         xb
 		auto w = [S](int i, double t) -> double {
-			double z = S->species_vec[0]->getX(i);
-			return 0.396*pow(z, 0.749)/10000;
+			std::vector<double> z = S->species_vec[0]->getXn(i);
+			return 0.396*pow(z[0], 0.749)/10000;
 		};
 		E = S->integrate_x(w, t, 0);
 	}

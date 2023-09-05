@@ -149,6 +149,9 @@ class Solver{
 	template<typename wFunc>
 	double integrate_wudx_above(wFunc w, double t, double xlow, int species_id);
 
+	template<typename wFunc>
+	double integrate_wudxn_above(wFunc w, double t, std::vector<double> xnlow, std::vector<double> xnhigh, int species_id);
+
 	std::vector<double> getDensitySpecies(int k, std::vector<double> breaks, Spline::Extr extrapolation_method = Spline::ZERO);
 
 	void save(std::ofstream &fout);
