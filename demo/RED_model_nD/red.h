@@ -88,7 +88,7 @@ class RED_Plant : public IndividualBase{
 	std::vector<double> growthRate(std::vector<double> xn, double t, void * env){
 		++nrc;
 		double x0 = g0*pow(xn[0],phiG);
-		double x1 = beta/xn[1];
+		double x1 = -beta/xn[1];
 		return {x0, x1};
 	}
 

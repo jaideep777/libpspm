@@ -45,6 +45,8 @@ inline std::vector<double> vector_addition(std::vector<double> x1, double x2){
 }
 
 void Solver::calcRates_EBTN(double t, vector<double>::iterator S, vector<double>::iterator dSdt){
+	// std::cout << "calculating Rates EBTN" << std::endl;
+
 
 	vector<double>::iterator its = S    + n_statevars_system; // Skip system variables
 	vector<double>::iterator itr = dSdt + n_statevars_system;
@@ -131,6 +133,12 @@ void Solver::addCohort_EBTN(){
 
 		// - update the recently internalized pi0-cohort with actual x0 value
 		std::vector<double> xn0 = vector_addition(spp->xnb, vector_product(pin0, (1/(N0+1e-12))));
+
+		std::cout << "in add cohort EBTN: xn0: " << xn0 << std::endl;
+		std::cout << "in add cohort EBTN: xnb: " << spp->xnb << std::endl;
+		std::cout << "in add cohort EBTN: pin0: " << pin0 << std::endl;
+		std::cout << "in add cohort EBTN: N0: " << N0 << std::endl;
+
 		spp->setXn(spp->J-1, xn0);
 		spp->setU(spp->J-1, N0);
 
@@ -140,8 +148,13 @@ void Solver::addCohort_EBTN(){
 
 		// 3. set x,u of the new cohort to 0,0, thus marking it as the new pi0-cohort
 		std::vector<double> xn_new(pin0.size(), 0);
+
+		std::cout << "in add cohort EBTN: xn_new: " << xn_new << std::endl;
+
 		spp->setXn(spp->J-1, xn_new); 
 		spp->setU(spp->J-1, 0);
+
+		std::cout << "in add cohort EBTN; new xn \n" << spp->xn << std::endl;
 	}
 
 	// 4. reset state from cohorts

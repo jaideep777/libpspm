@@ -85,7 +85,6 @@ void Solver::addSpecies(std::vector<std::vector<double>> xbreaks, Species_Base* 
 
 	std::cout << "Find J" << std::endl;
 
-	// Current assumption: J is the same for all the states
 	int J = 1;
 	if      (method == SOLVER_FMU)  J = xbreaks.size()-1;	
 	else if (method == SOLVER_IFMU) J = xbreaks.size()-1;	
@@ -513,11 +512,20 @@ void Solver::restoreEbtnBoundaryCohort(Species_Base * spp){
 //  after the other for each x.
 void Solver::copyStateToCohorts(std::vector<double>::iterator state_begin){
 	if (debug) std::cout << "state ---> cohorts\n";
+
+	// std::cout << "state ---> cohorts\n" <<std::endl;
+
 	std::vector<double>::iterator it = state_begin + n_statevars_system; // no need to copy system state
-	
+	size_t current_state = n_statevars_system;
+	size_t state_size = state.size();
+	// std::cout << "state size ---> " << state.size() << std::endl;
+	// std::cout << "After state: " << n_statevars_system << std::endl;
+
 	for (int k=0; k<species_vec.size(); ++k){
 		Species_Base* s = species_vec[k];
 		
+		// std::cout << "In species " << k << std::endl;
+
 		s->set_xb(s->xb); // Important: "touch" boundary cohort to trigger a precompute. Note that setSize() triggers it.
 		if (method == SOLVER_FMU || method == SOLVER_IFMU){
 			for (size_t i=0; i<s->J; ++i){
@@ -547,10 +555,18 @@ void Solver::copyStateToCohorts(std::vector<double>::iterator state_begin){
 			// x, u for boundary and internal cohorts
 			for (size_t i=0; i<s->J; ++i){
 				std::vector<double> Xn;
-				for(size_t k=0; k<s->Xn[i].size(); ++k){
+
+				// std::cout << "Cohort number " << i << std::endl;
+
+				for(size_t l=0; l<s->xnb.size(); ++l){
 					Xn.push_back(*it++);
+					current_state++;
 				}
+
+				// std::cout << "Current index " << current_state << "\tTotal states " << state_size << std::endl;
 				double U = *it++;
+				current_state++;
+				// std::cout << "Current index " << current_state << "\tTotal states " << state_size << std::endl;
 				s->setXn(i,Xn); 
 				s->setU(i,U);
 			}
@@ -566,11 +582,14 @@ void Solver::copyStateToCohorts(std::vector<double>::iterator state_begin){
 
 
 void Solver::copyCohortsToState(){
-	if (debug) std::cout << "state <--- cohorts\n";
+	// if (debug) std::cout << "state <--- cohorts\n";
+	// std::cout << "state size: " << state.size() << std::endl;
 	vector<double>::iterator it = state.begin() + n_statevars_system; // no need to copy system state
 	
 	for (int k=0; k<species_vec.size(); ++k){
 		Species_Base* s = species_vec[k];
+
+		// std::cout << "Species size: " << s->J << std::endl;
 		
 		if (method == SOLVER_FMU || method == SOLVER_IFMU){
 			for (size_t i=0; i<s->J; ++i){
@@ -601,10 +620,12 @@ void Solver::copyCohortsToState(){
 			// x, u for boundary and internal cohorts
 			for (size_t i=0; i<s->J; ++i){
 				std::vector<double> Xn = s->getXn(i); 
-				for(size_t k = 0; k<Xn.size(); ++k){
-					*it++ = Xn[k]; 
-				}
 				double U = s->getU(i);
+				
+				for(size_t l = 0; l<Xn.size(); ++l){
+					*it++ = Xn[l]; 
+				}
+				
 				*it++ = U;
 			}
 		}
@@ -647,7 +668,7 @@ void Solver::step_to(double tstop){
 
 
 void Solver::updateEnv(double t, std::vector<double>::iterator S, std::vector<double>::iterator dSdt){
-	if (debug) std::cout << "update Env..." << std::endl;
+	//if (debug) std::cout << "update Env..." << std::endl;
 	for (auto spp : species_vec) spp->triggerPreCompute();
 	env->computeEnv(t, this, S, dSdt);
 }
@@ -658,7 +679,7 @@ double Solver::calcSpeciesBirthFlux(int k, double t){
 	if (debug) std::cout << "calc birthFlux...\n";
 	auto spp = species_vec[k];	
 	auto newborns_production = [this, spp](int i, double _t){
-		double b1 = spp->birthRate(i, spp->getX(i), _t, env);
+		double b1 = spp->birthRate(i, spp->getXn(i), _t, env);
 		return b1;	
 	}; 
 	double birthFlux = integrate_x(newborns_production, t, k);
@@ -893,9 +914,23 @@ void Solver::printCohortVector(){
 
 	int i = 0;
 	for (auto s : species_vec){
-		s->printCohortVector(i, cohortprint);		
+		s->printCohortVector(i, current_time, cohortprint);		
 		++i;
 	}
 
 	cohortprint.close();
+}
+
+void Solver::printCohortVector(std::ostream &out){
+	int i = 0;
+	for (auto s : species_vec){
+		s->printCohortVector(i, current_time, out);		
+		++i;
+	}
+}
+
+
+
+void Solver::printODEmethod(){
+	odeStepper.printODEsolvermethod();
 }

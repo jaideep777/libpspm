@@ -99,6 +99,8 @@ class Solver{
 	
 	double maxSize();
 
+	void printODEmethod();
+
 	void updateEnv(double t, std::vector<double>::iterator S, std::vector<double>::iterator dSdt);
 
 	/// @brief calculate \f$du/dt\f$ using the FMU solver
@@ -158,6 +160,7 @@ class Solver{
 	void restore(std::ifstream &fin, std::vector<Species_Base*> spp_proto);
 
 	void printCohortVector();
+	void printCohortVector(std::ostream &out);
 
 };
 

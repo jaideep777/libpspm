@@ -34,27 +34,37 @@ int main(){
 	logBreaks.push_back(false);
 
 	S.addSpecies(10, xb, xm, logBreaks, &spp, 0);
-	S.printCohortVector();
-	//S.get_species(0)->set_bfin_is_u0in(true);	// say that input_birth_flux is u0
-	// S.resetState();
-	// S.initialize();
-	// //S.print();
 	
 	
-	// ofstream fout("ebt_Redmodel.txt");
+	S.resetState();
+	S.initialize();
 
-	// for (double t=0; t <= 5000; t=t+10) {
-	// 	S.step_to(t);
-	// 	fout << S.current_time << "\t" << S.newborns_out(t)[0] << "\t";
-	// 	cout << S.current_time << " " << S.species_vec[0]->xsize() << "\n";
-	// 	//cout << S.current_time << " " [><< S.u0_out()<] << "\n";
+	S.printODEmethod();
+	// S.print();
+	
+	
+	ofstream fout("ebtn_Redmodel.txt");
+
+
+	std::ofstream cohortprint;
+	cohortprint.open(std::string("cohort_vector_ebtn_Redmodel.csv").c_str());
+
+	for (double t=0; t <= 1; t=t+1) {
+		S.step_to(t);
+		S.printCohortVector(cohortprint);
+		cout << "Finished step to function for t = " << t << std::endl;
+
+		fout << S.current_time << "\t" << S.newborns_out(t)[0] << "\t";
+		cout << S.current_time << " " << S.species_vec[0]->xsize() << "\n";
+		//cout << S.current_time << " " [><< S.u0_out()<] << "\n";
 		
-	// 	vector <double> dist = S.getDensitySpecies(0, logseq(1, 1e6, 150));
-	// 	for (auto y : dist) fout << y << "\t";
-	// 	fout << endl;
-	// }
+		// vector <double> dist = S.getDensitySpecies(0, logseq(1, 1e6, 150));
+		// for (auto y : dist) fout << y << "\t";
+		fout << endl;
+	}
 
-	// fout.close();
+	fout.close();
+	cohortprint.close();
 
 	// // expected 38.1128953 (numerical R), 37.5845 (analytical)
 	// cout << S.newborns_out(5000)[0] << endl; 

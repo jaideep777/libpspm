@@ -152,6 +152,12 @@ class OdeSolver{
 		if      (type == ODE_RKCK45) static_cast<RKCK45*>(solver)->restore(fin);	
 		else if (type == ODE_LSODA)  throw std::runtime_error("Cannot restore the state for LSODA solver at this point.");
 	}
+
+	void printODEsolvermethod(){
+		std::cout << "ODE solver: " << type << std::endl;
+	}
+
+
 };
 
 

@@ -14,8 +14,12 @@
 template<typename AfterStepFunc>
 void Solver::step_to(double tstop, AfterStepFunc &afterStep_user){
 	// do nothing if tstop is <= current_time
+	// std::cout << "step to: current time: " << current_time << "\tt_stop: " << tstop << std::endl;
+
 	if (tstop <= current_time) return;
 	
+	// std::cout << "Running step to function " << std::endl;
+
 	auto after_step = [this, afterStep_user](double t, std::vector<double>::iterator S){
 		if (debug) std::cout << "After step: t = " << t << "\n";
 		copyStateToCohorts(S);
@@ -112,16 +116,20 @@ void Solver::step_to(double tstop, AfterStepFunc &afterStep_user){
 	
 	if (method == SOLVER_EBTN){
 		auto derivs = [this](double t, std::vector<double>::iterator S, std::vector<double>::iterator dSdt, void* params){
+			// std::cout << "in derivs: " << "\tstarting" << std::endl;
 			copyStateToCohorts(S);
+			// std::cout << "in derivs: " << "\tfinished copying state to cohorts" << std::endl;
 			updateEnv(t, S, dSdt);
+			// std::cout << "in derivs: " << "\tfinished updating environment" << std::endl;
 			calcRates_EBTN(t, S, dSdt);
+			// std::cout << "in derivs: " << "\tfinished calculating rates EBTN" << std::endl;
 		};
 		
 		// integrate 
 		odeStepper.step_to(tstop, current_time, state, derivs, after_step); // rk4_stepsize is only used if method is "rk4"
 		
 		// update cohorts
-		mergeCohorts_EBTN();
+		// mergeCohorts_EBTN();
 		removeDeadCohorts_EBTN();
 		addCohort_EBTN();  // Add new cohort if N0 > 0. Add after removing dead ones otherwise this will also be removed. 
 	}

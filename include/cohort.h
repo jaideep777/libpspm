@@ -44,7 +44,8 @@ class Cohort : public Ind {
 		out << std::setw(12) << std::setprecision(4) << u; 
 	}
 
-	void print_xnu(int speciesInd, std::ostream &out = std::cout){
+	void print_xnu(int speciesInd, double time, std::ostream &out = std::cout){
+		out << std::setw(6)  << std::setprecision(4) << time << ",";
 		out << std::setw(6)  << std::setprecision(4) << birth_time << ",";
 		for(int k = 0; k < xn.size(); ++k){ 
 			out << std::setw(12) << std::setprecision(4) << xn[k] << ",";
@@ -58,8 +59,8 @@ class Cohort : public Ind {
 		Ind::print(out);
 	}
 
-	void print(int speciesInd, std::ostream &out = std::cout){
-		print_xnu(speciesInd, out);
+	void print(int speciesInd, double time, std::ostream &out = std::cout){
+		print_xnu(speciesInd, time, out);
 		Ind::print(out);
 	}
 

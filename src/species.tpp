@@ -522,7 +522,7 @@ double Species<Model>::birthRate(int i, double x, double t, void * env){
 }
 
 template <class Model>
-double Species<Model>::birthRate(int i, std::vector<double> x, double t, void * env){
+double Species<Model>::birthRate(int i, std::vector<double> _xn, double t, void * env){
 	Cohort<Model> &c = (i<0)? boundaryCohort : cohorts[i];
 	return c.birthRate(c.xn,t,env);
 }	
@@ -535,14 +535,27 @@ void Species<Model>::getExtraRates(std::vector<double>::iterator &it){
 
 template <class Model>
 void Species<Model>::addCohort(int n){
+	std::cout << "In add cohort, adding n " << n << std::endl;
+
 	if (n > cohorts.max_size()){
 		std::cout << "requested n = " << n << " is greater than max_size = " << cohorts.max_size() << std::endl;
 	}
+
+	std::cout << "In add cohort before going through n" << 	std::endl;
+
+	std::cout << xn << std::endl;
+	std::cout << J << std::endl;
+
 	cohorts.reserve(cohorts.size()+n);
 	for (int i=0; i<n; ++i){
 		cohorts.push_back(boundaryCohort);
 		++J;
 	}
+	
+	std::cout << "In add cohort after going through n" << 	std::endl;
+
+	std::cout << cohorts.size() << std::endl;
+	std::cout << J << std::endl;
 }
 
 
@@ -778,11 +791,11 @@ void Species<Model>::restore(std::ifstream &fin){
 
 //TODO: maybe fix this later
 template <class Model>
-void Species<Model>::printCohortVector(int speciesInd, std::ostream &out){
+void Species<Model>::printCohortVector(int speciesInd, double time, std::ostream &out){
 
 	std::cout << "J is " << J << std::endl;
 	for(int i=0; i < cohorts.size(); ++i){
-		cohorts[i].print(speciesInd,out);	
+		cohorts[i].print(speciesInd, time, out);	
 		out << "\n";	
 	}
 
