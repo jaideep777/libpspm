@@ -22,7 +22,9 @@ void Species_Base::addCohort(T bc){
 template<class Model>
 void Species<Model>::resize(int _J){
 	J = _J;
-	cohorts.resize(J, boundaryCohort);  // when resizing, always insert copies of boundary cohort
+	std::cout << "In resize before resize " <<std::endl;
+	cohorts.resize(J, boundaryCohort);  // when resizing always insert copies of boundary cohort
+	std::cout << "In resize after resize " <<std::endl;
 }
 
 template<class Model>
@@ -155,7 +157,7 @@ template <class Model>
 void Species<Model>::set_xb(double _xb){
 	xb = _xb;
 	boundaryCohort.x = _xb;
-	boundaryCohort.set_size(_xb);
+	// boundaryCohort.set_size(_xb);
 }
 
 template <class Model>
@@ -422,18 +424,38 @@ std::vector<double> Species<Model>::growthRateGradient(int i, double x, double t
 
 template <class Model>
 std::vector<double> Species<Model>::growthRateGradient(int i, std::vector<double> x, double t, void * env, std::vector<double> grad_dx){
+
+	// std::cout << "Species::growthRateGradient" << std::endl;
+	// std::cout << "x:\t" << x << std::endl;
+	// std::cout << "i:\t" << i << std::endl;
+	// std::cout << "grad_dx:\t" << grad_dx << std::endl;
 	Cohort<Model> &c = (i<0)? boundaryCohort : cohorts[i];
+
+	// std::cout << "c.xn:\t" << c.xn << std::endl;
 
 
 	std::vector<double> g = c.growthRate(c.xn,t,env);
+	// std::cout << "g = c.growthRate(c.xn,t,env):\t" << g << std::endl; 
+
+
+
 	std::vector<double> gplus;
 
 	for(int k= 0; k < x.size(); ++k){
 		Cohort<Model> cplus = c;
 		std::vector<double> _x = x;
-		_x[k] += grad_dx[k];
+		// std::cout << "k:\t" << k << std::endl;
+		// std::cout << "_x:\t" << _x << std::endl;
+		// std::cout << "grad_dx[k]:\t" << grad_dx[k] << std::endl;
+
+		_x[k] = _x[k] + grad_dx[k];
+		// std::cout << "_x:\t" << _x << std::endl;
 		cplus.set_size(_x);
+
+		// std::cout << "cplus.xn:\t" << cplus.xn << std::endl;
 		std::vector<double> gplus_k = cplus.growthRate(cplus.xn, t, env);
+
+		// std::cout << "gplus_k:\t" << gplus_k[k] << std::endl;
 		gplus.push_back((gplus_k[k]-g[k])/grad_dx[k]);
 	}
 	
@@ -535,16 +557,16 @@ void Species<Model>::getExtraRates(std::vector<double>::iterator &it){
 
 template <class Model>
 void Species<Model>::addCohort(int n){
-	std::cout << "In add cohort, adding n " << n << std::endl;
+	// std::cout << "In add cohort, adding n " << n << std::endl;
 
 	if (n > cohorts.max_size()){
 		std::cout << "requested n = " << n << " is greater than max_size = " << cohorts.max_size() << std::endl;
 	}
 
-	std::cout << "In add cohort before going through n" << 	std::endl;
+	// std::cout << "In add cohort before going through n" << 	std::endl;
 
-	std::cout << xn << std::endl;
-	std::cout << J << std::endl;
+	// std::cout << xn << std::endl;
+	// std::cout << J << std::endl;
 
 	cohorts.reserve(cohorts.size()+n);
 	for (int i=0; i<n; ++i){
@@ -552,10 +574,10 @@ void Species<Model>::addCohort(int n){
 		++J;
 	}
 	
-	std::cout << "In add cohort after going through n" << 	std::endl;
+	// std::cout << "In add cohort after going through n" << 	std::endl;
 
-	std::cout << cohorts.size() << std::endl;
-	std::cout << J << std::endl;
+	// std::cout << cohorts.size() << std::endl;
+	// std::cout << J << std::endl;
 }
 
 
@@ -784,7 +806,10 @@ void Species<Model>::restore(std::ifstream &fin){
 	fin >> X >> x >> h;
 
 	boundaryCohort.restore(fin, n_extra_statevars);
+	std::cout << "In restore before resize " <<std::endl;
 	cohorts.resize(J, boundaryCohort); // cohorts must always be copy-constructed from the boundary cohort
+
+	std::cout << "In restore after resize " <<std::endl;
 	for (auto& C : cohorts) C.restore(fin, n_extra_statevars);
 }
 
@@ -793,7 +818,7 @@ void Species<Model>::restore(std::ifstream &fin){
 template <class Model>
 void Species<Model>::printCohortVector(int speciesInd, double time, std::ostream &out){
 
-	std::cout << "J is " << J << std::endl;
+	// std::cout << "J is " << J << std::endl;
 	for(int i=0; i < cohorts.size(); ++i){
 		cohorts[i].print(speciesInd, time, out);	
 		out << "\n";	

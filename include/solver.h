@@ -50,7 +50,7 @@ class Solver{
 		double cm_dxcut = 1e-10;
 		double ebt_ucut = 1e-10;
 		double ebt_grad_dx = 1e-6;
-		std::vector<double> ebtn_grad_dx = {1e-6};
+		std::vector<double> ebtn_grad_dx = {1e-6, 1e-6};
 		double ebt_merge_dxcut = 0; //1e-6;
 		std::vector<double> ebtn_merge_dxcut = {0}; //1e-6;
 		double ode_rk4_stepsize = 0.1;

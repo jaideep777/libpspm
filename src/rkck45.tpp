@@ -28,7 +28,7 @@ void RKCK45::RKStep(container& y, container& dydx, double& x, double htry,
 	}
 	if (errmax < 0.5) hnext=h*fmin(SAFETY*pow(errmax,PGROW), 5); // Step is too small, increase it next time, no more than 5 times
 	else hnext=h;                                      
-	//cout << "hnext = " << hnext << "\n";
+	// std::cout << "hnext = " << hnext << "\n";
 	hdid=h;
 	x += h;
 	for (int i=0; i<y.size();i++) y[i] = ytemp[i];

@@ -3,9 +3,12 @@
 #include <fstream>
 #include <cmath>
 #include "solver.h"
+
 using namespace std;
 
 #include "red.h"
+
+
 
 inline std::vector <double> logseq(double from, double to, int len){
 	std::vector<double> x(len);
@@ -49,10 +52,11 @@ int main(){
 	std::ofstream cohortprint;
 	cohortprint.open(std::string("cohort_vector_ebtn_Redmodel.csv").c_str());
 
-	for (double t=0; t <= 1; t=t+1) {
+	for (double t=0; t <= 10; t=t+1) {
 		S.step_to(t);
 		S.printCohortVector(cohortprint);
 		cout << "Finished step to function for t = " << t << std::endl;
+		// S.printCohortVector(std::cout);
 
 		fout << S.current_time << "\t" << S.newborns_out(t)[0] << "\t";
 		cout << S.current_time << " " << S.species_vec[0]->xsize() << "\n";

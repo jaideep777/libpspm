@@ -220,8 +220,10 @@ void Solver::removeSpecies(Species_Base * spp){
 
 void Solver::addSystemVariables(int _s){
 	n_statevars_system = _s;
+	// std::cout << "In Solver::addSystemVariables before resize " <<std::endl;
 	state.resize(state.size() + _s);
 	rates.resize(state.size() + _s);
+	// std::cout << "In Solver::addSystemVariables after resize " <<std::endl;
 }
 
 
@@ -246,8 +248,10 @@ void Solver::resizeStateFromSpecies(){
 		state_size_new += num_states + n_statevars_internal * spp->J;
 	}
 	
+	// std::cout << "In Solver::resizeStateFromSpecies before resize " <<std::endl;
 	state.resize(state_size_new, -999);
 	rates.resize(state_size_new, -999);
+	// std::cout << "In Solver::resizeStateFromSpecies after resize " <<std::endl;
 }
 
 

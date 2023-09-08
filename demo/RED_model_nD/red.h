@@ -49,7 +49,7 @@ class RED_Plant : public IndividualBase{
 	double m0 = 1;
 	double mort = 0.035;
 	double alpha = 0.1;
-	double beta = 0.2;
+	double beta = 0.002;
 	double mu0;
 
 	RED_Plant() {
@@ -87,8 +87,18 @@ class RED_Plant : public IndividualBase{
 
 	std::vector<double> growthRate(std::vector<double> xn, double t, void * env){
 		++nrc;
+		// std::cout << "growth Rate Gradient compute" << std::endl;
+		// std::cout << xn << std::endl;
+		std::vector<double> vec_out;
 		double x0 = g0*pow(xn[0],phiG);
-		double x1 = -beta/xn[1];
+		// std::cout << x0 << std::endl;	
+		vec_out.push_back(x0);
+		double x1 = -beta * xn[1];
+		// std::cout << x1 << std::endl;
+		vec_out.push_back(x1);
+		// std::cout <<x0 << "   " <<  x1 << std::endl;
+		// std::cout << "growth Rate Gradient compute: END" << std::endl;
+
 		return {x0, x1};
 	}
 

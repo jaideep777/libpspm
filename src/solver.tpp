@@ -182,5 +182,7 @@ void Solver::step_to(double tstop, AfterStepFunc &afterStep_user){
 
 	}
 
+	// std::cout << "Finished step to " <<std::endl;
+
 }
 
