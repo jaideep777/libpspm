@@ -392,7 +392,11 @@ void Solver::initializeSpecies(Species_Base * s){
 			// set pi0, N0 as x, u for the last cohort. This scheme allows using this last cohort with xb+pi0 in integrals etc 
 			// *it++ = 0; *it++ = 0;
 			// Now set boundary cohort
-			s->setX(s->J-1,0); // [resolved] todo: should this be set to xb for init_state and set to 0 again later? maybe not, as init_state is not expected to be x dependent
+			std::vector<double> xn_0;
+			for (size_t k = 0; k < s->xnb.size(); k++){
+				xn_0.push_back(0);
+			}
+			s->setXn(s->J-1,xn_0); // [resolved] todo: should this be set to xb for init_state and set to 0 again later? maybe not, as init_state is not expected to be x dependent
 			s->setU(s->J-1,0); 		
 		}
 

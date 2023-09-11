@@ -52,7 +52,7 @@ int main(){
 	std::ofstream cohortprint;
 	cohortprint.open(std::string("cohort_vector_ebtn_Redmodel.csv").c_str());
 
-	for (double t=0; t <= 10; t=t+1) {
+	for (double t=0; t <= 100; t=t+1) {
 		S.step_to(t);
 		S.printCohortVector(cohortprint);
 		cout << "Finished step to function for t = " << t << std::endl;
