@@ -25,10 +25,8 @@ class Species_Base{
 	// These are only used by FMU solver. 
 	// Others derive them from the state. 
 	// Kept private so users dont accidently access them for other solvers
-	std::vector <double> X;	
-	std::vector <double> x;
-	std::vector <std::vector<double>> Xn; // multiple state model
-	std::vector <std::vector<double>> xn; // multiple state model
+	std::vector <std::vector<double>> X; // multiple state model
+	std::vector <std::vector<double>> x; // multiple state model
 	std::vector <double> h;
 	// std::vector <double> schedule; // used only by CM/EBT
 

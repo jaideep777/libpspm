@@ -135,7 +135,7 @@ double Species<Model>::getX(int i){
 }
 
 template <class Model>
-std::vector<double> Species<Model>::getXn(int i){
+auto Species<Model>::getXn(int i){
 	if (i == -1) return boundaryCohort.xn;
 	else return cohorts[i].xn;
 }

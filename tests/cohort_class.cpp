@@ -3,6 +3,7 @@
 #include <environment_base.h>
 #include <individual_base.h>
 #include <cohort.h>
+#include <string_view>
 using namespace std;
 
 
@@ -145,6 +146,36 @@ class Insect : public IndividualBase<2>{
 };
 
 
+template <class Model>
+class TestSpecies{
+	public:
+	Cohort<Model> c;
+	auto getX(int i){
+		return c.x;
+	}
+};
+
+
+template <typename T>
+constexpr auto type_name() {
+  std::string_view name, prefix, suffix;
+#ifdef __clang__
+  name = __PRETTY_FUNCTION__;
+  prefix = "auto type_name() [T = ";
+  suffix = "]";
+#elif defined(__GNUC__)
+  name = __PRETTY_FUNCTION__;
+  prefix = "constexpr auto type_name() [with T = ";
+  suffix = "]";
+#elif defined(_MSC_VER)
+  name = __FUNCSIG__;
+  prefix = "auto __cdecl type_name<";
+  suffix = ">(void)";
+#endif
+  name.remove_prefix(prefix.size());
+  name.remove_suffix(suffix.size());
+  return name;
+}
 
 int main(){
 
@@ -175,6 +206,19 @@ int main(){
 	cout << "Insect g/m/f: " << C2.g << " / " << C2.m << " / " << C2.f << '\n';
 
 	C2.save(cout, 0);
+
+	TestSpecies<Insect> Si;
+	Si.c = C2;
+	cout << "Cohort inside Insect species has state: " << Si.getX(0) << '\n';
+	cout << "Cohort inside Insect species has state type: " << type_name<decltype(Si.getX(0))>() << '\n';
+
+	TestSpecies<Plant> Sp;
+	Sp.c = C1;
+	cout << "Cohort inside Plant species has state: " << Sp.getX(0) << '\n';
+	cout << "Cohort inside Plant species has state type: " << type_name<decltype(Sp.getX(0))>() << '\n';
+
+
+
 
 // 	Species<Plant> Sv(array<double,1> {1,2,3,4,5});
 // 	Sv.setX(0, 1.5);
