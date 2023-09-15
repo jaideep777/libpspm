@@ -11,8 +11,7 @@ class Cohort : public Ind {
 	public:
 	static int np, ng, nm, nf;   // number of evaluations of demographic functions
 
-	double x = -999;
-	std::vector<double> xn = { -999 }; // is this initialisation needed?
+	// std::array<double,dim> x; // Moved to IndividualBase
 	double u = -999;
 	int id = 0;	
 
@@ -31,113 +30,63 @@ class Cohort : public Ind {
 	}
 
 	void print_xu(std::ostream &out = std::cout){
-		out << std::setw(6)  << std::setprecision(4) << birth_time 
-		    << std::setw(12) << std::setprecision(4) << x 
-			<< std::setw(12) << std::setprecision(4) << u; 
-	}
-
-	void print_xnu(std::ostream &out = std::cout){
 		out << std::setw(6)  << std::setprecision(4) << birth_time;
-		for(int k = 0; k < xn.size(); ++k){
-			out << std::setw(12) << std::setprecision(4) << xn[k];
-		} 
+		for (auto xx : Ind::x) out << std::setw(12) << std::setprecision(4) << xx; 
 		out << std::setw(12) << std::setprecision(4) << u; 
 	}
 
-	void print_xnu(int speciesInd, double time, std::ostream &out = std::cout){
-		out << std::setw(6)  << std::setprecision(4) << time << ",";
-		out << std::setw(6)  << std::setprecision(4) << birth_time << ",";
-		for(int k = 0; k < xn.size(); ++k){ 
-			out << std::setw(12) << std::setprecision(4) << xn[k] << ",";
-		} 
-		out << std::setw(12) << std::setprecision(4) << u << ","; 
-		out << std::setw(12) << std::setprecision(4) << speciesInd; 
-	}
-
 	void print(std::ostream &out = std::cout){
-		print_xnu(out);
+		print_xu(out);
 		Ind::print(out);
 	}
 
-	void print(int speciesInd, double time, std::ostream &out = std::cout){
-		print_xnu(speciesInd, time, out);
-		Ind::print(out);
-	}
-
-	// This function is temporary until fully transitioned all solvers to multi-state format
-	void set_size(double _x){
-		x = _x;
-		std::vector<double> _xn;
-    	_xn.push_back(x);
-		set_size(_xn);
-	}
-
-	void set_size(std::vector <double> _xn){
-		xn = _xn;
+	template<size_t dim>
+	void set_size(std::array<double,dim> _x){
+		Ind::x = _x;
 		need_precompute = true;
-		Ind::set_size(_xn);
+		Ind::set_size(_x);
 	}
 	
 	
 	//  These are defined here so that precompute trigger can be 
 	//  checked before calling user-defined function 
-	void preCompute(double x, double t, void * _env){
+	template<size_t dim>
+	void preCompute(std::array<double,dim> x, double t, void * _env){
 		++np;
 		//std::cout << "cohort precompute: "; print(); std::cout << "\n";
 		Ind::preCompute(x,t,_env);	
 		need_precompute = false;   // Once precompute is called, no need to further precompute until necessary
 	}
-
-	void preCompute(std::vector <double> xn, double t, void * _env){
-		++np;
-		//std::cout << "cohort precompute: "; print(); std::cout << "\n";
-		Ind::preCompute(xn,t,_env);	
-		need_precompute = false;   // Once precompute is called, no need to further precompute until necessary
-	}
 	
-	double growthRate(double x, double t, void * _env){
+
+	template<size_t dim>
+	std::array<double,dim> growthRate(std::array<double,dim> x, double t, void * _env){
 		++ng;
 		if (need_precompute) preCompute(x,t,_env);
 		//std::cout << "cohort growthRate(): "; print(); std::cout << "\n";
 		return Ind::growthRate(x,t,_env);	
 	}
-
-	std::vector<double> growthRate(std::vector<double> xn, double t, void * _env){
-		++ng;
-		if (need_precompute) preCompute(xn,t,_env);
-		//std::cout << "cohort growthRate(): "; print(); std::cout << "\n";
-		return Ind::growthRate(xn,t,_env);	
-	}
 	
-	double mortalityRate(double x, double t, void * _env){
+
+	template<size_t dim>
+	double mortalityRate(std::array<double,dim> x, double t, void * _env){
 		++nm;
 		if (need_precompute) preCompute(x,t,_env);
 		//std::cout << "cohort mortRate(): "; print(); std::cout << "\n";
 		return Ind::mortalityRate(x,t,_env);	
 	}
 	
-	double mortalityRate(std::vector <double> xn, double t, void * _env){
-		++nm;
-		if (need_precompute) preCompute(xn,t,_env);
-		//std::cout << "cohort mortRate(): "; print(); std::cout << "\n";
-		return Ind::mortalityRate(xn,t,_env);	
-	}
 
-	double birthRate(double x, double t, void * _env){
+	template<size_t dim>
+	double birthRate(std::array<double,dim> x, double t, void * _env){
 		++nf;
 		if (need_precompute) preCompute(x,t,_env);
 		//std::cout << x << " cohort birthRate: "; print(); std::cout << "\n";
 		return Ind::birthRate(x,t,_env);	
 	}
 	
-	double birthRate(std::vector<double> xn, double t, void * _env){
-		++nf;
-		if (need_precompute) preCompute(xn,t,_env);
-		//std::cout << x << " cohort birthRate: "; print(); std::cout << "\n";
-		return Ind::birthRate(xn,t,_env);	
-	}
 
-	void save(std::ofstream &fout, int n_extra_vars){
+	void save(std::ostream &fout, int n_extra_vars){
 		// Save/restore individual first (for metadata)
 		Ind::save(fout);
 
@@ -148,9 +97,7 @@ class Cohort : public Ind {
 				, birth_time
 				, remove
 				, need_precompute); // we actually need not save need_precompute, because set_size() will always set it to 1 during restore
-		for (size_t k = 0; k < xn.size(); k++){
-			fout << xn[k] << ' ';
-		}
+		fout << Ind::x;
 		fout << u << ' ';
 
 		std::vector<double> ex_state(n_extra_vars);
@@ -159,7 +106,8 @@ class Cohort : public Ind {
 		fout << ex_state;
 	}
 
-	void restore(std::ifstream &fin, int n_extra_vars){
+
+	void restore(std::istream &fin, int n_extra_vars){
 		Ind::restore(fin);
 
 		std::string s; fin >> s; // discard version number
@@ -168,11 +116,9 @@ class Cohort : public Ind {
 		    >> remove
 		    >> need_precompute;
 
-		for (size_t k = 0; k < xn.size(); k++){
-			fin >> xn[k];
-		}
+		fin >> Ind::x;
 		fin >> u;
-		set_size(xn);
+		set_size(Ind::x);
 
 		std::vector<double> ex_state(n_extra_vars);
 		fin >> ex_state;

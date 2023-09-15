@@ -1,10 +1,8 @@
 #include <iostream>
-#include <cohort.h>
-#include <species.h>
-#include <solver.h>
 #include <vector>
 #include <environment_base.h>
 #include <individual_base.h>
+#include <cohort.h>
 using namespace std;
 
 
@@ -20,7 +18,7 @@ class LightEnv : public EnvironmentBase{
 
 
 
-class Plant {
+class Plant : public IndividualBase<1>{
 	public:
 	double lma = 30;
 
@@ -38,26 +36,22 @@ class Plant {
 		lma = _lma;
 	}
 	
-	void set_size(double x){
-		height = x;
-		crown_area = x*x;
+	void set_size(array<double,1> x){
+		height = x[0];
+		crown_area = height*height;
 	}
 
-	void preCompute(double x, double t, void * env){
+	void preCompute(array<double,1> x, double t, void * env){
 	}
 
-	void afterStep(double x, double t, void * _env){
-		//std::cout << "   After step in cohort\n";
+	array<double,1> growthRate(array<double,1> x, double t, void * env){
+		cout << "in g: " << x[0] << " " << t << " " << ((LightEnv*)env)->E << "\n";
+		return {x[0]*((LightEnv*)env)->E};
 	}
-
-	double growthRate(double x, double t, void * env){
-		cout << "in g: " << x << " " << t << " " << ((LightEnv*)env)->E << "\n";
-		return x*((LightEnv*)env)->E;
-	}
-	double mortalityRate(double x, double t, void * env){
+	double mortalityRate(array<double,1> x, double t, void * env){
 		return -0.5;
 	}
-	double birthRate(double x, double t, void * env){
+	double birthRate(array<double,1> x, double t, void * env){
 		return 1;
 	}
 	
@@ -65,18 +59,19 @@ class Plant {
 		return 1;
 	}
 
-	double init_density(double x, void * _env, double bf){
-		return 5/(x+0.5);
+	double init_density(array<double,1> x, void * _env, double bf){
+		return 5/(x[0]+0.5);
 	}
 
 	void init_state(double t, void * env){
-		root_mass = 10;
+		root_mass = 0;
 	}
 
 	vector<double>::iterator set_state(vector<double>::iterator &it){
 		root_mass = *it++;
 		return it;
 	}
+
 	vector<double>::iterator get_state(vector<double>::iterator &it){
 		*it++ = root_mass;
 		return it;
@@ -88,7 +83,8 @@ class Plant {
 	}
 
 	void print(std::ostream& out = std::cout){
-		out << lma << "|\t" << height << "\t" << crown_area << "\t" << root_mass << "\t";
+		out << std::setw(6) << std::setprecision(4) 
+		    << lma << "\t" << height << "\t" << crown_area << "\t" << root_mass << "\t";
 	}
 	
 	void save(std::ofstream& fout){
@@ -99,53 +95,41 @@ class Plant {
 };
 
 
-class Insect : public IndividualBase{
+class Insect : public IndividualBase<2>{
 	public:
+	double w; // weight
+	double e; // energy
 	double wingspan = 10;
 	
-	double g = -1, m = -1, f = -1;
+	double m = -1, f = -1;
+	array<double,2> g;
 
 	vector<string> varnames = {"wing", "f"};
 	
-	double init_density(double x, void * _env, double bf){
-		return x/10;
+	double init_density(array<double,2> x, void * _env, double bf){
+		return x[0]*x[1]/10;
 	}
 
-	void init_state(double t, void * env){
+	void set_size(array<double,2> x){
+		w = x[0];
+		e = x[1];
+		wingspan = 2*w;	
 	}
 
-	void set_size(double x){
-		wingspan = 2*x;	
+	void preCompute(array<double,2> x, double t, void * env){
+		LightEnv * le = static_cast<LightEnv*>(env);
+		f = 0.1*w;
+		g = {w*0.1, le->E*0.1};
+		m = w/e;
 	}
 
-	void preCompute(double x, double t, void * env){
-		f = x*100+t;
-		g = x*50*t;
-		m = 0.1;
-	}
-
-	void afterStep(double x, double t, void * _env){
-		//std::cout << "   After step in cohort\n";
-	}
-
-	vector<double>::iterator set_state(vector<double>::iterator &it){
-		return it;
-	}
-	vector<double>::iterator get_state(vector<double>::iterator &it){
-		return it;
-	}
-
-	vector<double>::iterator get_rates(vector<double>::iterator &it){
-		return it;
-	}
-	
-	double growthRate(double x, double t, void * env){
+	array<double,2> growthRate(array<double,2> x, double t, void * env){
 		return g;
 	}
-	double mortalityRate(double x, double t, void * env){
+	double mortalityRate(array<double,2> x, double t, void * env){
 		return m;
 	}
-	double birthRate(double x, double t, void * env){
+	double birthRate(array<double,2> x, double t, void * env){
 		return f;
 	}
 
@@ -154,7 +138,9 @@ class Insect : public IndividualBase{
 	}
 
 	void print(std::ostream& out = std::cout){
-		out << wingspan << "\t" << f << "\t";
+		out << std::setw(10) << std::setprecision(4) 
+		    << w << '\t' << e << '\t'
+			<< wingspan << '\t' << f << "\t";
 	}
 };
 
@@ -162,7 +148,10 @@ class Insect : public IndividualBase{
 
 int main(){
 
+	LightEnv E;
+
 	Plant P;
+	P.set_size({2});
 	cout << "P: "; P.print(); cout << "\n";
 
 	P.lma = 70;
@@ -170,49 +159,65 @@ int main(){
 	C1 = Cohort<Plant> (P);
 	cout << "C1: "; C1.print(); cout << "\n";
 
+	Insect I1;
+	I1.set_size({10, 90});
+	cout << "I: "; I1.print(); cout << "\n";
 
-	Species<Plant> Sv(vector<double> {1,2,3,4,5});
-	Sv.setX(0, 1.5);
-	Sv.setX(2, 3.5);
-	Sv.print();
+	Cohort<Insect> C2(I1);
+	cout << "C2: "; C2.print(); cout << "\n";
 
-	Species<Plant> S(P);  // create species S with prototype P
+	C2.set_size(array<double,2>{40,60});
+	cout << "C2: "; C2.print(); cout << "\n";
 
-	Species<Insect> I(vector<double> {1.1,2.1,3.1});
+	E.computeEnv(1, nullptr, vector<double>().begin(), vector<double>().begin());
+	cout << "Env @ t = 1: " << E.E << '\n';
+	C2.preCompute(array<double,2>{0,0}, 1, &E);
+	cout << "Insect g/m/f: " << C2.g << " / " << C2.m << " / " << C2.f << '\n';
 
-	Species_Base * S1 = &S;
-	//S1->print();
-	cout << "S size: " << S1->get_maxSize() << "\n";
+	C2.save(cout, 0);
 
-	Species_Base * S2 = &I;
-	//S2->print();
-	cout << "I size: " << S2->get_maxSize() << "\n";
+// 	Species<Plant> Sv(array<double,1> {1,2,3,4,5});
+// 	Sv.setX(0, 1.5);
+// 	Sv.setX(2, 3.5);
+// 	Sv.print();
 
-	LightEnv env;
+// 	Species<Plant> S(P);  // create species S with prototype P
 
-	Solver sol(SOLVER_EBT);
-	sol.setEnvironment(&env);
-	sol.addSpecies(vector<double> {1,2,3,4,5}, &S, 1, 1);
-	sol.addSpecies(vector<double> {1.1,2.1,3.1}, &I, 0, 1);
-	sol.resetState();
-	sol.initialize();
-	//sol.addCohort_EBT();
-	sol.print();	
+// 	Species<Insect> I(array<double,1> {1.1,2.1,3.1});
 
-	I.setX(2, 0.05);
-	I.setU(2, 0.2);
-	sol.print();	
-	cout << "Insect BF = " << sol.calcSpeciesBirthFlux(1,0) << "\n";
+// 	Species_Base * S1 = &S;
+// 	//S1->print();
+// 	cout << "S size: " << S1->get_maxSize() << "\n";
+
+// 	Species_Base * S2 = &I;
+// 	//S2->print();
+// 	cout << "I size: " << S2->get_maxSize() << "\n";
+
+// 	LightEnv env;
+
+// 	Solver sol(SOLVER_EBT);
+// 	sol.setEnvironment(&env);
+// 	sol.addSpecies(array<double,1> {1,2,3,4,5}, &S, 1, 1);
+// 	sol.addSpecies(array<double,1> {1.1,2.1,3.1}, &I, 0, 1);
+// 	sol.resetState();
+// 	sol.initialize();
+// 	//sol.addCohort_EBT();
+// 	sol.print();	
+
+// 	I.setX(2, 0.05);
+// 	I.setU(2, 0.2);
+// 	sol.print();	
+// 	cout << "Insect BF = " << sol.calcSpeciesBirthFlux(1,0) << "\n";
 	
-//	sol.preComputeSpecies(1,0);
-	sol.print();	
-	cout << "Insect BF (after precompute) = " << sol.calcSpeciesBirthFlux(1,0) << "\n";
+// //	sol.preComputeSpecies(1,0);
+// 	sol.print();	
+// 	cout << "Insect BF (after precompute) = " << sol.calcSpeciesBirthFlux(1,0) << "\n";
 
-	Cohort<Plant> C;
-	C.print(); cout << "\n";
-	C.set_size(10);
-	C.print(); cout << "\n";
-	cout << C.growthRate(C.height, 0, sol.env) << "\n";
+// 	Cohort<Plant> C;
+// 	C.print(); cout << "\n";
+// 	C.set_size(10);
+// 	C.print(); cout << "\n";
+// 	cout << C.growthRate(C.height, 0, sol.env) << "\n";
 
 }
 
