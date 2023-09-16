@@ -119,7 +119,7 @@ class Insect : public IndividualBase<2>{
 		cout << "Insect::Precompute()\n";
 		LightEnv * le = static_cast<LightEnv*>(env);
 		f = 0.1*w;
-		g = {w*0.1, le->E*0.1};
+		g = {w*e*0.1, le->E*w*0.1};
 		m = w/e;
 	}
 

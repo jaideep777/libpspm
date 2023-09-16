@@ -131,9 +131,11 @@ int main(){
 	
 	auto g1 = Si.growthRate(2, 1, &E); // cohort 2 {0.5, 5}
 	cout << g1 << '\n';
-	nerrors += check(g1, {0.05, 0.1});
+	{
+	nerrors += check(g1, {0.5*5*0.1, 1*0.5*0.1});
 	nerrors += check(Si.mortalityRate(2, 1, &E), 0.5/5);
 	nerrors += check(Si.birthRate(2, 1, &E), 0.05);
+	}
 
 	cout << "Testing removal of a specific cohort\n-----------------------\n";
 	Si.markCohortForRemoval(1);
@@ -152,7 +154,45 @@ int main(){
 	Si.print();
 	nerrors += check_species_states(Si, {20, 10, 0.5, 5, 100, 0.02, 1000, 1e-4});
 
+
+	cout << "Testing addCohort()\n-----------------------\n";
+	Si.addCohort();
+	Si.print();
+	nerrors += check_species_states(Si, {20, 10, 0.5, 5, 100, 0.02, 1000, 1e-4, 0.5, 0.01});
+
+
 	nerrors += check(Sp.growthRate(2, 1, &E), {32});
+
+
+	cout << "Testing mortalityRateGradient()\n-----------------------\n";
+	vector<double> m_mx = Si.mortalityRateGradient(0, 1, &E, {1e-6, 1e-6});
+	cout << "Mort rate gradient = " << m_mx << '\n';
+	{
+	auto& c = Si.getCohort(0);
+	nerrors += check(m_mx, {c.w/c.e, 1/c.e, -c.w/c.e/c.e});
+	//                        ^ This is analytical gradient calculation
+	}
+
+
+	// JJ FIXME: Double check this calculation.
+	cout << "Testing growthRateGradient()\n-----------------------\n";
+	vector<vector<double>> g_gx = Si.growthRateGradient(0, 1, &E, {1e-6, 1e-5});
+	cout << "Growth rate gradient:\n";
+	for (int i=0; i<Si.istate_size+1; ++i){
+		cout << vector<std::string>{"   g:"," gx1:", " gx2:"}[i] << " ";
+		for (int j=0; j<Si.istate_size; ++j){
+			cout << setw(10) << g_gx[i][j] << ' ';
+		}
+		if (i==0) cout << "\n----------------------------";
+		cout << '\n';
+	}
+	nerrors += check(g_gx[0], {20, 2});
+	{
+	auto& c = Si.getCohort(0);
+	nerrors += check(g_gx[1], {c.e*0.1, E.E*0.1});
+	nerrors += check(g_gx[2], {c.w*0.1, 0});
+	//                        ^ This is analytical gradient calculation
+	}
 
 
 

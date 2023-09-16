@@ -361,48 +361,41 @@ std::vector<double> Species<Model>::growthRate(int i, double t, void * env){
 // }
 
 
-// template <class Model>
-// std::vector<std::vector<double>> Species<Model>::growthRateGradient(int i, std::vector<double> x, double t, void * env, std::vector<double> grad_dx){
+// Return format:
+//    [ k--->
+//  j   [ g1       g2       gk       g4       ... ]
+//  |   [ --------------------------------------- ]
+//  |   [ dg1_dx1  dg2_dx1  ...      dg4_dx1  ... ]
+//  v   [ dg1_dx2  dg2_dx2  dgk_dxj  dg4_dx2  ... ]
+//      [ ...                                     ]
+//    ]
+template <class Model>
+std::vector<std::vector<double>> Species<Model>::growthRateGradient(int i, double t, void * env, std::vector<double> grad_dx){
 
-// 	// std::cout << "Species::growthRateGradient" << std::endl;
-// 	// std::cout << "x:\t" << x << std::endl;
-// 	// std::cout << "i:\t" << i << std::endl;
-// 	// std::cout << "grad_dx:\t" << grad_dx << std::endl;
-// 	Cohort<Model> &c = (i<0)? boundaryCohort : cohorts[i];
+	Cohort<Model> &c = (i<0)? boundaryCohort : cohorts[i];
 
-// 	// std::cout << "c.x:\t" << c.x << std::endl;
+	std::vector<std::vector<double>> g_gx;
+	g_gx.reserve(istate_size+1);
 
+	std::vector<double> g = to_vector(c.growthRate(t,env));
+	g_gx.push_back(g);
 
-// 	std::vector<double> g = c.growthRate(c.x,t,env);
-// 	// std::cout << "g = c.growthRate(c.x,t,env):\t" << g << std::endl; 
+	for(int k=0; k < istate_size; ++k){
+		Cohort<Model> cplus = c;
+		std::vector<double> xplus(c.x.begin(), c.x.end());
+		xplus[k] += grad_dx[k];	// FIXME: JJ: should we normalize here by maxSize[k]?
+		cplus.set_size(xplus);
+		std::vector<double> gplus_k = to_vector(cplus.growthRate(t, env));
+		std::vector<double> gx(istate_size);
+		for (int j=0; j<istate_size; ++j){
+			gx[j] = (gplus_k[j] - g[j])/grad_dx[k];
+		}
 
-
-
-// 	std::vector<double> gplus(c.state_size);
-
-// 	for(int k= 0; k < c.state_size; ++k){
-// 		Cohort<Model> cplus = c;
-// 		std::vector<double> _x = c.x;
-// 		// std::cout << "k:\t" << k << std::endl;
-// 		// std::cout << "_x:\t" << _x << std::endl;
-// 		// std::cout << "grad_dx[k]:\t" << grad_dx[k] << std::endl;
-
-// 		_x[k] = _x[k] + grad_dx[k];
-// 		// std::cout << "_x:\t" << _x << std::endl;
-// 		cplus.set_size(_x);
-
-// 		// std::cout << "cplus.x:\t" << cplus.x << std::endl;
-// 		std::vector<double> gplus_k = cplus.growthRate(t, env);
-
-// 		// std::cout << "gplus_k:\t" << gplus_k[k] << std::endl;
-// 		gplus[k] = ((gplus_k[k]-g[k])/grad_dx[k]);
-// 	}
+		g_gx.push_back(gx);
+	}
 	
-// 	std::vector<double> out;
-// 	// out.insert(g.begin(), g.end());
-// 	out.insert(out.end(), gplus.begin(), gplus.end());
-// 	return out;
-// }
+	return g_gx;
+}
 
 
 // // template <class Model>
@@ -431,28 +424,35 @@ double Species<Model>::mortalityRate(int i, double t, void * env){
 	return c.mortalityRate(t,env);
 }
 
+// Return format:
+//    [
+//    m
+//    ---
+//    dm_dx1
+//    dm_dx2
+//    ...
+//    ]
+template <class Model>
+std::vector<double> Species<Model>::mortalityRateGradient(int i, double t, void * env, const std::vector<double>& grad_dx){
+	Cohort<Model> &c = (i<0)? boundaryCohort : cohorts[i];
 
-// template <class Model>
-// std::vector<double> Species<Model>::mortalityRateGradient(int i, std::vector<double> x, double t, void * env, std::vector<double> grad_dx){
-// 	Cohort<Model> &c = (i<0)? boundaryCohort : cohorts[i];
+	std::vector<double> m_dmdx;
+	m_dmdx.reserve(istate_size+1);
 
-// 	double g = c.mortalityRate(c.x,t,env);
-// 	std::vector<double> gplus;
+	double m = c.mortalityRate(t,env);
+	m_dmdx.push_back(m);
 
-// 	for(int k= 0; k < x.size(); ++k){
-// 		Cohort<Model> cplus = c;
-// 		std::vector<double> _x = x;
-// 		_x[k] += grad_dx[k];
-// 		cplus.set_size(_x);
-// 		double gplus_k = cplus.mortalityRate(cplus.x, t, env);
-// 		gplus.push_back((gplus_k-g)/grad_dx[k]);
-// 	}
+	for(int k=0; k < istate_size; ++k){
+		Cohort<Model> cplus = c;
+		std::vector<double> xplus(c.x.begin(), c.x.end());
+		xplus[k] += grad_dx[k];	// FIXME: JJ: should we normalize here by maxSize[k]?
+		cplus.set_size(xplus);
+		double mplus_k = cplus.mortalityRate(t, env);
+		m_dmdx.push_back( (mplus_k-m)/grad_dx[k] );
+	}
 	
-// 	std::vector<double> out;
-// 	out.push_back(g);
-// 	out.insert(out.end(), gplus.begin(), gplus.end());
-// 	return out;
-// }
+	return m_dmdx;
+}
 	
 
 template <class Model>
@@ -467,30 +467,14 @@ double Species<Model>::birthRate(int i, double t, void * env){
 // }
 
 
-// template <class Model>
-// void Species<Model>::addCohort(int n){
-// 	// std::cout << "In add cohort, adding n " << n << std::endl;
-
-// 	if (n > cohorts.max_size()){
-// 		std::cout << "requested n = " << n << " is greater than max_size = " << cohorts.max_size() << std::endl;
-// 	}
-
-// 	// std::cout << "In add cohort before going through n" << 	std::endl;
-
-// 	// std::cout << x << std::endl;
-// 	// std::cout << J << std::endl;
-
-// 	cohorts.reserve(cohorts.size()+n);
-// 	for (int i=0; i<n; ++i){
-// 		cohorts.push_back(boundaryCohort);
-// 		++J;
-// 	}
-	
-// 	// std::cout << "In add cohort after going through n" << 	std::endl;
-
-// 	// std::cout << cohorts.size() << std::endl;
-// 	// std::cout << J << std::endl;
-// }
+template <class Model>
+void Species<Model>::addCohort(int n){
+	cohorts.reserve(cohorts.size()+n);
+	for (int i=0; i<n; ++i){
+		cohorts.push_back(boundaryCohort);
+		++J;
+	}
+}
 
 
 // This function allows a user to add a custom cohort to the species any time.
@@ -520,59 +504,59 @@ void Species<Model>::removeMarkedCohorts(){
 }
 
 
-// // template <class Model>
-// // void Species<Model>::removeDensestCohort(){
-// // 	if (cohorts.size() < 3) return; // do nothing if there are 2 or fewer cohorts
-// // 	int i_min = 0;
-// // 	double dx_min = dXn(next_xn_asc(cohorts[i_min].xn), next_xn_desc(cohorts[i_min].xn));
-// // 	std::vector<double> maxCohort = get_maxSizeN();
-// // 	if(cohorts[i_min].xn == maxCohort){ //this should be executed at most twice
-// // 		i_min = ++i_min;
-// // 		double dx_min = dXn(next_xn_asc(cohorts[i_min].xn), next_xn_desc(cohorts[i_min].xn));
-// // 	}
+template <class Model>
+void Species<Model>::removeDensestCohort(){
+// 	if (cohorts.size() < 3) return; // do nothing if there are 2 or fewer cohorts
+// 	int i_min = 0;
+// 	double dx_min = dXn(next_xn_asc(cohorts[i_min].xn), next_xn_desc(cohorts[i_min].xn));
+// 	std::vector<double> maxCohort = get_maxSizeN();
+// 	if(cohorts[i_min].xn == maxCohort){ //this should be executed at most twice
+// 		i_min = ++i_min;
+// 		double dx_min = dXn(next_xn_asc(cohorts[i_min].xn), next_xn_desc(cohorts[i_min].xn));
+// 	}
 
-// // 	for (int i=(i_min + 1); i<J-1; ++i){ // skip first and last cohorts
-// // 		if(maxCohort == cohorts[i].xn){
-// // 			continue;
-// // 		}
-// // 		double dx = dXn(next_xn_asc(cohorts[i].xn), next_xn_desc(cohorts[i].xn));
-// // 		if (dx < dx_min){
-// // 			dx_min = dx;
-// // 			i_min = i;
-// // 		}
-// // 	}
+// 	for (int i=(i_min + 1); i<J-1; ++i){ // skip first and last cohorts
+// 		if(maxCohort == cohorts[i].xn){
+// 			continue;
+// 		}
+// 		double dx = dXn(next_xn_asc(cohorts[i].xn), next_xn_desc(cohorts[i].xn));
+// 		if (dx < dx_min){
+// 			dx_min = dx;
+// 			i_min = i;
+// 		}
+// 	}
 
-// // 	//std::cout << "Removing cohort no. " << i_min << std::endl;
-// // 	cohorts.erase(cohorts.begin()+i_min);
-// // 	--J;
-// // }
+// 	//std::cout << "Removing cohort no. " << i_min << std::endl;
+// 	cohorts.erase(cohorts.begin()+i_min);
+// 	--J;
+}
 
 
-// // Jaideep FIXME: Maybe dxcut need not be a vector... in any case, it will be hard to specify it as a control parameter when dim is not known. 
-// // Instead, we can use a relative dxcut across all dims
-// template <class Model>
-// void Species<Model>::removeDenseCohorts(std::vector<double> dxcut){
-// 	// // mark cohorts to remove; skip 1st and last cohort
-// 	// if (cohorts.size() < 3) return; // do nothing if there are 2 or fewer cohorts
-// 	// std::vector<double> maxCohort = get_maxSizeN();
+// Jaideep FIXME: Maybe dxcut need not be a vector... in any case, it will be hard to specify it as a control parameter when dim is not known. 
+// Instead, we can use a relative dxcut across all dims
+template <class Model>
+void Species<Model>::removeDenseCohorts(std::vector<double> dxcut){
+	// // mark cohorts to remove; skip 1st and last cohort
+	// if (cohorts.size() < 3) return; // do nothing if there are 2 or fewer cohorts
+	// std::vector<double> maxCohort = get_maxSizeN();
 	
-// 	// for (int i=0; i<J-1; i+=2){
-// 	// 	if(maxCohort == cohorts[i].x){
-// 	// 		continue;
-// 	// 	}
-// 	// 	std::vector<double> dx_lo = cohort_dist(next_xn_asc(cohorts[i].xn), cohorts[i].xn);
-// 	// 	std::vector<double> dx_hi = cohort_dist(cohorts[i].xn, next_xn_desc(cohorts[i].xn));
+	// for (int i=0; i<J-1; i+=2){
+	// 	if(maxCohort == cohorts[i].x){
+	// 		continue;
+	// 	}
+	// 	std::vector<double> dx_lo = cohort_dist(next_xn_asc(cohorts[i].xn), cohorts[i].xn);
+	// 	std::vector<double> dx_hi = cohort_dist(cohorts[i].xn, next_xn_desc(cohorts[i].xn));
 
-// 	// 	if (dx_lo < dxcut || dx_hi < dxcut) cohorts[i].remove = true;
-// 	// }
+	// 	if (dx_lo < dxcut || dx_hi < dxcut) cohorts[i].remove = true;
+	// }
 
-// 	// // remove marked cohorts
-// 	// auto it_end = std::remove_if(cohorts.begin(), cohorts.end(), [](Cohort<Model> &c){return c.remove;});
-// 	// cohorts.erase(it_end, cohorts.end());
+	// // remove marked cohorts
+	// auto it_end = std::remove_if(cohorts.begin(), cohorts.end(), [](Cohort<Model> &c){return c.remove;});
+	// cohorts.erase(it_end, cohorts.end());
 
-// 	// // reset size
-// 	// J = cohorts.size();
-// }
+	// // reset size
+	// J = cohorts.size();
+}
 
 template <class Model>
 void Species<Model>::removeDeadCohorts(double ucut){

@@ -17,7 +17,6 @@ class Species_Base{
 
 	protected: // private members
 	int J;	
-	size_t istate_size;
 	int n_extra_statevars;
 
 	std::list<double> birth_flux_out_history;                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    
@@ -33,6 +32,7 @@ class Species_Base{
 	double noff_abm = 0; // used by ABM solver to insert offspring
 
 	public:
+	size_t istate_size;
 	double birth_flux_in;
 	
 	//debug only
@@ -91,21 +91,21 @@ class Species_Base{
 	// // TODO: argument x can probably be removed from these functions
 	virtual std::vector<double> growthRate(int i, double t, void * env) = 0;
 	// virtual std::vector<double> growthRateOffset(int i, std::vector<double> x, double t, void * env) = 0;
-	// std::vector<std::vector<double>> growthRateGradient(int i, std::vector<double> x, double t, void * env, std::vector<double> grad_dx) = 0;
+	virtual std::vector<std::vector<double>> growthRateGradient(int i, double t, void * env, std::vector<double> grad_dx) = 0;
 	// // virtual std::vector<double> growthRateGradientCentered(int i, double xplus, double xminus, double t, void * env) = 0;
 	virtual double mortalityRate(int i, double t, void * env) = 0;
-	// virtual std::vector<double> mortalityRateGradient(int i, std::vector<double> x, double t, void * env, std::vector<double> grad_dx) = 0;
+	virtual std::vector<double> mortalityRateGradient(int i, double t, void * env, const std::vector<double>& grad_dx) = 0;
 	virtual double birthRate(int i, double t, void * env) = 0;
 	// virtual void getExtraRates(std::vector<double>::iterator &it) = 0;
 
-	// virtual void addCohort(int n = 1) = 0;
+	virtual void addCohort(int n = 1) = 0;
 	template<class T> void addCohort(T bc);
 
 	virtual void markCohortForRemoval(int i) = 0;
 	virtual void removeMarkedCohorts() = 0;
-	// virtual void removeDensestCohort() = 0;
-	// virtual void removeDenseCohorts(std::vector<double> dxcut) = 0;
-	// virtual void removeDeadCohorts(double ucut) = 0;
+	virtual void removeDensestCohort() = 0;
+	virtual void removeDenseCohorts(std::vector<double> dxcut) = 0;
+	virtual void removeDeadCohorts(double ucut) = 0;
 	// virtual void mergeCohortsAddU(std::vector<double> dxcut) = 0;
 
 	virtual void sortCohortsDescending(size_t dim, int skip=0) = 0;
@@ -176,20 +176,23 @@ class Species : public Species_Base{
 	// // TODO: argument x can probably be removed from these functions
 	std::vector<double> growthRate(int i, double t, void * env);
 	// std::vector<double> growthRateOffset(int i, std::vector<double> x, double t, void * env);
-	// std::vector<std::vector<double>> growthRateGradient(int i, std::vector<double> x, double t, void * env, std::vector<double> grad_dx);
+	std::vector<std::vector<double>> growthRateGradient(int i, double t, void * env, std::vector<double> grad_dx);
 	// // std::vector<double> growthRateGradientCentered(int i, double xplus, double xminus, double t, void * env);
 	double mortalityRate(int i, double t, void * env);
-	// std::vector<double> mortalityRateGradient(int i, std::vector<double> x, double t, void * env, std::vector<double> grad_dx);
+	std::vector<double> mortalityRateGradient(int i, double t, void * env, const std::vector<double>& grad_dx);
 	double birthRate(int i, double t, void * env);
 	// void getExtraRates(std::vector<double>::iterator &it);
 
-	// void addCohort(int n = 1);
+	void addCohort(int n = 1);
 	template<class T> void addCohort(T bc);
 
 	void markCohortForRemoval(int i);
 	void removeMarkedCohorts();
-	// void removeDensestCohort();
-	// void removeDenseCohorts(std::vector<double> dxcut);
+	// JJ Note: A sorting-independent way to implement the following would be to use FoF algo. 
+	//          Postponing this to later. For now, these cohorts do nothing. In any case, they are only required by CM, 
+	//          and for current purposes, its ok if cohorts are not removed
+	void removeDensestCohort();
+	void removeDenseCohorts(std::vector<double> dxcut);
 	void removeDeadCohorts(double ucut);
 	// void mergeCohortsAddU(std::vector<double> dxcut);
 
