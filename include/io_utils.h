@@ -7,6 +7,7 @@
 #include <vector>
 #include <array>
 #include <iomanip>
+#include <string_view>
 
 // print a vector via ofstream
 // prints: size | v1 v2 v3 ...
@@ -17,7 +18,7 @@ std::ostream& operator << (std::ostream &os, const std::vector<T> &v) {
 	for (const auto &x : v) {
 		os << x << ' ';
 	}
-	os << '\n'; // FIXME: remove this newline and insert newline in every save() function
+	// os << '\n'; // FIXME: remove this newline and insert newline in every save() function
 	return os;
 }
 
@@ -68,6 +69,35 @@ std::ostream& operator<<(std::ostream& os, const std::tuple<Ts...> t) {
     return os;
 }
 
+
+// Convert an array to a vector
+template <class T, size_t n>
+std::vector<T> to_vector(const std::array<T,n>& a){
+	return std::vector<T>(a.begin(), a.end());
+}
+
+
+// Get the type of an object as a string
+template <typename T>
+constexpr auto type_name() {
+  std::string_view name, prefix, suffix;
+#ifdef __clang__
+  name = __PRETTY_FUNCTION__;
+  prefix = "auto type_name() [T = ";
+  suffix = "]";
+#elif defined(__GNUC__)
+  name = __PRETTY_FUNCTION__;
+  prefix = "constexpr auto type_name() [with T = ";
+  suffix = "]";
+#elif defined(_MSC_VER)
+  name = __FUNCSIG__;
+  prefix = "auto __cdecl type_name<";
+  suffix = ">(void)";
+#endif
+  name.remove_prefix(prefix.size());
+  name.remove_suffix(suffix.size());
+  return name;
+}
 
 
 #endif

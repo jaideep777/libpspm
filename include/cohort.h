@@ -4,6 +4,7 @@
 #include <iostream>
 #include <iomanip>
 #include <fstream>
+#include <limits>
 #include "io_utils.h"
 
 template<class Ind>
@@ -12,7 +13,7 @@ class Cohort : public Ind {
 	static int np, ng, nm, nf;   // number of evaluations of demographic functions
 
 	// std::array<double,dim> x; // Moved to IndividualBase
-	double u = -999;
+	double u = std::numeric_limits<double>::quiet_NaN();
 	int id = 0;	
 
 	double birth_time = 0;
@@ -27,6 +28,13 @@ class Cohort : public Ind {
 
 	// Construct a cohort from Individual using copy constructor of Individual
 	Cohort(const Ind& _ind) : Ind(_ind){
+		// std::cout << "Constructing cohort form Individual:\n"; 
+		// _ind.print();
+		// std::cout << '\n';
+		// Ind::print();
+		// std::cout << '\n';
+		// print();
+		// std::cout << '\n';
 	}
 
 	void print_xu(std::ostream &out = std::cout){
@@ -40,49 +48,44 @@ class Cohort : public Ind {
 		Ind::print(out);
 	}
 
-	template<size_t dim>
-	void set_size(std::array<double,dim> _x){
-		Ind::x = _x;
-		need_precompute = true;
-		Ind::set_size(_x);
+	void set_size(const std::vector<double>& _x){
+		std::copy(_x.begin(), _x.end(), Ind::x.begin());
+		need_precompute = true; // when size is updated, next rate calc will need precompute
+		Ind::set_size(Ind::x);
 	}
-	
+
 	
 	//  These are defined here so that precompute trigger can be 
 	//  checked before calling user-defined function 
-	template<size_t dim>
-	void preCompute(std::array<double,dim> x, double t, void * _env){
+	void preCompute(double t, void * _env){
 		++np;
-		//std::cout << "cohort precompute: "; print(); std::cout << "\n";
-		Ind::preCompute(x,t,_env);	
+		// std::cout << "cohort precompute: "; print(); std::cout << "\n";
+		Ind::preCompute(t,_env);	
 		need_precompute = false;   // Once precompute is called, no need to further precompute until necessary
 	}
 	
 
-	template<size_t dim>
-	std::array<double,dim> growthRate(std::array<double,dim> x, double t, void * _env){
+	decltype(Ind::x) growthRate(double t, void * _env){
 		++ng;
-		if (need_precompute) preCompute(x,t,_env);
-		//std::cout << "cohort growthRate(): "; print(); std::cout << "\n";
-		return Ind::growthRate(x,t,_env);	
+		if (need_precompute) preCompute(t,_env);
+		// std::cout << "cohort growthRate(): "; print(); std::cout << "\n";
+		return Ind::growthRate(t,_env);
 	}
 	
 
-	template<size_t dim>
-	double mortalityRate(std::array<double,dim> x, double t, void * _env){
+	double mortalityRate(double t, void * _env){
 		++nm;
-		if (need_precompute) preCompute(x,t,_env);
-		//std::cout << "cohort mortRate(): "; print(); std::cout << "\n";
-		return Ind::mortalityRate(x,t,_env);	
+		if (need_precompute) preCompute(t,_env);
+		// std::cout << "cohort mortRate(): "; print(); std::cout << "\n";
+		return Ind::mortalityRate(t,_env);	
 	}
 	
 
-	template<size_t dim>
-	double birthRate(std::array<double,dim> x, double t, void * _env){
+	double birthRate(double t, void * _env){
 		++nf;
-		if (need_precompute) preCompute(x,t,_env);
-		//std::cout << x << " cohort birthRate: "; print(); std::cout << "\n";
-		return Ind::birthRate(x,t,_env);	
+		if (need_precompute) preCompute(t,_env);
+		// std::cout << "cohort birthRate: "; print(); std::cout << "\n";
+		return Ind::birthRate(t,_env);	
 	}
 	
 
@@ -91,19 +94,18 @@ class Cohort : public Ind {
 		Ind::save(fout);
 
 		// Then save cohort (for cohort state). This way, Individual metadata will be available when set_size() and set_state() are called in restore()
-		fout << "Cohort<Ind>::v1" << "   ";
+		fout << "Cohort<Ind>::v2" << "   ";
 		fout << std::make_tuple(
 				  id
 				, birth_time
 				, remove
 				, need_precompute); // we actually need not save need_precompute, because set_size() will always set it to 1 during restore
-		fout << Ind::x;
-		fout << u << ' ';
+		fout << Ind::x << ' ' << u << ' ';
 
-		std::vector<double> ex_state(n_extra_vars);
-		auto it = ex_state.begin();
-		Ind::get_state(it);
-		fout << ex_state;
+		std::vector<double> cumm_vars(n_extra_vars);
+		auto it = cumm_vars.begin();
+		Ind::get_accumulators(it);
+		fout << cumm_vars << '\n';
 	}
 
 
@@ -116,14 +118,13 @@ class Cohort : public Ind {
 		    >> remove
 		    >> need_precompute;
 
-		fin >> Ind::x;
-		fin >> u;
+		fin >> Ind::x >> u;
 		set_size(Ind::x);
 
-		std::vector<double> ex_state(n_extra_vars);
-		fin >> ex_state;
-		auto it = ex_state.begin();
-		Ind::set_state(it);
+		std::vector<double> cumm_vars(n_extra_vars);
+		fin >> cumm_vars;
+		auto it = cumm_vars.begin();
+		Ind::set_accumulators(it);
 	}
 	
 	// FIXME other env dependent rates should also check for precompute

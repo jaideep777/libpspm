@@ -8,6 +8,7 @@ inst/website
 *.png
 *.pdf 
 *.xlsx
+*.csv
 gprof2dot.py
 
 *~
