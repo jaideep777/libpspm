@@ -504,20 +504,20 @@ void Species<Model>::addCohort(T bc){
 }
 
 
-// template <class Model>
-// void Species<Model>::markCohortForRemoval(int i){
-// 	cohorts[i].remove = true;
-// }
+template <class Model>
+void Species<Model>::markCohortForRemoval(int i){
+	cohorts[i].remove = true;
+}
 
-// template <class Model>
-// void Species<Model>::removeMarkedCohorts(){
-// 	// remove marked cohorts
-// 	auto it_end = std::remove_if(cohorts.begin(), cohorts.end(), [](Cohort<Model> &c){return c.remove;});
-// 	cohorts.erase(it_end, cohorts.end());
+template <class Model>
+void Species<Model>::removeMarkedCohorts(){
+	// remove marked cohorts
+	auto it_end = std::remove_if(cohorts.begin(), cohorts.end(), [](Cohort<Model> &c){return c.remove;});
+	cohorts.erase(it_end, cohorts.end());
 	
-// 	// reset size
-// 	J = cohorts.size();
-// }
+	// reset size
+	J = cohorts.size();
+}
 
 
 // // template <class Model>
@@ -574,20 +574,15 @@ void Species<Model>::addCohort(T bc){
 // 	// J = cohorts.size();
 // }
 
-// template <class Model>
-// void Species<Model>::removeDeadCohorts(double ucut){
-// 	// mark cohorts to remove; skip pi0-cohort (index J-1)
-// 	for (int i=0; i<J-1; ++i){
-// 		if (cohorts[i].u < ucut) cohorts[i].remove = true;
-// 	}
+template <class Model>
+void Species<Model>::removeDeadCohorts(double ucut){
+	// mark cohorts to remove; skip pi0-cohort (index J-1)
+	for (int i=0; i<J-1; ++i){
+		if (cohorts[i].u < ucut) cohorts[i].remove = true;
+	}
 
-// 	// remove marked cohorts
-// 	auto it_end = std::remove_if(cohorts.begin(), cohorts.end(), [](Cohort<Model> &c){return c.remove;});
-// 	cohorts.erase(it_end, cohorts.end());
-
-// 	// reset size
-// 	J = cohorts.size();
-// }
+	removeMarkedCohorts();
+}
 
 
 // // Jaideep FIXME: Maybe dxcut need not be a vector... in any case, it will be hard to specify it as a control parameter when dim is not known. 

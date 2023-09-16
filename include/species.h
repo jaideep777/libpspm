@@ -101,8 +101,8 @@ class Species_Base{
 	// virtual void addCohort(int n = 1) = 0;
 	template<class T> void addCohort(T bc);
 
-	// virtual void markCohortForRemoval(int i) = 0;
-	// virtual void removeMarkedCohorts() = 0;
+	virtual void markCohortForRemoval(int i) = 0;
+	virtual void removeMarkedCohorts() = 0;
 	// virtual void removeDensestCohort() = 0;
 	// virtual void removeDenseCohorts(std::vector<double> dxcut) = 0;
 	// virtual void removeDeadCohorts(double ucut) = 0;
@@ -186,11 +186,11 @@ class Species : public Species_Base{
 	// void addCohort(int n = 1);
 	template<class T> void addCohort(T bc);
 
-	// void markCohortForRemoval(int i);
-	// void removeMarkedCohorts();
+	void markCohortForRemoval(int i);
+	void removeMarkedCohorts();
 	// void removeDensestCohort();
 	// void removeDenseCohorts(std::vector<double> dxcut);
-	// void removeDeadCohorts(double ucut);
+	void removeDeadCohorts(double ucut);
 	// void mergeCohortsAddU(std::vector<double> dxcut);
 
 	void sortCohortsDescending(size_t dim, int skip=0);

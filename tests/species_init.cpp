@@ -44,6 +44,8 @@ int main(){
 	Plant P;
 	P.set_size({25});
 	cout << "P: "; P.print(); cout << "\n";
+	nerrors += check(P.height, 25);
+	nerrors += check(P.crown_area, 625.0);
 
 	P.lma = 70;
 	Cohort<Plant> C1;
@@ -63,6 +65,8 @@ int main(){
 
 	E.computeEnv(1, nullptr, vector<double>().begin(), vector<double>().begin());
 	cout << "Env @ t = 1: " << E.E << '\n';
+	nerrors += check(E.E, 1);
+
 	C2.preCompute(1, &E);
 	cout << "Insect g/m/f: " << C2.g << " / " << C2.m << " / " << C2.f << '\n';
 	C2.print(); cout << '\n';
@@ -109,7 +113,7 @@ int main(){
 	nerrors += check_species_states(Si, {20, 10, 0.5, 5, 20, 0.01});
 
 	// Now insert a EBT boundary cohort and check that it can be skipped in sorting
-	Cohort<Insect> Cb; Cb.set_size({100, 0.02}); Cb.u = 0;
+	Cohort<Insect> Cb; Cb.set_size({100, 0.02}); Cb.u = 0.1;
 	Si.addCohort(Cb);
 	Si.print();
 	nerrors += check_species_states(Si, {20, 10, 0.5, 5, 20, 0.01, 100, 0.02});
@@ -131,8 +135,30 @@ int main(){
 	nerrors += check(Si.mortalityRate(2, 1, &E), 0.5/5);
 	nerrors += check(Si.birthRate(2, 1, &E), 0.05);
 
+	cout << "Testing removal of a specific cohort\n-----------------------\n";
+	Si.markCohortForRemoval(1);
+	Si.removeMarkedCohorts();
+	Si.print();
+	nerrors += check_species_states(Si, {20, 10, 0.5, 5, 100, 0.02});
+
+	cout << "Testing removal of a dead cohorts\n-----------------------\n";
+	Cohort<Insect> Cdead(I1); Cdead.set_size({1000, 1e-4}); Cdead.u = 1e-15;
+	Si.addCohort(Cdead);
+	Si.addCohort(Cdead);
+	Si.addCohort(Cdead);
+	Si.print();
+
+	Si.removeDeadCohorts(1e-10); // Note: This will not remove cohort at index J-1. We must ensure during cohort sorting that J-1 is indeed the boundary cohort
+	Si.print();
+	nerrors += check_species_states(Si, {20, 10, 0.5, 5, 100, 0.02, 1000, 1e-4});
+
 	nerrors += check(Sp.growthRate(2, 1, &E), {32});
 
+
+
+	if (nerrors == 0) cout << "******* ALL TESTS PASSED ***********\n";
+	else cout << "xxxxxx SOME TESTS FAILED xxxxxxxxxxx\n";
+	
 	return nerrors;
 
 // 	Species<Plant> Sv(array<double,1> {1,2,3,4,5});
