@@ -43,10 +43,10 @@ class Species_Base{
 	public: // public functions
 	virtual ~Species_Base() = 0;
 	
-	int cohortsize();
+	// int cohortsize(); // 
 	
 	int xsize();
-	int size();
+	// int size();
 
 	void set_inputBirthFlux(double b);
 	void set_bfin_is_u0in(bool flag);

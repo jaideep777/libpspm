@@ -24,9 +24,7 @@ void Species_Base::addCohort(T bc){
 template<class Model>
 void Species<Model>::resize(int _J){
 	J = _J;
-	std::cout << "In resize before resize " <<std::endl;
 	cohorts.resize(J, boundaryCohort);  // when resizing always insert copies of boundary cohort
-	std::cout << "In resize after resize " <<std::endl;
 }
 
 // TODO: make this comment more sensible
@@ -34,6 +32,7 @@ void Species<Model>::resize(int _J){
 // We dont know in advance whether there is a boundary cohort at position J-1. So provide an option to skip it
 template<class Model>
 std::vector<double> Species<Model>::get_maxSize(int skip){ // TODO ALERT: make sure this sees the latest state
+	// FIXME JJ: What happened of the FMU case to get this from x?
 	if (cohorts.empty()) return xb;
 
 	std::vector<double> largest = xb;
@@ -335,7 +334,8 @@ double Species<Model>::establishmentProbability(double t, void * env){
 // 		boundaryCohort.u = birth_flux_in;
 // 	}
 // 	else {
-// 		boundaryCohort.u = 1e-3; //(gb>0)? birth_flux_in * pe/gb  :  0;  // FIXME JJ: This will change in nD version
+// 		double gdotn = std::accumulate(gb.begin(), gb.end(), 0);  // FIXME JJ: Check if this is correct
+// 		boundaryCohort.u = (gdotn>0)? birth_flux_in * pe/gdotn  :  0;  
 // 	}
 // 	return boundaryCohort.u;
 // }

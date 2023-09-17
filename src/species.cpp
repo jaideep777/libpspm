@@ -7,9 +7,12 @@ Species_Base::~Species_Base(){
 void Species_Base::print_extra(){
 }
 	
-int Species_Base::cohortsize(){
-	return J;
-}
+// FIXME JJ: I am removing this because `cohort` is not the correct generic name. 
+//           We use it internally to define eithe cohort/gridcell/etc, 
+//           but the user need not be concerned with this 
+// int Species_Base::cohortsize(){
+// 	return J;
+// }
 
 //template<class Model>
 //int Species<Model>::addVar(std::string name, int stride, int offset){
