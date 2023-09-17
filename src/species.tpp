@@ -604,46 +604,56 @@ void Species<Model>::sortCohortsDescending(size_t dim, int skip){
 }
 
 
-// template <class Model>
-// void Species<Model>::save(std::ofstream &fout){
-// //	Species_Base::save(fout);
-// 	fout << "Species<T>::v1\n";
-// 	fout << std::make_tuple(
-// 		J
-// 	  , n_accumulators
-// 	  , noff_abm
-// 	  , birth_flux_in
-// 	  , bfin_is_u0in);
+template <class Model>
+void Species<Model>::save(std::ostream &fout){
+//	Species_Base::save(fout);
+	fout << "Species<T>::v2\n";
+	fout << std::make_tuple(
+		J
+	  , istate_size
+	  , n_accumulators
+	  , noff_abm
+	  , birth_flux_in
+	  , bfin_is_u0in);
+	fout << '\n';
+	fout << xb << '\n';
+	fout << X.size() << ' ' << x.size() << ' ' << h.size() << '\n';
+	for (int i=0; i<X.size(); ++i) fout << X[i] << '\n';
+	for (int i=0; i<x.size(); ++i) fout << x[i] << '\n';
+	for (int i=0; i<h.size(); ++i) fout << h[i] << '\n';
 
-// 	fout << xb;
-// 	fout << X << x << h;
+	boundaryCohort.save(fout, n_accumulators);
+	for (auto& C : cohorts) C.save(fout, n_accumulators);
+}
 
-// 	boundaryCohort.save(fout, n_accumulators);
-// 	for (auto& C : cohorts) C.save(fout, n_accumulators);
-// }
-
-// template <class Model>
-// void Species<Model>::restore(std::ifstream &fin){
-// //	Species_Base::restore(fin);
-// 	std::cout << "Restoring Species<T>" << std::endl;
-// 	std::string s; fin >> s; // version number (discard)
-// 	assert(s == "Species<T>::v1");
-// 	fin >> J	
-// 	    >> n_accumulators
-// 	    >> noff_abm
-// 	    >> birth_flux_in
-// 	    >> bfin_is_u0in;
+template <class Model>
+void Species<Model>::restore(std::istream &fin){
+//	Species_Base::restore(fin);
+	std::cout << "Restoring Species<T>" << std::endl;
+	std::string s; fin >> s; // version number (discard)
+	assert(s == "Species<T>::v2");
+	fin >> J
+	    >> istate_size
+	    >> n_accumulators
+	    >> noff_abm
+	    >> birth_flux_in
+	    >> bfin_is_u0in;
 	
-// 	fin >> xb;
-// 	fin >> X >> x >> h;
+	fin >> xb;
 
-// 	boundaryCohort.restore(fin, n_accumulators);
-// 	std::cout << "In restore before resize " <<std::endl;
-// 	cohorts.resize(J, boundaryCohort); // cohorts must always be copy-constructed from the boundary cohort
+	int nx;
+	fin >> nx; X.resize(nx);
+	fin >> nx; x.resize(nx);
+	fin >> nx; h.resize(nx);
+	for (int i=0; i<X.size(); ++i) fin >> X[i];
+	for (int i=0; i<x.size(); ++i) fin >> x[i];
+	for (int i=0; i<h.size(); ++i) fin >> h[i];
 
-// 	std::cout << "In restore after resize " <<std::endl;
-// 	for (auto& C : cohorts) C.restore(fin, n_accumulators);
-// }
+	boundaryCohort.restore(fin, n_accumulators);
+	cohorts.resize(J, boundaryCohort); // cohorts must always be copy-constructed from the boundary cohort
+
+	for (auto& C : cohorts) C.restore(fin, n_accumulators);
+}
 
 
 // // //TODO: maybe fix this later

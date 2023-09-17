@@ -31,6 +31,7 @@ std::istream& operator >> (std::istream &is, std::vector<T> &v) {
 	int n; 
 	std::string s;
 	is >> n >> s; // s contains "|"
+	// std::cout << "restoring vector: " << n << " " << s << std::endl;
 	v.resize(n);
 	for (int i=0; i<n; ++i) is >> v[i];
 	return is;

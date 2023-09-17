@@ -1,5 +1,6 @@
 #include <iostream>
 #include <vector>
+#include <cassert>
 #include <environment_base.h>
 #include <individual_base.h>
 using namespace std;
@@ -86,9 +87,14 @@ class Plant : public IndividualBase<1>{
 		    << lma << "\t" << height << "\t" << crown_area << "\t" << root_mass << "\t";
 	}
 	
-	void save(std::ofstream& fout){
+	void save(std::ostream& fout){
+		fout << "TestPlant::v1" << "   ";
+		fout << lma << "   ";
 	}
-	void restore(std::ifstream& fin){
+	void restore(std::istream& fin){
+		std::string s; fin >> s; // discard version number
+		assert(s == "TestPlant::v1");
+		fin >> lma;
 	}
 	
 };

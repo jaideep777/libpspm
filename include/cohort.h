@@ -5,6 +5,7 @@
 #include <iomanip>
 #include <fstream>
 #include <limits>
+#include <cassert>
 #include "io_utils.h"
 
 template<class Ind>
@@ -13,7 +14,7 @@ class Cohort : public Ind {
 	static int np, ng, nm, nf;   // number of evaluations of demographic functions
 
 	// std::array<double,dim> x; // Moved to IndividualBase
-	double u = std::numeric_limits<double>::quiet_NaN();
+	double u = -9.9e20; //std::numeric_limits<double>::quiet_NaN(); // Best to avoid nan's because they cant be read via filestreams
 	int id = 0;	
 
 	double birth_time = 0;
@@ -100,7 +101,7 @@ class Cohort : public Ind {
 				, birth_time
 				, remove
 				, need_precompute); // we actually need not save need_precompute, because set_size() will always set it to 1 during restore
-		fout << Ind::x << ' ' << u << ' ';
+		fout << to_vector(Ind::x) << "   " << u << "   ";
 
 		std::vector<double> cumm_vars(n_extra_vars);
 		auto it = cumm_vars.begin();
@@ -113,13 +114,15 @@ class Cohort : public Ind {
 		Ind::restore(fin);
 
 		std::string s; fin >> s; // discard version number
+		assert(s == "Cohort<Ind>::v2");
 		fin >> id
 		    >> birth_time
 		    >> remove
 		    >> need_precompute;
 
-		fin >> Ind::x >> u;
-		set_size(Ind::x);
+		std::vector<double> _x;
+		fin >> _x >> u;
+		set_size(_x);
 
 		std::vector<double> cumm_vars(n_extra_vars);
 		fin >> cumm_vars;

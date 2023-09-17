@@ -89,6 +89,7 @@ int main(){
 
 	Species<Plant> Sp(P);
 	Sp.set_xb({0.35});
+	Sp.n_accumulators = 1;
 	Sp.print();	
 
 	Cohort<Plant> Cp3; Cp3.set_size({30}); Cp3.u = 5.1;
@@ -227,6 +228,18 @@ int main(){
 	vector<double> expected_u = {20, 0.25, 0.2, 0.01, 0.0005};
 	for (int i=0; i<Si.xsize(); ++i) nerrors += check(Si.getU(i), expected_u[i]);
 
+
+	cout << "Testing save / restore\n-----------------------\n";
+	ofstream fout("Si_save.txt");
+	Si.save(cout);
+	Si.save(fout);
+	fout.close();
+
+	ifstream fin("Si_save.txt");
+	Species<Insect> Si_restored(I1);
+	Si_restored.restore(fin);
+	Si_restored.save(cout);
+	// Verify manually that console output is same as in the saved file.
 
 
 

@@ -16,8 +16,7 @@ class Species_Base{
 	friend class Solver;
 
 	protected: // private members
-	int J;	
-	int n_accumulators;
+	int J = 0;	
 
 	std::list<double> birth_flux_out_history;                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    
 	
@@ -33,7 +32,8 @@ class Species_Base{
 
 	public:
 	size_t istate_size;
-	double birth_flux_in;
+	int n_accumulators = 0;
+	double birth_flux_in = -9.9e20; //std::numeric_limits<double>::quiet_NaN();
 	
 	//debug only
 	bool bfin_is_u0in = false;
@@ -110,8 +110,8 @@ class Species_Base{
 
 	virtual void sortCohortsDescending(size_t dim, int skip=0) = 0;
 	
-	// virtual void save(std::ofstream &fout) = 0;
-	// virtual void restore(std::ifstream &fin) = 0;
+	virtual void save(std::ostream &fout) = 0;
+	virtual void restore(std::istream &fin) = 0;
 
 	// virtual void printCohortVector(int speciesInd, double time, std::ostream &out) = 0;
 
@@ -198,8 +198,8 @@ class Species : public Species_Base{
 
 	void sortCohortsDescending(size_t dim, int skip=0);
 	
-	// void save(std::ofstream &fout);
-	// void restore(std::ifstream &fin);
+	void save(std::ostream &fout);
+	void restore(std::istream &fin);
 
 	// void printCohortVector(int speciesInd, double time, std::ostream &out);
 
