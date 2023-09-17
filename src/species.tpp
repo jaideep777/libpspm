@@ -68,13 +68,10 @@ Species<Model>::Species(const Model& M){
 template <class Model>
 void Species<Model>::print(){
 	std::cout << "~~~~~ Species ~~~~~\n";
-	//auto iset = get_iterators(sv);
-	//std::cout << "start index = " << start_index <<"\n";
-	//std::cout << "Model = " << mod << "\n";
 	std::cout << "xb = " << boundaryCohort.x << " / " << xb << "\n";
 	std::cout << "xsize = " << J << "\n";
 	std::cout << "istate size = " << istate_size << '\n';
-	std::cout << "Extra state variables: " << n_extra_statevars << "\n";
+	std::cout << "Extra state variables: " << n_accumulators << "\n";
 	std::cout << "Input birth flux = " << birth_flux_in << "\n";
 	print_extra();
 	//if (!X.empty()){
@@ -105,12 +102,6 @@ void Species<Model>::print(){
 	boundaryCohort.print();
 	std::cout << "\n";
 	std::cout << "Max size = " << get_maxSize() << "\n";
-	//std::cout << "State (" << size() << "):\n";
-	//iset.print();
-	
-	//std::cout << "Rates (" << size() << "):\n";
-	//auto irates = get_iterators(rv);
-	//irates.print();
 	std::cout << "-------\n\n"; std::cout.flush();
 
 }
@@ -268,61 +259,67 @@ void Species<Model>::setU(int i, double _u){
 
 // ---------------------------
 
-// template <class Model>
-// void Species<Model>::initExtraState(double t, void * env){
-// 	// init boundary cohort 
-// 	boundaryCohort.init_state(t, env); 
-// 	// init internal cohorts
-// 	for (auto& c : cohorts){
-// 		c.init_state(t, env);	// init state
-// 	}
-// }
+template <class Model>
+void Species<Model>::initAccumulators(double t, void * env){
+	// init boundary cohort 
+	boundaryCohort.init_accumulators(t, env); 
+	// init internal cohorts
+	for (auto& c : cohorts){
+		c.init_accumulators(t, env);	// init state
+	}
+}
 
 
-// template <class Model>
-// void Species<Model>::initAndCopyExtraState(double t, void * env, std::vector<double>::iterator &it){
-// 	// init boundary cohort (no copy required)
-// 	boundaryCohort.init_state(t, env); 
-// 	// init internal cohorts and copy to state vector
-// 	for (auto& c : cohorts){
-// 		c.init_state(t, env);	// init state
-// 		auto it_prev = it;		
-// 		it = c.get_state(it);	// copy the initialized state into state vector
-// 		assert(distance(it_prev, it) == n_extra_statevars);
-// 	}
-// }
+template <class Model>
+void Species<Model>::initAndCopyAccumulators(double t, void * env, std::vector<double>::iterator &it){
+	// init boundary cohort (no copy required)
+	boundaryCohort.init_accumulators(t, env); 
+	// init internal cohorts and copy to state vector
+	for (auto& c : cohorts){
+		c.init_accumulators(t, env);	// init state
+		auto it_prev = it;		
+		it = c.get_accumulators(it);	// copy the initialized state into state vector
+		assert(distance(it_prev, it) == n_accumulators);
+	}
+}
 
 
-// template <class Model>
-// void Species<Model>::initBoundaryCohort(double t, void * env){
-// 	boundaryCohort.birth_time = t;
-// 	boundaryCohort.init_state(t, env);
-// }
+template <class Model>
+void Species<Model>::initBoundaryCohort(double t, void * env){
+	boundaryCohort.birth_time = t;
+	boundaryCohort.init_accumulators(t, env);
+}
 
 
-// template <class Model>
-// double Species<Model>::init_density(int i, std::vector<double> _x, void * env){
-// 	return cohorts[i].init_density(env, birth_flux_in);
-// }
+template <class Model>
+double Species<Model>::init_density(int i, void * env){
+	assert(i>=0);
+	return cohorts[i].init_density(env, birth_flux_in);
+}
 
-// // TODO: check increment here itself
-// template <class Model>
-// void Species<Model>::copyExtraStateToCohorts(std::vector<double>::iterator &it){
-// 	for (auto& c : cohorts) c.set_state(it);
-// }
-
-
-// template <class Model>
-// void Species<Model>::copyCohortsExtraToState(std::vector<double>::iterator &it){
-// 	for (auto& c : cohorts) c.get_state(it);
-// }
+// TODO: check increment here itself
+template <class Model>
+void Species<Model>::copyAccumulatorsToCohorts(std::vector<double>::iterator &it){
+	for (auto& c : cohorts) c.set_accumulators(it);
+}
 
 
-// template <class Model>
-// void Species<Model>::triggerPreCompute(){
-// 	for (auto& c : cohorts) c.need_precompute = true;
-// 	boundaryCohort.need_precompute = true;
-// }
+template <class Model>
+void Species<Model>::copyAccumulatorsToState(std::vector<double>::iterator &it){
+	for (auto& c : cohorts) c.get_accumulators(it);
+}
+
+template <class Model>
+void Species<Model>::accumulatorRates(std::vector<double>::iterator &it){
+	for (auto& c : cohorts) c.get_accumulatorRates(it);
+}
+
+
+template <class Model>
+void Species<Model>::triggerPreCompute(){
+	for (auto& c : cohorts) c.need_precompute = true;
+	boundaryCohort.need_precompute = true;
+}
 
 
 template <class Model>
@@ -338,7 +335,7 @@ double Species<Model>::establishmentProbability(double t, void * env){
 // 		boundaryCohort.u = birth_flux_in;
 // 	}
 // 	else {
-// 		boundaryCohort.u = 1e-3; //(gb>0)? birth_flux_in * pe/gb  :  0;  // FIXME_ND: This will change in nD version
+// 		boundaryCohort.u = 1e-3; //(gb>0)? birth_flux_in * pe/gb  :  0;  // FIXME JJ: This will change in nD version
 // 	}
 // 	return boundaryCohort.u;
 // }
@@ -351,14 +348,14 @@ std::vector<double> Species<Model>::growthRate(int i, double t, void * env){
 }
 
 
-// template <class Model>
-// std::vector<double> Species<Model>::growthRateOffset(int i, std::vector<double> x, double t, void * env){
-// 	Cohort<Model> coff = (i<0)? boundaryCohort : cohorts[i];
-// 	coff.set_size(x);
-// 	//coff.preCompute(coff.x,t,env);
+template <class Model>
+std::vector<double> Species<Model>::growthRateOffset(int i, std::vector<double> x, double t, void * env){
+	Cohort<Model> coff = (i<0)? boundaryCohort : cohorts[i];
+	coff.set_size(x);
+	//coff.preCompute(coff.x,t,env);
 
-// 	return to_vector(coff.growthRate(coff.x,t,env));
-// }
+	return to_vector(coff.growthRate(t,env));
+}
 
 
 // Return format:
@@ -370,7 +367,7 @@ std::vector<double> Species<Model>::growthRate(int i, double t, void * env){
 //      [ ...                                     ]
 //    ]
 template <class Model>
-std::vector<std::vector<double>> Species<Model>::growthRateGradient(int i, double t, void * env, std::vector<double> grad_dx){
+std::vector<std::vector<double>> Species<Model>::growthRateGradient(int i, double t, void * env, const std::vector<double>& grad_dx){
 
 	Cohort<Model> &c = (i<0)? boundaryCohort : cohorts[i];
 
@@ -426,11 +423,11 @@ double Species<Model>::mortalityRate(int i, double t, void * env){
 
 // Return format:
 //    [
-//    m
-//    ---
-//    dm_dx1
-//    dm_dx2
-//    ...
+//     m
+//     ---
+//     dm_dx1
+//     dm_dx2
+//     ...
 //    ]
 template <class Model>
 std::vector<double> Species<Model>::mortalityRateGradient(int i, double t, void * env, const std::vector<double>& grad_dx){
@@ -461,10 +458,6 @@ double Species<Model>::birthRate(int i, double t, void * env){
 	return c.birthRate(t,env);
 }	
 
-// template <class Model>
-// void Species<Model>::getExtraRates(std::vector<double>::iterator &it){
-// 	for (auto& c : cohorts) c.get_rates(it);
-// }
 
 
 template <class Model>
@@ -617,7 +610,7 @@ void Species<Model>::sortCohortsDescending(size_t dim, int skip){
 // 	fout << "Species<T>::v1\n";
 // 	fout << std::make_tuple(
 // 		J
-// 	  , n_extra_statevars
+// 	  , n_accumulators
 // 	  , noff_abm
 // 	  , birth_flux_in
 // 	  , bfin_is_u0in);
@@ -625,8 +618,8 @@ void Species<Model>::sortCohortsDescending(size_t dim, int skip){
 // 	fout << xb;
 // 	fout << X << x << h;
 
-// 	boundaryCohort.save(fout, n_extra_statevars);
-// 	for (auto& C : cohorts) C.save(fout, n_extra_statevars);
+// 	boundaryCohort.save(fout, n_accumulators);
+// 	for (auto& C : cohorts) C.save(fout, n_accumulators);
 // }
 
 // template <class Model>
@@ -636,7 +629,7 @@ void Species<Model>::sortCohortsDescending(size_t dim, int skip){
 // 	std::string s; fin >> s; // version number (discard)
 // 	assert(s == "Species<T>::v1");
 // 	fin >> J	
-// 	    >> n_extra_statevars
+// 	    >> n_accumulators
 // 	    >> noff_abm
 // 	    >> birth_flux_in
 // 	    >> bfin_is_u0in;
@@ -644,12 +637,12 @@ void Species<Model>::sortCohortsDescending(size_t dim, int skip){
 // 	fin >> xb;
 // 	fin >> X >> x >> h;
 
-// 	boundaryCohort.restore(fin, n_extra_statevars);
+// 	boundaryCohort.restore(fin, n_accumulators);
 // 	std::cout << "In restore before resize " <<std::endl;
 // 	cohorts.resize(J, boundaryCohort); // cohorts must always be copy-constructed from the boundary cohort
 
 // 	std::cout << "In restore after resize " <<std::endl;
-// 	for (auto& C : cohorts) C.restore(fin, n_extra_statevars);
+// 	for (auto& C : cohorts) C.restore(fin, n_accumulators);
 // }
 
 

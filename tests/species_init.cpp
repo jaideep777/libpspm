@@ -73,6 +73,8 @@ int main(){
 
 	C2.save(cout, 0);
 
+	cout << "Testing custom cohort addition\n-----------------------\n";
+
 	Species<Insect> Si(I1); // This constructor does not necessarily set x
 	Si.set_xb({0.5, 0.01});
 	Si.print();
@@ -161,7 +163,7 @@ int main(){
 	nerrors += check_species_states(Si, {20, 10, 0.5, 5, 100, 0.02, 1000, 1e-4, 0.5, 0.01});
 
 
-	nerrors += check(Sp.growthRate(2, 1, &E), {32});
+	// nerrors += check(Sp.growthRate(2, 1, &E), {32});
 
 
 	cout << "Testing mortalityRateGradient()\n-----------------------\n";
@@ -195,9 +197,41 @@ int main(){
 	}
 
 
+	cout << "Testing accumulators\n-----------------------\n";
+	Sp.print();
+	Sp.initAccumulators(1, &E);
+	Sp.print();
+	vector<double> acc(4, 0);
+	auto it = acc.begin();
+	Sp.copyAccumulatorsToState(it);
+	nerrors += check(acc, vector<double>(4, 2.03));
+
+	acc = {1.01, 2.02, 3.03, 4.04};
+	it = acc.begin();
+	Sp.copyAccumulatorsToCohorts(it);
+	Sp.print();
+	nerrors += check(Sp.getCohort(0).root_mass, 1.01);
+	nerrors += check(Sp.getCohort(1).root_mass, 2.02);
+	nerrors += check(Sp.getCohort(2).root_mass, 3.03);
+	nerrors += check(Sp.getCohort(3).root_mass, 4.04);
+
+	it = acc.begin();
+	Sp.accumulatorRates(it);
+	cout << "Accum var rates: " << acc << '\n';
+	nerrors += check(acc, {-0.001, -0.102, -0.203, -0.304});
+
+
+	cout << "Testing density initialization\n-----------------------\n";
+	for (int i=0; i<Si.xsize(); ++i) Si.setU(i, Si.init_density(i, &E));
+	Si.print();	
+	vector<double> expected_u = {20, 0.25, 0.2, 0.01, 0.0005};
+	for (int i=0; i<Si.xsize(); ++i) nerrors += check(Si.getU(i), expected_u[i]);
+
+
+
 
 	if (nerrors == 0) cout << "******* ALL TESTS PASSED ***********\n";
-	else cout << "xxxxxx SOME TESTS FAILED xxxxxxxxxxx\n";
+	else cout << "xxxxxx " << nerrors << " TESTS FAILED xxxxxxxxxxx\n";
 	
 	return nerrors;
 

@@ -63,7 +63,7 @@ class Plant : public IndividualBase<1>{
 	}
 
 	void init_accumulators(double t, void * env){
-		root_mass = 0;
+		root_mass = 0.03 + 2*((LightEnv*)env)->E;
 	}
 
 	vector<double>::iterator set_accumulators(vector<double>::iterator &it){

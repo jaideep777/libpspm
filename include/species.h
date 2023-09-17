@@ -17,7 +17,7 @@ class Species_Base{
 
 	protected: // private members
 	int J;	
-	int n_extra_statevars;
+	int n_accumulators;
 
 	std::list<double> birth_flux_out_history;                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    
 	
@@ -74,29 +74,29 @@ class Species_Base{
 	// virtual std::vector<double> next_xn_desc(std::vector<double> xn) = 0;
 	// virtual std::vector<double> next_xn_asc(std::vector<double> xn) = 0;
 
-	// virtual double init_density(int i, std::vector<double> x, void * env) = 0;
-	// virtual void initExtraState(double t, void * env) = 0;
-	// virtual void initAndCopyExtraState(double t, void * env, std::vector<double>::iterator &it) = 0;
-	// virtual void initBoundaryCohort(double t, void * env) = 0;
+	virtual void initBoundaryCohort(double t, void * env) = 0;
+	virtual double init_density(int i, void * env) = 0; // FIXME: Should init_density take t as input?
 
-	// virtual void copyExtraStateToCohorts(std::vector<double>::iterator &it) = 0;
-	// virtual void copyCohortsExtraToState(std::vector<double>::iterator &it) = 0;
-	
+	virtual void initAccumulators(double t, void * env) = 0;
+	virtual void initAndCopyAccumulators(double t, void * env, std::vector<double>::iterator &it) = 0;
+	virtual void copyAccumulatorsToCohorts(std::vector<double>::iterator &it) = 0;
+	virtual void copyAccumulatorsToState(std::vector<double>::iterator &it) = 0;
+	virtual void accumulatorRates(std::vector<double>::iterator &it) = 0;
+
 	virtual double establishmentProbability(double t, void * env) = 0;
 	// virtual double calc_boundary_u(std::vector<double> gb, double pe) = 0;
 	virtual double get_boundary_u() = 0;
 
-	// virtual void triggerPreCompute() = 0;
+	virtual void triggerPreCompute() = 0;
 
 	// // TODO: argument x can probably be removed from these functions
 	virtual std::vector<double> growthRate(int i, double t, void * env) = 0;
-	// virtual std::vector<double> growthRateOffset(int i, std::vector<double> x, double t, void * env) = 0;
-	virtual std::vector<std::vector<double>> growthRateGradient(int i, double t, void * env, std::vector<double> grad_dx) = 0;
+	virtual std::vector<double> growthRateOffset(int i, std::vector<double> x, double t, void * env) = 0;
+	virtual std::vector<std::vector<double>> growthRateGradient(int i, double t, void * env, const std::vector<double>& grad_dx) = 0;
 	// // virtual std::vector<double> growthRateGradientCentered(int i, double xplus, double xminus, double t, void * env) = 0;
 	virtual double mortalityRate(int i, double t, void * env) = 0;
 	virtual std::vector<double> mortalityRateGradient(int i, double t, void * env, const std::vector<double>& grad_dx) = 0;
 	virtual double birthRate(int i, double t, void * env) = 0;
-	// virtual void getExtraRates(std::vector<double>::iterator &it) = 0;
 
 	virtual void addCohort(int n = 1) = 0;
 	template<class T> void addCohort(T bc);
@@ -159,29 +159,29 @@ class Species : public Species_Base{
 	// std::vector<double> next_xn_desc(std::vector<double> xn);
 	// std::vector<double> next_xn_asc(std::vector<double> xn);
 
-	// double init_density(int i, std::vector<double> x, void * env);
-	// void initExtraState(double t, void * env);
-	// void initAndCopyExtraState(double t, void * env, std::vector<double>::iterator &it);
-	// void initBoundaryCohort(double t, void * env);
+	void initBoundaryCohort(double t, void * env);
+	double init_density(int i, void * env);
 
-	// void copyExtraStateToCohorts(std::vector<double>::iterator &it);
-	// void copyCohortsExtraToState(std::vector<double>::iterator &it);
+	void initAccumulators(double t, void * env);
+	void initAndCopyAccumulators(double t, void * env, std::vector<double>::iterator &it);
+	void copyAccumulatorsToCohorts(std::vector<double>::iterator &it);
+	void copyAccumulatorsToState(std::vector<double>::iterator &it);
+	void accumulatorRates(std::vector<double>::iterator &it);
 	
 	double establishmentProbability(double t, void * env);
 	// double calc_boundary_u(std::vector<double> gb, double pe);
 	double get_boundary_u();
 
-	// void triggerPreCompute();
+	void triggerPreCompute();
 
 	// // TODO: argument x can probably be removed from these functions
 	std::vector<double> growthRate(int i, double t, void * env);
-	// std::vector<double> growthRateOffset(int i, std::vector<double> x, double t, void * env);
-	std::vector<std::vector<double>> growthRateGradient(int i, double t, void * env, std::vector<double> grad_dx);
+	std::vector<double> growthRateOffset(int i, std::vector<double> x, double t, void * env);
+	std::vector<std::vector<double>> growthRateGradient(int i, double t, void * env, const std::vector<double>& grad_dx);
 	// // std::vector<double> growthRateGradientCentered(int i, double xplus, double xminus, double t, void * env);
 	double mortalityRate(int i, double t, void * env);
 	std::vector<double> mortalityRateGradient(int i, double t, void * env, const std::vector<double>& grad_dx);
 	double birthRate(int i, double t, void * env);
-	// void getExtraRates(std::vector<double>::iterator &it);
 
 	void addCohort(int n = 1);
 	template<class T> void addCohort(T bc);
