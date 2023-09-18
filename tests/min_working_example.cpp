@@ -32,7 +32,7 @@ class Environment : public EnvironmentBase{
 
 
 
-class Individual : public IndividualBase{
+class Individual : public IndividualBase<1>{
 	public:
 
 	double init_density(double x, void * _env, double bf){

@@ -50,16 +50,24 @@ void Species_Base::set_bfin_is_u0in(bool flag){
 	bfin_is_u0in = flag;
 }
 
+void Species_Base::clear_vectors(){
+	dim_centres.clear();
+	dim_edges.clear();
+	X.clear();
+	x.clear();
+	h.clear();
+	xb.clear();
+}
 
 int Species_Base::xsize(){
 	return J;
 }
 
 
-//template<class Model>
-//int Species<Model>::size(){
-//    return varnames.size()*J;
-//}
+int Species_Base::stateSizeTotal(){
+	return (istate_size + 1 + n_accumulators)*J;
+	//      ^ x           ^ u      ^ accumulators
+}
 
 
 // void Species_Base::save(std::ofstream &fout){

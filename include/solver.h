@@ -12,16 +12,25 @@
 #include "ode_solver.h"
 #include "cubic_spline.h"
 
-enum PSPM_SolverType {SOLVER_FMU, SOLVER_MMU, SOLVER_CM, SOLVER_EBT, SOLVER_IFMU, SOLVER_ABM, SOLVER_IEBT, SOLVER_ICM, SOLVER_EBTN, SOLVER_IEBTN};
+enum PSPM_SolverType {SOLVER_FMU, 
+                      SOLVER_MMU, 
+                      SOLVER_CM, 
+                      SOLVER_EBT, 
+                      SOLVER_IFMU, 
+					  SOLVER_ABM, 
+					  SOLVER_IEBT,
+					  SOLVER_ICM, 
+					  SOLVER_EBTN, 
+					  SOLVER_IEBTN};
 
 class Solver{
 	private:
 	static std::map<std::string, PSPM_SolverType> methods_map;
 
-	static constexpr bool debug = false;
+	static constexpr bool debug = true;
 	PSPM_SolverType method;
 
-	int n_statevars_internal = 0;		// number of internal i-state variables (x and/or u)
+	// int n_statevars_internal = 0;		// number of internal i-state variables (x and/or u)
 	int n_statevars_system = 0;			// number of s-state variables 
 
 	std::default_random_engine generator; // random number generator
@@ -31,7 +40,7 @@ class Solver{
 	EnvironmentBase * env = nullptr;
 	
 	// The current state of the system, {t, S, dS/dt} 
-	// FIXME: Setting initial value of current_time to anything other than 0 breaks Falster17 sede rain in Plant model. Investigate. 
+	// FIXME: Setting initial value of current_time to anything other than 0 breaks Falster17 seed rain in Plant model. Investigate. 
 	//  ^ Solution: init of current_time must happen before species_initialization. Maybe via an argument to solver constructor?
 	double current_time = 0;			// these are synced with ODE solver only after a successful step
 	std::vector <double> state;		// +-- They are NOT synced during the ODE solver's internal steps
@@ -65,22 +74,21 @@ class Solver{
 	bool use_log_densities = true;
 
 	private:
-	std::vector<double> pin0;
-	double pi0, N0;
+	std::vector<double> pi0;
+	double N0;
+
 	void realizeEbtBoundaryCohort(Species_Base * spp);
-	void realizeEbtnBoundaryCohort(Species_Base * spp);
+	// void realizeEbtnBoundaryCohort(Species_Base * spp);
 	void restoreEbtBoundaryCohort(Species_Base * spp);
-	void restoreEbtnBoundaryCohort(Species_Base * spp);
+	// void restoreEbtnBoundaryCohort(Species_Base * spp);
 
 	public:	
 	Solver(PSPM_SolverType _method, std::string ode_method = "rk45ck");
 	Solver(std::string _method, std::string ode_method = "rk45ck");
 
 	void addSystemVariables(int _s);
-	// This will be eventually removed (?)
-	void addSpecies(int _J, double _xb, double _xm, bool log_breaks, Species_Base* _mod, int n_extra_vars, double input_birth_flux = -1);
-	void addSpecies(int _J, std::vector<double> _xb, std::vector<double> _xm, std::vector<bool> log_breaks, Species_Base* _mod, int n_extra_vars, double input_birth_flux = -1);
-	void addSpecies(std::vector<std::vector<double>> xbreaks, Species_Base* _mod, int n_extra_vars, double input_birth_flux = -1);
+	void addSpecies(std::vector<int> _J, std::vector<double> _xb, std::vector<double> _xm, std::vector<bool> log_breaks, Species_Base* _mod, int _n_accumulators, double input_birth_flux = -1);
+	void addSpecies(std::vector<std::vector<double>> xbreaks, Species_Base* _mod, int _n_accumulators, double input_birth_flux = -1);
 	void removeSpecies(Species_Base* spp);
 
 	//Species<Model>* get_species(int id);
@@ -97,7 +105,7 @@ class Solver{
 	void copyStateToCohorts(std::vector<double>::iterator state_begin);		////const int size();
 	void copyCohortsToState();
 	
-	double maxSize();
+	// double maxSize();
 
 	void printODEmethod();
 
@@ -164,8 +172,8 @@ class Solver{
 
 };
 
-#include "../src/solver.tpp"
-#include "../src/size_integrals.tpp"
+// #include "../src/solver.tpp"
+// #include "../src/size_integrals.tpp"
 
 
 #endif

@@ -18,14 +18,15 @@ class Species_Base{
 	protected: // private members
 	int J = 0;	
 
-	std::list<double> birth_flux_out_history;                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    
+	// std::list<double> birth_flux_out_history;                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    
 	
 	// These are only used by FMU solver. 
 	// Others derive them from the state. 
 	// Kept private so users dont accidently access them for other solvers
+	std::vector<int> dim_centres, dim_edges;
 	std::vector <std::vector<double>> X; // multiple state model
 	std::vector <std::vector<double>> x; // multiple state model
-	std::vector <double> h;
+	std::vector <std::vector<double>> h;
 	// std::vector <double> schedule; // used only by CM/EBT
 
 	double noff_abm = 0; // used by ABM solver to insert offspring
@@ -46,10 +47,12 @@ class Species_Base{
 	// int cohortsize(); // 
 	
 	int xsize();
-	// int size();
+	int stateSizeTotal();
 
 	void set_inputBirthFlux(double b);
 	void set_bfin_is_u0in(bool flag);
+
+	void clear_vectors();
 
 	public:
 	virtual void resize(int _J) = 0;

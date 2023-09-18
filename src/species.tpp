@@ -71,15 +71,17 @@ void Species<Model>::print(){
 	std::cout << "xsize = " << J << "\n";
 	std::cout << "istate size = " << istate_size << '\n';
 	std::cout << "Extra state variables: " << n_accumulators << "\n";
+	std::cout << "Total state size: " << stateSizeTotal() << "\n";
 	std::cout << "Input birth flux = " << birth_flux_in << "\n";
+
 	print_extra();
-	//if (!X.empty()){
-	//    iset.push_back("_X", X.begin(),1);
-	//    iset.push_back("_h", h.begin(),1);
-	std::cout << "x (" << x.size() << "): "; 
-	for (auto xx : x) std::cout << xx << " ";
-	std::cout << "\n";
-	//}
+
+	std::cout << "x (" << x.size() << "):\n"; 
+	for (auto xx : x) std::cout << xx << "\n";
+	std::cout << "X (" << X.size() << "):\n"; 
+	for (auto xx : X) std::cout << xx << "\n";
+	std::cout << "h (" << h.size() << "):\n"; 
+	for (auto xx : h) std::cout << xx << "\n";
 
 	std::cout << "Cohorts: (" << cohorts.size() << ")\n";
 	std::cout << std::setw(6) << "t0";
@@ -104,6 +106,7 @@ void Species<Model>::print(){
 	std::cout << "-------\n\n"; std::cout.flush();
 
 }
+
 
 template <class Model>
 Cohort<Model>& Species<Model>::getCohort(int i){
