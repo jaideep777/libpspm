@@ -55,24 +55,19 @@ void Solver::calcRates_EBTN(double t, vector<double>::iterator S, vector<double>
 		Species_Base * spp = species_vec[s];
 
 		// get boundary cohort state and density
-		std::vector<double>   pi0  =  spp->getXn(spp->J-1);	 // last cohort is pi0, N0
+		std::vector<double>   pi0  =  spp->getX(spp->J-1);	 // last cohort is pi0, N0
 		double   N0   =  spp->getU(spp->J-1);
 		// std::cout << "pi = " << pi0 << "N0 = " << N0 << "\n";
 
 		// get boundary cohort gradients
-		std::vector<double> g_gx = spp->growthRateGradient(-1, spp->xnb, t, env, control.ebtn_grad_dx);
-		std::vector<double> m_mx = spp->mortalityRateGradient(-1, spp->xnb, t, env, control.ebtn_grad_dx);
+		std::vector<std::vector<double>> g_gx = spp->growthRateGradient(-1, t, env, control.ebtn_grad_dx);
+		std::vector<double> m_mx = spp->mortalityRateGradient(-1, t, env, control.ebtn_grad_dx);
 		// std::cout << "g = " << g_gx[0] << ", gx = " << g_gx[1] << "\n";
 		// std::cout << "m = " << m_mx[0] << ", mx = " << m_mx[1] << "\n";
 
 		// first index [0] is value of growth rate / mortality rate at point
-		double mb = m_mx[0], gb = g_gx[0];	
-		// index [1:n] is the value of the gradient along each state axis
-		std::vector<double> mortGrad(m_mx[1], m_mx[m_mx.size()-1]);
-		// std::cout << "after mort grad" << "\n";
-
-        std::vector<double> growthGrad(g_gx[1], g_gx[g_gx.size()-1]);
-		// std::cout << "after growth grad" << "\n";
+		double mb = m_mx[0];
+		vector<double> gb = g_gx[0];
 
 		// std::cout << "Updating birthflux" << "\n";
 		double birthFlux;
@@ -81,8 +76,7 @@ void Solver::calcRates_EBTN(double t, vector<double>::iterator S, vector<double>
 			birthFlux = calcSpeciesBirthFlux(s,t) * pe;
 		}
 		else{
-			double u0 = spp->calc_boundary_u(gb, pe);
-			birthFlux = u0*gb;
+			birthFlux = spp->birth_flux_in * pe;
 		}
 
 		for (int i=0; i<spp->J-1; ++i){	// go down to the second last cohort (exclude boundary cohort)
@@ -113,11 +107,11 @@ void Solver::calcRates_EBTN(double t, vector<double>::iterator S, vector<double>
 		*itr++ = dN0;
 		its += 1 + dpi0.size(); 
 
-		if (spp->n_extra_statevars > 0){
+		if (spp->n_accumulators > 0){
 			auto itr_prev = itr;
-			spp->getExtraRates(itr);
-			assert(distance(itr_prev, itr) == spp->n_extra_statevars*spp->J); 
-			its += spp->n_extra_statevars*spp->J; 	
+			spp->accumulatorRates(itr);
+			assert(distance(itr_prev, itr) == spp->n_accumulators*spp->J); 
+			its += spp->n_accumulators*spp->J; 	
 		}
 		
 	}
@@ -132,18 +126,18 @@ void Solver::addCohort_EBTN(){
 	for (auto spp : species_vec){
 		// 1. internalize the pi0-cohort (this cohort's birth time would have been already set when it was inserted)
 		// - get pi0, N0 from last cohort
-		std::vector<double>   pin0  =  spp->getXn(spp->J-1);
+		std::vector<double>   pin0  =  spp->getX(spp->J-1);
 		double   N0   =  spp->getU(spp->J-1);
 
 		// - update the recently internalized pi0-cohort with actual x0 value
-		std::vector<double> xn0 = vector_addition(spp->xnb, vector_product(pin0, (1/(N0+1e-12))));
+		std::vector<double> xn0 = vector_addition(spp->xb, vector_product(pin0, (1/(N0+1e-12))));
 
 		// std::cout << "in add cohort EBTN: xn0: " << xn0 << std::endl;
 		// std::cout << "in add cohort EBTN: xnb: " << spp->xnb << std::endl;
 		// std::cout << "in add cohort EBTN: pin0: " << pin0 << std::endl;
 		// std::cout << "in add cohort EBTN: N0: " << N0 << std::endl;
 
-		spp->setXn(spp->J-1, xn0);
+		spp->setX(spp->J-1, xn0);
 		spp->setU(spp->J-1, N0);
 
 		// 2. insert a new cohort (copy of boundary cohort, to be the new pi0-cohort)
@@ -155,7 +149,7 @@ void Solver::addCohort_EBTN(){
 
 		// std::cout << "in add cohort EBTN: xn_new: " << xn_new << std::endl;
 
-		spp->setXn(spp->J-1, xn_new); 
+		spp->setX(spp->J-1, xn_new); 
 		spp->setU(spp->J-1, 0);
 
 		// std::cout << "in add cohort EBTN; new xn \n" << spp->xn << std::endl;
@@ -179,12 +173,12 @@ void Solver::removeDeadCohorts_EBTN(){
 
 }
 
-void Solver::mergeCohorts_EBTN(){
-	for (auto spp : species_vec){
-		spp->mergeCohortsAddU(control.ebt_merge_dxcut);
-	}
+// void Solver::mergeCohorts_EBTN(){
+// 	for (auto spp : species_vec){
+// 		spp->mergeCohortsAddU(control.ebt_merge_dxcut);
+// 	}
 
-	resizeStateFromSpecies();
-	copyCohortsToState();
+// 	resizeStateFromSpecies();
+// 	copyCohortsToState();
 
-}
+// }
