@@ -238,12 +238,11 @@ void Solver::removeSpecies(Species_Base * spp){
 }
 
 
-void Solver::addSystemVariables(int _s){
-	n_statevars_system = _s;
-	// std::cout << "In Solver::addSystemVariables before resize " <<std::endl;
-	state.resize(state.size() + _s);
-	rates.resize(state.size() + _s);
-	// std::cout << "In Solver::addSystemVariables after resize " <<std::endl;
+void Solver::addSystemVariables(const std::vector<double>& s_state_0){
+	s_state = s_state_0;
+	n_statevars_system = s_state_0.size();
+	resizeStateFromSpecies();
+	copyCohortsToState();
 }
 
 
@@ -316,6 +315,7 @@ void Solver::print(){
 	std::cout << "+ State size = " << state.size() << "\n";
 	std::cout << "+ Rates size = " << rates.size() << "\n";
 	std::cout << "+ Environment = " << env << "\n";
+	std::cout << "+ S-State variables = " << s_state << "\n";
 	std::cout << "+ Species (" << species_vec.size() << "):\n";
 	for (int i=0; i<species_vec.size(); ++i) {
 		std::cout << "Sp (" << i << "):\n";
@@ -328,7 +328,7 @@ void Solver::print(){
 /// @brief      initializes species - sets initial state (x, u, abc) for all cohorts depending on the solver
 /// @param s    species to be initialized
 // TODO: should this take t0 as an argument, instead of setting to 0? 
-// [resolved] todo: maybe make use of copyCohortsToState here instead ofnmanually updating state elements?
+// [resolved] todo: maybe make use of copyCohortsToState here instead of manually updating state elements?
 void Solver::initializeSpecies(Species_Base * s){
 		if (env == nullptr) throw std::runtime_error("Error: Environment has not been set. You must set it before addSpecies().");
 
@@ -545,7 +545,11 @@ void Solver::restoreEbtBoundaryCohort(Species_Base * spp){
 void Solver::copyStateToCohorts(std::vector<double>::iterator state_begin){
 	if (debug) std::cout << "state ---> cohorts\n";
 
-	std::vector<double>::iterator it = state_begin + n_statevars_system; // no need to copy system state
+	std::vector<double>::iterator it = state_begin;
+	
+	// copy system state
+	for (int i=0; i<n_statevars_system; ++i) s_state[i] = *it++; 
+
 	size_t current_state = n_statevars_system;
 	size_t state_size = state.size();
 	// std::cout << "state size ---> " << state.size() << std::endl;
@@ -616,7 +620,10 @@ void Solver::copyStateToCohorts(std::vector<double>::iterator state_begin){
 void Solver::copyCohortsToState(){
 	if (debug) std::cout << "state <--- cohorts\n";
 	// std::cout << "state size: " << state.size() << std::endl;
-	vector<double>::iterator it = state.begin() + n_statevars_system; // no need to copy system state
+	std::vector<double>::iterator it = state.begin();
+	
+	// copy system state
+	for (int i=0; i<n_statevars_system; ++i) *it++ = s_state[i]; 
 	
 	for (int k=0; k<species_vec.size(); ++k){
 		Species_Base* s = species_vec[k];

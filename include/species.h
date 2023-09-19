@@ -52,9 +52,9 @@ class Species_Base{
 	void set_inputBirthFlux(double b);
 	void set_bfin_is_u0in(bool flag);
 
-	void clear_vectors();
 
 	public:
+	virtual void clear_vectors() = 0;
 	virtual void resize(int _J) = 0;
 	virtual std::vector<double> get_maxSize(int skip) = 0;
 	virtual void print() = 0;
@@ -140,6 +140,7 @@ class Species : public Species_Base{
 	// Species<Model>* create(); // virtual constructor needed for deserialization
 
 	
+	void clear_vectors();
 	void resize(int _J);
 	std::vector<double> get_maxSize(int skip=0);
 	void print();

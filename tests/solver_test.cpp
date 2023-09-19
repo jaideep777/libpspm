@@ -117,14 +117,15 @@ int main(){
 	sol_ebt.setEnvironment(&E);
 	sol_ebt.addSpecies(vector<int>{5, 3}, vector<double>{1, 0.5}, vector<double>{11,6.5}, {false, false}, (Species_Base*)&Si, 0, -1);
 	sol_ebt.addSpecies(vector<int>{10}, vector<double>{0}, vector<double>{20}, {false}, (Species_Base*)&Sp, 1, -1);
+	sol_ebt.addSystemVariables({-50, -60, -70});
 	sol_ebt.print();
 
 	cout << "State from FMU solver: " << sol_fmu.state << '\n';
 	cout << "State from EBT solver: " << sol_ebt.state << '\n';
 
 
-	nerrors += check(sol_ebt.state, 
-		{
+	vector<double> expected_state_ebt = 
+	    {   -50, -60, -70,
 			2,         1.5,         1.2,
 			2,         3.5,         2.8,
 			2,         5.5,         4.4,
@@ -163,7 +164,24 @@ int main(){
 			2.03,
 			2.03,
 			2.03
-		}, 2e-3);
+		};
+
+	nerrors += check(sol_ebt.state, expected_state_ebt, 2e-3);
+
+	sol_ebt.state[0] = -52;
+	sol_ebt.state[1] = -62;
+	sol_ebt.state[2] = -72;
+
+	sol_ebt.copyStateToCohorts(sol_ebt.state.begin());
+	sol_ebt.print();
+	nerrors += check(sol_ebt.s_state, {-52, -62, -72});
+
+	expected_state_ebt[0] = -52; 
+	expected_state_ebt[0] = -62; 
+	expected_state_ebt[0] = -72;
+
+	sol_ebt.copyCohortsToState();
+	nerrors += check(sol_ebt.s_state, {-52, -62, -72});
 
 
 	if (nerrors == 0) cout << "******* ALL TESTS PASSED ***********\n";

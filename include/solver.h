@@ -31,13 +31,14 @@ class Solver{
 	PSPM_SolverType method;
 
 	// int n_statevars_internal = 0;		// number of internal i-state variables (x and/or u)
-	int n_statevars_system = 0;			// number of s-state variables 
 
-	std::default_random_engine generator; // random number generator
+	std::default_random_engine generator; // random number generator (used by ABM)
 
 	public:	
 	OdeSolver odeStepper;
 	EnvironmentBase * env = nullptr;
+	int n_statevars_system = 0;			// number of s-state variables 
+	std::vector<double> s_state;
 	
 	// The current state of the system, {t, S, dS/dt} 
 	// FIXME: Setting initial value of current_time to anything other than 0 breaks Falster17 seed rain in Plant model. Investigate. 
@@ -86,7 +87,7 @@ class Solver{
 	Solver(PSPM_SolverType _method, std::string ode_method = "rk45ck");
 	Solver(std::string _method, std::string ode_method = "rk45ck");
 
-	void addSystemVariables(int _s);
+	void addSystemVariables(const std::vector<double>& s_state_0);
 	void addSpecies(std::vector<int> _J, std::vector<double> _xb, std::vector<double> _xm, std::vector<bool> log_breaks, Species_Base* _mod, int _n_accumulators, double input_birth_flux = -1);
 	void addSpecies(std::vector<std::vector<double>> xbreaks, Species_Base* _mod, int _n_accumulators, double input_birth_flux = -1);
 	void removeSpecies(Species_Base* spp);

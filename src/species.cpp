@@ -50,14 +50,6 @@ void Species_Base::set_bfin_is_u0in(bool flag){
 	bfin_is_u0in = flag;
 }
 
-void Species_Base::clear_vectors(){
-	dim_centres.clear();
-	dim_edges.clear();
-	X.clear();
-	x.clear();
-	h.clear();
-	xb.clear();
-}
 
 int Species_Base::xsize(){
 	return J;

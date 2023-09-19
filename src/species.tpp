@@ -20,6 +20,17 @@ void Species_Base::addCohort(T bc){
 // 	return new Species<Model>();
 // }
 
+template<class Model>
+void Species<Model>::clear_vectors(){
+	dim_centres.clear();
+	dim_edges.clear();
+	X.clear();
+	x.clear();
+	h.clear();
+	xb.clear();
+	cohorts.clear();
+}
+
 
 template<class Model>
 void Species<Model>::resize(int _J){
