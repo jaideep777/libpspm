@@ -25,7 +25,7 @@ void RKCK45::resize(int new_size){
 }
 
 
-void RKCK45::save(std::ofstream &fout){
+void RKCK45::save(std::ostream &fout){
 	fout << "RKCK45::v1\n";
 	fout << std::make_tuple(
 			ht
@@ -41,7 +41,7 @@ void RKCK45::save(std::ofstream &fout){
 	fout << yscal;
 }
 
-void RKCK45::restore(std::ifstream &fin){
+void RKCK45::restore(std::istream &fin){
 	string s; fin >> s; // version number (discard)
 	fin >> ht
 	    >> eps_rel

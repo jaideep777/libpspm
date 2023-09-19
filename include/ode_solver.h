@@ -122,7 +122,7 @@ class OdeSolver{
 		else return -1;
 	}
 
-	void save(std::ofstream &fout){
+	void save(std::ostream &fout){
 		fout << "odeSolver::v1\n";
 
 		fout << control.abs_tol << ' '
@@ -134,7 +134,7 @@ class OdeSolver{
 		else if (type == ODE_LSODA)  throw std::runtime_error("Cannot save the state for LSODA solver.");
 	}
 
-	void restore(std::ifstream &fin){
+	void restore(std::istream &fin){
 		deleteSolver(); // delete current solver as its type may be different from the saved type...
 
 		std::string s; fin >> s; // discard version number

@@ -184,6 +184,8 @@ int main(){
 	nerrors += check(sol_ebt.s_state, {-52, -62, -72});
 
 
+	sol_ebt.save(cout);
+
 	if (nerrors == 0) cout << "******* ALL TESTS PASSED ***********\n";
 	else cout << "xxxxxx " << nerrors << " TESTS FAILED xxxxxxxxxxx\n";
 	

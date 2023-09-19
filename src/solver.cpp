@@ -718,7 +718,7 @@ void Solver::updateEnv(double t, std::vector<double>::iterator S, std::vector<do
 // 	if (debug) std::cout << "calc birthFlux...\n";
 // 	auto spp = species_vec[k];	
 // 	auto newborns_production = [this, spp](int i, double _t){
-// 		double b1 = spp->birthRate(i, spp->getXn(i), _t, env);
+// 		double b1 = spp->birthRate(i, _t, env);
 // 		return b1;	
 // 	}; 
 // 	double birthFlux = integrate_x(newborns_production, t, k);
@@ -894,57 +894,56 @@ void Solver::updateEnv(double t, std::vector<double>::iterator S, std::vector<do
 // }
 
 
-// void Solver::save(std::ofstream &fout){
-// 	fout << "Solver::v1\n";
-// 	int m = static_cast<int>(method);
-// 	fout << std::make_tuple(
-// 		  m
-// 		, n_statevars_internal
-// 		, n_statevars_system
-// 		, current_time
-// 		, use_log_densities
-// 		, pi0
-// 		, N0);
-// 	fout << '\n';
+void Solver::save(std::ostream &fout){
+	fout << "Solver::v2\n";
+	int m = static_cast<int>(method);
+	fout << std::make_tuple(
+		  m
+		, n_statevars_system
+		, current_time
+		, use_log_densities
+		, pi0
+		, N0);
+	fout << '\n';
 
-// 	fout << species_vec.size() << '\n';
-// 	for (auto spp : species_vec) spp->save(fout);
+	// we actually dont need the full state vector, as it can be reconstructed from cohorts. We only need the system variables
+	fout << s_state << '\n';
 
-// 	// we actually dont need the full state vector, as it can be reconstructed from cohorts. We only need the system variables
-// 	fout << state; 
+	fout << species_vec.size() << '\n';
+	for (auto spp : species_vec) spp->save(fout);
 
-// 	odeStepper.save(fout);
-// }
+	odeStepper.save(fout);
+}
 
 
-// void Solver::restore(std::ifstream &fin, vector<Species_Base*> spp_proto){
-// 	string s; fin >> s; // version number (discard)
-// 	assert(s == "Solver::v1");
-// 	int m;
-// 	fin >> m
-// 	    >> n_statevars_internal
-// 	    >> n_statevars_system
-// 		>> current_time
-// 		>> use_log_densities
-// 		>> pi0
-// 		>> N0;
-// 	method = PSPM_SolverType(m);
+void Solver::restore(std::istream &fin, vector<Species_Base*> spp_proto){
+	string s; fin >> s; // version number (discard)
+	assert(s == "Solver::v2");
+	int m;
+	fin >> m
+	    >> n_statevars_system
+		>> current_time
+		>> use_log_densities
+		>> pi0
+		>> N0;
+	method = PSPM_SolverType(m);
 
-// 	int nspecies;
-// 	fin >> nspecies;
-// 	assert(nspecies == spp_proto.size());
-// 	species_vec = spp_proto;
+	fin >> s_state;
 
-// 	for (auto spp : species_vec){
-// 		spp->restore(fin);
-// 	}
-// 	resizeStateFromSpecies(); // this includes system vars
+	int nspecies;
+	fin >> nspecies;
+	assert(nspecies == spp_proto.size());
+	species_vec = spp_proto;
+
+	for (auto spp : species_vec){
+		spp->restore(fin);
+	}
+	resizeStateFromSpecies(); // this includes system vars
+	copyCohortsToState(); // this will overwrite species state (except system vars), but I guess this is better for sake of consistency
 	
-// 	fin >> state;
-// 	copyCohortsToState(); // this will overwrite species state (except system vars), but I guess this is better for sake of consistency
-	
-// 	odeStepper.restore(fin);
-// }
+	odeStepper.restore(fin);
+}
+
 
 // void Solver::printCohortVector(){
 

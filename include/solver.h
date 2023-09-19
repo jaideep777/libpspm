@@ -165,8 +165,8 @@ class Solver{
 
 	std::vector<double> getDensitySpecies(int k, std::vector<double> breaks, Spline::Extr extrapolation_method = Spline::ZERO);
 
-	void save(std::ofstream &fout);
-	void restore(std::ifstream &fin, std::vector<Species_Base*> spp_proto);
+	void save(std::ostream &fout);
+	void restore(std::istream &fin, std::vector<Species_Base*> spp_proto);
 
 	void printCohortVector();
 	void printCohortVector(std::ostream &out);
