@@ -94,6 +94,7 @@ class Solver{
 
 	//Species<Model>* get_species(int id);
 	int n_species();
+	int n_statevars(Species_Base * spp);
 
 	void setEnvironment(EnvironmentBase * _env);
 

@@ -4,6 +4,7 @@
 #include <iomanip>
 
 #include "io_utils.h"
+#include "fof.h"
 
 // *************** Species_Base   ***************  
 
@@ -512,7 +513,8 @@ void Species<Model>::removeMarkedCohorts(){
 
 
 template <class Model>
-void Species<Model>::removeDensestCohort(){
+void Species<Model>::markDensestCohort(){
+//	group_cohorts(cohorts, 1e-6);
 // 	if (cohorts.size() < 3) return; // do nothing if there are 2 or fewer cohorts
 // 	int i_min = 0;
 // 	double dx_min = dXn(next_xn_asc(cohorts[i_min].xn), next_xn_desc(cohorts[i_min].xn));
@@ -542,7 +544,29 @@ void Species<Model>::removeDensestCohort(){
 // Jaideep FIXME: Maybe dxcut need not be a vector... in any case, it will be hard to specify it as a control parameter when dim is not known. 
 // Instead, we can use a relative dxcut across all dims
 template <class Model>
-void Species<Model>::removeDenseCohorts(std::vector<double> dxcut){
+void Species<Model>::markDenseCohorts(double dxcut){
+	// group cohorts
+	group_cohorts(cohorts, dxcut);
+	
+	// sort by group_id, and within group_id, sort ascending by birth_time
+	std::sort(cohorts.begin(), cohorts.end(), 
+		[](const Cohort<Model>&c1, const Cohort<Model>& c2){ 
+			return (c1.group_id  < c2.group_id) || 
+			       (c1.group_id == c2.group_id && c1.birth_time < c2.birth_time);
+		}
+	);
+
+	// Mark 1st (oldest) cohort within each group to remove, skip 1-sized groups
+	int prev_group_id = -999;
+	for (int i = 0; i < cohorts.size(); ++i) {
+		if (cohorts[i].group_id != prev_group_id) {
+			if (cohorts[i].group_size > 1) {
+				cohorts[i].remove = true; // Mark the first Cohort in this group
+			}
+			prev_group_id = cohorts[i].group_id; // Update the previous group_id
+		}
+    }	
+
 	// // mark cohorts to remove; skip 1st and last cohort
 	// if (cohorts.size() < 3) return; // do nothing if there are 2 or fewer cohorts
 	// std::vector<double> maxCohort = get_maxSizeN();
@@ -566,13 +590,11 @@ void Species<Model>::removeDenseCohorts(std::vector<double> dxcut){
 }
 
 template <class Model>
-void Species<Model>::removeDeadCohorts(double ucut){
+void Species<Model>::markDeadCohorts(double ucut){
 	// mark cohorts to remove; skip pi0-cohort (index J-1)
 	for (int i=0; i<J-1; ++i){
 		if (cohorts[i].u < ucut) cohorts[i].remove = true;
 	}
-
-	removeMarkedCohorts();
 }
 
 

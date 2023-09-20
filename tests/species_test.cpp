@@ -153,7 +153,8 @@ int main(){
 	Si.addCohort(Cdead);
 	Si.print();
 
-	Si.removeDeadCohorts(1e-10); // Note: This will not remove cohort at index J-1. We must ensure during cohort sorting that J-1 is indeed the boundary cohort
+	Si.markDeadCohorts(1e-10); // Note: This will not remove cohort at index J-1. We must ensure during cohort sorting that J-1 is indeed the boundary cohort
+	Si.removeMarkedCohorts(); // Note: This will not remove cohort at index J-1. We must ensure during cohort sorting that J-1 is indeed the boundary cohort
 	Si.print();
 	nerrors += check_species_states(Si, {20, 10, 0.5, 5, 100, 0.02, 1000, 1e-4});
 
@@ -229,9 +230,28 @@ int main(){
 	for (int i=0; i<Si.xsize(); ++i) nerrors += check(Si.getU(i), expected_u[i]);
 
 
+	cout << "Testing cohort grouping\n-----------------------\n";
+	Cohort<Insect> Ci1(I1);
+	Ci1.set_size({2,5.5});
+	Si.addCohort(Ci1);
+	Si.addCohort(Ci1);
+	Si.addCohort(Ci1);
+	Ci1.set_size({0.5, 0.01});
+	Si.addCohort(Ci1);
+
+	for (int i=0; i<Si.xsize(); ++i) Si.set_birthTime(i, (Si.xsize()-i)*0.1);
+
+	Si.save(cout);
+	Si.markDenseCohorts(1e-6);
+	Si.save(cout);
+	Si.removeMarkedCohorts();
+	Si.save(cout);
+
+	nerrors += check_species_states(Si, {20, 10, 0.5, 5, 100, 0.02, 1000, 0.0001, 2, 5.5, 2, 5.5, 0.5, 0.01});
+
+
 	cout << "Testing save / restore\n-----------------------\n";
 	ofstream fout("Si_save.txt");
-	Si.save(cout);
 	Si.save(fout);
 	fout.close();
 
@@ -240,7 +260,6 @@ int main(){
 	Si_restored.restore(fin);
 	Si_restored.save(cout);
 	// Verify manually that console output is same as in the saved file.
-
 
 
 	if (nerrors == 0) cout << "******* ALL TESTS PASSED ***********\n";

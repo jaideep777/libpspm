@@ -105,10 +105,10 @@ class Species_Base{
 	template<class T> void addCohort(T bc);
 
 	virtual void markCohortForRemoval(int i) = 0;
+	virtual void markDensestCohort() = 0;
+	virtual void markDenseCohorts(double dxcut) = 0;
+	virtual void markDeadCohorts(double ucut) = 0;
 	virtual void removeMarkedCohorts() = 0;
-	virtual void removeDensestCohort() = 0;
-	virtual void removeDenseCohorts(std::vector<double> dxcut) = 0;
-	virtual void removeDeadCohorts(double ucut) = 0;
 	// virtual void mergeCohortsAddU(std::vector<double> dxcut) = 0;
 
 	virtual void sortCohortsDescending(size_t dim, int skip=0) = 0;
@@ -191,13 +191,13 @@ class Species : public Species_Base{
 	template<class T> void addCohort(T bc);
 
 	void markCohortForRemoval(int i);
-	void removeMarkedCohorts();
 	// JJ Note: A sorting-independent way to implement the following would be to use FoF algo. 
 	//          Postponing this to later. For now, these cohorts do nothing. In any case, they are only required by CM, 
 	//          and for current purposes, its ok if cohorts are not removed
-	void removeDensestCohort();
-	void removeDenseCohorts(std::vector<double> dxcut);
-	void removeDeadCohorts(double ucut);
+	void markDensestCohort();
+	void markDenseCohorts(double dxcut);
+	void markDeadCohorts(double ucut);
+	void removeMarkedCohorts();
 	// void mergeCohortsAddU(std::vector<double> dxcut);
 
 	void sortCohortsDescending(size_t dim, int skip=0);

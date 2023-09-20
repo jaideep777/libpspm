@@ -17,6 +17,9 @@ class Cohort : public Ind {
 	double u = -9.9e20; //std::numeric_limits<double>::quiet_NaN(); // Best to avoid nan's because they cant be read via filestreams
 	int id = 0;	
 
+	int group_id = 0;   // ID of the spatial group this cohort belongs to
+	int group_size = 0; // size of the spatial group this cohort belongs to
+
 	double birth_time = 0;
 	bool remove = false;
 	
@@ -98,6 +101,8 @@ class Cohort : public Ind {
 		fout << "Cohort<Ind>::v2" << "   ";
 		fout << std::make_tuple(
 				  id
+				, group_id
+				, group_size
 				, birth_time
 				, remove
 				, need_precompute); // we actually need not save need_precompute, because set_size() will always set it to 1 during restore
@@ -116,6 +121,8 @@ class Cohort : public Ind {
 		std::string s; fin >> s; // discard version number
 		assert(s == "Cohort<Ind>::v2");
 		fin >> id
+		    >> group_id
+			>> group_size
 		    >> birth_time
 		    >> remove
 		    >> need_precompute;

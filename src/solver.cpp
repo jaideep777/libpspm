@@ -263,10 +263,8 @@ void Solver::resetState(double t0){  // FIXME: This is currently redundant, and 
 void Solver::resizeStateFromSpecies(){
 	int state_size_new = n_statevars_system;
 	for (auto& spp : species_vec){
-		state_size_new += spp->J*(1 + spp->n_accumulators); // add u and accumulators for all solvers
-		if (method != SOLVER_FMU && method != SOLVER_IFMU){
-			state_size_new += spp->J*(spp->istate_size);    // add x for solvers other than FMU family
-		}
+		state_size_new += n_statevars(spp);
+		state_size_new += spp->J*(spp->n_accumulators); // add accumulators for all solvers
 	}
 	
 	// std::cout << "In Solver::resizeStateFromSpecies before resize " <<std::endl;
@@ -288,6 +286,14 @@ void Solver::setEnvironment(EnvironmentBase * _env){
 
 int Solver::n_species(){
 	return species_vec.size();
+}
+
+int Solver::n_statevars(Species_Base * spp){
+	int n = spp->J*(1); // add u for all solvers
+	if (method != SOLVER_FMU && method != SOLVER_IFMU){
+		n += spp->J*(spp->istate_size);    // add x for solvers other than FMU family
+	}
+	return n;
 }
 
 
@@ -678,26 +684,28 @@ void Solver::copyCohortsToState(){
 }
 
 
-// void Solver::calcOdeRatesImplicit(double t, vector<double>::iterator S, vector<double>::iterator dSdt){
-// 	vector<double>::iterator its = S    + n_statevars_system; // Skip system variables
-// 	vector<double>::iterator itr = dSdt + n_statevars_system;
+void Solver::calcOdeRatesImplicit(double t, vector<double>::iterator S, vector<double>::iterator dSdt){
+	vector<double>::iterator its = S    + n_statevars_system; // Skip system variables
+	vector<double>::iterator itr = dSdt + n_statevars_system;
 	
-// 	for (int s = 0; s<species_vec.size(); ++s){
-// 		auto spp = species_vec[s];
+	for (int s = 0; s<species_vec.size(); ++s){
+		auto spp = species_vec[s];
 		
-// 		its += (n_statevars_internal)*spp->J; // skip x and u 
-// 		for (int i=0; i<n_statevars_internal*spp->J; ++i) *itr++ = 0; // set dx/dt and du/dt to 0 
+		its += n_statevars(spp); // skip x and u 
+		for (int i=0; i<n_statevars(spp); ++i) *itr++ = 0; // set dx/dt and du/dt to 0 
 	
-// 		// FIXME: Maybe a good idea to realize pi0 cohort before calc extra rates
-// 		if (spp->n_accumulators > 0){
-// 			auto itr_prev = itr;
-// 			spp->getExtraRates(itr); // TODO/FIXME: Does calc of extra rates need t and env?
-// 			assert(distance(itr_prev, itr) == spp->n_accumulators*spp->J);
-// 			its += spp->n_accumulators*spp->J; 	
-// 		}
-// 	}
+		// [resolved]: Maybe a good idea to realize pi0 cohort before calc extra rates
+		if (spp->n_accumulators > 0){
+			if (method == SOLVER_EBT || method == SOLVER_IEBT) realizeEbtBoundaryCohort(spp);
+			auto itr_prev = itr;
+			spp->accumulatorRates(itr); // TODO/FIXME: Does calc of extra rates need t and env?
+			assert(distance(itr_prev, itr) == spp->n_accumulators*spp->J);
+			its += spp->n_accumulators*spp->J; 	
+			if (method == SOLVER_EBT || method == SOLVER_IEBT) restoreEbtBoundaryCohort(spp);
+		}
+	}
 
-// }
+}
 
 
 // void Solver::step_to(double tstop){
