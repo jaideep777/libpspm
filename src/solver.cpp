@@ -491,7 +491,7 @@ void Solver::initializeSpecies(Species_Base * s){
 
 
 // void Solver::initialize(){
-// 	// FIXME: Where is initialization of system vars?
+// 	// [resolved FIXME]: Where is initialization of system vars? - Now addSystemVariables() takes initial values as argument
 // //	vector<double>::iterator it = state.begin() + n_statevars_system; // TODO: replace with init_sState() 
 // 	// for (int k=0; k<species_vec.size(); ++k){
 // 	// 	Species_Base* s = species_vec[k];
@@ -721,44 +721,44 @@ void Solver::updateEnv(double t, std::vector<double>::iterator S, std::vector<do
 }
 
 
-// // k = species_id
-// double Solver::calcSpeciesBirthFlux(int k, double t){
-// 	if (debug) std::cout << "calc birthFlux...\n";
-// 	auto spp = species_vec[k];	
-// 	auto newborns_production = [this, spp](int i, double _t){
-// 		double b1 = spp->birthRate(i, _t, env);
-// 		return b1;	
-// 	}; 
-// 	double birthFlux = integrate_x(newborns_production, t, k);
-// 	return birthFlux;	
-// }
+// k = species_id
+double Solver::calcSpeciesBirthFlux(int k, double t){
+	if (debug) std::cout << "calc birthFlux...\n";
+	auto spp = species_vec[k];	
+	auto newborns_production = [this, spp](int i, double _t){
+		double b1 = spp->birthRate(i, _t, env);
+		return b1;	
+	}; 
+	double birthFlux = state_integral(newborns_production, t, k);
+	return birthFlux;	
+}
 
 
-// vector<double> Solver::newborns_out(double t){  // TODO: make recompute env optional
-// 	// update Environment from latest state
-// 	//copyStateToCohorts(state.begin());  // not needed here because this is done in afterStep or upon cohorts update
-// 	//env->computeEnv(t, this, state.begin(), rates.begin());
-// 	updateEnv(t, state.begin(), rates.begin()); // this will trigger a precompute
-// //	for (int k = 0; k<species_vec.size(); ++k) preComputeSpecies(k,t);	
+vector<double> Solver::newborns_out(double t){  // TODO: make recompute env optional
+	// update Environment from latest state
+	//copyStateToCohorts(state.begin());  // not needed here because this is done in afterStep or upon cohorts update
+	//env->computeEnv(t, this, state.begin(), rates.begin());
+	updateEnv(t, state.begin(), rates.begin()); // this will trigger a precompute
+//	for (int k = 0; k<species_vec.size(); ++k) preComputeSpecies(k,t);	
 
-// 	vector<double> b_out;
-// 	for (int k=0; k<species_vec.size(); ++k){	
-// 		// calculate birthflux
-// 		// [solved] wudx doesnt work here. Why?? - works now, no idea why it was not working earlier!
-// 		//auto newborns_production = [this, k](int i, double t){
-// 			//double z = species_vec[k]->getX(i);
-// 			////species_vec[k]->preCompute(i,t,env);	
-// 			//double b = species_vec[k]->birthRate(i,z,t,env);	
-// 			////cout << "newborns of " << i << " = " << b << "\n"; 
-// 			//return b; 
-// 		//}; 
-// 		//double birthFlux = integrate_x(newborns_production, t, k);
-// 		//double birthFlux = integrate_wudx_above(newborns_production, t, 0, k);
-// 		double birthFlux = calcSpeciesBirthFlux(k, t);
-// 		b_out.push_back(birthFlux);
-// 	}
-// 	return b_out;
-// }
+	vector<double> b_out;
+	for (int k=0; k<species_vec.size(); ++k){	
+		// calculate birthflux
+		// [solved] wudx doesnt work here. Why?? - works now, no idea why it was not working earlier!
+		//auto newborns_production = [this, k](int i, double t){
+			//double z = species_vec[k]->getX(i);
+			////species_vec[k]->preCompute(i,t,env);	
+			//double b = species_vec[k]->birthRate(i,z,t,env);	
+			////cout << "newborns of " << i << " = " << b << "\n"; 
+			//return b; 
+		//}; 
+		//double birthFlux = integrate_x(newborns_production, t, k);
+		//double birthFlux = integrate_wudx_above(newborns_production, t, 0, k);
+		double birthFlux = calcSpeciesBirthFlux(k, t);
+		b_out.push_back(birthFlux);
+	}
+	return b_out;
+}
 
 // // FOR DEBUG ONLY, using TESTMODEL
 // vector<double> Solver::u0_out(double t){

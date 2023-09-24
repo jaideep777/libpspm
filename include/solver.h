@@ -152,17 +152,20 @@ class Solver{
 
 	void print();
 	
-	// integrals over size and density
-	/// @brief Computes the integral \f[I = \int_{x_b}^{x_m} w(z,t)u(z)dz\f] for the specified species. For details, see @ref integrate_wudx_above
-	template<typename wFunc>
-	double integrate_x(wFunc w, double t, int species_id);
+	// // integrals over size and density
+	// /// @brief Computes the integral \f[I = \int_{x_b}^{x_m} w(z,t)u(z)dz\f] for the specified species. For details, see @ref integrate_wudx_above
+	// template<typename wFunc>
+	// double integrate_x(wFunc w, double t, int species_id);
 
-	/// @brief Computes the partial integral \f[I = \int_{x_{low}}^{x_m} w(z,t)u(z)dz\f] for the specified species. 
-	template<typename wFunc>
-	double integrate_wudx_above(wFunc w, double t, double xlow, int species_id);
+	// /// @brief Computes the partial integral \f[I = \int_{x_{low}}^{x_m} w(z,t)u(z)dz\f] for the specified species. 
+	// template<typename wFunc>
+	// double integrate_wudx_above(wFunc w, double t, double xlow, int species_id);
+
+	// template<typename wFunc>
+	// double integrate_wudxn_above(wFunc w, double t, std::vector<double> xnlow, std::vector<double> xnhigh, int species_id);
 
 	template<typename wFunc>
-	double integrate_wudxn_above(wFunc w, double t, std::vector<double> xnlow, std::vector<double> xnhigh, int species_id);
+	double state_integral(wFunc w, double t, int species_id);
 
 	std::vector<double> getDensitySpecies(int k, std::vector<double> breaks, Spline::Extr extrapolation_method = Spline::ZERO);
 
@@ -175,7 +178,7 @@ class Solver{
 };
 
 // #include "../src/solver.tpp"
-// #include "../src/size_integrals.tpp"
+#include "../src/size_integrals.tpp"
 
 
 #endif
