@@ -21,22 +21,19 @@ std::vector <double> diff(vector <double> breaks){
 
 int main(){
 
-	Species<TestModel> spp;
+	TestModel M;
+	Species<TestModel> spp(M);
 	Environment E;
 
 	Solver S(SOLVER_EBT);
-	S.control.ebt_grad_dx = 0.001;
-	//S.control.ode_method = "rk4";
-	//S.control.ode_rk4_stepsize = 0.01;
 	S.setEnvironment(&E);
-	S.addSpecies(25, 0, 1, false, &spp, 4, -1);
-	S.species_vec[0]->set_bfin_is_u0in(true);
-	S.resetState();
-	S.initialize();
+	S.addSpecies({25}, {0}, {1}, {false}, &spp, 4, -1);
+
 	S.print();
 	
 	E.computeEnv(0, &S, S.state.begin(), S.rates.begin());
 	cout << E.evalEnv(0,0) << endl;
+	if (fabs(E.evalEnv(0,0) - 0.3802) > 1e-5) return 1;
 
 	S.print();
 	//for (auto s : S.state) cout << s << " "; cout << endl;
@@ -51,16 +48,16 @@ int main(){
 		S.step_to(t);
 		fout << S.current_time << "\t" << S.u0_out(t)[0] << "\t";
 
-		vector<double> breaks = myseq(0,1,26);
-		vector<double> v = S.getDensitySpecies(0, breaks, Spline::QUADRATIC);
-		for (auto y : v) fout << y << "\t";
-		fout << endl;
+		// vector<double> breaks = myseq(0,1,26);
+		// vector<double> v = S.getDensitySpecies(0, breaks, Spline::QUADRATIC);
+		// for (auto y : v) fout << y << "\t";
+		// fout << endl;
 	}
 
 	fout.close();
 
 	S.print();	
-	cout << S.u0_out(S.current_time)[0] << endl;
+	cout << setprecision(6) << S.u0_out(S.current_time)[0] << endl;
 	if (abs(S.u0_out(S.current_time)[0]-0.97504) < 2e-5) return 0;
 	else return 1;
 }

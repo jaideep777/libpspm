@@ -8,18 +8,21 @@ using namespace std;
 
 int main(){
 
-	Species<TestModel> spp;
+	TestModel M;
+	Species<TestModel> spp(M);
 	Environment E;
 
 	Solver S(SOLVER_EBT);
 	S.setEnvironment(&E);
-	S.addSpecies(25, 0, 1, false, &spp, 4, -1);
-	S.resetState();
-	S.initialize();
+	S.addSpecies({25}, {0}, {1}, {false}, &spp, 4, -1);
+	// S.resetState();
+	// S.initialize();
+	static_cast<Species<TestModel>*>(S.species_vec[0])->sortCohortsDescending(0,1);
 	S.print();
 	
 	E.computeEnv(0, &S, S.state.begin(), S.rates.begin());
 	cout << E.evalEnv(0,0) << endl;
+	if (fabs(E.evalEnv(0,0) - 0.3802) > 1e-5) return 1;
 
 	S.calcRates_EBT(1, S.state.begin(), S.rates.begin());  // dummy rates calc rates(X=X0, U=U0, t=1, E=E(U0))
 //	S.step_to(1);

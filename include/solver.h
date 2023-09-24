@@ -177,7 +177,7 @@ class Solver{
 
 };
 
-// #include "../src/solver.tpp"
+#include "../src/solver.tpp"
 #include "../src/size_integrals.tpp"
 
 

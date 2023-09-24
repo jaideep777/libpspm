@@ -170,7 +170,6 @@ void Solver::addSpecies(std::vector<std::vector<double>> xbreaks, Species_Base* 
 void Solver::addSpecies(std::vector<int> _J, std::vector<double> _xb, std::vector<double> _xm, std::vector<bool> log_breaks, Species_Base* s, 
 								int _n_accumulators, double input_birth_flux){
 
-	// TODO: make sure that _xb and _xm are the same size
 	if (_xb.size() != s->istate_size){
 		throw std::runtime_error("Error: \nSolver::addSpecies: number of elements in xb doesnt match the species istate_size"); // Fix this to be more informative
 	}
@@ -384,9 +383,12 @@ void Solver::initializeSpecies(Species_Base * s){
 				s->setX(i,X); 
 
 				vector<double> dx = id_utils::coord_value(id_utils::index(i, s->dim_centres), s->h);
-				double dV = std::accumulate(dx.begin(), dx.end(), 1, std::multiplies<double>());
+				cout << "dx = " << dx << '\n';
+				double dV = std::accumulate(dx.begin(), dx.end(), 1.0, std::multiplies<double>());
+				cout << "dV = " << dV << '\n';
 				double U = s->init_density(i, env)*dV; 
 				s->setU(i,U);
+				cout << "Init: X = " << X << " / U = " << U << '\n';
 			}
 			// set pi0, N0 as x, u for the last cohort. This scheme allows using this last cohort with xb+pi0 in integrals etc 
 			s->setX(s->J-1, vector<double>(s->istate_size, 0)); 
@@ -708,10 +710,10 @@ void Solver::calcOdeRatesImplicit(double t, vector<double>::iterator S, vector<d
 }
 
 
-// void Solver::step_to(double tstop){
-// 	auto func = [](double t){};
-// 	step_to(tstop, func);
-// }
+void Solver::step_to(double tstop){
+	auto func = [](double t){};
+	step_to(tstop, func);
+}
 
 
 void Solver::updateEnv(double t, std::vector<double>::iterator S, std::vector<double>::iterator dSdt){
@@ -760,15 +762,15 @@ vector<double> Solver::newborns_out(double t){  // TODO: make recompute env opti
 	return b_out;
 }
 
-// // FOR DEBUG ONLY, using TESTMODEL
-// vector<double> Solver::u0_out(double t){
-// 	vector <double> u0out;
-// 	vector <double> newbornsout = newborns_out(t);
-// 	for (int k=0; k < species_vec.size(); ++k){
-// 		u0out.push_back(newbornsout[k]/species_vec[k]->growthRate(-1, species_vec[k]->xb, t, env));
-// 	}
-// 	return u0out;
-// }
+// FOR DEBUG ONLY, using TESTMODEL
+vector<double> Solver::u0_out(double t){
+	vector <double> u0out;
+	vector <double> newbornsout = newborns_out(t);
+	for (int k=0; k < species_vec.size(); ++k){
+		u0out.push_back(newbornsout[k]/species_vec[k]->growthRate(-1, t, env)[0]);
+	}
+	return u0out;
+}
 
 
 
@@ -910,11 +912,10 @@ void Solver::save(std::ostream &fout){
 		, n_statevars_system
 		, current_time
 		, use_log_densities
-		, pi0
 		, N0);
 	fout << '\n';
-
-	// we actually dont need the full state vector, as it can be reconstructed from cohorts. We only need the system variables
+	fout << pi0 << '\n';
+	// [resolved] we dont need the full state vector, as it can be reconstructed from cohorts. We only need the system variables
 	fout << s_state << '\n';
 
 	fout << species_vec.size() << '\n';
@@ -932,8 +933,8 @@ void Solver::restore(std::istream &fin, vector<Species_Base*> spp_proto){
 	    >> n_statevars_system
 		>> current_time
 		>> use_log_densities
-		>> pi0
 		>> N0;
+	fin >> pi0;
 	method = PSPM_SolverType(m);
 
 	fin >> s_state;
