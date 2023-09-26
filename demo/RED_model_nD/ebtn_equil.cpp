@@ -19,13 +19,17 @@ inline std::vector <double> logseq(double from, double to, int len){
 
 int main(){
 
-	Species<RED_Plant> spp;
+	RED_Plant M;
+	Species<RED_Plant> spp(M);
 	LightEnvironment E;
 
-	Solver S(SOLVER_EBTN);
+	Solver S(SOLVER_EBT);
 	S.control.ebt_ucut = 1e-20;
 
 	S.setEnvironment(&E);
+	std::vector<int> Jn;
+	Jn.push_back(10);
+	Jn.push_back(10);
 	std::vector<double> xb;
 	xb.push_back(1);
 	xb.push_back(0.5);
@@ -36,13 +40,13 @@ int main(){
 	logBreaks.push_back(true);
 	logBreaks.push_back(false);
 
-	S.addSpecies(10, xb, xm, logBreaks, &spp, 0);
+	S.addSpecies(Jn, xb, xm, logBreaks, &spp, 0);
 	
 	
 	S.resetState();
-	S.initialize();
+	// S.initialize();
 
-	S.printODEmethod();
+	// S.printODEmethod();
 	// S.print();
 	
 	
@@ -54,7 +58,7 @@ int main(){
 
 	for (double t=0; t <= 100; t=t+1) {
 		S.step_to(t);
-		S.printCohortVector(cohortprint);
+		// S.printCohortVector(cohortprint);
 		cout << "Finished step to function for t = " << t << std::endl;
 		// S.printCohortVector(std::cout);
 

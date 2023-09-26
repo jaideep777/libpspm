@@ -22,17 +22,17 @@ class LightEnvironment : public EnvironmentBase{
 		// Calculate _/ w(z,t)u(z,t)dz
 		//         xb
 		auto w = [S](int i, double t) -> double {
-			std::vector<double> z = S->species_vec[0]->getXn(i);
+			std::vector<double> z = S->species_vec[0]->getX(i);
 			return 0.396*pow(z[0], 0.749)/10000;
 		};
-		E = S->integrate_x(w, t, 0);
+		E = S->state_integral(w, t, 0);
 	}
 
 };
 
 
 
-class RED_Plant : public IndividualBase{
+class RED_Plant : public IndividualBase<2>{
 	public:
 
 	//double input_seed_rain = 1;	
@@ -56,44 +56,29 @@ class RED_Plant : public IndividualBase{
 		mu0 = mort*m0/g0;
 	}
 
-	void set_size(double _x){
+	void set_size(const std::array <double, 2>& _x){
 	}
 
-	void set_size(std::vector<double> _x){
+	double init_density(void * env, double input_seed_rain){
+		return 100/pow(x[0],4);
 	}
 
-	double init_density(double x, void * env, double input_seed_rain){
-		return 100/pow(x,4);
-	}
-
-	double init_density(std::vector<double> xn, void * env, double input_seed_rain){
-		return 100/pow(xn[0],4);
-	}
-
-	void preCompute(double x, double t, void * env){
-	}
-
-	void preCompute(std::vector<double> xn, double t, void * env){
+	void preCompute(double t, void * env){
 	}
 
 	double establishmentProbability(double t, void * env){
 		return 1;
 	}
 
-	double growthRate(double x, double t, void * env){
-		++nrc;
-		return g0*pow(x,phiG);	
-	}
-
-	std::vector<double> growthRate(std::vector<double> xn, double t, void * env){
+	std::array<double,2> growthRate(double t, void * env){
 		++nrc;
 		// std::cout << "growth Rate Gradient compute" << std::endl;
 		// std::cout << xn << std::endl;
 		std::vector<double> vec_out;
-		double x0 = g0*pow(xn[0],phiG);
+		double x0 = g0*pow(x[0],phiG);
 		// std::cout << x0 << std::endl;	
 		vec_out.push_back(x0);
-		double x1 = -beta * xn[1];
+		double x1 = -beta * x[1];
 		// std::cout << x1 << std::endl;
 		vec_out.push_back(x1);
 		// std::cout <<x0 << "   " <<  x1 << std::endl;
@@ -102,28 +87,16 @@ class RED_Plant : public IndividualBase{
 		return {x0, x1};
 	}
 
-	double mortalityRate(double x, double t, void * env){
+	double mortalityRate(double t, void * env){
 		++ndc;
 		return mort;
 	}
-
-	double mortalityRate(std::vector<double> xn, double t, void * env){
-		++ndc;
-		return mort;
-	}
-
-	double birthRate(double x, double t, void * env){
+	
+	double birthRate(double t, void * env){
 		++nbc;
-		if (x < 0) throw std::runtime_error("x is negative");
+		if (x[0] < 0) throw std::runtime_error("x_0 is negative");
 		LightEnvironment* env1 = (LightEnvironment*)env;
-		return 0.1/0.9*g0*pow(x,phiG)*(1-env1->evalEnv(x,t));
-	}
-
-	double birthRate(std::vector<double> xn, double t, void * env){
-		++nbc;
-		if (xn[0] < 0) throw std::runtime_error("x_0 is negative");
-		LightEnvironment* env1 = (LightEnvironment*)env;
-		return 0.1/0.9*g0*pow(xn[0],phiG)*(1-env1->evalEnv(xn[0],t));
+		return 0.1/0.9*g0*pow(x[0],phiG)*(1-env1->evalEnv(x[0],t));
 	}
 
 	void init_state(double t, void * env){
