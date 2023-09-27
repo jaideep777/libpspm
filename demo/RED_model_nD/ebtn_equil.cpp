@@ -28,13 +28,13 @@ int main(){
 
 	S.setEnvironment(&E);
 	std::vector<int> Jn;
-	Jn.push_back(10);
+	Jn.push_back(20);
 	Jn.push_back(10);
 	std::vector<double> xb;
 	xb.push_back(1);
 	xb.push_back(0.5);
 	std::vector<double> xm;
-	xm.push_back(1e4);
+	xm.push_back(1e6);
 	xm.push_back(100);
 	std::vector<bool> logBreaks;
 	logBreaks.push_back(true);
@@ -50,34 +50,42 @@ int main(){
 	// S.print();
 	
 	
-	ofstream fout("ebtn_Redmodel.txt");
+	// ofstream fout("ebtn_Redmodel.txt");
 
 
-	std::ofstream cohortprint;
-	cohortprint.open(std::string("cohort_vector_ebtn_Redmodel.csv").c_str());
+	// std::ofstream cohortprint;
+	// cohortprint.open(std::string("cohort_vector_ebtn_Redmodel.csv").c_str());
 
-	for (double t=0; t <= 100; t=t+1) {
+	for (double t=0; t <= 10; t=t+1) {
 		S.step_to(t);
 		// S.printCohortVector(cohortprint);
 		cout << "Finished step to function for t = " << t << std::endl;
 		// S.printCohortVector(std::cout);
 
-		fout << S.current_time << "\t" << S.newborns_out(t)[0] << "\t";
+		// fout << S.current_time << "\t" << S.newborns_out(t) << "\t";
 		cout << S.current_time << " " << S.species_vec[0]->xsize() << "\n";
 		//cout << S.current_time << " " [><< S.u0_out()<] << "\n";
 		
 		// vector <double> dist = S.getDensitySpecies(0, logseq(1, 1e6, 150));
 		// for (auto y : dist) fout << y << "\t";
-		fout << endl;
+		// fout << endl;
 	}
 
-	fout.close();
-	cohortprint.close();
+	
+	// fout.close();
+	// cohortprint.close();
 
-	// // expected 38.1128953 (numerical R), 37.5845 (analytical)
+
+	// S.print();	
+
 	// cout << S.newborns_out(5000)[0] << endl; 
-	// //if (abs(S.u0_out()[0] - 1.468232) < 1e-5) return 0;
-	// //else return 1;
+	// expected 38.1128953 (numerical R), 37.5845 (analytical)
+	cout << "Newborns out" << endl;
+	cout << setprecision(6) << S.newborns_out(S.current_time)[0] << endl; 
+	cout << "S.u0_out()[0]" << endl;
+	cout << setprecision(6) << S.u0_out(S.current_time)[0] << endl;
+	//if (abs(S.u0_out()[0] - 1.468232) < 1e-5) return 0;
+	//else return 1;
 
 }
 

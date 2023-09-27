@@ -96,18 +96,20 @@ class RED_Plant : public IndividualBase<2>{
 		++nbc;
 		if (x[0] < 0) throw std::runtime_error("x_0 is negative");
 		LightEnvironment* env1 = (LightEnvironment*)env;
+		// std::cout << "Birth Rate for " << x[0] << std::endl;
 		return 0.1/0.9*g0*pow(x[0],phiG)*(1-env1->evalEnv(x[0],t));
 	}
 
-	void init_state(double t, void * env){
+	void init_accumulators(double t, void * env){
 	}
-	vector<double>::iterator set_state(vector<double>::iterator &it){
+
+	vector<double>::iterator set_accumulators(vector<double>::iterator &it){
 		return it;
 	}
-	vector<double>::iterator get_state(vector<double>::iterator &it){
+	vector<double>::iterator get_accumulators(vector<double>::iterator &it){
 		return it;
 	}
-	vector<double>::iterator get_rates(vector<double>::iterator &it){
+	vector<double>::iterator get_accumulatorRates(vector<double>::iterator &it){
 		return it;
 	}
 

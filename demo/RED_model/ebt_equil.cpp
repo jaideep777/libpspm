@@ -16,17 +16,18 @@ inline std::vector <double> logseq(double from, double to, int len){
 
 int main(){
 
-	Species<RED_Plant> spp;
+	RED_Plant M;
+	Species<RED_Plant> spp(M);
 	LightEnvironment E;
 
 	Solver S(SOLVER_EBT);
 	S.control.ebt_ucut = 1e-20;
 
 	S.setEnvironment(&E);
-	S.addSpecies(100, 1, 1e6, true, &spp, 0);
+	S.addSpecies({100}, {1}, {1e6}, {true}, &spp, 0);
 	//S.get_species(0)->set_bfin_is_u0in(true);	// say that input_birth_flux is u0
 	S.resetState();
-	S.initialize();
+	// S.initialize();
 	//S.print();
 	
 	
@@ -38,8 +39,8 @@ int main(){
 		cout << S.current_time << " " << S.species_vec[0]->xsize() << "\n";
 		//cout << S.current_time << " " [><< S.u0_out()<] << "\n";
 		
-		vector <double> dist = S.getDensitySpecies(0, logseq(1, 1e6, 150));
-		for (auto y : dist) fout << y << "\t";
+		// vector <double> dist = S.getDensitySpecies(0, logseq(1, 1e6, 150));
+		// for (auto y : dist) fout << y << "\t";
 		fout << endl;
 	}
 

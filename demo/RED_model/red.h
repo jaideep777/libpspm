@@ -22,17 +22,17 @@ class LightEnvironment : public EnvironmentBase{
 		// Calculate _/ w(z,t)u(z,t)dz
 		//         xb
 		auto w = [S](int i, double t) -> double {
-			double z = S->species_vec[0]->getX(i);
+			double z = S->species_vec[0]->getX(i)[0];
 			return 0.396*pow(z, 0.749)/10000;
 		};
-		E = S->integrate_x(w, t, 0);
+		E = S->state_integral(w, t, 0);
 	}
 
 };
 
 
 
-class RED_Plant : public IndividualBase{
+class RED_Plant : public IndividualBase <1>{
 	public:
 
 	//double input_seed_rain = 1;	
@@ -56,49 +56,49 @@ class RED_Plant : public IndividualBase{
 	}
 
 
-	void set_size(double _x){
+	void set_size(const std::array <double, 1>& _x){
 	}
 
-	double init_density(double x, void * env, double input_seed_rain){
-		return 100/pow(x,4);
+	double init_density(void * env, double input_seed_rain){
+		return 100/pow(x[0],4);
 	}
 
-	void preCompute(double x, double t, void * env){
+	void preCompute(double t, void * env){
 	}
 
 	double establishmentProbability(double t, void * env){
 		return 1;
 	}
 
-	double growthRate(double x, double t, void * env){
+	std::array<double,1> growthRate(double t, void * env){
 		++nrc;
-		return g0*pow(x,phiG);	
+		return {g0*pow(x[0],phiG)};	
 	}
 
-	double mortalityRate(double x, double t, void * env){
+	double mortalityRate(double t, void * env){
 		++ndc;
 		return mort;
 	}
 
-	double birthRate(double x, double t, void * env){
+	double birthRate(double t, void * env){
 		++nbc;
-		if (x < 0) throw std::runtime_error("x is negative");
+		if (x[0] < 0) throw std::runtime_error("x is negative");
 		LightEnvironment* env1 = (LightEnvironment*)env;
-		return 0.1/0.9*g0*pow(x,phiG)*(1-env1->evalEnv(x,t));
+		return 0.1/0.9*g0*pow(x[0],phiG)*(1-env1->evalEnv(x[0],t));
 	}
 
-	void init_state(double t, void * env){
-	}
-	vector<double>::iterator set_state(vector<double>::iterator &it){
-		return it;
-	}
-	vector<double>::iterator get_state(vector<double>::iterator &it){
-		return it;
-	}
-	vector<double>::iterator get_rates(vector<double>::iterator &it){
-		return it;
+	void init_accumulators(double t, void * env){
 	}
 
+	vector<double>::iterator set_accumulators(vector<double>::iterator &it){
+		return it;
+	}
+	vector<double>::iterator get_accumulators(vector<double>::iterator &it){
+		return it;
+	}
+	vector<double>::iterator get_accumulatorRates(vector<double>::iterator &it){
+		return it;
+	}
 	void print(std::ostream& out = std::cout){
 	}
 };

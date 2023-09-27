@@ -725,7 +725,7 @@ void Solver::updateEnv(double t, std::vector<double>::iterator S, std::vector<do
 
 // k = species_id
 double Solver::calcSpeciesBirthFlux(int k, double t){
-	if (debug) std::cout << "calc birthFlux...\n";
+	// if (debug) std::cout << "calc birthFlux...\n";
 	auto spp = species_vec[k];	
 	auto newborns_production = [this, spp](int i, double _t){
 		double b1 = spp->birthRate(i, _t, env);
