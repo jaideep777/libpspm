@@ -245,18 +245,18 @@ void Solver::addSystemVariables(const std::vector<double>& s_state_0){
 }
 
 
-void Solver::resetState(double t0){  // FIXME: This is currently redundant, and needs to be improved with reset of both state and cohorts for a true reset of state
-	current_time = t0;
-	odeStepper.reset(t0, control.ode_eps, control.ode_eps); // = RKCK45<vector<double>> (0, control.ode_eps, control.ode_initial_step_size);  // this is a cheap operation, but this will empty the internal containers, which will then be (automatically) resized at next 1st ODE step. Maybe add a reset function to the ODE stepper? 
+// void Solver::resetState(double t0){  // FIXME: This is currently redundant, and needs to be improved with reset of both state and cohorts for a true reset of state
+// 	current_time = t0;
+// 	odeStepper.reset(t0, control.ode_eps, control.ode_eps); // = RKCK45<vector<double>> (0, control.ode_eps, control.ode_initial_step_size);  // this is a cheap operation, but this will empty the internal containers, which will then be (automatically) resized at next 1st ODE step. Maybe add a reset function to the ODE stepper? 
 
-	// set birth time for each cohort to current_time
-	for (auto s : species_vec){
-		for (int i=0; i<s->J; ++i) s->set_birthTime(i, current_time); // FIXME: doesnt make sense, because larger cohorts would have been born earlier, but birthTime is not used anyways
-	}
+// 	// set birth time for each cohort to current_time
+// 	for (auto s : species_vec){
+// 		for (int i=0; i<s->J; ++i) s->set_birthTime(i, current_time); // FIXME: doesnt make sense, because larger cohorts would have been born earlier, but birthTime is not used anyways
+// 	}
 
-	std::fill(state.begin(), state.end(), 0); 
-	std::fill(rates.begin(), rates.end(), -999); // DEBUG
-}
+// 	std::fill(state.begin(), state.end(), 0); 
+// 	std::fill(rates.begin(), rates.end(), -999); // DEBUG
+// }
 
 
 void Solver::resizeStateFromSpecies(){

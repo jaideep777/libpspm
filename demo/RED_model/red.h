@@ -87,20 +87,7 @@ class RED_Plant : public IndividualBase <1>{
 		return 0.1/0.9*g0*pow(x[0],phiG)*(1-env1->evalEnv(x[0],t));
 	}
 
-	void init_accumulators(double t, void * env){
-	}
 
-	vector<double>::iterator set_accumulators(vector<double>::iterator &it){
-		return it;
-	}
-	vector<double>::iterator get_accumulators(vector<double>::iterator &it){
-		return it;
-	}
-	vector<double>::iterator get_accumulatorRates(vector<double>::iterator &it){
-		return it;
-	}
-	void print(std::ostream& out = std::cout){
-	}
 };
 
 

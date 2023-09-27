@@ -98,11 +98,11 @@ class Solver{
 
 	void setEnvironment(EnvironmentBase * _env);
 
-	void resetState(double t0 = 0);
+	// void resetState(double t0 = 0);
 	void resizeStateFromSpecies();
 
 	void initializeSpecies(Species_Base * s);
-	void initialize();
+	// void initialize();
 
 	void copyStateToCohorts(std::vector<double>::iterator state_begin);		////const int size();
 	void copyCohortsToState();
