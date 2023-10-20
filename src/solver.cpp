@@ -703,7 +703,7 @@ void Solver::calcOdeRatesImplicit(double t, vector<double>::iterator S, vector<d
 			spp->accumulatorRates(itr); // TODO/FIXME: Does calc of extra rates need t and env?
 			assert(distance(itr_prev, itr) == spp->n_accumulators*spp->J);
 			its += spp->n_accumulators*spp->J; 	
-			if (method == SOLVER_EBT || method == SOLVER_IEBT) restoreEbtBoundaryCohort(spp);
+			if (method == SOLVER_EBT || method == SOLVER_IEBT) restoreEbtBoundaryCohort(spp);	
 		}
 	}
 
@@ -801,36 +801,35 @@ struct point{
 	int    count = 0;
 };	
 
+// breaks must be sorted ascending
 std::vector<double> Solver::getDensitySpecies1D(int k, int dim, const std::vector<double>& breaks, Spline::Extr extrapolation_method){
 	auto spp = species_vec[k];
 	vector <double> xx, uu;
 	
-	if (method == SOLVER_ABM) spp->sortCohortsDescending(dim); // ABM needs sorted cohorts
-	if (method == SOLVER_EBT || method == SOLVER_IEBT) spp->sortCohortsDescending(dim, 1); // for EBT, skip boundary cohort and sort
+	// if (method == SOLVER_ABM) spp->sortCohortsDescending(dim); // ABM needs sorted cohorts
+	// if (method == SOLVER_EBT || method == SOLVER_IEBT) spp->sortCohortsDescending(dim, 1); // for EBT, skip boundary cohort and sort
 
 	if (method == SOLVER_EBT || method == SOLVER_IEBT || method == SOLVER_ABM){ // EBT and ABM have very simular structure so use the same density calculation algo
 		double xm = spp->getX(0)[dim]+1e-6;
 
-		vector<point> points(breaks.size()-1);
+		vector<point> points(breaks.size());
 
-		// assuming breaks are sorted ascending
-		// and cohorts are sorted descending
-		int current_interval = breaks.size()-2;
+		// int current_interval = breaks.size()-2;
 		for (int i=0; i<spp->J; ++i){ // loop over all cohorts 
 			double x = spp->getX(i)[dim];
 			double N = spp->getU(i);
-			// if (method == SOLVER_EBT || method == SOLVER_IEBT) if (i == spp->J-1) x = spp->xb[dim] + x/(N+1e-12); // For EBT, real-ize x if it's boundary cohort
-			if (method == SOLVER_EBT || method == SOLVER_IEBT) if (i == spp->J-1) continue; // x = spp->xb[dim] + x/(N+1e-12); // Skip boundary cohort for EBT and IEBT
+			if (method == SOLVER_EBT || method == SOLVER_IEBT) if (i == spp->J-1) x = spp->xb[dim] + x/(N+1e-12); // For EBT, real-ize x if it's boundary cohort
 			
-			while(breaks[current_interval]>x) --current_interval; // decrement interval until x fits
-			//cout << current_interval << ", x = " << x << "(" << N << ") in [" << breaks[current_interval] << ", " << breaks[current_interval+1] << "]\n"; cout.flush();
+			int current_interval = std::upper_bound(breaks.begin(), breaks.end(), x) - breaks.begin() -1; // this assumes breaks is sorted ascending
+			current_interval = std::clamp<int>(current_interval, 0, breaks.size()-1);
+			// while(breaks[current_interval]>x) --current_interval; // decrement interval until x fits
+			// cout << current_interval << ", x = " << x << "(" << N << ") in [" << breaks[current_interval] << ", " << breaks[current_interval+1] << "]\n"; cout.flush();
 			if (N>0){
 				points[current_interval].abund += N;
 				points[current_interval].count += 1;
 				points[current_interval].xmean += N*x;
 			}
 		}
-
 		// Compute mean x in each interval (each point corresponds to 1 interval)
 		for (int i=0; i<points.size(); ++i) if (points[i].count>0) points[i].xmean /= points[i].abund;
 		
@@ -842,11 +841,11 @@ std::vector<double> Solver::getDensitySpecies1D(int k, int dim, const std::vecto
 		auto pend = std::remove_if(points.begin(), points.end(), pred);
 		points.erase(pend, points.end());
 
-		//cout << "mean x and abund (removed):\n";
-		//for (int i=0; i<points.size(); ++i) cout << i << "\t" << points[i].count << "\t" << points[i].xmean << "\t" << points[i].abund << "\n";	
-		//cout << "--\n";
+		// cout << "mean x and abund (removed):\n";
+		// for (int i=0; i<points.size(); ++i) cout << i << "\t" << points[i].count << "\t" << points[i].xmean << "\t" << points[i].abund << "\n";	
+		// cout << "--\n";
 
-		// Now treat xmean as the x vector and calculate the width spanned by each point
+		// Now treat xmean as the x vector and calculate the width spanned by each point, i.e., 1D Voronoi cells
 		// to get u, divide abundance by width for each point
 		if (points.size() > 2){
 			vector<double> h(points.size());
@@ -861,6 +860,7 @@ std::vector<double> Solver::getDensitySpecies1D(int k, int dim, const std::vecto
 				uu.push_back(points[i].abund / h[i]);
 			}
 		}
+
 	}
 
 	else if (method == SOLVER_CM || method == SOLVER_ICM){
@@ -882,6 +882,7 @@ std::vector<double> Solver::getDensitySpecies1D(int k, int dim, const std::vecto
 		}
 		
 	}	
+
 
 	// interpolate density at each value in breaks from uu
 	if (xx.size() >= 2){ 
