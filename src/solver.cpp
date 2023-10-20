@@ -774,134 +774,135 @@ vector<double> Solver::u0_out(double t){
 
 
 
-// // xb
-// // |---*--|--*--|----*----|---*---|
-// //     0     1       2        3        <--- points
-// // 0      1     2         3       4    <--- breaks
+// xb
+// |---*--|--*--|----*----|---*---|
+//     0     1       2        3        <--- points
+// 0      1     2         3       4    <--- breaks
 
-// // Test this function with this R script:
-// /**
-// x = c(0, 1,1.1,1.2, 2,2.2,2.3, 4.5,5.5,6.5)[length(x):1]
-// N = c(1, 1,1,  1,   2,2,  2,   3,   4,  5)[length(N):1]
-// plot(N~x)
-// abline(v=breaks, col="grey")
-// breaks = seq(0,10,1)
-// dens = rep(0, length(x))
-// J = length(x)
+// Test this function with this R script:
+/**
+x = c(0, 1,1.1,1.2, 2,2.2,2.3, 4.5,5.5,6.5)[length(x):1]
+N = c(1, 1,1,  1,   2,2,  2,   3,   4,  5)[length(N):1]
+plot(N~x)
+abline(v=breaks, col="grey")
+breaks = seq(0,10,1)
+dens = rep(0, length(x))
+J = length(x)
 
-// current_interval = length(breaks)-1
-// for (i in 1:J){
-//   while(breaks[current_interval] > x[i]) current_interval = current_interval-1
-//   dens[current_interval] = dens[current_interval]+N[i]
-// }
-// **/
-// struct point{
-// 	double xmean = 0;
-// 	double abund = 0;
-// 	int    count = 0;
-// };	
+current_interval = length(breaks)-1
+for (i in 1:J){
+  while(breaks[current_interval] > x[i]) current_interval = current_interval-1
+  dens[current_interval] = dens[current_interval]+N[i]
+}
+**/
+struct point{
+	double xmean = 0;
+	double abund = 0;
+	int    count = 0;
+};	
 
-// // TODO: make sure this works for EBTN method
-// std::vector<double> Solver::getDensitySpecies(int k, vector<double> breaks, Spline::Extr extrapolation_method){
-// 	auto spp = species_vec[k];
-// 	vector <double> xx, uu;
+std::vector<double> Solver::getDensitySpecies1D(int k, int dim, const std::vector<double>& breaks, Spline::Extr extrapolation_method){
+	auto spp = species_vec[k];
+	vector <double> xx, uu;
 	
-// 	if (method == SOLVER_ABM) spp->sortCohortsDescending(); // ABM needs sorted cohorts
+	if (method == SOLVER_ABM) spp->sortCohortsDescending(dim); // ABM needs sorted cohorts
+	if (method == SOLVER_EBT || method == SOLVER_IEBT) spp->sortCohortsDescending(dim, 1); // for EBT, skip boundary cohort and sort
 
-// 	if (method == SOLVER_EBT || method == SOLVER_IEBT || method == SOLVER_ABM){ // EBT and ABM have very simular structure so use the same density calculation algo
-// 		double xm = spp->getX(0)+1e-6;
+	if (method == SOLVER_EBT || method == SOLVER_IEBT || method == SOLVER_ABM){ // EBT and ABM have very simular structure so use the same density calculation algo
+		double xm = spp->getX(0)[dim]+1e-6;
 
-// 		vector<point> points(breaks.size()-1);
+		vector<point> points(breaks.size()-1);
 
-// 		// assuming breaks are sorted ascending
-// 		// and cohorts are sorted descending
-// 		int current_interval = breaks.size()-2;
-// 		for (int i=0; i<spp->J; ++i){ // loop over all cohorts except boundary cohort
-// 			double x = spp->getX(i);
-// 			double N = spp->getU(i);
-// 			if (method == SOLVER_EBT) if (i == spp->J-1) x = spp->xb + x/(N+1e-12); // For EBT, real-ize x if it's boundary cohort
+		// assuming breaks are sorted ascending
+		// and cohorts are sorted descending
+		int current_interval = breaks.size()-2;
+		for (int i=0; i<spp->J; ++i){ // loop over all cohorts 
+			double x = spp->getX(i)[dim];
+			double N = spp->getU(i);
+			// if (method == SOLVER_EBT || method == SOLVER_IEBT) if (i == spp->J-1) x = spp->xb[dim] + x/(N+1e-12); // For EBT, real-ize x if it's boundary cohort
+			if (method == SOLVER_EBT || method == SOLVER_IEBT) if (i == spp->J-1) continue; // x = spp->xb[dim] + x/(N+1e-12); // Skip boundary cohort for EBT and IEBT
 			
-// 			while(breaks[current_interval]>x) --current_interval; // decrement interval until x fits
-// 			//cout << current_interval << ", x = " << x << "(" << N << ") in [" << breaks[current_interval] << ", " << breaks[current_interval+1] << "]\n"; cout.flush();
-// 			if (N>0){
-// 				points[current_interval].abund += N;
-// 				points[current_interval].count += 1;
-// 				points[current_interval].xmean += N*x;
-// 			}
-// 		}
+			while(breaks[current_interval]>x) --current_interval; // decrement interval until x fits
+			//cout << current_interval << ", x = " << x << "(" << N << ") in [" << breaks[current_interval] << ", " << breaks[current_interval+1] << "]\n"; cout.flush();
+			if (N>0){
+				points[current_interval].abund += N;
+				points[current_interval].count += 1;
+				points[current_interval].xmean += N*x;
+			}
+		}
 
-// 		// Compute mean x in each interval (each point corresponds to 1 interval)
-// 		for (int i=0; i<points.size(); ++i) if (points[i].count>0) points[i].xmean /= points[i].abund;
+		// Compute mean x in each interval (each point corresponds to 1 interval)
+		for (int i=0; i<points.size(); ++i) if (points[i].count>0) points[i].xmean /= points[i].abund;
 		
-// 		// remove 0-count points (i.e., delete intervals with no cohorts)
-// 		auto pred = [this](const point& p) -> bool {
-// 			return p.count == 0; 
-// 		};
+		// remove 0-count points (i.e., delete intervals with no cohorts)
+		auto pred = [this](const point& p) -> bool {
+			return p.count == 0; 
+		};
 
-// 		auto pend = std::remove_if(points.begin(), points.end(), pred);
-// 		points.erase(pend, points.end());
+		auto pend = std::remove_if(points.begin(), points.end(), pred);
+		points.erase(pend, points.end());
 
-// 		//cout << "mean x and abund (removed):\n";
-// 		//for (int i=0; i<points.size(); ++i) cout << i << "\t" << points[i].count << "\t" << points[i].xmean << "\t" << points[i].abund << "\n";	
-// 		//cout << "--\n";
+		//cout << "mean x and abund (removed):\n";
+		//for (int i=0; i<points.size(); ++i) cout << i << "\t" << points[i].count << "\t" << points[i].xmean << "\t" << points[i].abund << "\n";	
+		//cout << "--\n";
 
-// 		// Now treat xmean as the x vector and calculate the width spanned by each point
-// 		// to get u, divide abundance by width for each point
-// 		if (points.size() > 2){
-// 			vector<double> h(points.size());
-// 			h[0] = (points[1].xmean+points[0].xmean)/2 - spp->xb;
-// 			for (int i=1; i<h.size()-1; ++i) h[i] = (points[i+1].xmean - points[i-1].xmean)/2;
-// 			h[h.size()-1] = xm - (points[h.size()-1].xmean+points[h.size()-2].xmean)/2;
+		// Now treat xmean as the x vector and calculate the width spanned by each point
+		// to get u, divide abundance by width for each point
+		if (points.size() > 2){
+			vector<double> h(points.size());
+			h[0] = (points[1].xmean+points[0].xmean)/2 - spp->xb[dim];
+			for (int i=1; i<h.size()-1; ++i) h[i] = (points[i+1].xmean - points[i-1].xmean)/2;
+			h[h.size()-1] = xm - (points[h.size()-1].xmean+points[h.size()-2].xmean)/2;
 
-// 			xx.reserve(points.size());
-// 			uu.reserve(points.size());
-// 			for (int i=0; i<points.size(); ++i){
-// 				xx.push_back(points[i].xmean);
-// 				uu.push_back(points[i].abund / h[i]);
-// 			}
-// 		}
-// 	}
+			xx.reserve(points.size());
+			uu.reserve(points.size());
+			for (int i=0; i<points.size(); ++i){
+				xx.push_back(points[i].xmean);
+				uu.push_back(points[i].abund / h[i]);
+			}
+		}
+	}
 
-// 	else if (method == SOLVER_CM || method == SOLVER_ICM){
-// 		xx.reserve(spp->J);
-// 		uu.reserve(spp->J);
-// 		for (int i=spp->J-1; i>=0; --i){
-// 			xx.push_back(spp->getX(i));
-// 			uu.push_back(spp->getU(i));
-// 		}
+	else if (method == SOLVER_CM || method == SOLVER_ICM){
+		xx.reserve(spp->J);
+		uu.reserve(spp->J);
+		for (int i=spp->J-1; i>=0; --i){
+			xx.push_back(spp->getX(i)[dim]);
+			uu.push_back(spp->getU(i));
+		}
 		
-// 	}	
+	}	
 	
-// 	else {
-// 		xx.reserve(spp->J);
-// 		uu.reserve(spp->J);
-// 		for (int i=0; i<spp->J-1; ++i){
-// 			xx.push_back(spp->getX(i));
-// 			uu.push_back(spp->getU(i));
-// 		}
+	else {
+		xx.reserve(spp->J);
+		uu.reserve(spp->J);
+		for (int i=0; i<spp->J-1; ++i){
+			xx.push_back(spp->getX(i)[dim]);
+			uu.push_back(spp->getU(i));
+		}
 		
-// 	}	
+	}	
 
-// 	// interpolate density at each value in breaks from uu
-// 	if (xx.size() >= 2){ 
+	// interpolate density at each value in breaks from uu
+	if (xx.size() >= 2){ 
 		
-// 		Spline spl;
-// 		spl.splineType = Spline::LINEAR; //Spline::CONSTRAINED_CUBIC;
-// 		spl.extrapolate = extrapolation_method; //Spline::ZERO; //Spline::ZERO;
-// 		spl.set_points(xx, uu);
+		Spline spl;
+		spl.splineType = Spline::LINEAR; //Spline::CONSTRAINED_CUBIC;
+		spl.extrapolate = extrapolation_method; //Spline::ZERO; //Spline::ZERO;
+		spl.set_points(xx, uu);
 		 
-// 		vector <double> dens;
-// 		dens.reserve(xx.size());
-// 		for (int i=0; i<breaks.size(); ++i){
-// 			dens.push_back(spl.eval(breaks[i]));			
-// 		}
+		vector <double> dens;
+		dens.reserve(xx.size());
+		for (int i=0; i<breaks.size(); ++i){
+			dens.push_back(spl.eval(breaks[i]));			
+		}
 		
-// 		return dens;
-// 	}
-// 	else {
-// 		return vector<double>(breaks.size(), 0);
-// 	}
-// }
+		return dens;
+	}
+	else {
+		return vector<double>(breaks.size(), 0);
+	}
+}
 
 
 void Solver::save(std::ostream &fout){

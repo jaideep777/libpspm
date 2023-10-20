@@ -167,7 +167,7 @@ class Solver{
 	template<typename wFunc>
 	double state_integral(wFunc w, double t, int species_id);
 
-	std::vector<double> getDensitySpecies(int k, std::vector<double> breaks, Spline::Extr extrapolation_method = Spline::ZERO);
+	std::vector<double> getDensitySpecies1D(int k, int dim, const std::vector<double>& breaks, Spline::Extr extrapolation_method = Spline::ZERO);
 
 	void save(std::ostream &fout);
 	void restore(std::istream &fin, std::vector<Species_Base*> spp_proto);

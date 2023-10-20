@@ -50,7 +50,7 @@ int main(){
 	// S.print();
 	
 	
-	// ofstream fout("ebtn_Redmodel.txt");
+	ofstream fout("ebtn_Redmodel.txt");
 
 
 	// std::ofstream cohortprint;
@@ -62,17 +62,17 @@ int main(){
 		// cout << "Finished step to function for t = " << t << std::endl;
 		// S.printCohortVector(std::cout);
 
-		// fout << S.current_time << "\t" << S.newborns_out(t) << "\t";
+		fout << S.current_time << "\t" << S.newborns_out(t) << "\t";
 		cout << S.current_time << " " << S.species_vec[0]->xsize() << "\n";
 		//cout << S.current_time << " " [><< S.u0_out()<] << "\n";
 		
-		// vector <double> dist = S.getDensitySpecies(0, logseq(1, 1e6, 150));
-		// for (auto y : dist) fout << y << "\t";
-		// fout << endl;
+		vector <double> dist = S.getDensitySpecies1D(0, 0, logseq(1, 1e6, 150));
+		for (auto y : dist) fout << y << "\t";
+		fout << endl;
 	}
 
 	
-	// fout.close();
+	fout.close();
 	// cohortprint.close();
 
 
