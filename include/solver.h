@@ -27,7 +27,7 @@ class Solver{
 	private:
 	static std::map<std::string, PSPM_SolverType> methods_map;
 
-	static constexpr bool debug = true;
+	static constexpr bool debug = false;
 	PSPM_SolverType method;
 
 	// int n_statevars_internal = 0;		// number of internal i-state variables (x and/or u)

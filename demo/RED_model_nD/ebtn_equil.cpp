@@ -43,7 +43,7 @@ int main(){
 	S.addSpecies(Jn, xb, xm, logBreaks, &spp, 0);
 	
 	
-	S.resetState();
+	// S.resetState();
 	// S.initialize();
 
 	// S.printODEmethod();
@@ -56,7 +56,7 @@ int main(){
 	// std::ofstream cohortprint;
 	// cohortprint.open(std::string("cohort_vector_ebtn_Redmodel.csv").c_str());
 
-	for (double t=0; t <= 10; t=t+1) {
+	for (double t=0; t <= 5000; t=t+10) {
 		S.step_to(t);
 		// S.printCohortVector(cohortprint);
 		cout << "Finished step to function for t = " << t << std::endl;
