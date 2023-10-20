@@ -1,5 +1,5 @@
 FILE=ebtn_equil
-g++ -g -pg -I../../include -c ../../src/species.cpp ../../src/rkck45.cpp ../../src/lsoda.cpp ../../src/solver.cpp ../../src/ebt.cpp  $FILE.cpp
+g++ -O3 -g -pg -I../../include -c ../../src/species.cpp ../../src/rkck45.cpp ../../src/lsoda.cpp ../../src/solver.cpp ../../src/ebt.cpp  $FILE.cpp
 g++ -g -pg -o 1 species.o rkck45.o lsoda.o solver.o ebt.o $FILE.o
 
 ./1 && \

@@ -59,7 +59,7 @@ int main(){
 	for (double t=0; t <= 5000; t=t+10) {
 		S.step_to(t);
 		// S.printCohortVector(cohortprint);
-		cout << "Finished step to function for t = " << t << std::endl;
+		// cout << "Finished step to function for t = " << t << std::endl;
 		// S.printCohortVector(std::cout);
 
 		// fout << S.current_time << "\t" << S.newborns_out(t) << "\t";

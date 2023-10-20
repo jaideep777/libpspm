@@ -74,13 +74,10 @@ class RED_Plant : public IndividualBase<2>{
 		++nrc;
 		// std::cout << "growth Rate Gradient compute" << std::endl;
 		// std::cout << xn << std::endl;
-		std::vector<double> vec_out;
 		double x0 = g0*pow(x[0],phiG);
 		// std::cout << x0 << std::endl;	
-		vec_out.push_back(x0);
 		double x1 = -beta * x[1];
 		// std::cout << x1 << std::endl;
-		vec_out.push_back(x1);
 		// std::cout <<x0 << "   " <<  x1 << std::endl;
 		// std::cout << "growth Rate Gradient compute: END" << std::endl;
 

@@ -73,7 +73,7 @@ std::ostream& operator<<(std::ostream& os, const std::tuple<Ts...> t) {
 
 // Convert an array to a vector
 template <class T, size_t n>
-std::vector<T> to_vector(const std::array<T,n>& a){
+inline std::vector<T> to_vector(const std::array<T,n>& a){
 	return std::vector<T>(a.begin(), a.end());
 }
 
