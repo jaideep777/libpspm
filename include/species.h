@@ -134,9 +134,16 @@ class Species : public Species_Base{
 	//Cohort<Model> savedCohort; // a cohort to save a backup of any other cohort
 
 	public:
-	// TODO: make these virtual? - not needed. They are virtual by default.
+	// Make these virtual? - not needed. They are virtual by default.
 	// Species(std::vector<double> breaks = std::vector<double>());
-	Species(const Model& M);
+	
+	// Constructor based on model instance
+	// Species(const Model& M);
+	
+	// Constructor based on arguments required by model constructor
+	template <typename... ARGS>
+	Species(ARGS... args);
+
 	// Species<Model>* create(); // virtual constructor needed for deserialization
 
 	

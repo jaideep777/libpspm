@@ -16,10 +16,20 @@ void Species_Base::addCohort(T bc){
 
 // *************** Species<Model> ******************
 
+// Actually, this constructor is not required because it is covered by the second one below
+// copy-construct boundary cohort
 // template<class Model>
-// Species<Model>* Species<Model>::create(){
-// 	return new Species<Model>();
+// Species<Model>::Species(const Model& M) : boundaryCohort(M){
+// 	istate_size = M.state_size;
 // }
+
+// construct boundary cohort using default / custom / copy constructor
+template<class Model>
+template <typename... ARGS>
+Species<Model>::Species(ARGS... args) : boundaryCohort(args...){
+	istate_size = boundaryCohort.state_size;
+}
+
 
 template<class Model>
 void Species<Model>::clear_vectors(){
@@ -67,13 +77,6 @@ std::vector<double> Species<Model>::get_maxSize(int skip){ // TODO ALERT: make s
 // }
 
 
-
-
-template<class Model>
-Species<Model>::Species(const Model& M){
-	istate_size = M.state_size;
-	boundaryCohort = Cohort<Model>(M); 
-}
 
 
 template <class Model>

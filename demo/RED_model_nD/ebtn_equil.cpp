@@ -19,8 +19,7 @@ inline std::vector <double> logseq(double from, double to, int len){
 
 int main(){
 
-	RED_Plant M;
-	Species<RED_Plant> spp(M);
+	Species<RED_Plant> spp;
 	LightEnvironment E;
 
 	Solver S(SOLVER_EBT);

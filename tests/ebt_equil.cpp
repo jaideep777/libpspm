@@ -21,8 +21,9 @@ std::vector <double> diff(vector <double> breaks){
 
 int main(){
 
-	TestModel M;
-	Species<TestModel> spp(M);
+	// TestModel M;
+	// Species<TestModel> spp(M);
+	Species<TestModel> spp;
 	Environment E;
 
 	Solver S(SOLVER_EBT);
