@@ -85,7 +85,12 @@ void Solver::addSpecies(std::vector<std::vector<double>> xbreaks, Species_Base* 
 
 	// JJ Note: nD CM must be disallowed, because its integral (as of now) needs ordering of cohorts.
 	if (method == SOLVER_CM || method == SOLVER_ICM){
-		if (xbreaks.size() > 1) throw std::runtime_error("With the CM and ICM solvers, only 1 state variable per species is allowed.");
+		if (s->istate_size > 1) throw std::runtime_error("With the CM and ICM solvers, only 1 state variable per species is allowed.");
+	}
+
+	// JJ Note: nD CM must be disallowed, because its integral (as of now) needs ordering of cohorts.
+	if (method == SOLVER_FMU || method == SOLVER_IFMU){
+		if (s->istate_size > 1) throw std::runtime_error("With FMU and IFMU solvers, currently only 1D state variables are supported.");
 	}
 
 	// TODO: Should we check that all coordinates are sorted ascending?
@@ -132,7 +137,6 @@ void Solver::addSpecies(std::vector<std::vector<double>> xbreaks, Species_Base* 
 	if (n_grid_edges > 1e6) cout << "**** WARNING ****: The number of cohorts/cells may exceed 1M. Consider using a lower resolution\n\n";
 
 	std::cout << "Find J" << std::endl;
-	// FIXME JJ: These would no longer work for FMU et al.. J is to total number of cohorts / gridcells, not along each dim
 	int J = 1;
 	if      (method == SOLVER_FMU)   J = n_grid_centres; // xbreaks.size()-1;	
 	else if (method == SOLVER_IFMU)  J = n_grid_centres;	
@@ -291,6 +295,14 @@ int Solver::n_statevars(Species_Base * spp){
 	int n = spp->J*(1); // add u for all solvers
 	if (method != SOLVER_FMU && method != SOLVER_IFMU){
 		n += spp->J*(spp->istate_size);    // add x for solvers other than FMU family
+	}
+	return n;
+}
+
+int Solver::n_statevars_cohort(Species_Base * spp){
+	int n = 1; // add u for all solvers
+	if (method != SOLVER_FMU && method != SOLVER_IFMU){
+		n += spp->istate_size;    // add x for solvers other than FMU family
 	}
 	return n;
 }

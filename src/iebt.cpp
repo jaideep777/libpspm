@@ -3,6 +3,7 @@
 #include <algorithm>
 // #include <execution>
 #include "solver.h"
+#include "linear_system.h"
 using namespace std;
 
 // void Solver::calcRates_iEBT(double t, vector<double>::iterator S, vector<double>::iterator dSdt){
@@ -26,6 +27,21 @@ using namespace std;
 // }
 
 
+double identity_matrix(int i, int j){
+	return (i==j)? 1:0;
+}
+
+// Note: Boundary cohort dynamics for IEBT can be written in matrix form:
+//  /            [  0   -dmu/dx0      ... -dmu/dxn ]  \    [ N0(t+1) ] = [ N0 + B*dt ]      
+// |             [  g0   dg0/dx0      ...  dg0/dxn ]   |   [ p0(t+1) ] = [ p0        ]   
+// |(1+mu*dt)I - [  g1   dg1/dx0      ...  dg1/dxn ]dt | * [ p1(t+1) ] = [ p1        ]               
+// |             [  ..   ..           ...   ..     ]   |   [ ..      ] = [ ..        ]   
+//  \            [  gn   dgn/dx0      ...  dgn/dxn ]  /    [ pn(t+1) ] = [ pn        ]   
+// 
+//  /                         \ 
+// |(1+mu*dt)I - [ 0   -mx ]dt | X(t+1) = X(t)+ Bdt*[1]
+// |             [ g'   gx']   |                    [0]
+//  \                         /
 void Solver::stepU_iEBT(double t, vector<double> &S, vector<double> &dSdt, double dt){
 		
 	vector<double>::iterator its = S.begin() + n_statevars_system; // Skip system variables
@@ -39,25 +55,24 @@ void Solver::stepU_iEBT(double t, vector<double> &S, vector<double> &dSdt, doubl
 		double *XU = &(*its); 
 		int J = spp->J;
 
-		double   pi0  =  spp->getX(spp->J-1);	 // last cohort is pi0, N0
-		double   N0   =  spp->getU(spp->J-1);
+		std::vector<double> pi0 = spp->getX(spp->J-1);	 // last cohort is pi0, N0
+		double N0 = spp->getU(spp->J-1);
 		//std::cout << "pi = " << pi0 << ", N0 = " << N0 << "\n";
 
-		std::vector<double> g_gx = spp->growthRateGradient(-1, spp->xb, t, env, control.ebt_grad_dx);
-		std::vector<double> m_mx = spp->mortalityRateGradient(-1, spp->xb, t, env, control.ebt_grad_dx);
+		std::vector<double> grad_dx(spp->istate_size, control.ebt_grad_dx);
+
+		std::vector<std::vector<double>> g_gx = spp->growthRateGradient(-1, t, env, grad_dx);
+		std::vector<double> m_mx = spp->mortalityRateGradient(-1, t, env, grad_dx);
 		//std::cout << "g = " << g_gx[0] << ", gx = " << g_gx[1] << "\n";
 		//std::cout << "m = " << m_mx[0] << ", mx = " << m_mx[1] << "\n";
 
-		double mb = m_mx[0], mortGrad = m_mx[1], gb = g_gx[0], growthGrad = g_gx[1];	
-		
 		double birthFlux;
 		double pe = spp->establishmentProbability(t, env);
 		if (spp->birth_flux_in < 0){	
 			birthFlux = calcSpeciesBirthFlux(s,t) * pe;
 		}
 		else{
-			double u0 = spp->calc_boundary_u(gb, pe);
-			birthFlux = u0*gb;
+			birthFlux = spp->birth_flux_in * pe;
 		}
 
 		// internal cohorts
@@ -65,6 +80,7 @@ void Solver::stepU_iEBT(double t, vector<double> &S, vector<double> &dSdt, doubl
 		// 	XU[2*i+0] += spp->growthRate(i, spp->getX(i), t, env)*dt;
 		// 	XU[2*i+1] /= 1+spp->mortalityRate(i, spp->getX(i), t, env)*dt;
 		// }
+		// below version allows parallel execution
 		vector<int>a(J-1);
 		std::iota(a.begin(), a.end(), 0);
 		std::for_each(
@@ -72,30 +88,65 @@ void Solver::stepU_iEBT(double t, vector<double> &S, vector<double> &dSdt, doubl
 			a.begin(),
 			a.end(),
 			[this, XU, spp, t, dt](int i){
-				XU[2*i+0] += spp->growthRate(i, spp->getX(i), t, env)*dt;
-				XU[2*i+1] /= 1+spp->mortalityRate(i, spp->getX(i), t, env)*dt;
+				int nk = n_statevars_cohort(spp);
+				std::vector<double> g = spp->growthRate(i, t, env);	 // dx/dt
+				for (int k=0; k<spp->istate_size; ++k){
+					XU[nk*i+k] += g[k]*dt;
+				}
+				XU[nk*i+spp->istate_size] /= 1+spp->mortalityRate(i, t, env)*dt;
 			}
 		);
 
-
 		// pi0 cohort
-		double a1 = 1 + mb*dt;
-		double b1 = mortGrad*dt;
-		double c1 = birthFlux*dt + N0;
-		double a2 = -gb*dt;
-		double b2 = 1 - growthGrad*dt + mb*dt;
-		double c2 = pi0;
+		Matrix A(spp->istate_size+1, Vector(spp->istate_size+1, 0)); // create (n+1)x(n+1) Zero matrix
 
-		double pinew = (a2*c1-a1*c2)/(a2*b1-a1*b2);
-		double unew = (b2*c1-b1*c2)/(b2*a1-b1*a2);
+		// 1. Construct the matrix -A*dt (negative A)
+		// top-left element is 0
+		A[0][0] = 0; // included for clarity. 
+		// first row contains mortality gradient vector
+		for (int i=0; i<spp->istate_size; ++i){
+			A[0][i+1] = m_mx[i+1]*dt; // m_mx[0] is the mortality rate
+		}
+		// all other rows contain the transposed g_gx matrix
+		for (int i=0; i<spp->istate_size; ++i){ // row index
+			for (int j=0; j<spp->istate_size; ++j){ // column index
+				A[i+1][j] = -g_gx[j][i]*dt; 
+				// ^ i+1 here because we need to skip the first row in A
+			}
+		}
+		// 2. Add (1+mu*dt)I to (-A*dt)
+		for (int i=0; i<spp->istate_size+1; ++i){
+			A[i][i] += 1 + m_mx[0]*dt;
+		}
 
-		if (pinew < 0) throw std::runtime_error("pi0 < 0: "+std::to_string(pinew));
-		if (unew < 0) throw std::runtime_error("u0 < 0: "+std::to_string(unew));
+		// 3. Construct B
+		Vector B(spp->istate_size+1, 0);
+		B[0] = N0 + birthFlux*dt;
+		for (int i=0; i<spp->istate_size; ++i){
+			B[i+1] = pi0[i];
+		}
+
+		Vector X = lupSolve(A, B);
+
+		// double a1 = 1 + mb*dt;
+		// double b1 = mortGrad*dt;
+		// double c1 = birthFlux*dt + N0;
+		// double a2 = -gb*dt;
+		// double b2 = 1 - growthGrad*dt + mb*dt;
+		// double c2 = pi0;
+
+		// double pinew = (a2*c1-a1*c2)/(a2*b1-a1*b2);
+		// double unew = (b2*c1-b1*c2)/(b2*a1-b1*a2);
 		
-		XU[2*(J-1)+0] = pinew;
-		XU[2*(J-1)+1] = unew;
-
-		its += J*(2+spp->n_extra_statevars);
+		int nk = n_statevars_cohort(spp);
+		for (int k=0; k<spp->istate_size; ++k){
+			if (X[k+1] < 0) throw std::runtime_error("pi_"+std::to_string(k)+" < 0: "+std::to_string(X[k+1]));
+			XU[nk*(J-1)+k] = X[k+1];
+		}
+		if (X[0] < 0) throw std::runtime_error("u0 < 0: "+std::to_string(X[0]));
+		XU[nk*(J-1)+spp->istate_size] = X[0];
+		
+		its += J*(nk+spp->n_accumulators);
 
 	}
 	

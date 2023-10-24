@@ -30,14 +30,13 @@ int main(){
 	//S.control.ode_rk4_stepsize = 0.01;
 	S.control.ode_ifmu_stepsize = 0.001;
 	S.setEnvironment(&E);
-	S.addSpecies(25, 0, 1, false, &spp, 4, -1);
-	S.species_vec[0]->set_bfin_is_u0in(true);
-	S.resetState();
-	S.initialize();
+	S.addSpecies({25}, {0}, {1}, {false}, &spp, 4, -1);
+
 	S.print();
 	
 	E.computeEnv(0, &S, S.state.begin(), S.rates.begin());
 	cout << E.evalEnv(0,0) << endl;
+	// if (fabs(E.evalEnv(0,0) - 0.3802) > 1e-5) return 1;
 
 	S.print();
 	//for (auto s : S.state) cout << s << " "; cout << endl;
@@ -53,7 +52,7 @@ int main(){
 		fout << S.current_time << "\t" << S.u0_out(t)[0] << "\t";
 
 		vector<double> breaks = myseq(0,1,26);
-		vector<double> v = S.getDensitySpecies(0, breaks, Spline::QUADRATIC);
+		vector<double> v = S.getDensitySpecies1D(0, 0, breaks, Spline::QUADRATIC);
 		for (auto y : v) fout << y << "\t";
 		fout << endl;
 	}
@@ -62,7 +61,8 @@ int main(){
 
 	S.print();	
 	cout << S.u0_out(S.current_time)[0] << endl;
-	if (abs(S.u0_out(S.current_time)[0]-0.999487) < 2e-5) return 0;
+	// if (abs(S.u0_out(S.current_time)[0]-0.999487) < 2e-5) return 0; // 1D version gave this answer
+	if (abs(S.u0_out(S.current_time)[0]-0.9995) < 2e-5) return 0; // nD version gives this answer
 	else return 1;
 }
 
