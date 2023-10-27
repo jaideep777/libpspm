@@ -59,6 +59,69 @@ class Chain{
 // deal with convergence, and provide samples.
 class MCMCSampler {
 
+	public:
+	std::vector<Chain> chainList;
+	int num_Chains;
+	int dims; 
+	int burn_in; 
+	int thinning; 
+	const std::vector<double> x_min;
+	const std::vector<double> x_max; 
+	const std::vector<double> sd; 
+	std::vector<std::vector<double>> merged_chains;
+
+	MCMCSampler(const std::vector<double> _x_min, 
+				const std::vector<double> _x_max, 
+				const std::vector<double>& _sd,
+				int _nChains, 
+				std::default_random_engine generator, 
+				int _burn_in, 
+				int _thinning): 
+				x_min(_x_min), 
+				x_max(_x_max),
+				sd(_sd){
+
+		num_Chains = _nChains;
+		burn_in = _burn_in;
+		thinning = _thinning;
+
+		for(int i = 0; i < num_Chains; ++i){
+			std::vector<double> start;
+			for(int k = 0; k < x_min.size(); k++){
+				std::uniform_real_distribution<> random_start(x_min[k],x_max[k]);
+				start.push_back(random_start(generator));
+			}
+			chainList.push_back(Chain(start));
+			merged_chains.push_back(start);
+		}
+	}
+
+	template <class Func>
+	void run_chains(Func target, int chainLength){
+		for(int i=0; i < chainLength; ++i){
+			for (auto & chain : chainList) 
+  			{
+    			chain.sample(target, sd);
+				merged_chains.push_back(chain.samples.end());
+  			}
+		}
+	}
+
+	void gelman_rubin_test(){
+		std::vector<std::vector<double>> posterior_mean;
+		for(int i=burn_in; i < chainList[0].samples.size(); i++){
+			
+		}
+
+	}
+
+	std::vector<std::vector<double>> sample(int nSamples){
+		std::vector<std::vector<double>>::const_iterator first = merged_chains.end() - nSamples + 1;
+		std::vector<std::vector<double>>::const_iterator last = merged_chains.end();
+		std::vector<std::vector<double>> newVec(first, last);
+		return newVec;
+	}
+
 };
 
 

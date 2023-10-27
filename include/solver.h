@@ -19,9 +19,7 @@ enum PSPM_SolverType {SOLVER_FMU,
                       SOLVER_IFMU, 
 					  SOLVER_ABM, 
 					  SOLVER_IEBT,
-					  SOLVER_ICM, 
-					  SOLVER_EBTN, 
-					  SOLVER_IEBTN};
+					  SOLVER_ICM};
 
 class Solver{
 	private:

@@ -54,9 +54,7 @@ std::map<std::string, PSPM_SolverType> Solver::methods_map =
 		 {"IFMU", SOLVER_IFMU}, 
 		 {"ABM",  SOLVER_ABM}, 
 		 {"IEBT", SOLVER_IEBT},
-		 {"ICM",  SOLVER_ICM},
-		 {"EBTN", SOLVER_EBTN},
-		 {"IEBTN", SOLVER_IEBTN}};
+		 {"ICM",  SOLVER_ICM}};
 
 
 Solver::Solver(PSPM_SolverType _method, string ode_method) : odeStepper(ode_method, 0, 1e-6, 1e-6) {
@@ -145,8 +143,6 @@ void Solver::addSpecies(std::vector<std::vector<double>> xbreaks, Species_Base* 
 	else if (method == SOLVER_ICM )  J = n_grid_edges;
 	else if (method == SOLVER_EBT)   J = n_grid_centres+1;  // As many cohorts as grid centers + 1 boundary cohort
 	else if (method == SOLVER_IEBT)  J = n_grid_centres+1;
-	else if (method == SOLVER_EBTN)  J = n_grid_centres+1;
-	else if (method == SOLVER_IEBTN) J = n_grid_centres+1;
 	else if (method == SOLVER_ABM)   J = n_grid_centres;    // For ABM solver, this is a temporary size thats used to generate the initial density distribution. s will be resized during init to abm_n0. FIXME JJ: Can ABM init be kept identical to EBT?
 	else    throw std::runtime_error("Unsupported method");
 
@@ -406,89 +402,52 @@ void Solver::initializeSpecies(Species_Base * s){
 			s->setX(s->J-1, vector<double>(s->istate_size, 0)); 
 			s->setU(s->J-1, 0); 		
 		}
+
+		// FIXME: abm_n0 and x.size() can be different - we want higher x.size() to get a high-res initial density function, but when we draw from it, we only draw abm_n0 individuals
+		// FIXME: Note that X must be set before calculating U.
+		if (method == SOLVER_ABM){
+			// Create the initial density distribution from which we will draw individuals
+			vector<double> Uvec;
+			Uvec.reserve(s->x.size()-1);
+			for (size_t i=0; i<s->x.size()-1; ++i){
+				std::vector<double> X = s->x[i];
+				cout << "i/X = " << i << "/" << X << endl;
+				double U = s->init_density(i, env)*(s->x[i+1]-s->x[i]); 
+				Uvec.push_back(U);	
+			}
+			//cout << "HERE\n";
+			//for (size_t i=0; i<s->x.size()-1; ++i) cout << s->x[i] << " " << Uvec[i] << "\n";
 		
-// 		if (method == SOLVER_EBTN || method == SOLVER_IEBTN){
-// 			// x, u for internal cohorts 
-// 			// update the X values first then update U separately
+			s->resize(control.abm_n0); // Once initial density dist has been obtained, resize species to n0
 
-// 			// TODO also this should be adapted with the multistate maybe...
+			std::discrete_distribution<int> distribution(Uvec.begin(), Uvec.end()); // for drawing intervals
+			std::uniform_real_distribution<> distribution2(0,1);                         // for drawing X within interval
 
-// 			std::cout << "in solver method" << std::endl;
+			// Utot = sum(Uvec) = sum(u[i] * dx[i])
+			double Utot = std::accumulate(Uvec.begin(), Uvec.end(), 0.0, std::plus<double>());			
+			double N_cohort = Utot/s->J; // Elisa: Why is this? 
+			s->set_ub(N_cohort);
+			for (int i=0; i<s->J; ++i){
+				int id = distribution(generator);
+				//cout << id << " ";
+				double xi = s->x[id] + distribution2(generator)*(s->x[id+1]-s->x[id]);
+				//cout << xi << "\n";
+				s->setX(i, xi);
+				s->setU(i, N_cohort);
+			}
 
-// 			for (size_t i=0; i<s->xsize()-1; ++i){
-// 				std::cout << "looking at i = " << i << std::endl;
-// 				std::vector<double> X;
-// 				std::cout << "xn is " << s->xn[i] << std::endl;
-// 				for(size_t k=0; k<(s->xn[i].size()); ++k){
-// 					std::cout << "state k is" << k << std::endl;
-// 					double xk = (s->xn[i][k]+s->next_xk_desc(s->xn[i][k], k))/2.0;			
-// 					std::cout << "xk is" << xk << "for k " << k << std::endl;
-// 					X.push_back(xk);	 
-// 				}
-// 				std::cout << "Finished the state loop" << std::endl;
-// 				std::cout << "Printing dXn(i) " << s->dXn(i) << std::endl;
-// 				double U = s->init_density(i, X, env) * s->dXn(i);
-// 				std::cout << "Printing U(i) " << U << std::endl;
-// 				s->setXn(i,X);
-// 				s->setU(i,U);
-// 			}
-// 			// set pi0, N0 as x, u for the last cohort. This scheme allows using this last cohort with xb+pi0 in integrals etc 
-// 			// *it++ = 0; *it++ = 0;
-// 			// Now set boundary cohort
-// 			std::vector<double> xn_0;
-// 			for (size_t k = 0; k < s->xnb.size(); k++){
-// 				xn_0.push_back(0);
-// 			}
-// 			s->setXn(s->J-1,xn_0); // [resolved] todo: should this be set to xb for init_state and set to 0 again later? maybe not, as init_state is not expected to be x dependent
-// 			s->setU(s->J-1,0); 		
-// 		}
-
-// 		// FIXME: abm_n0 and x.size() can be different - we want higher x.size() to get a high-res initial density function, but when we draw from it, we only draw abm_n0 individuals
-//		// FIXME: Note that X must be set before calculating U.
-// 		if (method == SOLVER_ABM){
-// 			// Create the initial density distribution from which we will draw individuals
-// 			vector<double> Uvec;
-// 			Uvec.reserve(s->x.size()-1);
-// 			for (size_t i=0; i<s->x.size()-1; ++i){
-// 				double X = s->x[i];
-// 				cout << "i/X = " << i << "/" << X << endl;
-// 				double U = s->init_density(i, X, env)*(s->x[i+1]-s->x[i]); 
-// 				Uvec.push_back(U);	
-// 			}
-// 			//cout << "HERE\n";
-// 			//for (size_t i=0; i<s->x.size()-1; ++i) cout << s->x[i] << " " << Uvec[i] << "\n";
-		
-// 			s->resize(control.abm_n0); // Once initial density dist has been obtained, resize species to n0
-
-// 			std::discrete_distribution<int> distribution(Uvec.begin(), Uvec.end()); // for drawing intervals
-// 			std::uniform_real_distribution<> distribution2(0,1);                         // for drawing X within interval
-
-// 			// Utot = sum(Uvec) = sum(u[i] * dx[i])
-// 			double Utot = std::accumulate(Uvec.begin(), Uvec.end(), 0.0, std::plus<double>());			
-// 			double N_cohort = Utot/s->J;
-// 			s->set_ub(N_cohort);
-// 			for (int i=0; i<s->J; ++i){
-// 				int id = distribution(generator);
-// 				//cout << id << " ";
-// 				double xi = s->x[id] + distribution2(generator)*(s->x[id+1]-s->x[id]);
-// 				//cout << xi << "\n";
-// 				s->setX(i, xi);
-// 				s->setU(i, N_cohort);
-// 			}
-
-// 			s->sortCohortsDescending();
+			// s->sortCohortsDescending();
 			
-// //			ofstream fout("abm_init.txt");
-// //			for (int i=0; i<s->J; ++i){
-// //				fout << s->getX(i) << "\t" << s->getU(i) << "\n";
-// //			}		
-// //			fout.close();	
-// 		}
+//			ofstream fout("abm_init.txt");
+//			for (int i=0; i<s->J; ++i){
+//				fout << s->getX(i) << "\t" << s->getU(i) << "\n";
+//			}		
+//			fout.close();	
+		}
 
 		// initialize extra state for each cohort ... previously also copied to state
 		// For EBT, the initialization of extra variables may need state info, so need to realize pi0-cohort
 		if (method == SOLVER_EBT || method == SOLVER_IEBT) realizeEbtBoundaryCohort(s);
-		if (method == SOLVER_EBTN || method == SOLVER_IEBTN) realizeEbtBoundaryCohort(s);
 		s->initAccumulators(current_time, env);
 		if (method == SOLVER_EBT || method == SOLVER_IEBT) restoreEbtBoundaryCohort(s);
 		if (method == SOLVER_EBTN || method == SOLVER_IEBTN) restoreEbtBoundaryCohort(s);
