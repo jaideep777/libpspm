@@ -407,34 +407,34 @@ void Solver::initializeSpecies(Species_Base * s){
 		// FIXME: Note that X must be set before calculating U.
 		if (method == SOLVER_ABM){
 			// Create the initial density distribution from which we will draw individuals
-			vector<double> Uvec;
-			Uvec.reserve(s->x.size()-1);
-			for (size_t i=0; i<s->x.size()-1; ++i){
-				std::vector<double> X = s->x[i];
-				cout << "i/X = " << i << "/" << X << endl;
-				double U = s->init_density(i, env)*(s->x[i+1]-s->x[i]); 
-				Uvec.push_back(U);	
-			}
-			//cout << "HERE\n";
-			//for (size_t i=0; i<s->x.size()-1; ++i) cout << s->x[i] << " " << Uvec[i] << "\n";
+			// vector<double> Uvec;
+			// Uvec.reserve(s->x.size()-1);
+			// for (size_t i=0; i<s->x.size()-1; ++i){
+			// 	std::vector<double> X = s->x[i];
+			// 	cout << "i/X = " << i << "/" << X << endl;
+			// 	double U = s->init_density(i, env)*(s->x[i+1]-s->x[i]); 
+			// 	Uvec.push_back(U);	
+			// }
+			// //cout << "HERE\n";
+			// //for (size_t i=0; i<s->x.size()-1; ++i) cout << s->x[i] << " " << Uvec[i] << "\n";
 		
-			s->resize(control.abm_n0); // Once initial density dist has been obtained, resize species to n0
+			// s->resize(control.abm_n0); // Once initial density dist has been obtained, resize species to n0
 
-			std::discrete_distribution<int> distribution(Uvec.begin(), Uvec.end()); // for drawing intervals
-			std::uniform_real_distribution<> distribution2(0,1);                         // for drawing X within interval
+			// std::discrete_distribution<int> distribution(Uvec.begin(), Uvec.end()); // for drawing intervals
+			// std::uniform_real_distribution<> distribution2(0,1);                         // for drawing X within interval
 
-			// Utot = sum(Uvec) = sum(u[i] * dx[i])
-			double Utot = std::accumulate(Uvec.begin(), Uvec.end(), 0.0, std::plus<double>());			
-			double N_cohort = Utot/s->J; // Elisa: Why is this? 
-			s->set_ub(N_cohort);
-			for (int i=0; i<s->J; ++i){
-				int id = distribution(generator);
-				//cout << id << " ";
-				double xi = s->x[id] + distribution2(generator)*(s->x[id+1]-s->x[id]);
-				//cout << xi << "\n";
-				s->setX(i, xi);
-				s->setU(i, N_cohort);
-			}
+			// // Utot = sum(Uvec) = sum(u[i] * dx[i])
+			// // double Utot = std::accumulate(Uvec.begin(), Uvec.end(), 0.0, std::plus<double>());			
+			// // double N_cohort = Utot/s->J; // Elisa: Why is this? 
+			// s->set_ub(N_cohort);
+			// for (int i=0; i<s->J; ++i){
+			// 	int id = distribution(generator);
+			// 	//cout << id << " ";
+			// 	double xi = s->x[id] + distribution2(generator)*(s->x[id+1]-s->x[id]);
+			// 	//cout << xi << "\n";
+			// 	s->setX(i, xi);
+			// 	s->setU(i, N_cohort);
+			// }
 
 			// s->sortCohortsDescending();
 			
@@ -450,7 +450,6 @@ void Solver::initializeSpecies(Species_Base * s){
 		if (method == SOLVER_EBT || method == SOLVER_IEBT) realizeEbtBoundaryCohort(s);
 		s->initAccumulators(current_time, env);
 		if (method == SOLVER_EBT || method == SOLVER_IEBT) restoreEbtBoundaryCohort(s);
-		if (method == SOLVER_EBTN || method == SOLVER_IEBTN) restoreEbtBoundaryCohort(s);
 		//if (s->n_accumulators > 0){  // FIXME: maybe redundant
 			//auto it_prev = it;
 			//s->init_ExtraState(it);  // this also inits the extra state of boundary cohort, but without advancing the iterator

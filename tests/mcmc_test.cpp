@@ -1,4 +1,5 @@
 #include <iostream>
+#include <cmath>
 #include "../include/mcmc.h"
 using namespace std;
 
@@ -31,20 +32,35 @@ int main() {
         return result;
     };
 
-	Chain C({15,0});
-	for (int s=0; s<10000; ++s){
-		C.sample(targetDistribution, {.5,.5});
-	}
+	auto targetDistribution_gaussian = [](const std::vector<double>& x) {
+        std::vector<double> means = {1,2};
+		std::vector<std::vector<double>> sd = {{1, 0.5}, {0.5, 2}};
+		double result = 1.0;
 
-	Chain C2({15,15});
-	for (int s=0; s<10000; ++s){
-		C2.sample(targetDistribution, {.5,.5});
-	}
+
+		double mah_distance = (x[0]-means[0])*(x[0]-means[0])*sd[0][0] + (x[0]-means[0])*(x[1]-means[1])*(sd[0][1] + sd[1][0]) + (x[1]-means[1])*(x[1]-means[1])*sd[1][1];
+		double cov_det = sd[0][0] * sd[0][1] - sd[1][0] * sd[1][1];
+
+
+		result *= std::exp(-0.5 * mah_distance) / sqrt(pow(2*M_PI, 2) * cov_det);
+        return result;
+    };
+
+	
+	MCMCSampler sampler({-5,-5}, {5,5}, {.5, .5}, 4, 1000, 1);
+	sampler.run_chains(targetDistribution_gaussian, 10000);
 
 	std::ofstream fout("mcmc_test.txt");
-	C.printSamples(fout);
-	C2.printSamples(fout);
+	sampler.chainList[0].printSamples(fout);
+	sampler.chainList[1].printSamples(fout);
+	sampler.chainList[2].printSamples(fout);
+	sampler.chainList[3].printSamples(fout);
 	fout.close();
+
+	std::vector<double> rubintest = sampler.gelman_rubin_test();
+
+	std::cout << "GELMAN RUBIN TEST" << std::endl;
+	std::cout <<  rubintest[0] << "\t"  << rubintest[1] << std::endl;
 
 	return 0;
 }

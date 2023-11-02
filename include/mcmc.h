@@ -74,12 +74,13 @@ class MCMCSampler {
 				const std::vector<double> _x_max, 
 				const std::vector<double>& _sd,
 				int _nChains, 
-				std::default_random_engine generator, 
 				int _burn_in, 
 				int _thinning): 
 				x_min(_x_min), 
 				x_max(_x_max),
 				sd(_sd){
+
+		std::default_random_engine generator;
 
 		num_Chains = _nChains;
 		burn_in = _burn_in;
@@ -102,12 +103,12 @@ class MCMCSampler {
 			for (auto & chain : chainList) 
   			{
     			chain.sample(target, sd);
-				merged_chains.push_back(chain.samples.end());
+				merged_chains.push_back(chain.samples.back());
   			}
 		}
 	}
 
-	void gelman_rubin_test(){
+	std::vector<double> gelman_rubin_test(){
 		std::vector<std::vector<double>> posterior_mean_chain(dims);
 		std::vector<double> posterior_mean(dims);
 		std::vector<std::vector<double>> intra_chain_variance_chain(dims);
@@ -150,13 +151,8 @@ class MCMCSampler {
 			R[k] = sqrt(V[k]/W[k]); // should ~~ 1 - need a tolerance measure
 		}
 
-		// test Rk
-
-		
-
-
-
-
+		// test Rk - for now just returning R because... well 
+		return R;
 	}
 
 	std::vector<std::vector<double>> sample(int nSamples){
