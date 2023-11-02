@@ -108,10 +108,54 @@ class MCMCSampler {
 	}
 
 	void gelman_rubin_test(){
-		std::vector<std::vector<double>> posterior_mean;
-		for(int i=burn_in; i < chainList[0].samples.size(); i++){
+		std::vector<std::vector<double>> posterior_mean_chain(dims);
+		std::vector<double> posterior_mean(dims);
+		std::vector<std::vector<double>> intra_chain_variance_chain(dims);
+		int num_elements = chainList[0].samples.size() - burn_in;
+
+		std::vector<double> B(dims); // B = how the individual means vary around the joint mean
+		std::vector<double> W(dims); // W = averaged variances of the chains
+
+		std::vector<double> V(dims); // V = true variance
+		std::vector<double> R(dims); // R = test for convergence
+
+		for (int k = 0; k < dims; ++k)
+		{
+			std::vector<double> chain_posteriors(num_Chains);
+			intra_chain_variance_chain.push_back(chain_posteriors);
+
+			std::vector<double> chain_IC_variance(num_Chains);
+			posterior_mean_chain.push_back(chain_IC_variance);
 			
+			for (int j = 0; j < num_Chains; ++j)
+			{
+				for (int i = burn_in; i < chainList[0].samples.size(); ++i)
+				{
+					posterior_mean_chain[k][j] += chainList[j].samples[i][k] / num_elements;
+				}
+				for (int i = burn_in; i < chainList[0].samples.size(); ++i)
+				{
+					intra_chain_variance_chain[k][j] += pow((chainList[j].samples[i][k] - posterior_mean_chain[k][j]),2) / (num_elements-1);
+				}
+				posterior_mean[k] += posterior_mean_chain[k][j] / num_Chains;
+				W[k] += intra_chain_variance_chain[k][j] / num_Chains;
+			}
+
+			for (int j = 0; j < num_Chains; ++j)
+			{
+				B[k] += pow((posterior_mean_chain[k][j] - posterior_mean[k]), 2) * num_elements / (num_Chains-1);
+			}
+
+			V[k] = (num_elements - 1)/num_elements * W[k] + (num_Chains + 1)/(num_Chains * num_elements) * B[k];
+			R[k] = sqrt(V[k]/W[k]); // should ~~ 1 - need a tolerance measure
 		}
+
+		// test Rk
+
+		
+
+
+
 
 	}
 
