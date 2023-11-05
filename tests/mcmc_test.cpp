@@ -1,6 +1,6 @@
 #include <iostream>
 #include <cmath>
-#include "../include/mcmc.h"
+#include "mcmc.h"
 using namespace std;
 
 // compile: g++ -o 1 mcmc_test.cpp
@@ -34,21 +34,30 @@ int main() {
 
 	auto targetDistribution_gaussian = [](const std::vector<double>& x) {
         std::vector<double> means = {1,2};
-		std::vector<std::vector<double>> sd = {{1, 0.5}, {0.5, 2}};
-		double result = 1.0;
+		std::vector<std::vector<double>> sd = {{1, 0.5}, {0.5, 1}};
+		double cov_det = sd[0][0] * sd[1][1] - sd[1][0] * sd[0][1];
+		std::vector<std::vector<double>> sd_inv = {{sd[1][1]/cov_det, -sd[1][0]/cov_det}, {-sd[0][1]/cov_det , sd[0][0]/cov_det}};
+		
 
+		double a = x[0] - means[0];
+		double b = x[1] - means[1];
 
-		double mah_distance = (x[0]-means[0])*(x[0]-means[0])*sd[0][0] + (x[0]-means[0])*(x[1]-means[1])*(sd[0][1] + sd[1][0]) + (x[1]-means[1])*(x[1]-means[1])*sd[1][1];
-		double cov_det = sd[0][0] * sd[0][1] - sd[1][0] * sd[1][1];
+		double mah_distance = a * a *sd_inv[0][0] + a * b *(sd_inv[0][1] + sd_inv[1][0]) + b * b *sd_inv[1][1];
 
-
-		result *= std::exp(-0.5 * mah_distance) / sqrt(pow(2*M_PI, 2) * cov_det);
+		double result = std::exp(-0.5 * mah_distance) / sqrt(pow(2*M_PI, 2) * cov_det);
         return result;
     };
 
-	
-	MCMCSampler sampler({-5,-5}, {5,5}, {.5, .5}, 4, 1000, 1);
+	std::cout << "Creating sampler" << std::endl;
+
+	MCMCSampler sampler({-5,-5}, {5,5}, {0.25, 0.25}, 4, 1000, 1);
+
+	std::cout << "Created sampler" << std::endl;
+	std::cout << "Running chains" << std::endl;
 	sampler.run_chains(targetDistribution_gaussian, 10000);
+	std::cout << "Chains ran" << std::endl;
+
+	std::cout << "Writing output" << std::endl;
 
 	std::ofstream fout("mcmc_test.txt");
 	sampler.chainList[0].printSamples(fout);
@@ -56,6 +65,9 @@ int main() {
 	sampler.chainList[2].printSamples(fout);
 	sampler.chainList[3].printSamples(fout);
 	fout.close();
+
+	std::cout << "Output created" << std::endl;
+	std::cout << "Running gelman-rubin test" << std::endl;
 
 	std::vector<double> rubintest = sampler.gelman_rubin_test();
 

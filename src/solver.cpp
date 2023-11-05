@@ -1,5 +1,6 @@
 #include "solver.h"
 #include "index_utils.h"
+#include "mcmc.h"
 
 #include <iostream>
 #include <cmath>
@@ -406,37 +407,54 @@ void Solver::initializeSpecies(Species_Base * s){
 		// FIXME: abm_n0 and x.size() can be different - we want higher x.size() to get a high-res initial density function, but when we draw from it, we only draw abm_n0 individuals
 		// FIXME: Note that X must be set before calculating U.
 		if (method == SOLVER_ABM){
-			// Create the initial density distribution from which we will draw individuals
-			// vector<double> Uvec;
-			// Uvec.reserve(s->x.size()-1);
-			// for (size_t i=0; i<s->x.size()-1; ++i){
-			// 	std::vector<double> X = s->x[i];
-			// 	cout << "i/X = " << i << "/" << X << endl;
-			// 	double U = s->init_density(i, env)*(s->x[i+1]-s->x[i]); 
-			// 	Uvec.push_back(U);	
-			// }
-			// //cout << "HERE\n";
-			// //for (size_t i=0; i<s->x.size()-1; ++i) cout << s->x[i] << " " << Uvec[i] << "\n";
-		
-			// s->resize(control.abm_n0); // Once initial density dist has been obtained, resize species to n0
+			// Simulate initial elements using a 
 
-			// std::discrete_distribution<int> distribution(Uvec.begin(), Uvec.end()); // for drawing intervals
-			// std::uniform_real_distribution<> distribution2(0,1);                         // for drawing X within interval
+			// Since we don't have an 'independent' density function and we will in any case substitute 
+			// the x values. there should hopefully be a better way of doing this but since it is a one time
+			// simulation it might be ok to keep it this way
+			auto targetDensity = [s, this](const std::vector<double>& x) {
+				s->setX(s->J-2, x);
+				return s->init_density(s->J-2, env);
+   	 		};
 
-			// // Utot = sum(Uvec) = sum(u[i] * dx[i])
-			// // double Utot = std::accumulate(Uvec.begin(), Uvec.end(), 0.0, std::plus<double>());			
-			// // double N_cohort = Utot/s->J; // Elisa: Why is this? 
-			// s->set_ub(N_cohort);
-			// for (int i=0; i<s->J; ++i){
-			// 	int id = distribution(generator);
-			// 	//cout << id << " ";
-			// 	double xi = s->x[id] + distribution2(generator)*(s->x[id+1]-s->x[id]);
-			// 	//cout << xi << "\n";
-			// 	s->setX(i, xi);
-			// 	s->setU(i, N_cohort);
-			// }
+			// Create sampler chain
 
-			// s->sortCohortsDescending();
+			std::vector<double> x_min = s->getX(s->J-1);
+			std::vector<double> x_max = s->getX(0);
+			std::vector<double> sd(x_min.size());
+			for(size_t k = 0; k < x_min.size(); ++k){
+				sd[k] = (x_max[k] - x_min[k])/10;
+			}
+
+			MCMCSampler sampler(x_min, x_max, sd, control.abm_numChains, control.abm_burnin, 1);
+			sampler.run_chains(targetDensity, control.abm_n0 + control.abm_burnin);
+
+			/* here instert test for convergence */
+
+			/* allocate new samples */
+			std::vector<std::vector<double>> sample_x = sampler.sample(control.abm_n0);
+			s->resize(control.abm_n0 + 1); // Elisa: adding one for the boundary cohort - is this necessary?
+
+			// allocate values to all elements
+			for(size_t i = 0; i < sample_x.size(); ++i){
+				s->setX(i, sample_x[i]);
+			}
+
+			/* Find total density */
+			double Utot = 0.0; 
+			for(size_t i = 0; i < sample_x.size(); ++i){
+				/* TODO: fix dim_centres to work with the ABM set up */
+				vector<double> dx = id_utils::coord_value(id_utils::index(i, s->dim_centres), s->h);
+				double dV = std::accumulate(dx.begin(), dx.end(), 1.0, std::multiplies<double>());
+				double U = s->init_density(i, env) * dV;
+				Utot += U;
+			}
+			//Create the initial density distribution from which we will draw individuals
+			double N_cohort = Utot/s->J; 
+			s->set_ub(N_cohort);
+			for (int i=0; i<s->J; ++i){ 
+				s->setU(i, N_cohort);
+			}
 			
 //			ofstream fout("abm_init.txt");
 //			for (int i=0; i<s->J; ++i){
@@ -565,27 +583,6 @@ void Solver::copyStateToCohorts(std::vector<double>::iterator state_begin){
 			}
 		}
 
-		// if (method == SOLVER_EBTN || method == SOLVER_IEBTN){
-		// 	// x, u for boundary and internal cohorts
-		// 	for (size_t i=0; i<s->J; ++i){
-		// 		std::vector<double> Xn;
-
-		// 		// std::cout << "Cohort number " << i << std::endl;
-
-		// 		for(size_t l=0; l<s->xnb.size(); ++l){
-		// 			Xn.push_back(*it++);
-		// 			current_state++;
-		// 		}
-
-		// 		// std::cout << "Current index " << current_state << "\tTotal states " << state_size << std::endl;
-		// 		double U = *it++;
-		// 		current_state++;
-		// 		// std::cout << "Current index " << current_state << "\tTotal states " << state_size << std::endl;
-		// 		s->setXn(i,Xn); 
-		// 		s->setU(i,U);
-		// 	}
-		// }
-
 		if (s->n_accumulators > 0){  // If extra state variables have been requested, initialize them
 			auto it_prev = it;
 			s->copyAccumulatorsToCohorts(it);
@@ -631,21 +628,6 @@ void Solver::copyCohortsToState(){
 				*it++ = U;
 			}
 		}
-
-		// // TODO: double check that this works
-		// if (method == SOLVER_EBTN || method == SOLVER_IEBTN){
-		// 	// x, u for boundary and internal cohorts
-		// 	for (size_t i=0; i<s->J; ++i){
-		// 		std::vector<double> Xn = s->getXn(i); 
-		// 		double U = s->getU(i);
-				
-		// 		for(size_t l = 0; l<Xn.size(); ++l){
-		// 			*it++ = Xn[l]; 
-		// 		}
-				
-		// 		*it++ = U;
-		// 	}
-		// }
 
 		if (s->n_accumulators > 0){  // If extra state variables have been requested, initialize them
 			auto it_prev = it;

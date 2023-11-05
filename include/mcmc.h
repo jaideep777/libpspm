@@ -85,6 +85,7 @@ class MCMCSampler {
 		num_Chains = _nChains;
 		burn_in = _burn_in;
 		thinning = _thinning;
+		dims = x_min.size();
 
 		for(int i = 0; i < num_Chains; ++i){
 			std::vector<double> start;
@@ -102,31 +103,31 @@ class MCMCSampler {
 		for(int i=0; i < chainLength; ++i){
 			for (auto & chain : chainList) 
   			{
-    			chain.sample(target, sd);
+				while (!accept(chain.sample(target,sd)))
+				{
+					/* do nothing */
+				}
 				merged_chains.push_back(chain.samples.back());
   			}
 		}
 	}
 
 	std::vector<double> gelman_rubin_test(){
-		std::vector<std::vector<double>> posterior_mean_chain(dims);
+		
+		std::vector<std::vector<double>> posterior_mean_chain(dims, std::vector<double> (num_Chains, 0.0));
 		std::vector<double> posterior_mean(dims);
-		std::vector<std::vector<double>> intra_chain_variance_chain(dims);
+		std::vector<std::vector<double>> intra_chain_variance_chain(dims, std::vector<double> (num_Chains, 0.0));
+
 		int num_elements = chainList[0].samples.size() - burn_in;
 
-		std::vector<double> B(dims); // B = how the individual means vary around the joint mean
-		std::vector<double> W(dims); // W = averaged variances of the chains
+		std::vector<double> B(dims, 0); // B = how the individual means vary around the joint mean
+		std::vector<double> W(dims, 0); // W = averaged variances of the chains
 
-		std::vector<double> V(dims); // V = true variance
-		std::vector<double> R(dims); // R = test for convergence
+		std::vector<double> V(dims, 0); // V = true variance
+		std::vector<double> R(dims, 0); // R = test for convergence
 
 		for (int k = 0; k < dims; ++k)
 		{
-			std::vector<double> chain_posteriors(num_Chains);
-			intra_chain_variance_chain.push_back(chain_posteriors);
-
-			std::vector<double> chain_IC_variance(num_Chains);
-			posterior_mean_chain.push_back(chain_IC_variance);
 			
 			for (int j = 0; j < num_Chains; ++j)
 			{
@@ -134,10 +135,12 @@ class MCMCSampler {
 				{
 					posterior_mean_chain[k][j] += chainList[j].samples[i][k] / num_elements;
 				}
+
 				for (int i = burn_in; i < chainList[0].samples.size(); ++i)
 				{
 					intra_chain_variance_chain[k][j] += pow((chainList[j].samples[i][k] - posterior_mean_chain[k][j]),2) / (num_elements-1);
 				}
+
 				posterior_mean[k] += posterior_mean_chain[k][j] / num_Chains;
 				W[k] += intra_chain_variance_chain[k][j] / num_Chains;
 			}
@@ -147,7 +150,7 @@ class MCMCSampler {
 				B[k] += pow((posterior_mean_chain[k][j] - posterior_mean[k]), 2) * num_elements / (num_Chains-1);
 			}
 
-			V[k] = (num_elements - 1)/num_elements * W[k] + (num_Chains + 1)/(num_Chains * num_elements) * B[k];
+			V[k] = 1.0 * (num_elements - 1)/num_elements * W[k] + (num_Chains + 1)/(num_Chains * num_elements) * B[k];
 			R[k] = sqrt(V[k]/W[k]); // should ~~ 1 - need a tolerance measure
 		}
 
@@ -160,6 +163,16 @@ class MCMCSampler {
 		std::vector<std::vector<double>>::const_iterator last = merged_chains.end();
 		std::vector<std::vector<double>> newVec(first, last);
 		return newVec;
+	}
+
+	bool accept(std::vector<double> element){
+		bool out = true;
+		for(int i = 0; i < dims ; ++i){
+			if(element[i] < x_min[i] || element[i] > x_max[i]){
+				return false;
+			}
+		}
+		return out;
 	}
 
 };

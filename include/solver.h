@@ -67,6 +67,8 @@ class Solver{
 		bool integral_interpolate = true;
 		double ifmu_order = 1;
 		double abm_n0 = 100;
+		double abm_burnin = 1000;
+		int abm_numChains = 4;
 		double abm_stepsize = 0.02;
 	} control;
 	
