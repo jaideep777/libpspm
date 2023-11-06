@@ -407,7 +407,16 @@ void Solver::initializeSpecies(Species_Base * s){
 		// FIXME: abm_n0 and x.size() can be different - we want higher x.size() to get a high-res initial density function, but when we draw from it, we only draw abm_n0 individuals
 		// FIXME: Note that X must be set before calculating U.
 		if (method == SOLVER_ABM){
-			// Simulate initial elements using a 
+			// Simulate initial elements using a Monte Carlo simulation 
+
+			/* Find total density - cheat by using the initial grid a little  */
+			double Utot = 0.0; 
+			for (size_t i=0; i<s->J-1; ++i){
+				vector<double> dx = id_utils::coord_value(id_utils::index(i, s->dim_centres), s->h);
+				double dV = std::accumulate(dx.begin(), dx.end(), 1.0, std::multiplies<double>());
+				double U = s->init_density(i, env)*dV; 
+				Utot += U;
+			}
 
 			// Since we don't have an 'independent' density function and we will in any case substitute 
 			// the x values. there should hopefully be a better way of doing this but since it is a one time
@@ -438,16 +447,6 @@ void Solver::initializeSpecies(Species_Base * s){
 			// allocate values to all elements
 			for(size_t i = 0; i < sample_x.size(); ++i){
 				s->setX(i, sample_x[i]);
-			}
-
-			/* Find total density */
-			double Utot = 0.0; 
-			for(size_t i = 0; i < sample_x.size(); ++i){
-				/* TODO: fix dim_centres to work with the ABM set up */
-				vector<double> dx = id_utils::coord_value(id_utils::index(i, s->dim_centres), s->h);
-				double dV = std::accumulate(dx.begin(), dx.end(), 1.0, std::multiplies<double>());
-				double U = s->init_density(i, env) * dV;
-				Utot += U;
 			}
 			//Create the initial density distribution from which we will draw individuals
 			double N_cohort = Utot/s->J; 

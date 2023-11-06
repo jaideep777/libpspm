@@ -114,27 +114,7 @@ void Solver::step_to(double tstop, AfterStepFunc &afterStep_user){
 		addCohort_EBT();  // Add new cohort if N0 > 0. Add after removing dead ones otherwise this will also be removed. 
 	}
 	
-	// if (method == SOLVER_EBTN){
-	// 	auto derivs = [this](double t, std::vector<double>::iterator S, std::vector<double>::iterator dSdt, void* params){
-	// 		// std::cout << "in derivs: " << "\tstarting" << std::endl;
-	// 		copyStateToCohorts(S);
-	// 		// std::cout << "in derivs: " << "\tfinished copying state to cohorts" << std::endl;
-	// 		updateEnv(t, S, dSdt);
-	// 		// std::cout << "in derivs: " << "\tfinished updating environment" << std::endl;
-	// 		calcRates_EBTN(t, S, dSdt);
-	// 		// std::cout << "in derivs: " << "\tfinished calculating rates EBTN" << std::endl;
-	// 	};
-		
-	// 	// integrate 
-	// 	odeStepper.step_to(tstop, current_time, state, derivs, after_step); // rk4_stepsize is only used if method is "rk4"
-		
-	// 	// update cohorts
-	// 	// mergeCohorts_EBTN();
-	// 	removeDeadCohorts_EBTN();
-	// 	addCohort_EBTN();  // Add new cohort if N0 > 0. Add after removing dead ones otherwise this will also be removed. 
-	// }
-	
-	
+
 	// if (method == SOLVER_CM){
 	// 	auto derivs = [this](double t, std::vector<double>::iterator S, std::vector<double>::iterator dSdt, void* params){
 	// 		if (debug) std::cout << "derivs()\n";
@@ -154,33 +134,33 @@ void Solver::step_to(double tstop, AfterStepFunc &afterStep_user){
 	// 	//env->computeEnv(current_time, this); // is required here IF rescaleEnv is used in derivs
 	// }
 	
-	// if (method == SOLVER_ABM){	
-	// 	while (current_time < tstop){
-	// 		double dt = std::min(control.abm_stepsize, tstop-current_time);
+	if (method == SOLVER_ABM){	
+		while (current_time < tstop){
+			double dt = std::min(control.abm_stepsize, tstop-current_time);
 			
-	// 		//copyStateToCohorts(state.begin()); // not needed here because it is called by the odestepper below
-	// 		updateEnv(current_time, state.begin(), rates.begin());
-	// 		std::vector<double> rates_prev(rates.begin(), rates.begin()+n_statevars_system);  // save system variable rates
+			//copyStateToCohorts(state.begin()); // not needed here because it is called by the odestepper below
+			updateEnv(current_time, state.begin(), rates.begin());
+			std::vector<double> rates_prev(rates.begin(), rates.begin()+n_statevars_system);  // save system variable rates
 			
-	// 		// use implicit stepper to advance u
-	// 		stepABM(current_time, dt);  // this will step all variables, including extra_istate
-	// 		current_time += dt; 
+			// use implicit stepper to advance u
+			stepABM(current_time, dt);  // this will step all variables, including extra_istate
+			current_time += dt; 
 			
-	// 		// step system vars
-	// 		if (n_statevars_system > 0){
-	// 			updateEnv(current_time, state.begin(), rates.begin());  // recompute env with updated u
-	// 			// .FIXME: use fully implicit stepper here?
-	// 			for (int i=0; i<n_statevars_system; ++i){
-	// 				state[i] += (rates_prev[i]+rates[i])/2*dt;  // use average of old and updated rates for stepping system vars
-	// 			}
-	// 		}
+			// step system vars
+			if (n_statevars_system > 0){
+				updateEnv(current_time, state.begin(), rates.begin());  // recompute env with updated u
+				// .FIXME: use fully implicit stepper here?
+				for (int i=0; i<n_statevars_system; ++i){
+					state[i] += (rates_prev[i]+rates[i])/2*dt;  // use average of old and updated rates for stepping system vars
+				}
+			}
 
-	// 		// Need to explicitly call this because ODE solver is not used in ABM
-	// 		// Should cohorts be copied to state here? - done within stepABM() above
-	// 		after_step(current_time, state.begin());
-	// 	}
+			// Need to explicitly call this because ODE solver is not used in ABM
+			// Should cohorts be copied to state here? - done within stepABM() above
+			after_step(current_time, state.begin());
+		}
 
-	// }
+	}
 
 	// std::cout << "Finished step to " <<std::endl;
 

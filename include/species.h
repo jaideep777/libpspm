@@ -87,7 +87,7 @@ class Species_Base{
 	virtual void accumulatorRates(std::vector<double>::iterator &it) = 0;
 
 	virtual double establishmentProbability(double t, void * env) = 0;
-	// virtual double calc_boundary_u(std::vector<double> gb, double pe) = 0;
+	virtual double calc_boundary_u(std::vector<double> gb, double pe) = 0;
 	virtual double get_boundary_u() = 0;
 
 	virtual void triggerPreCompute() = 0;
@@ -180,7 +180,7 @@ class Species : public Species_Base{
 	void accumulatorRates(std::vector<double>::iterator &it);
 	
 	double establishmentProbability(double t, void * env);
-	// double calc_boundary_u(std::vector<double> gb, double pe);
+	double calc_boundary_u(std::vector<double> gb, double pe);
 	double get_boundary_u();
 
 	void triggerPreCompute();

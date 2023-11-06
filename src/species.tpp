@@ -345,18 +345,18 @@ double Species<Model>::establishmentProbability(double t, void * env){
 }
 
 
-// template <class Model>
-// double Species<Model>::calc_boundary_u(std::vector<double> gb, double pe){
-// 	//std::cout << "calc_boundary_u\n";
-// 	if (bfin_is_u0in){
-// 		boundaryCohort.u = birth_flux_in;
-// 	}
-// 	else {
-// 		double gdotn = std::accumulate(gb.begin(), gb.end(), 0);  // FIXME JJ: Check if this is correct
-// 		boundaryCohort.u = (gdotn>0)? birth_flux_in * pe/gdotn  :  0;  
-// 	}
-// 	return boundaryCohort.u;
-// }
+template <class Model>
+double Species<Model>::calc_boundary_u(std::vector<double> gb, double pe){
+	//std::cout << "calc_boundary_u\n";
+	if (bfin_is_u0in){
+		boundaryCohort.u = birth_flux_in;
+	}
+	else {
+		double gdotn = std::accumulate(gb.begin(), gb.end(), 0);  // FIXME JJ: Check if this is correct
+		boundaryCohort.u = (gdotn>0)? birth_flux_in * pe/gdotn  :  0;  
+	}
+	return boundaryCohort.u;
+}
 
 
 template <class Model>
