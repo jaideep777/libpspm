@@ -24,6 +24,7 @@ class Species_Base{
 	// Others derive them from the state. 
 	// Kept private so users dont accidently access them for other solvers
 	std::vector<int> dim_centres, dim_edges;
+	int n_grid_centres, n_grid_edges; // These are cummulative products of dim_centres and dim_edges respectively
 	std::vector <std::vector<double>> X; // multiple state model
 	std::vector <std::vector<double>> x; // multiple state model
 	std::vector <std::vector<double>> h;

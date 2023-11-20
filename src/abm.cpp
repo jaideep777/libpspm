@@ -39,7 +39,7 @@ void Solver::stepABM(double t, double dt){
 		// implement growth
 		for (int i=0; i<spp->J; ++i){
 			std::vector<double> X = spp->getX(i);
-			for(int k = 0; k<X.size(), ++k){
+			for(int k = 0; k<X.size(); ++k){
 				X[k] += growthArray[i][k] * dt;
 			}
 			spp->setX(i, X);

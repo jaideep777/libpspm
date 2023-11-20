@@ -31,9 +31,9 @@ void Solver::calcRates_FMU(double t, vector<double>::iterator S, vector<double>:
 		double *U = &(*its); // Since FMU only has U in state, start of species is actually U
 		double *dUdt = &(*itr); 
 		int J = spp->J;			// xsize of species.
-		vector<double> &x = spp->x;
-		vector<double> &X = spp->X;
-		vector<double> &h = spp->h;
+		vector<vector<double>> &x = spp->x;
+		vector<vector<double>> &X = spp->X;
+		vector<vector<double>> &h = spp->h;
 
 		vector <double> growthArray(J+1);
 		growthArray[0] = spp->growthRate(-1, x[0], t, env); // growth rate of boundary cohort

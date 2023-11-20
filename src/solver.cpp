@@ -87,9 +87,9 @@ void Solver::addSpecies(std::vector<std::vector<double>> xbreaks, Species_Base* 
 		if (s->istate_size > 1) throw std::runtime_error("With the CM and ICM solvers, only 1 state variable per species is allowed.");
 	}
 
-	// JJ Note: nD CM must be disallowed, because its integral (as of now) needs ordering of cohorts.
+	// JJ Note: nD FMU must be disallowed, because its boundary condition still needs to be sorted out.
 	if (method == SOLVER_FMU || method == SOLVER_IFMU){
-		if (s->istate_size > 1) throw std::runtime_error("With FMU and IFMU solvers, currently only 1D state variables are supported.");
+		if (s->istate_size > 1) throw std::runtime_error("With grid-based solvers, currently only 1D state variables are supported.");
 	}
 
 	// TODO: Should we check that all coordinates are sorted ascending?
@@ -131,20 +131,20 @@ void Solver::addSpecies(std::vector<std::vector<double>> xbreaks, Species_Base* 
 	for (auto& vx : xbreaks) s->dim_centres.push_back(vx.size()-1);  // For each dimension, N breaks give rise to N-1 cohorts/cells 
 	for (auto& vx : xbreaks) s->dim_edges.push_back(vx.size());  // For each dimension, N breaks give rise to N cell edges 
 
-	int n_grid_centres = std::accumulate(s->dim_centres.begin(), s->dim_centres.end(), 1, std::multiplies<int>());
-	int n_grid_edges   = std::accumulate(s->dim_edges.begin(),   s->dim_edges.end(),   1, std::multiplies<int>());
-	if (n_grid_edges > 1e6) cout << "**** WARNING ****: The number of cohorts/cells may exceed 1M. Consider using a lower resolution\n\n";
+	s->n_grid_centres = std::accumulate(s->dim_centres.begin(), s->dim_centres.end(), 1, std::multiplies<int>());
+	s->n_grid_edges   = std::accumulate(s->dim_edges.begin(),   s->dim_edges.end(),   1, std::multiplies<int>());
+	if (s->n_grid_edges > 1e6) cout << "**** WARNING ****: The number of cohorts/cells may exceed 1M. Consider using a lower resolution\n\n";
 
 	std::cout << "Find J" << std::endl;
 	int J = 1;
-	if      (method == SOLVER_FMU)   J = n_grid_centres; // xbreaks.size()-1;	
-	else if (method == SOLVER_IFMU)  J = n_grid_centres;	
-	else if (method == SOLVER_MMU)   J = n_grid_centres;  
-	else if (method == SOLVER_CM )   J = n_grid_edges;  // For CM, its not strictly necessary to use grid edges, but this helps with tests on the Plant Model 
-	else if (method == SOLVER_ICM )  J = n_grid_edges;
-	else if (method == SOLVER_EBT)   J = n_grid_centres+1;  // As many cohorts as grid centers + 1 boundary cohort
-	else if (method == SOLVER_IEBT)  J = n_grid_centres+1;
-	else if (method == SOLVER_ABM)   J = n_grid_centres;    // For ABM solver, this is a temporary size thats used to generate the initial density distribution. s will be resized during init to abm_n0. FIXME JJ: Can ABM init be kept identical to EBT?
+	if      (method == SOLVER_FMU)   J = s->n_grid_centres; // xbreaks.size()-1;	
+	else if (method == SOLVER_IFMU)  J = s->n_grid_centres;	
+	else if (method == SOLVER_MMU)   J = s->n_grid_centres;  
+	else if (method == SOLVER_CM )   J = s->n_grid_edges;  // For CM, its not strictly necessary to use grid edges, but this helps with tests on the Plant Model 
+	else if (method == SOLVER_ICM )  J = s->n_grid_edges;
+	else if (method == SOLVER_EBT)   J = s->n_grid_centres+1;  // As many cohorts as grid centers + 1 boundary cohort
+	else if (method == SOLVER_IEBT)  J = s->n_grid_centres+1;
+	else if (method == SOLVER_ABM)   J = s->n_grid_centres;    // For ABM solver, this is a temporary size thats used to generate the initial density distribution. s will be resized during init to abm_n0. FIXME JJ: Can ABM init be kept identical to EBT?
 	else    throw std::runtime_error("Unsupported method");
 
 	std::cout << "Resize with J" << std::endl;
