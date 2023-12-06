@@ -449,6 +449,7 @@ void Solver::initializeSpecies(Species_Base * s){
 				s->setX(i, sample_x[i]);
 			}
 			//Create the initial density distribution from which we will draw individuals
+			double Utot = sampler.integral(control.abm_n0);
 			double N_cohort = Utot/s->J; 
 			s->set_ub(N_cohort);
 			for (int i=0; i<s->J; ++i){ 
