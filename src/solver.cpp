@@ -111,8 +111,9 @@ void Solver::addSpecies(std::vector<std::vector<double>> xbreaks, Species_Base* 
 		s->h.push_back(diff(xbreaks[i]));
 	}
 
+	// FIXME: Need to properly investigate labelling of grids and how that affects boundary condition
 	// in IFMU solver, gridcells are labelled by upper edge
-	if (method == SOLVER_IFMU){
+	if (method == SOLVER_IFMU && !control.ifmu_centered_grids){
 		s->X.clear(); // clear stuff set above
 		for (int i=0; i<xbreaks.size(); ++i){
 			s->X.push_back(right_edge(xbreaks[i]));

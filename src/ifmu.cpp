@@ -93,9 +93,10 @@ void Solver::stepU_iFMU(double t, vector<double> &S, vector<double> &dSdt, doubl
 			}
 		}
 
+		Vector Unew = lupSolve(M, Z); // FIXME: Replace with Eigen or suchlike
+		for (int i=0; i<J; ++i) U[i] = Unew[i];
+
 		// // ~~~ Old method ~~~
-		// // Vector Unew = lupSolve(M, Z); // FIXME: Replace with Eigen or suchlike
-		// // for (int i=0; i<J; ++i) U[i] = Unew[i];
 		// double B0  = 1 + dt/h[0][0]*growthArray[0][0] + dt*spp->mortalityRate(0, t, env);
 		// double C0 = spp->getU(0) + dt/h[0][0]*birthFlux;
 		// U[0] = C0/B0;
