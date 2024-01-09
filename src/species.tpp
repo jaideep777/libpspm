@@ -642,6 +642,12 @@ void Species<Model>::sortCohortsDescending(size_t dim, int skip){
 	std::sort(cohorts.begin(), cohorts.end()-skip, [dim](const Cohort<Model> &a, const Cohort<Model> &b){return a.x[dim] > b.x[dim];});
 }
 
+template <class Model>
+void Species<Model>::sortCohortsAscending(size_t dim, int skip){
+	assert(dim <= istate_size);
+	std::sort(cohorts.begin(), cohorts.end()-skip, [dim](const Cohort<Model> &a, const Cohort<Model> &b){return a.x[dim] < b.x[dim];});
+}
+
 
 template <class Model>
 void Species<Model>::save(std::ostream &fout){
@@ -695,17 +701,18 @@ void Species<Model>::restore(std::istream &fin){
 }
 
 
-// // //TODO: maybe fix this later
-// // template <class Model>
-// // void Species<Model>::printCohortVector(int speciesInd, double time, std::ostream &out){
+//TODO: maybe fix this later
+template <class Model>
+void Species<Model>::printCohortVector(std::ostream &out){
 
-// // 	// std::cout << "J is " << J << std::endl;
-// // 	for(int i=0; i < cohorts.size(); ++i){
-// // 		cohorts[i].print(speciesInd, time, out);	
-// // 		out << "\n";	
-// // 	}
-
-// // }
+	for (int i=0; i<istate_size; ++i) out << "x[" << i << "]" << '\t';
+	out << "u\n";
+	// std::cout << "J is " << J << std::endl;
+	for(int i=0; i < cohorts.size(); ++i){
+		for (auto xx : cohorts[i].x) out << xx << "\t";
+		out << cohorts[i].u << "\n";
+	}
+}
 
 // //template <class Model>
 // //void Species<Model>::backupCohort(int j){

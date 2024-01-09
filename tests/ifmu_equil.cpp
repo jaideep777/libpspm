@@ -20,10 +20,11 @@ int main(){
 
 	Solver S(SOLVER_IFMU);
 	S.setEnvironment(&E);
-	S.addSpecies(30, 0, 1, false, &spp, 4, -1);
-	S.species_vec[0]->set_bfin_is_u0in(true);	// say that input_birth_flux is u0
-	S.resetState();
-	S.initialize();
+	S.control.ode_ifmu_stepsize = 0.001;
+	S.addSpecies({30}, {0}, {1}, {false}, &spp, 4, -1);
+	// S.species_vec[0]->set_bfin_is_u0in(true);	// say that input_birth_flux is u0
+	// S.resetState();
+	// S.initialize();
 	S.print();
 	
 	E.computeEnv(0, &S, S.state.begin(), S.rates.begin());
@@ -37,7 +38,7 @@ int main(){
 		cout << S.current_time << " " << S.u0_out(t)[0] << "\n";
 		
 		vector<double> breaks = myseq(0,1,26);
-		vector<double> v = S.getDensitySpecies(0, breaks, Spline::QUADRATIC);
+		vector<double> v = S.getDensitySpecies1D(0, 0, breaks, Spline::QUADRATIC);
 		for (auto y : v) fout << y << "\t";
 		fout << endl;
 	}

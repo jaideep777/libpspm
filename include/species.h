@@ -113,11 +113,12 @@ class Species_Base{
 	// virtual void mergeCohortsAddU(std::vector<double> dxcut) = 0;
 
 	virtual void sortCohortsDescending(size_t dim, int skip=0) = 0;
+	virtual void sortCohortsAscending(size_t dim, int skip=0) = 0;
 	
 	virtual void save(std::ostream &fout) = 0;
 	virtual void restore(std::istream &fin) = 0;
 
-	// virtual void printCohortVector(int speciesInd, double time, std::ostream &out) = 0;
+	virtual void printCohortVector(std::ostream &out) = 0;
 
 //	virtual void backupCohort(int j) = 0;
 //	virtual void restoreCohort(int j) = 0;
@@ -209,11 +210,12 @@ class Species : public Species_Base{
 	// void mergeCohortsAddU(std::vector<double> dxcut);
 
 	void sortCohortsDescending(size_t dim, int skip=0);
+	void sortCohortsAscending(size_t dim, int skip=0);
 	
 	void save(std::ostream &fout);
 	void restore(std::istream &fin);
 
-	// void printCohortVector(int speciesInd, double time, std::ostream &out);
+	void printCohortVector(std::ostream &out);
 
 //	void backupCohort(int j);
 //	void restoreCohort(int j);

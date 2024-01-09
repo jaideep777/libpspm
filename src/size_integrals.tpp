@@ -1,3 +1,5 @@
+#include "index_utils.h"
+
 inline bool smaller_than(const std::vector<double>& x1, const std::vector <double>& x2){
     for(int i = 0; i < x1.size(); ++i){
         if(x1[i] >= x2[i]){
@@ -353,6 +355,18 @@ double Solver::state_integral(wFunc w, double t, int species_id){
 		return I;
 	}
 
+	if (method == SOLVER_FMU || method == SOLVER_IFMU){
+		// integrate using midpoint quadrature rule
+		double I=0;
+		for (unsigned int i=0; i<spp->J; ++i){
+			std::vector<double> dx = id_utils::coord_value(id_utils::index(i, spp->dim_centres), spp->h);
+			double dV = std::accumulate(dx.begin(), dx.end(), 1.0, std::multiplies<double>());
+
+			I += w(i, t)*spp->getU(i)*dV;  // TODO: Replace with std::transform after profiling
+			//std::cout << "integral: " << w(i, t) << " * " << spp->getU(i) << std::endl;
+		}
+		return I;
+	}
 
 	else{
 		throw std::runtime_error("Unsupported solver method");

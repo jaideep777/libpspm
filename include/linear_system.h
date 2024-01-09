@@ -14,7 +14,7 @@
 using Matrix = std::vector<std::vector<double>>;
 using Vector = std::vector<double>;
 
-void printMatrix(const Matrix& m, int n){
+inline void printMatrix(const Matrix& m, int n){
 	for(int i=0;i<n;i++)
     {
         for(int j=0;j<n;j++)
@@ -26,7 +26,7 @@ void printMatrix(const Matrix& m, int n){
 
 // Code for this function is adapted from 
 // http://blog.gtiwari333.com/2009/12/c-c-code-lu-decomposition-for-solving.html
-Vector luSolve(const Matrix& a, const Vector& b){
+inline Vector luSolve(const Matrix& a, const Vector& b){
 
     int n = a.size();
 	assert(n == b.size());
@@ -95,7 +95,7 @@ Vector luSolve(const Matrix& a, const Vector& b){
  *        containing column indexes where the permutation matrix has "1". The last element P[N]=S+N, 
  *        where S is the number of row exchanges needed for determinant computation, det(P)=(-1)^S    
  */
-int LUPDecompose_wiki(double **A, int N, double Tol, int *P) {
+inline int LUPDecompose_wiki(double **A, int N, double Tol, int *P) {
 
     int i, j, k, imax; 
     double maxA, *ptr, absA;
@@ -144,7 +144,7 @@ int LUPDecompose_wiki(double **A, int N, double Tol, int *P) {
 /* INPUT: A,P filled in LUPDecompose; b - rhs vector; N - dimension
  * OUTPUT: x - solution vector of A*x=b
  */
-void LUPSolve_wiki(double **A, int *P, double *b, int N, double *x) {
+inline void LUPSolve_wiki(double **A, int *P, double *b, int N, double *x) {
 
     for (int i = 0; i < N; i++) {
         x[i] = b[P[i]];
@@ -163,7 +163,7 @@ void LUPSolve_wiki(double **A, int *P, double *b, int N, double *x) {
 
 
 // Code adapted from https://en.wikipedia.org/wiki/LU_decomposition#C_code_example
-Vector lupSolve(Matrix& A, const Vector& b, double Tol = 1e-6){
+inline Vector lupSolve(Matrix& A, const Vector& b, double Tol = 1e-6){
     int n = A.size();
 	assert(n == b.size());
 	for (auto& v : A) assert(n == v.size());

@@ -1,6 +1,6 @@
 #include "solver.h"
 #include "index_utils.h"
-#include "mcmc.h"
+// #include "mcmc.h"
 
 #include <iostream>
 #include <cmath>
@@ -34,6 +34,12 @@ inline std::vector <double> mids(const vector <double>& breaks){
 inline std::vector <double> left_edge(const vector <double>& breaks){
 	std::vector<double> a(breaks.size()-1);
 	for (size_t i=0; i<a.size(); ++i) a[i] = breaks[i];
+	return a;
+}
+
+inline std::vector <double> right_edge(const vector <double>& breaks){
+	std::vector<double> a(breaks.size()-1);
+	for (size_t i=0; i<a.size(); ++i) a[i] = breaks[i+1];
 	return a;
 }
 
@@ -88,8 +94,8 @@ void Solver::addSpecies(std::vector<std::vector<double>> xbreaks, Species_Base* 
 	}
 
 	// JJ Note: nD FMU must be disallowed, because its boundary condition still needs to be sorted out.
-	if (method == SOLVER_FMU || method == SOLVER_IFMU){
-		if (s->istate_size > 1) throw std::runtime_error("With grid-based solvers, currently only 1D state variables are supported.");
+	if (method == SOLVER_FMU){
+		if (s->istate_size > 1) throw std::runtime_error("With FMU solver, currently only 1D state variables are supported.");
 	}
 
 	// TODO: Should we check that all coordinates are sorted ascending?
@@ -105,26 +111,17 @@ void Solver::addSpecies(std::vector<std::vector<double>> xbreaks, Species_Base* 
 		s->h.push_back(diff(xbreaks[i]));
 	}
 
-	// in IFMU solver, if gridcells are labelled by lower edge, set X by lower edge rather than centre
-	if (method == SOLVER_IFMU && !control.ifmu_centered_grids){
+	// in IFMU solver, gridcells are labelled by upper edge
+	if (method == SOLVER_IFMU){
 		s->X.clear(); // clear stuff set above
 		for (int i=0; i<xbreaks.size(); ++i){
-			s->X.push_back(left_edge(xbreaks[i]));
+			s->X.push_back(right_edge(xbreaks[i]));
 		}
 	} 
 
-
 	// Set species birth size - xb
-	s->xb.clear();
-	if (method == SOLVER_IFMU && control.ifmu_centered_grids){ 
-		// For IFMU with centered grids, xb is the centre of the first nD cell 
-		for (int i=0; i<s->istate_size; ++i) s->xb.push_back(s->X[i][0]);
-	}
-	else{  
-		// For all other solvers, xb is the lower edge of the first nD cell 
-		for (int i=0; i<s->istate_size; ++i) s->xb.push_back(s->x[i][0]);
-	}
-
+	// For all solvers, xb is the lower edge of the corner cell 
+	s->xb = id_utils::coord_value(vector<int>(s->istate_size, 0), s->x);
 
 	// Create cohorts
 	// vector<int> dim_centres, dim_edges;
@@ -138,7 +135,7 @@ void Solver::addSpecies(std::vector<std::vector<double>> xbreaks, Species_Base* 
 	std::cout << "Find J" << std::endl;
 	int J = 1;
 	if      (method == SOLVER_FMU)   J = s->n_grid_centres; // xbreaks.size()-1;	
-	else if (method == SOLVER_IFMU)  J = s->n_grid_centres;	
+	else if (method == SOLVER_IFMU)  J = s->n_grid_centres;	// as many as grid centres but labelled by upper edge
 	else if (method == SOLVER_MMU)   J = s->n_grid_centres;  
 	else if (method == SOLVER_CM )   J = s->n_grid_edges;  // For CM, its not strictly necessary to use grid edges, but this helps with tests on the Plant Model 
 	else if (method == SOLVER_ICM )  J = s->n_grid_edges;
@@ -350,7 +347,7 @@ void Solver::initializeSpecies(Species_Base * s){
 		// Boundary cohort is not in state, but used as a reference.	
 
 		std::cout << "Set up boundary" << std::endl;
-		s->set_xb(s->xb); // set x of boundary cohort 
+		s->set_xb(s->xb); // set x of boundary cohort - this is needed to set any other variables that depend on size
 		std::cout << "Set up u at boundary" << std::endl;
 		s->set_ub(0);     // set initial density of boundary cohort to 0.
 		
@@ -404,66 +401,66 @@ void Solver::initializeSpecies(Species_Base * s){
 			s->setU(s->J-1, 0); 		
 		}
 
-		// FIXME: abm_n0 and x.size() can be different - we want higher x.size() to get a high-res initial density function, but when we draw from it, we only draw abm_n0 individuals
-		// FIXME: Note that X must be set before calculating U.
-		if (method == SOLVER_ABM){
-			// Simulate initial elements using a Monte Carlo simulation 
+// 		// FIXME: abm_n0 and x.size() can be different - we want higher x.size() to get a high-res initial density function, but when we draw from it, we only draw abm_n0 individuals
+// 		// FIXME: Note that X must be set before calculating U.
+// 		if (method == SOLVER_ABM){
+// 			// Simulate initial elements using a Monte Carlo simulation 
 
-			/* Find total density - cheat by using the initial grid a little  */
-			double Utot = 0.0; 
-			for (size_t i=0; i<s->J-1; ++i){
-				vector<double> dx = id_utils::coord_value(id_utils::index(i, s->dim_centres), s->h);
-				double dV = std::accumulate(dx.begin(), dx.end(), 1.0, std::multiplies<double>());
-				double U = s->init_density(i, env)*dV; 
-				Utot += U;
-			}
+// 			/* Find total density - cheat by using the initial grid a little  */
+// 			double Utot = 0.0; 
+// 			for (size_t i=0; i<s->J-1; ++i){
+// 				vector<double> dx = id_utils::coord_value(id_utils::index(i, s->dim_centres), s->h);
+// 				double dV = std::accumulate(dx.begin(), dx.end(), 1.0, std::multiplies<double>());
+// 				double U = s->init_density(i, env)*dV; 
+// 				Utot += U;
+// 			}
 
-			// Since we don't have an 'independent' density function and we will in any case substitute 
-			// the x values. there should hopefully be a better way of doing this but since it is a one time
-			// simulation it might be ok to keep it this way
-			auto targetDensity = [s, this](const std::vector<double>& x) {
-				s->setX(s->J-2, x);
-				return s->init_density(s->J-2, env);
-   	 		};
+// 			// Since we don't have an 'independent' density function and we will in any case substitute 
+// 			// the x values. there should hopefully be a better way of doing this but since it is a one time
+// 			// simulation it might be ok to keep it this way
+// 			auto targetDensity = [s, this](const std::vector<double>& x) {
+// 				s->setX(s->J-2, x);
+// 				return s->init_density(s->J-2, env);
+//    	 		};
 
-			// Create sampler chain
+// 			// Create sampler chain
 
-			std::vector<double> x_min = s->getX(s->J-1);
-			std::vector<double> x_max = s->getX(0);
-			std::vector<double> sd(x_min.size());
-			for(size_t k = 0; k < x_min.size(); ++k){
-				sd[k] = (x_max[k] - x_min[k])/10;
-			}
+// 			std::vector<double> x_min = s->getX(s->J-1);
+// 			std::vector<double> x_max = s->getX(0);
+// 			std::vector<double> sd(x_min.size());
+// 			for(size_t k = 0; k < x_min.size(); ++k){
+// 				sd[k] = (x_max[k] - x_min[k])/10;
+// 			}
 
-			MCMCSampler sampler(x_min, x_max, sd, control.abm_numChains, control.abm_burnin, 1);
-			sampler.run_chains(targetDensity, control.abm_n0 + control.abm_burnin);
+// 			MCMCSampler sampler(x_min, x_max, sd, control.abm_numChains, control.abm_burnin, 1);
+// 			sampler.run_chains(targetDensity, control.abm_n0 + control.abm_burnin);
 
-			/* here instert test for convergence */
+// 			/* here instert test for convergence */
 
-			/* allocate new samples */
-			std::vector<std::vector<double>> sample_x = sampler.sample(control.abm_n0);
-			s->resize(control.abm_n0 + 1); // Elisa: adding one for the boundary cohort - is this necessary?
+// 			/* allocate new samples */
+// 			std::vector<std::vector<double>> sample_x = sampler.sample(control.abm_n0);
+// 			s->resize(control.abm_n0 + 1); // Elisa: adding one for the boundary cohort - is this necessary?
 
-			// allocate values to all elements
-			for(size_t i = 0; i < sample_x.size(); ++i){
-				s->setX(i, sample_x[i]);
-			}
-			//Create the initial density distribution from which we will draw individuals
-			double Utot = sampler.integral(control.abm_n0);
-			double N_cohort = Utot/s->J; 
-			s->set_ub(N_cohort);
-			for (int i=0; i<s->J; ++i){ 
-				s->setU(i, N_cohort);
-			}
+// 			// allocate values to all elements
+// 			for(size_t i = 0; i < sample_x.size(); ++i){
+// 				s->setX(i, sample_x[i]);
+// 			}
+// 			//Create the initial density distribution from which we will draw individuals
+// 			double Utot = sampler.integral(control.abm_n0);
+// 			double N_cohort = Utot/s->J; 
+// 			s->set_ub(N_cohort);
+// 			for (int i=0; i<s->J; ++i){ 
+// 				s->setU(i, N_cohort);
+// 			}
 			
-//			ofstream fout("abm_init.txt");
-//			for (int i=0; i<s->J; ++i){
-//				fout << s->getX(i) << "\t" << s->getU(i) << "\n";
-//			}		
-//			fout.close();	
-		}
+// //			ofstream fout("abm_init.txt");
+// //			for (int i=0; i<s->J; ++i){
+// //				fout << s->getX(i) << "\t" << s->getU(i) << "\n";
+// //			}		
+// //			fout.close();	
+// 		}
 
-		// initialize extra state for each cohort ... previously also copied to state
+		// initialize accumulator variables for each cohort ... previously also copied to state
 		// For EBT, the initialization of extra variables may need state info, so need to realize pi0-cohort
 		if (method == SOLVER_EBT || method == SOLVER_IEBT) realizeEbtBoundaryCohort(s);
 		s->initAccumulators(current_time, env);
@@ -826,6 +823,7 @@ std::vector<double> Solver::getDensitySpecies1D(int k, int dim, const std::vecto
 	}	
 	
 	else {
+		// in grid-based methods, we must aggregate all dimensions other then dim
 		xx.reserve(spp->J);
 		uu.reserve(spp->J);
 		for (int i=0; i<spp->J-1; ++i){

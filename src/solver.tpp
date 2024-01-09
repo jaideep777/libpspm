@@ -27,17 +27,17 @@ void Solver::step_to(double tstop, AfterStepFunc &afterStep_user){
 	};
 
 	
-	if (method == SOLVER_IEBT){//} || method == SOLVER_IFMU || method == SOLVER_ICM){	
+	if (method == SOLVER_IEBT || method == SOLVER_IFMU){//} || method == SOLVER_ICM){	
 		while (current_time < tstop){
 			double dt = std::min(control.ode_ifmu_stepsize, tstop-current_time);
 			
 			//copyStateToCohorts(state.begin()); // not needed here because it is called by the odestepper below
 			updateEnv(current_time, state.begin(), rates.begin());
-			std::vector<double> rates_prev(rates.begin(), rates.begin()+n_statevars_system);  // save system variable rates
+			std::vector<double> sys_rates_prev(rates.begin(), rates.begin()+n_statevars_system);  // save system variable rates
 			
 			// use implicit stepper to advance u
 			if      (method == SOLVER_IEBT) stepU_iEBT(current_time, state, rates, dt);
-			// else if (method == SOLVER_IFMU) stepU_iFMU(current_time, state, rates, dt);
+			else if (method == SOLVER_IFMU) stepU_iFMU(current_time, state, rates, dt);
 			// else if (method == SOLVER_ICM)  stepU_iCM(current_time, state, rates, dt);
 			else     throw std::runtime_error("step_to(): Invalid solver method"); // TODO: This will actually never be reached so we can refactor to remove 
 			// current_time += dt; // not needed here, as current time is advanced by the ODE stepper below.
@@ -48,7 +48,7 @@ void Solver::step_to(double tstop, AfterStepFunc &afterStep_user){
 				updateEnv(current_time, state.begin(), rates.begin());  // FIXME: recompute env with updated u <-- is this necessary or even correct??
 				// .FIXME: use fully implicit stepper here?
 				for (int i=0; i<n_statevars_system; ++i){
-					state[i] += (rates_prev[i]+rates[i])/2*dt;  // use average of old and updated rates for stepping system vars
+					state[i] += (sys_rates_prev[i]+rates[i])/2*dt;  // use average of old and updated rates for stepping system vars
 				}
 			}
 
@@ -134,33 +134,33 @@ void Solver::step_to(double tstop, AfterStepFunc &afterStep_user){
 	// 	//env->computeEnv(current_time, this); // is required here IF rescaleEnv is used in derivs
 	// }
 	
-	if (method == SOLVER_ABM){	
-		while (current_time < tstop){
-			double dt = std::min(control.abm_stepsize, tstop-current_time);
+	// if (method == SOLVER_ABM){	
+	// 	while (current_time < tstop){
+	// 		double dt = std::min(control.abm_stepsize, tstop-current_time);
 			
-			//copyStateToCohorts(state.begin()); // not needed here because it is called by the odestepper below
-			updateEnv(current_time, state.begin(), rates.begin());
-			std::vector<double> rates_prev(rates.begin(), rates.begin()+n_statevars_system);  // save system variable rates
+	// 		//copyStateToCohorts(state.begin()); // not needed here because it is called by the odestepper below
+	// 		updateEnv(current_time, state.begin(), rates.begin());
+	// 		std::vector<double> rates_prev(rates.begin(), rates.begin()+n_statevars_system);  // save system variable rates
 			
-			// use implicit stepper to advance u
-			stepABM(current_time, dt);  // this will step all variables, including extra_istate
-			current_time += dt; 
+	// 		// use implicit stepper to advance u
+	// 		stepABM(current_time, dt);  // this will step all variables, including extra_istate
+	// 		current_time += dt; 
 			
-			// step system vars
-			if (n_statevars_system > 0){
-				updateEnv(current_time, state.begin(), rates.begin());  // recompute env with updated u
-				// .FIXME: use fully implicit stepper here?
-				for (int i=0; i<n_statevars_system; ++i){
-					state[i] += (rates_prev[i]+rates[i])/2*dt;  // use average of old and updated rates for stepping system vars
-				}
-			}
+	// 		// step system vars
+	// 		if (n_statevars_system > 0){
+	// 			updateEnv(current_time, state.begin(), rates.begin());  // recompute env with updated u
+	// 			// .FIXME: use fully implicit stepper here?
+	// 			for (int i=0; i<n_statevars_system; ++i){
+	// 				state[i] += (rates_prev[i]+rates[i])/2*dt;  // use average of old and updated rates for stepping system vars
+	// 			}
+	// 		}
 
-			// Need to explicitly call this because ODE solver is not used in ABM
-			// Should cohorts be copied to state here? - done within stepABM() above
-			after_step(current_time, state.begin());
-		}
+	// 		// Need to explicitly call this because ODE solver is not used in ABM
+	// 		// Should cohorts be copied to state here? - done within stepABM() above
+	// 		after_step(current_time, state.begin());
+	// 	}
 
-	}
+	// }
 
 	// std::cout << "Finished step to " <<std::endl;
 
