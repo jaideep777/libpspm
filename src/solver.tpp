@@ -87,16 +87,16 @@ void Solver::step_to(double tstop, AfterStepFunc &afterStep_user){
 
 	}
 
-	// if (method == SOLVER_FMU){	
-	// 	auto derivs = [this](double t, std::vector<double>::iterator S, std::vector<double>::iterator dSdt, void* params){
-	// 		copyStateToCohorts(S); 
-	// 		updateEnv(t, S, dSdt);
-	// 		calcRates_FMU(t, S, dSdt);
-	// 	};
+	if (method == SOLVER_FMU){	
+		auto derivs = [this](double t, std::vector<double>::iterator S, std::vector<double>::iterator dSdt, void* params){
+			copyStateToCohorts(S); 
+			updateEnv(t, S, dSdt);
+			calcRates_FMU(t, S, dSdt);
+		};
 		
-	// 	// integrate
-	// 	odeStepper.step_to(tstop, current_time, state, derivs, after_step); // rk4_stepsize is only used if method is "rk4"
-	// }
+		// integrate
+		odeStepper.step_to(tstop, current_time, state, derivs, after_step); // rk4_stepsize is only used if method is "rk4"
+	}
 	
 	if (method == SOLVER_EBT){
 		auto derivs = [this](double t, std::vector<double>::iterator S, std::vector<double>::iterator dSdt, void* params){
