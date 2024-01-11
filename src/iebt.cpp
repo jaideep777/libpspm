@@ -37,8 +37,8 @@ double identity_matrix(int i, int j){
 // |(1+mu*dt)I - [  g1   dg1/dx0      ...  dg1/dxn ]dt | * [ p1(t+1) ] = [ p1        ]               
 // |             [  ..   ..           ...   ..     ]   |   [ ..      ] = [ ..        ]   
 //  \            [  gn   dgn/dx0      ...  dgn/dxn ]  /    [ pn(t+1) ] = [ pn        ]   
-// 
-//  /                         \ 
+//   
+//  /                         \.     
 // |(1+mu*dt)I - [ 0   -mx ]dt | X(t+1) = X(t)+ Bdt*[1]
 // |             [ g'   gx']   |                    [0]
 //  \                         /

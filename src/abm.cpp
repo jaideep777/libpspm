@@ -3,7 +3,7 @@
 using namespace std;
 
 void Solver::stepABM(double t, double dt){
-		
+/*		
 	// Take implicit step for U
 	for (int s = 0; s<species_vec.size(); ++s){
 		Species_Base* spp = species_vec[s];
@@ -58,7 +58,7 @@ void Solver::stepABM(double t, double dt){
 	// these will be in order abc abc abc... 
 	// use the state vector itself to temporarily store and retrive state, since it's not used for x and u (but after system variables)
 
-	/* Elisa: copied over from ebt.cpp after code reformatting*/
+	// Elisa: copied over from ebt.cpp after code reformatting
 	
 	for (auto spp : species_vec){
 		vector<double>::iterator its = state.begin() + n_statevars_system; // Skip system variables
@@ -119,7 +119,7 @@ void Solver::stepABM(double t, double dt){
 	resizeStateFromSpecies();
 	copyCohortsToState();
 	//print();
-	
+*/	
 }
 
 
