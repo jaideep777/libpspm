@@ -351,7 +351,7 @@ double Solver::state_integral(wFunc w, double t, int species_id){
 			double u_lo = spp->getU(i); 
 			double x_lo = spp->getX(i)[0];
 			double f_lo = w(i, t)*u_lo;
-			// std::cout << "size_integral: x = " << x_lo << ", w(" << i << ",t) = " << w(i,t) << '\n';
+			if (debug) std::cout << "size_integral: x = " << x_lo << ", w(" << i << ",t) = " << w(i,t) << '\n';
 	
 			I += (x_hi - x_lo) * (f_hi + f_lo);
 			x_hi = x_lo;

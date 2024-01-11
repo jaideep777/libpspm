@@ -22,7 +22,7 @@ void Solver::calcRates_CM(double t, vector<double>::iterator S, vector<double>::
 		// Boundary u is not used in rate calcs per se, but needed in size integral. Hence update
 		// FIXME: This boundary condition works only for 1D state
 		double birthFlux;
-		vector<double> gb = spp->growthRate(-1, current_time, env);
+		vector<double> gb = spp->growthRate(-1, t, env);
 		double pe = spp->establishmentProbability(t, env);
 		if (spp->birth_flux_in < 0){	
 			birthFlux = calcSpeciesBirthFlux(s,t) * pe;
@@ -79,6 +79,7 @@ void Solver::addCohort_CM(){
 		else{
 			birthFlux = spp->birth_flux_in * pe;
 		}
+		// cout << "Adding cohort: gb = " << gb[0] << '\n';
 		spp->initBoundaryCohort(current_time, env); // init extra state variables and birth time of the boundary cohort
 		spp->set_ub(birthFlux/(gb[0]+1e-20)); // FIXME: This line works only for 1D state
 		spp->addCohort();	// introduce copy of boundary cohort in system

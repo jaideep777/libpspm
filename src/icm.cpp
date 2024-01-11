@@ -16,29 +16,46 @@ void Solver::stepU_iCM(double t, vector<double> &S, vector<double> &dSdt, double
 		double *XU = &(*its); 
 		int J = spp->J;
 
-		std::vector<double> g_gx = spp->growthRateGradient(-1, spp->xb, t, env, control.cm_grad_dx);
-		//std::cout << "g = " << g_gx[0] << ", gx = " << g_gx[1] << "\n";
-
 		// Boundary u is not used in rate calcs per se, but needed in size integral. Hence update
-		double gb = g_gx[0], growthGrad = g_gx[1];	
+		// FIXME: This boundary condition works only for 1D state
+		double birthFlux;
+		vector<double> gb = spp->growthRate(-1, t, env);
 		double pe = spp->establishmentProbability(t, env);
 		if (spp->birth_flux_in < 0){	
-			double birthFlux = calcSpeciesBirthFlux(s,t) * pe;
-			spp->set_ub(birthFlux/(gb+1e-20));
+			birthFlux = calcSpeciesBirthFlux(s,t) * pe;
 		}
 		else{
-			spp->calc_boundary_u(gb, pe); // this will set u in boundary cohort
+			birthFlux = spp->birth_flux_in * pe;
+		}
+		spp->set_ub(birthFlux/(gb[0]+1e-20));
+		// cout << "B = " << birthFlux << ", ub = " << birthFlux/(gb[0]+1e-20) << '\n';
+
+		for (int i=0; i<spp->J; ++i){
+			vector<vector<double>> g_gx = spp->growthRateGradient(i, t, env, control.cm_grad_dx);  
+
+			for (int k=0; k<spp->istate_size; ++k){
+				*its++ += g_gx[0][k]*dt;
+			}
+
+			double du = spp->mortalityRate(i, t, env); 
+			for (int k=0; k<spp->istate_size; ++k){
+				du += g_gx[k+1][k]; 
+			}
+			if (!use_log_densities) *its++ /= 1 + du*dt;
+			else *its++ -= du*dt;
 		}
 
-		// all cohorts
-		for (int i=0; i<J; ++i){
-			XU[2*i+0] += spp->growthRate(i, spp->getX(i), t, env)*dt;
+		its += J*spp->n_accumulators;
 
-			std::vector<double> g_gx = spp->growthRateGradient(i, spp->getX(i), t, env, control.cm_grad_dx);
-			XU[2*i+1] /= 1 + g_gx[1]*dt + spp->mortalityRate(i, spp->getX(i), t, env)*dt;
-		}
-		
-		its += J*(2+spp->n_extra_statevars);
+		// // all cohorts
+		// for (int i=0; i<J; ++i){
+		// 	XU[2*i+0] += spp->growthRate(i, t, env)[0]*dt;
+
+		// 	std::vector<std::vector<double>> g_gx = spp->growthRateGradient(i, t, env, control.cm_grad_dx);
+		// 	XU[2*i+1] /= 1 + g_gx[1][0]*dt + spp->mortalityRate(i, t, env)*dt;
+		// }
+	
+		// its += J*(2+spp->n_accumulators);
 
 	}
 	
