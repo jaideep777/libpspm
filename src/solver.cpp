@@ -90,12 +90,12 @@ void Solver::addSpecies(std::vector<std::vector<double>> xbreaks, Species_Base* 
 
 	// JJ Note: nD CM must be disallowed, because its integral (as of now) needs ordering of cohorts.
 	if (method == SOLVER_CM || method == SOLVER_ICM){
-		if (s->istate_size > 1) throw std::runtime_error("With the CM and ICM solvers, only 1 state variable per species is allowed.");
+		if (s->istate_size > 1) throw std::runtime_error("The CM and ICM solvers currently only support 1D state variables");
 	}
 
 	// JJ Note: nD FMU must be disallowed, because its boundary condition still needs to be sorted out.
 	if (method == SOLVER_FMU){
-		if (s->istate_size > 1) throw std::runtime_error("With FMU solver, currently only 1D state variables are supported.");
+		if (s->istate_size > 1) throw std::runtime_error("The FMU solver currently only supports 1D state variables.");
 	}
 
 	// TODO: Should we check that all coordinates are sorted ascending?
@@ -112,6 +112,7 @@ void Solver::addSpecies(std::vector<std::vector<double>> xbreaks, Species_Base* 
 	}
 
 	// FIXME: Need to properly investigate labelling of grids and how that affects boundary condition
+	//        with the testmodel, labelling by lower edge gives best results (compared to centre / upper edge)! 
 	// in IFMU solver, gridcells are labelled by upper edge
 	if (method == SOLVER_IFMU && !control.ifmu_centered_grids){
 		s->X.clear(); // clear stuff set above
@@ -137,7 +138,6 @@ void Solver::addSpecies(std::vector<std::vector<double>> xbreaks, Species_Base* 
 	int J = 1;
 	if      (method == SOLVER_FMU)   J = s->n_grid_centres; // xbreaks.size()-1;	
 	else if (method == SOLVER_IFMU)  J = s->n_grid_centres;	// as many as grid centres but labelled by upper edge
-	else if (method == SOLVER_MMU)   J = s->n_grid_centres;  
 	else if (method == SOLVER_CM )   J = s->n_grid_edges;  // For CM, its not strictly necessary to use grid edges, but this helps with tests on the Plant Model 
 	else if (method == SOLVER_ICM )  J = s->n_grid_edges;
 	else if (method == SOLVER_EBT)   J = s->n_grid_centres+1;  // As many cohorts as grid centers + 1 boundary cohort
@@ -371,17 +371,18 @@ void Solver::initializeSpecies(Species_Base * s){
 			}
 		}
 		
-// 		if (method == SOLVER_CM || method == SOLVER_ICM){
-// 			for (size_t i=0; i<s->J; ++i){
-// 				double X = s->x[i];
-// 				s->setX(i,X); 
+		if (method == SOLVER_CM || method == SOLVER_ICM){
+			for (size_t i=0; i<s->J; ++i){
+				vector<double> X = id_utils::coord_value(id_utils::index(i, s->dim_edges), s->x);
+				s->setX(i,X);
 
-// 				double U = s->init_density(i, X, env); 
-// 				s->setU(i,U);
-// 				// *it++ = X;									// x in state
-// 				// *it++ = (use_log_densities)? log(U) : U;	// u in state 
-// 			}
-// 		}
+				double U = s->init_density(i, env); 
+				s->setU(i,U);
+				// *it++ = X;									// x in state
+				// *it++ = (use_log_densities)? log(U) : U;	// u in state 
+			}
+			s->sortCohortsDescending(0);
+		}
 		
 		if (method == SOLVER_EBT || method == SOLVER_IEBT){
 			// x, u for internal cohorts 

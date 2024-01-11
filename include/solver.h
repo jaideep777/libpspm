@@ -51,7 +51,7 @@ class Solver{
 		double ode_eps = 1e-6;	// FIXME: Need a function to set these params, so ODE solver can be reset
 		double ode_initial_step_size = 1e-6;
 		double convergence_eps = 1e-6;
-		double cm_grad_dx = 1e-6;
+		std::vector<double> cm_grad_dx = {1e-6};
 		bool update_cohorts = true;
 		bool cm_remove_cohorts = true;
 		int  max_cohorts = 500;

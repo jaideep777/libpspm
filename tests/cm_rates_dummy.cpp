@@ -15,11 +15,11 @@ int main(){
 
 	Solver S(SOLVER_CM);
 	S.setEnvironment(&E);
-	S.use_log_densities = false;  // FIXME:: Make sure that oder of calling this before/after reset state doesnt matter
-	S.control.cm_grad_dx = 0.001;
-	S.addSpecies(25, 0, 1, false, &spp, 4, 2);
-	S.resetState();
-	S.initialize();
+	S.use_log_densities = false;
+	S.control.cm_grad_dx = {0.001};
+	S.control.max_cohorts = 26;
+	S.control.cm_remove_cohorts = false;
+	S.addSpecies({25}, {0}, {1}, {false}, &spp, 4, -1);
 	S.print();
 	
 	E.computeEnv(0,&S, S.state.begin(), S.rates.begin());

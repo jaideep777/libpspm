@@ -115,24 +115,24 @@ void Solver::step_to(double tstop, AfterStepFunc &afterStep_user){
 	}
 	
 
-	// if (method == SOLVER_CM){
-	// 	auto derivs = [this](double t, std::vector<double>::iterator S, std::vector<double>::iterator dSdt, void* params){
-	// 		if (debug) std::cout << "derivs()\n";
-	// 		copyStateToCohorts(S);  // this triggers precompute
-	// 		updateEnv(t, S, dSdt);
-	// 		calcRates_CM(t, S, dSdt);
-	// 	};
+	if (method == SOLVER_CM){
+		auto derivs = [this](double t, std::vector<double>::iterator S, std::vector<double>::iterator dSdt, void* params){
+			if (debug) std::cout << "derivs()\n";
+			copyStateToCohorts(S);  // this triggers precompute
+			updateEnv(t, S, dSdt);
+			calcRates_CM(t, S, dSdt);
+		};
 		
-	// 	// integrate 
-	// 	odeStepper.step_to(tstop, current_time, state, derivs, after_step); // rk4_stepsize is only used if method is "rk4"
+		// integrate 
+		odeStepper.step_to(tstop, current_time, state, derivs, after_step); // rk4_stepsize is only used if method is "rk4"
 		
-	// 	// update cohorts
-	// 	if (control.update_cohorts){
-	// 		addCohort_CM();		// add before so that it becomes boundary cohort and first internal cohort can be (potentially) removed
-	// 		removeCohort_CM();
-	// 	}
-	// 	//env->computeEnv(current_time, this); // is required here IF rescaleEnv is used in derivs
-	// }
+		// update cohorts
+		if (control.update_cohorts){
+			addCohort_CM();		// add before so that it becomes boundary cohort and first internal cohort can be (potentially) removed
+			removeCohort_CM();
+		}
+		//env->computeEnv(current_time, this); // is required here IF rescaleEnv is used in derivs
+	}
 	
 	// if (method == SOLVER_ABM){	
 	// 	while (current_time < tstop){

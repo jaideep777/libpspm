@@ -336,6 +336,37 @@ template<typename wFunc>
 double Solver::state_integral(wFunc w, double t, int species_id){
 	Species_Base* spp = species_vec[species_id];
 
+	if (method == SOLVER_CM || method == SOLVER_ICM){
+		// NOTE: This works for 1D state only! Cohorts assumed to be sorted
+		// spp->sortCohortsDescending(0);
+		// copyCohortsToState();
+		// integrate using trapezoidal rule 
+		// Note, new cohorts are inserted at the end, so x will be descending
+		double I = 0;
+		double u_hi = spp->getU(0); 
+		double x_hi = spp->getX(0)[0];
+		double f_hi = w(0, t)*u_hi;
+		// std::cout << "size_integral: x = " << x_hi << ", w(0,t) = " << w(0,t) << '\n';
+		for (int i=1; i<spp->J; ++i){
+			double u_lo = spp->getU(i); 
+			double x_lo = spp->getX(i)[0];
+			double f_lo = w(i, t)*u_lo;
+			// std::cout << "size_integral: x = " << x_lo << ", w(" << i << ",t) = " << w(i,t) << '\n';
+	
+			I += (x_hi - x_lo) * (f_hi + f_lo);
+			x_hi = x_lo;
+			f_hi = f_lo;
+		}
+		
+		// boundary at xb
+		double u0 = spp->get_boundary_u();
+		double x_lo = spp->xb[0];
+		double f_lo =  w(-1, t)*u0; // -1 is boundary cohort
+		I += (x_hi-x_lo)*(f_hi+f_lo);
+		
+		return I*0.5;
+	}
+
 	if (method == SOLVER_EBT || method == SOLVER_IEBT){
 		// integrate using EBT rule (sum over cohorts)
 		realizeEbtBoundaryCohort(spp);
