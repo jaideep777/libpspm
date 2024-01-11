@@ -49,10 +49,10 @@ int main(){
 		S.step_to(t);
 		fout << S.current_time << "\t" << S.u0_out(t)[0] << "\t";
 
-		// vector<double> breaks = myseq(0,1,26);
-		// vector<double> v = S.getDensitySpecies(0, breaks, Spline::QUADRATIC);
-		// for (auto y : v) fout << y << "\t";
-		// fout << endl;
+		vector<double> breaks = myseq(0,1,26);
+		vector<double> v = S.getDensitySpecies1D(0, 0, breaks, Spline::QUADRATIC);
+		for (auto y : v) fout << y << "\t";
+		fout << endl;
 	}
 
 	fout.close();

@@ -33,7 +33,7 @@ int main(){
 	E.computeEnv(0, &S, S.state.begin(), S.rates.begin());
 	cout << E.evalEnv(0,0) << endl;
 
-	ofstream fout("cm_testmodel_equil.txt");
+	ofstream fout("icm_testmodel_equil.txt");
 
 	//fout << S.current_time << "\t" << 0 << "\t";
 	//for (auto y : S.state){fout << y << "\t";} fout << "\n";
@@ -44,10 +44,10 @@ int main(){
 		//cout << S.current_time << "\t" << S.species_vec[0]->xsize() << " " << S.u0_out()[0] << "\t" << S.species_vec[0]->get_boundary_u() << "\n";
 		//cout << S.u0_out() << "\n";
 
-		// vector<double> breaks = myseq(0,1,26);
-		// vector<double> v = S.getDensitySpecies1D(0, 0, breaks, Spline::QUADRATIC);
-		// for (auto y : v) fout << y << "\t";
-		// fout << endl;
+		vector<double> breaks = myseq(0,1,26);
+		vector<double> v = S.getDensitySpecies1D(0, 0, breaks, Spline::QUADRATIC);
+		for (auto y : v) fout << y << "\t";
+		fout << endl;
 	}
 
 	fout.close();
