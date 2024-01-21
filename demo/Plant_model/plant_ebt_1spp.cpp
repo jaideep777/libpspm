@@ -172,18 +172,15 @@ int main(int argc, char ** argv){
 	cout << "Simulating with input seed rain = " << ip_seed_rain << endl;
  
 #ifndef USE_INIT_DIST
-	S.addSpecies({p1.vars.height, p1.vars.height+1e-4}, &s1, 4, ip_seed_rain);
-	S.addSpecies({p2.vars.height, p1.vars.height+1e-4}, &s2, 4, ip_seed_rain);
-	S.addSpecies({p3.vars.height, p1.vars.height+1e-4}, &s3, 4, ip_seed_rain);
+	S.addSpecies({{p1.vars.height, p1.vars.height+1e-4}}, &s1, 4, ip_seed_rain);
+	S.addSpecies({{p2.vars.height, p1.vars.height+1e-4}}, &s2, 4, ip_seed_rain);
+	S.addSpecies({{p3.vars.height, p1.vars.height+1e-4}}, &s3, 4, ip_seed_rain);
 #else
  	S.addSpecies(fmu_create_grid(p1.vars.height, 3), &s1, 4, ip_seed_rain);
 	S.addSpecies(fmu_create_grid(p1.vars.height, 3), &s2, 4, ip_seed_rain);
 	S.addSpecies(fmu_create_grid(p1.vars.height, 3), &s3, 4, ip_seed_rain);
 #endif	
 	
-	S.resetState();
-	S.initialize();
-
 	S.print();
 	
 	double tmax = 105.32;

@@ -54,7 +54,6 @@ void Species<Model>::resize(int _J){
 // We dont know in advance whether there is a boundary cohort at position J-1. So provide an option to skip it
 template<class Model>
 std::vector<double> Species<Model>::get_maxSize(int skip){ // TODO ALERT: make sure this sees the latest state
-	// FIXME JJ: What happened of the FMU case to get this from x?
 	if (cohorts.empty()) return xb;
 
 	std::vector<double> largest = xb;

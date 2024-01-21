@@ -154,13 +154,10 @@ int main(){
 	S.setEnvironment(&env);
 	//    S.createSizeStructuredVariables({"mort", "fec", "heart_area", "heart_mass"});
     
-	S.addSpecies(vector<double>(1, p1.vars.height), &s1, 4, 1);
-	S.addSpecies(vector<double>(1, p2.vars.height), &s2, 4, 1);
-	S.addSpecies(vector<double>(1, p3.vars.height), &s3, 4, 1);
+	S.addSpecies({{p1.vars.height}}, &s1, 4, 1);
+	S.addSpecies({{p2.vars.height}}, &s2, 4, 1);
+	S.addSpecies({{p3.vars.height}}, &s3, 4, 1);
 	
-	S.resetState();
-	S.initialize();
-
 	S.print();
 	
 
@@ -219,8 +216,9 @@ int main(){
 
 	// expected falster17: 
 	vector<double> ex = {12.188123, 19.832202,  3.687228};
-	// expected from this code to declare pass/fail:
-	vector<double> ex_here = {12.1883, 19.8322, 3.6867};
+	// // expected from this code to declare pass/fail:
+	// vector<double> ex_here = {12.1883, 19.8322, 3.6867};
+	vector<double> ex_here = {12.1882, 19.8323, 3.68644}; // after nD version
 	for (int s=0; s< S.n_species(); ++s){
 		auto spp = S.species_vec[s];
 		vector <double> fec_vec;

@@ -321,6 +321,30 @@ int Solver::n_statevars_cohort(Species_Base * spp){
 // 	return maxsize;
 // }
 
+// This is literally only required for the Plant demo
+std::vector<double> Solver::maxState(int species_id){
+	if (method == SOLVER_FMU || method == SOLVER_IFMU){
+		auto spp = species_vec[species_id];
+		std::vector<double> ms(spp->istate_size);
+		for (int k=0; k<spp->istate_size; ++k){
+			ms[k] = spp->x[k].back();
+		}
+		return ms;
+	}
+	else if (method == SOLVER_EBT || method == SOLVER_IEBT){
+		realizeEbtBoundaryCohort(species_vec[species_id]);
+		std::vector<double> ms = species_vec[species_id]->get_maxSize(0);
+		restoreEbtBoundaryCohort(species_vec[species_id]);
+		return ms;
+	}
+	else if (method == SOLVER_CM || method == SOLVER_ICM){
+		return species_vec[species_id]->get_maxSize(0);
+	}
+	else{
+		throw std::runtime_error("maxState() not supported for this solver");
+	}
+}
+
 
 
 

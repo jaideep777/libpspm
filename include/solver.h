@@ -108,7 +108,7 @@ class Solver{
 	void copyStateToCohorts(std::vector<double>::iterator state_begin);		////const int size();
 	void copyCohortsToState();
 	
-	// double maxSize();
+	std::vector<double> maxState(int species_id);
 
 	void printODEmethod();
 
@@ -158,9 +158,9 @@ class Solver{
 	// template<typename wFunc>
 	// double integrate_x(wFunc w, double t, int species_id);
 
-	// /// @brief Computes the partial integral \f[I = \int_{x_{low}}^{x_m} w(z,t)u(z)dz\f] for the specified species. 
-	// template<typename wFunc>
-	// double integrate_wudx_above(wFunc w, double t, double xlow, int species_id);
+	/// @brief Computes the partial integral \f[I = \int_{x_{low}}^{x_m} w(z,t)u(z)dz\f] for the specified species. 
+	template<typename wFunc>
+	double integrate_wudx_above(wFunc w, double t, const std::vector<double>& xlow, int species_id);
 
 	// template<typename wFunc>
 	// double integrate_wudxn_above(wFunc w, double t, std::vector<double> xnlow, std::vector<double> xnhigh, int species_id);
