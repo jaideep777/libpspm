@@ -1,7 +1,9 @@
 #ifndef __PSPM_TEST_TEST_TEST_MODEL_H_
 #define __PSPM_TEST_TEST_TEST_MODEL_H_
 
-
+#include <individual_base.h>
+#include <environment_base.h>
+#include <solver.h>
 
 class Environment : public EnvironmentBase{
 	
@@ -12,17 +14,12 @@ class Environment : public EnvironmentBase{
 		return E;
 	}
 
-	// This function must do any necessary precomputations to facilitate evalEnv()
-	// Therefore, this should calculate env for all X when it is a function of X
-	// In such a case, the solver's SubdivisionSpline can be ussed
-	// Note: The state vector in the solver will not be updated until the RK step is completed. 
-	// Hence, explicitly pass the state to this function.
 	void computeEnv(double t, Solver * S, std::vector<double>::iterator s, std::vector<double>::iterator dsdt){
 		//             _xm 
 		// Calculate _/ w(z,t)u(z,t)dz
 		//         xb
 		auto w = [S](int i, double t) -> double {
-			double z = S->species_vec[0]->getX(i);
+			double z = S->species_vec[0]->getX(i)[0];
 			if (z <= 1.0/3) 
 				return 1;
 			else if (z > 1.0/3 && z <= 2.0/3) 
@@ -30,7 +27,7 @@ class Environment : public EnvironmentBase{
 			else 
 				return 0;
 		};
-		E = S->integrate_x(w, t, 0);
+		E = S->state_integral(w, t, 0);
 	}
 
 };
@@ -40,13 +37,12 @@ class Environment : public EnvironmentBase{
 class Plant{
 	public:
 	double height;
-	double mortality;
-	double viable_seeds;
-	double heart_mass;
-	double sap_mass;
+	double mortality = 0;
+	double viable_seeds = 0;
+	double heart_mass = 0;
+	double sap_mass = 0;
 
-	std::vector<std::string> varnames = {"mort", "vs", "heart", "sap"};
-
+	
 	Plant(double h){
 		height = h;
 	}
@@ -65,7 +61,7 @@ class Plant{
 
 
 
-class TestModel : public Plant{
+class TestModel : public Plant, public IndividualBase<1>{
 	public:
 	double sc = 10;
 
@@ -74,22 +70,23 @@ class TestModel : public Plant{
 	
 	TestModel() : Plant(0) {}
 
-	double init_density(double x, void * _env, double bf){
-		return pow(1-x,2)/pow(1+x,4) + (1-x)/pow(1+x,3);
+	double init_density(void * _env, double bf){
+		double _x = x[0];
+		return pow(1-_x,2)/pow(1+_x,4) + (1-_x)/pow(1+_x,3);
 	}
 	
-	void preCompute(double x, double t, void * _env){
+	void preCompute(double t, void * _env){
 		Environment* env = (Environment*)_env;
-	
+		double _x = x[0];	
 		// growth rate
-		double E = env->evalEnv(x,t);
+		double E = env->evalEnv(_x,t);
 		double a = 0.16+0.22*exp(-0.225*t*t);
-		g = 0.225*(1-x*x)*(E/(1+E*E))*t*(1+a*a)/a;
+		g = {0.225*(1-_x*_x)*(E/(1+E*E))*t*(1+a*a)/a};
 
 		m = 1.35*t*E/a;
 		
 		double oneplusa = 1+a;
-		double n1 = 0.225*t*x*x*(1-x)*(1-x)*E/(1+E)/(1+E)*oneplusa*oneplusa/a;
+		double n1 = 0.225*t*_x*_x*(1-_x)*(1-_x)*E/(1+E)/(1+E)*oneplusa*oneplusa/a;
 		double n2 = (1+exp(-0.225*t*t))/(61-88*log(2)+(38*log(2)-79.0/3)*exp(-0.225*t*t));
 		f = n1*n2;
 
@@ -97,15 +94,15 @@ class TestModel : public Plant{
 
 	}
 
-	double growthRate(double x, double t, void * _env){
-		return g;
+	std::array<double,1> growthRate(double t, void * _env){
+		return {g};
 	}
 
-	double mortalityRate(double x, double t, void * _env){
+	double mortalityRate(double t, void * _env){
 		return m;
 	}
 
-	double birthRate(double x, double t, void * _env){
+	double birthRate(double t, void * _env){
 		return f;
 	}
 
@@ -114,25 +111,26 @@ class TestModel : public Plant{
 	}
 
 
-	void set_size(double _x){
-		height = _x;
+	void set_size(const std::array <double, 1>& _x){
+		height = _x[0];
 		mortality = 0.1*height + 1e-12; //exp(-height);	
 		viable_seeds = 100*height + 1e-13;
 		heart_mass = 1000*height + 1e-14;
 		sap_mass = 10*height + 1e-15;
 	}
 
-	void init_state(double t, void * env){
+	void init_accumulators(double t, void * env){
 	}
 
-	std::vector<double>::iterator set_state(std::vector<double>::iterator &it){
+	std::vector<double>::iterator set_accumulators(std::vector<double>::iterator &it){
 		mortality    = *it++;
 		viable_seeds = *it++;
 		heart_mass   = *it++;
 		sap_mass     = *it++;
 		return it;
 	}
-	std::vector<double>::iterator get_state(std::vector<double>::iterator &it){
+
+	std::vector<double>::iterator get_accumulators(std::vector<double>::iterator &it){
 		*it++ = mortality;
 		*it++ = viable_seeds;
 		*it++ = heart_mass;
@@ -140,7 +138,7 @@ class TestModel : public Plant{
 		return it;
 	}
 
-	std::vector<double>::iterator get_rates(std::vector<double>::iterator &it){
+	std::vector<double>::iterator get_accumulatorRates(std::vector<double>::iterator &it){
 		std::vector<double> r = calcRates();
 		*it++ = r[0];
 		*it++ = r[1];
@@ -156,11 +154,11 @@ class TestModel : public Plant{
 			<< std::setw(10) << sap_mass << "\t";
 	}
 
-	void save(std::ofstream& fout){
+	void save(std::ostream& fout){
 		fout << "TestModel::v1 ";
 	}
 
-	void restore(std::ifstream& fin){
+	void restore(std::istream& fin){
 		std::string s; fin >> s; // discard version number 
 	}
 

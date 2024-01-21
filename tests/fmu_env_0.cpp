@@ -14,9 +14,7 @@ int main(){
 
 	Solver S(SOLVER_FMU);
 	S.setEnvironment(&E);
-	S.addSpecies(25, 0, 1, false, &M, 4);
-	S.resetState();
-	S.initialize();
+	S.addSpecies({25}, {0}, {1}, {false}, &M, 4);
 	S.print();
 	
 	E.computeEnv(0,&S, S.state.begin(), S.rates.begin());

@@ -13,13 +13,11 @@ int main(){
 	Species<TestModel> spp;
 
 	//Solver<TestModel> S({0,1,2,3}, SOLVER_CM);
-	S.addSpecies({0,1,2,3,4}, &spp, 4, 2);
+	S.addSpecies({{0,1,2,3,4}}, &spp, 4, 2);
 	//if(S.get_species(0)->xb != 0) return 1;
 
 	S.species_vec[0]->set_bfin_is_u0in(true);
 	S.species_vec[0]->set_inputBirthFlux(2); // this sets u0
-	S.resetState();
-	S.initialize();
 	S.state = {1,2,4,8, 0,0,0,0,1,1,1,1,2,2,2,2,3,3,3,3};
 	S.copyStateToCohorts(S.state.begin());
 	S.print();

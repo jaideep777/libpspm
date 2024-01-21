@@ -20,27 +20,27 @@ int main(){
 
 	Solver S(SOLVER_EBT);
 	S.setEnvironment(&E);
-	S.addSpecies(5, 0, 1, false, &s1, 4, 2);
-	S.addSpecies(8, 0, 1, false, &s2, 4, 2);
-	S.resetState();
-	S.initialize();
+	S.addSpecies({5}, {0}, {1}, {false}, &s1, 4, 2);
+	S.addSpecies({8}, {0}, {1}, {false}, &s2, 4, 2);
 	S.print();
 	//for (auto s : S.state) cout << s << " "; cout << endl;
 	
 	auto spp1 = S.species_vec[0];	
 	auto spp2 = S.species_vec[1];	
 
-	spp1->setX(1,spp1->getX(0)+1e-5); 
-	spp1->setX(2,spp1->getX(1)+1e-5); 
+	spp1->setX(1,{spp1->getX(0)[0]+1e-5}); 
+	spp1->setX(2,{spp1->getX(1)[0]+1e-5}); 
 
-	spp2->setX(1,spp2->getX(0)+1e-5); 
-	spp2->setX(4,spp2->getX(3)+1e-5); 
-	spp2->setX(5,spp2->getX(3)+1e-5); 
+	spp2->setX(1,{spp2->getX(0)[0]+1e-5}); 
+	spp2->setX(4,{spp2->getX(3)[0]+1e-5}); 
+	spp2->setX(5,{spp2->getX(3)[0]+1e-5}); 
 
 	S.print();
 
-	spp1->removeDenseCohorts(1e-4);
-	spp2->removeDenseCohorts(1e-4);
+	spp1->markDenseCohorts(1e-4);
+	spp1->removeMarkedCohorts();
+	spp2->markDenseCohorts(1e-4);
+	spp2->removeMarkedCohorts();
 	//S.resizeStateFromSpecies();
 	//S.copyCohortsToState();
 

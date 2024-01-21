@@ -21,7 +21,7 @@ int main(){
 	// Solver S(SOLVER_ABM);
 	// S.control.abm_n0 = 5000;
 	// S.setEnvironment(&E);
-	// S.addSpecies(25, 0, 1, false, &spp, 4);
+	// S.addSpecies({25}, {0}, {1}, {false}, &spp, 4);
 	// S.species_vec[0]->set_bfin_is_u0in(true);	// say that input_birth_flux is u0
 	// S.resetState();
 	// S.initialize();

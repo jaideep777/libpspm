@@ -107,7 +107,7 @@ int main(){
 	Sp.print();
 	nerrors += check_species_states(Sp, {30, 31, 32, 32.1});
 
-	Solver sol_fmu("FMU", "rk45ck");
+	Solver sol_fmu("IFMU", "rk45ck");
 	sol_fmu.setEnvironment(&E);
 	sol_fmu.addSpecies(vector<int>{5, 3}, vector<double>{1, 0.5}, vector<double>{11,6.5}, {false, false}, (Species_Base*)&Si, 0, -1);
 	sol_fmu.addSpecies(vector<int>{10}, vector<double>{0}, vector<double>{20}, {false}, (Species_Base*)&Sp, 1, -1);

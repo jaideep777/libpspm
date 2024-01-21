@@ -29,11 +29,9 @@ int main(){
 	//S.control.ode_method = "rk4";
 	//S.control.ode_rk4_stepsize = 0.01;
 	S.setEnvironment(&E);
-	S.addSpecies(25, 0, 1, false, &spp, 4, -1);
+	S.addSpecies({25}, {0}, {1}, {false}, &spp, 4, -1);
 	S.print();
 	S.species_vec[0]->set_bfin_is_u0in(true);
-	S.resetState();
-	S.initialize();
 	S.print();
 	
 	E.computeEnv(0, &S, S.state.begin(), S.rates.begin());
@@ -53,7 +51,7 @@ int main(){
 		fout << S.current_time << "\t" << S.u0_out(t)[0] << "\t";
 
 		vector<double> breaks = myseq(0,1,26);
-		vector<double> v = S.getDensitySpecies(0, breaks, Spline::QUADRATIC);
+		vector<double> v = S.getDensitySpecies1D(0,0, breaks, Spline::QUADRATIC);
 		for (auto y : v) fout << y << "\t";
 		fout << endl;
 	}
@@ -89,7 +87,7 @@ int main(){
 
 	// S = Solver(SOLVER_EBT);
 	// S.control.ebt_grad_dx = 0.001;
-	// S.addSpecies(25, 0, 1, false, &spp, 4, -1);
+	// S.addSpecies({25}, {0}, {1}, {false}, &spp, 4, -1);
 	// S.resetState();
 	// S.initialize();
 
@@ -103,7 +101,7 @@ int main(){
 		fout << S.current_time << "\t" << S.u0_out(t)[0] << "\t";
 
 		vector<double> breaks = myseq(0,1,26);
-		vector<double> v = S.getDensitySpecies(0, breaks, Spline::QUADRATIC);
+		vector<double> v = S.getDensitySpecies1D(0,0, breaks, Spline::QUADRATIC);
 		for (auto y : v) fout << y << "\t";
 		fout << endl;
 	}

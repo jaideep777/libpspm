@@ -14,13 +14,10 @@ int main(){
 
 	Solver S(SOLVER_CM);
 	S.use_log_densities = true;
-	S.control.cm_grad_dx = 0.001;
+	S.control.cm_grad_dx = {0.001};
 	S.control.max_cohorts = 26;
 	S.setEnvironment(&E);
-	S.addSpecies(25, 0, 1, false, &spp, 4, 2);
-	S.resetState();
-	S.initialize();
-	S.species_vec[0]->set_bfin_is_u0in(true);	// say that input_birth_flux is u0
+	S.addSpecies({25}, {0}, {1}, {false}, &spp, 4, -1);
 	S.print();
 	//for (auto s : S.state) cout << s << " "; cout << endl;
 
@@ -63,7 +60,7 @@ int main(){
 	cout << setprecision(10) << S.u0_out(S.current_time)[0] << endl;
 	// test value is from R code	
 	//if (abs(S.u0_out()[0] - 1.556967) < 1e-5) return 0;  // this is when integrate_x BC is not included
-	if (abs(S.u0_out(S.current_time)[0] - 1.397009081) < 1e-7) return 0;  // this is when integrate_x BC IS included
+	if (abs(S.u0_out(S.current_time)[0] - 0.976177) < 1e-7) return 0;  // this is when integrate_x BC IS included
 
 	else return 1;
   

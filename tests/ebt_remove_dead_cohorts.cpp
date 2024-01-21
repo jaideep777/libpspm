@@ -20,10 +20,8 @@ int main(){
 
 	Solver S(SOLVER_EBT);
 	S.setEnvironment(&E);
-	S.addSpecies(5, 0, 1, false, &s1, 4, 2);
-	S.addSpecies(8, 0, 1, false, &s2, 4, 2);
-	S.resetState();
-	S.initialize();
+	S.addSpecies({5}, {0}, {1}, {false}, &s1, 4, 2);
+	S.addSpecies({8}, {0}, {1}, {false}, &s2, 4, 2);
 	S.print();
 	//for (auto s : S.state) cout << s << " "; cout << endl;
 	

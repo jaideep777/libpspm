@@ -13,11 +13,9 @@ int main(){
 
 	Solver S(SOLVER_CM);
 	S.setEnvironment(&E);
-	S.addSpecies(10, 0, 1, false, &spp1, 4, 10);
-	S.addSpecies(5, 0, 0.5, false, &spp2, 4, 5);
-	S.addSpecies(2, 0, 1, false, &spp3, 4, 2);
-	S.resetState();
-	S.initialize();
+	S.addSpecies({10}, {0}, {1}, {false}, &spp1, 4, 10);
+	S.addSpecies({5}, {0}, {0.5}, {false}, &spp2, 4, 5);
+	S.addSpecies({2}, {0}, {1}, {false}, &spp3, 4, 2);
 	E.computeEnv(0, &S, S.state.begin(), S.rates.begin());
 	S.print();
 
@@ -29,7 +27,7 @@ int main(){
 
 	// test user inserting a user-defined cohort
 	Cohort<TestModel> bc;
-	bc.x = 1.555;
+	bc.x = {1.555};
 	bc.u = 900;
 	bc.mortality = 1;
 	bc.viable_seeds = 2;
@@ -45,9 +43,7 @@ int main(){
 	Solver S1(SOLVER_CM);
 	S1.setEnvironment(&E);
 	S1.control.max_cohorts = 5;
-	S1.addSpecies({.1,.4,.5,.6,1.0}, &spp4, 4, 10);
-	S1.resetState();
-	S1.initialize();
+	S1.addSpecies({{.1,.4,.5,.6,1.0}}, &spp4, 4, 10);
 	S1.print();
 
 	S1.removeCohort_CM();

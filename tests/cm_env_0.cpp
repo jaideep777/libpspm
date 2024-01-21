@@ -14,9 +14,7 @@ int main(){
 
 	Solver S(SOLVER_CM);
 	S.setEnvironment(&E);
-	S.addSpecies(25, 0, 1, false, &spp, 4);
-	S.resetState();
-	S.initialize();
+	S.addSpecies({25}, {0}, {1}, {false}, &spp, 4);
 	S.print();
 	
 	E.computeEnv(0, &S, S.state.begin(), S.rates.begin());
