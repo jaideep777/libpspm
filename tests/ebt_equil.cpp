@@ -27,6 +27,7 @@ int main(){
 	Environment E;
 
 	Solver S(SOLVER_EBT);
+	S.control.ebt_grad_dx = 0.001;
 	S.setEnvironment(&E);
 	S.addSpecies({25}, {0}, {1}, {false}, &spp, 4, -1);
 
@@ -59,7 +60,7 @@ int main(){
 
 	S.print();	
 	cout << setprecision(6) << S.u0_out(S.current_time)[0] << endl;
-	if (abs(S.u0_out(S.current_time)[0]-0.97504) < 2e-5) return 0;
+	if (abs(S.u0_out(S.current_time)[0]-0.97504) < 1e-6) return 0;
 	else return 1;
 }
 
