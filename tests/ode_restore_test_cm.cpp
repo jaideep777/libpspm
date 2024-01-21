@@ -5,7 +5,13 @@
 #include "solver.h"
 using namespace std;
 
-#include "test_model_2_ms_precompute.h"
+#include "test_model_2_ms.h"
+
+std::vector <double> myseq(double from, double to, int len){
+	std::vector<double> x(len);
+	for (size_t i=0; i<len; ++i) x[i] = from + i*(to-from)/(len-1);
+	return x;
+}
 
 int main(){
 
@@ -13,28 +19,35 @@ int main(){
 	Environment E;
 
 	Solver S(SOLVER_CM);
+	S.setEnvironment(&E);
 	S.use_log_densities = true;
 	S.control.cm_grad_dx = {0.001};
 	S.control.max_cohorts = 26;
-	S.setEnvironment(&E);
+	S.control.cm_remove_cohorts = true;
 	S.addSpecies({25}, {0}, {1}, {false}, &spp, 4, -1);
 	S.print();
 	//for (auto s : S.state) cout << s << " "; cout << endl;
 
-	ofstream fout("cm_testmodel.txt");
+	E.computeEnv(0, &S, S.state.begin(), S.rates.begin());
+	cout << E.evalEnv(0,0) << endl;
 
-	fout << S.current_time << "\t" << 0 << "\t";
-	for (auto y : S.state){ fout << y << "\t";} fout << "\n";
+	ofstream fout("cm_testmodel_ode_restored.txt");
+
+	// fout << S.current_time << "\t" << 0 << "\t";
+	// for (auto y : S.state){ fout << y << "\t";} fout << "\n";
 	for (double t=0.05; t <= 4; t=t+0.05) {
 		S.step_to(t);
 		fout << S.current_time << "\t" << S.u0_out(t)[0] << "\t";
 		//cout << S.current_time << "\t" << S.species_vec[0]->xsize() << " " << S.u0_out()[0] << "\t" << S.species_vec[0]->get_boundary_u() << "\n";
 		//cout << S.u0_out() << "\n";
-		for (auto y : S.state) fout << y << "\t";
+
+		vector<double> breaks = myseq(0,1,26);
+		vector<double> v = S.getDensitySpecies1D(0, 0, breaks, Spline::QUADRATIC);
+		for (auto y : v) fout << y << "\t";
 		fout << endl;
 	}
 
-	S.print();
+	// S.print();
 
 	ofstream fouts("ode_state_save.txt");
 	S.odeStepper.save(fouts);
@@ -48,7 +61,10 @@ int main(){
 		fout << S.current_time << "\t" << S.u0_out(t)[0] << "\t";
 		//cout << S.current_time << "\t" << S.species_vec[0]->xsize() << " " << S.u0_out()[0] << "\t" << S.species_vec[0]->get_boundary_u() << "\n";
 		//cout << S.u0_out() << "\n";
-		for (auto y : S.state) fout << y << "\t";
+
+		vector<double> breaks = myseq(0,1,26);
+		vector<double> v = S.getDensitySpecies1D(0, 0, breaks, Spline::QUADRATIC);
+		for (auto y : v) fout << y << "\t";
 		fout << endl;
 	}
 
