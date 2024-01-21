@@ -104,8 +104,12 @@ void Solver::addSpecies(std::vector<std::vector<double>> xbreaks, Species_Base* 
 	s->set_inputBirthFlux(input_birth_flux);
 	s->n_accumulators = _n_accumulators;
 
-	// Create grid centres and grid dx along each axis
+	// Set species birth size - xb
+	// For all solvers, xb is the lower edge of the corner cell 
 	s->x = xbreaks;
+	s->xb = id_utils::coord_value(vector<int>(s->istate_size, 0), s->x);
+
+	// Create grid centres and grid dx along each axis
 	for (int i=0; i<xbreaks.size(); ++i){
 		s->X.push_back(mids(xbreaks[i]));
 		s->h.push_back(diff(xbreaks[i]));
@@ -121,9 +125,10 @@ void Solver::addSpecies(std::vector<std::vector<double>> xbreaks, Species_Base* 
 		}
 	} 
 
-	// Set species birth size - xb
-	// For all solvers, xb is the lower edge of the corner cell 
-	s->xb = id_utils::coord_value(vector<int>(s->istate_size, 0), s->x);
+	// This was used to cross check with 1D impl, but this isnt correct
+	// if (method == SOLVER_IFMU && control.ifmu_centered_grids){
+	// 	s->xb = id_utils::coord_value(vector<int>(s->istate_size, 0), s->X);
+	// }	
 
 	// Create cohorts
 	// vector<int> dim_centres, dim_edges;

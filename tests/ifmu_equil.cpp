@@ -20,7 +20,7 @@ int main(){
 
 	Solver S(SOLVER_IFMU);
 	S.setEnvironment(&E);
-	S.control.ode_ifmu_stepsize = 0.001;
+	// S.control.ode_ifmu_stepsize = 0.001;
 	S.control.ifmu_centered_grids = true; // FIXME: 'false' seems more correct, but to cross check with 1D impl, set to true. Investigate
 	S.addSpecies({30}, {0}, {1}, {false}, &spp, 4, -1);
 	// S.species_vec[0]->set_bfin_is_u0in(true);	// say that input_birth_flux is u0
@@ -46,8 +46,9 @@ int main(){
 
 	fout.close();
 
-	cout << S.u0_out(S.current_time)[0] << endl; 
-	if (abs(S.u0_out(S.current_time)[0] - 1.30639) < 5e-4) return 0;
+	cout << setprecision(7) << S.u0_out(S.current_time)[0] << endl; 
+	// if (abs(S.u0_out(S.current_time)[0] - 1.306386) < 5e-4) return 0; // this value is expected if xb = X[0] (probably not correct)
+	if (abs(S.u0_out(S.current_time)[0] - 1.306023) < 1e-6) return 0; // this value is expected if xb = x[0] (probably correct)
 	else return 1;
 
 }

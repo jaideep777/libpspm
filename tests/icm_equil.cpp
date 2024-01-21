@@ -57,7 +57,7 @@ int main(){
 	cout << setprecision(10) << S.u0_out(S.current_time)[0] << endl;
 	// test value is from R code	
 	//if (abs(S.u0_out()[0] - 1.556967) < 1e-5) return 0;  // this is when integrate_x BC is not included
-	if (abs(S.u0_out(S.current_time)[0] - 0.998272) < 1e-5) return 0;  // this is when integrate_x BC IS included
+	if (abs(S.u0_out(S.current_time)[0] - 0.998272) < 1e-6) return 0;  // this is when integrate_x BC IS included
 	else return 1;
   
 }
