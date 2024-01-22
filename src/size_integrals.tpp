@@ -142,25 +142,28 @@ double Solver::integrate_wudx_above(wFunc w, double t, const std::vector<double>
 	// 	return I;
 	// }
 	
-	// else if (method == SOLVER_EBT || method == SOLVER_IEBT){
-	// 	// set up cohorts to integrate
-	// 	realizeEbtBoundaryCohort(spp);
+	else if (method == SOLVER_EBT || method == SOLVER_IEBT){
+		// set up cohorts to integrate
+		realizeEbtBoundaryCohort(spp);
 
-	// 	// sort cohorts, but skip pi0-cohort
-	// 	spp->sortCohortsDescending(1); // FIXME: Add a label to EBT boundary cohort and assert that it is always at J-1
-
-	// 	// calculate integral
-	// 	double I = 0;
-	// 	for (int i=0; i<spp->J; ++i){  // in EBT, cohorts are sorted descending
-	// 	   	if (spp->getX(i) < xlow) break; // if X == xlow, we still include it in the intgral
-	// 		else I += w(i, t)*spp->getU(i);
-	// 	}
+		// calculate integral
+		double I = 0;
+		for (int i=0; i<spp->J; ++i){  // in EBT, cohorts are sorted descending
+		   	// bool x_ge_xlow = std::equal(spp->getX(i).begin(), spp->getX(i).end(),
+            //                             xlow.begin(), xlow.end(),
+            //                             [](int a, int b)->bool {return a >= b; });
+			bool x_ge_xlow = true;
+			for (int k=0; k<spp->istate_size; ++k){
+				x_ge_xlow = x_ge_xlow && spp->getX(i)[k] >= xlow[k];
+			}
+			if (x_ge_xlow) I += w(i, t)*spp->getU(i); // if X >= xlow, we include it in the intgral
+		}
 		
-	// 	// restore the original pi0-cohort
-	// 	restoreEbtBoundaryCohort(spp);
+		// restore the original pi0-cohort
+		restoreEbtBoundaryCohort(spp);
 
-	// 	return I;
-	// }
+		return I;
+	}
 	
 	// else if (method == SOLVER_ABM){
 	// 	// sort cohorts descending - this is important in ABM because traits may vary
