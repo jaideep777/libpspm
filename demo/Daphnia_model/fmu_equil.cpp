@@ -17,7 +17,7 @@ int main(){
 	
 	S.setEnvironment(&E);
 
-	S.addSpecies({100}, {0}, {1}, {false}, &spp, 0, -1);
+	S.addSpecies({300}, {0}, {1}, {false}, &spp, 0, -1);
 	S.addSystemVariables({E.K});  // this can be done either before or after addSpecies()
 
 	S.control.ebt_ucut = 1e-20;

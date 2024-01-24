@@ -24,7 +24,7 @@ int main(){
 	S.control.abm_n0 = 1000;
 	S.setEnvironment(&E);
 
-	S.addSpecies(100, 1, 1e6, true, &spp, 0);
+	S.addSpecies({100}, {1}, {1e6}, {true}, &spp, 0);
 	//S.get_species(0)->set_bfin_is_u0in(true);	// say that input_birth_flux is u0
 	S.resetState();
 	S.initialize();
@@ -39,7 +39,7 @@ int main(){
 		cout << S.current_time << " " << S.species_vec[0]->xsize() << "\n";
 		//cout << S.current_time << " " [><< S.u0_out()<] << "\n";
 		
-		vector <double> dist = S.getDensitySpecies(0, logseq(1, 1e6, 150));
+		vector <double> dist = S.getDensitySpecies1D(0, 0, logseq(1, 1e6, 150));
 		for (auto y : dist) fout << y << "\t";
 		fout << endl;
 	}
