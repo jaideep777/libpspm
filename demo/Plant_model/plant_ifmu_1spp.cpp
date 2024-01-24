@@ -99,7 +99,7 @@ class SolverIO{
 
 			for (int j=0; j<spp->xsize(); ++j){
 				auto& C = spp->getCohort(j);
-				streams[s][0] << C.x << "\t";
+				streams[s][0] << C.x[0] << "\t";
 				streams[s][1] << C.u << "\t";
 				streams[s][2] << C.vars.mortality << "\t";
 				streams[s][3] << C.viable_seeds << "\t";
@@ -161,13 +161,10 @@ int main(int argc, char ** argv){
 	cout << "Simulating with input seed rain = " << ip_seed_rain << endl;
     
     // use 1000 for precise, 100 for fast
-	S.addSpecies(fmu_create_grid(p1.vars.height, 20), &s1, 4, ip_seed_rain);
-	S.addSpecies(fmu_create_grid(p2.vars.height, 20), &s2, 4, ip_seed_rain);
-	S.addSpecies(fmu_create_grid(p3.vars.height, 20), &s3, 4, ip_seed_rain);
+	S.addSpecies({fmu_create_grid(p1.vars.height, 20)}, &s1, 4, ip_seed_rain);
+	S.addSpecies({fmu_create_grid(p2.vars.height, 20)}, &s2, 4, ip_seed_rain);
+	S.addSpecies({fmu_create_grid(p3.vars.height, 20)}, &s3, 4, ip_seed_rain);
 	
-	S.resetState();
-	S.initialize();
-
 #ifndef USE_INIT_DIST
 	// ensure that only 1st cohort has finite density
 	for (int k=0; k<S.species_vec.size(); ++k) 

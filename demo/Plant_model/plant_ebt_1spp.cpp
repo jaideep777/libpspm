@@ -97,8 +97,8 @@ class SolverIO{
 
 			for (int i=0; i<streams[s].size(); ++i) streams[s][i] << S->current_time << "\t";
 
-			vector<double> breaks = my_log_seq(spp->xb, 20, 100);
-			vector<double> dist = S->getDensitySpecies(s, breaks);
+			vector<double> breaks = my_log_seq(spp->xb[0], 20, 100);
+			vector<double> dist = S->getDensitySpecies1D(s, 0, breaks);
 			//cout << "here: " << breaks.size() << " " << dist.size() << endl;
 
 			for (int i=0; i<100; ++i){
@@ -181,6 +181,7 @@ int main(int argc, char ** argv){
 	S.addSpecies(fmu_create_grid(p1.vars.height, 3), &s3, 4, ip_seed_rain);
 #endif	
 	
+	S.initialize();
 	S.print();
 	
 	double tmax = 105.32;

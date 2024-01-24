@@ -122,25 +122,40 @@ double Solver::integrate_wudx_above(wFunc w, double t, const std::vector<double>
 		return I*0.5;
 	}
 
-	// else if (method == SOLVER_FMU || method == SOLVER_IFMU){
-	// 	//if (xlow < spp->xb) throw std::runtime_error("integral lower bound must be >= xb");
-	// 	if (xlow > spp->x[spp->J]) return 0;  // if xlow is above the maximum size, integral is 0
+	else if (method == SOLVER_FMU || method == SOLVER_IFMU){
+		//if (xlow < spp->xb) throw std::runtime_error("integral lower bound must be >= xb");
+		// if (xlow > spp->x[spp->J]) return 0;  // if xlow is above the maximum size, integral is 0
 
-	// 	// integrate using midpoint quadrature rule
-	// 	double I=0;
-	// 	for (int i=spp->J-1; i>=0; --i){  // in FMU, cohorts are sorted ascending
-	// 		if (spp->x[i] <= xlow){ // check if last interval is reached 
-	// 			double h = (control.integral_interpolate)?  spp->x[i+1]-xlow  :  spp->h[i];
-	// 			I += h * w(i,t) * spp->getU(i);
-	// 			break;
-	// 		}
-	// 		else{
-	// 			I += spp->h[i] * w(i,t) * spp->getU(i);
-	// 		}
-	// 	}
-		
-	// 	return I;
-	// }
+		// integrate using midpoint quadrature rule
+		double I=0;
+		for (int i=0; i<spp->J; ++i){  
+			bool x_ge_xlow = true;
+			for (int k=0; k<spp->istate_size; ++k){
+				x_ge_xlow = x_ge_xlow && spp->getX(i)[k] >= xlow[k];
+			}
+			if (x_ge_xlow){
+				std::vector<double> dx = id_utils::coord_value(id_utils::index(i, spp->dim_centres), spp->h);
+				double dV = std::accumulate(dx.begin(), dx.end(), 1.0, std::multiplies<double>()); // TODO: Better to precompute this and store in cohort
+				I += w(i, t)*spp->getU(i)*dV;
+			}
+		}
+
+		// if (xlow[0] > spp->x[0][spp->J]) return 0;  // if xlow is above the maximum size, integral is 0
+
+		// // integrate using midpoint quadrature rule
+		// for (int i=spp->J-1; i>=0; --i){  // in FMU, cohorts are sorted ascending
+		// 	if (spp->x[0][i] <= xlow[0]){ // check if last interval is reached 
+		// 		double h = (control.integral_interpolate)?  spp->x[0][i+1]-xlow[0]  :  spp->h[0][i];
+		// 		I += h * w(i,t) * spp->getU(i);
+		// 		break;
+		// 	}
+		// 	else{
+		// 		I += spp->h[0][i] * w(i,t) * spp->getU(i);
+		// 	}
+		// }
+
+		return I;
+	}
 	
 	else if (method == SOLVER_EBT || method == SOLVER_IEBT){
 		// set up cohorts to integrate

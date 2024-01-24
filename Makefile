@@ -21,7 +21,7 @@ LIB_PATH := -L./lib
 PROFILING_FLAGS = -g -pg
 
 # flags
-CPPFLAGS = -O3 -std=c++17 -fPIC -Wall -Wextra -pedantic
+CPPFLAGS = -O2 -std=c++17 -fPIC -Wall -Wextra -pedantic
 LDFLAGS =  
 
 CPPFLAGS += $(PROFILING_FLAGS)

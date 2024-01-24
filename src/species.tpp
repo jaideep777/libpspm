@@ -366,7 +366,7 @@ std::vector<double> Species<Model>::growthRate(int i, double t, void * env){
 
 
 template <class Model>
-std::vector<double> Species<Model>::growthRateOffset(int i, std::vector<double> x, double t, void * env){
+std::vector<double> Species<Model>::growthRateOffset(int i, const std::vector<double>& x, double t, void * env){
 	Cohort<Model> coff = (i<0)? boundaryCohort : cohorts[i];
 	coff.set_size(x);
 	//coff.preCompute(coff.x,t,env);

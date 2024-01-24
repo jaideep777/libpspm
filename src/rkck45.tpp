@@ -111,6 +111,7 @@ void RKCK45::Step(double& x, container& y, functor& derivs, double hmax, double 
 	++nfe;
 	// good way of determining desired accuracy
 	for (int i=0; i<y.size(); i++) yscal[i] =  eps_abs + eps_rel*(a_y * fabs(y[i]) + a_dydt * fabs(dydx[i]*ht)); // fabs(y[i]) + fabs(dydx[i]*ht) + 1e-3;
+	// std::cout << "eps = " << eps_abs << "/" << eps_rel << "\n";
 	double hnext, hdid;
 	// Cals the Runge-Kutta rountine
 	// takes: y -- dependent variable, dydx -- derivative at the beginning

@@ -95,7 +95,7 @@ class Species_Base{
 
 	// // TODO: argument x can probably be removed from these functions
 	virtual std::vector<double> growthRate(int i, double t, void * env) = 0;
-	virtual std::vector<double> growthRateOffset(int i, std::vector<double> x, double t, void * env) = 0;
+	virtual std::vector<double> growthRateOffset(int i, const std::vector<double>& x, double t, void * env) = 0;
 	virtual std::vector<std::vector<double>> growthRateGradient(int i, double t, void * env, const std::vector<double>& grad_dx) = 0;
 	// // virtual std::vector<double> growthRateGradientCentered(int i, double xplus, double xminus, double t, void * env) = 0;
 	virtual double mortalityRate(int i, double t, void * env) = 0;
@@ -189,7 +189,7 @@ class Species : public Species_Base{
 
 	// // TODO: argument x can probably be removed from these functions
 	std::vector<double> growthRate(int i, double t, void * env);
-	std::vector<double> growthRateOffset(int i, std::vector<double> x, double t, void * env);
+	std::vector<double> growthRateOffset(int i, const std::vector<double>& x, double t, void * env);
 	std::vector<std::vector<double>> growthRateGradient(int i, double t, void * env, const std::vector<double>& grad_dx);
 	// // std::vector<double> growthRateGradientCentered(int i, double xplus, double xminus, double t, void * env);
 	double mortalityRate(int i, double t, void * env);

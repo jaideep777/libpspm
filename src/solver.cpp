@@ -262,6 +262,17 @@ void Solver::addSystemVariables(const std::vector<double>& s_state_0){
 // 	std::fill(rates.begin(), rates.end(), -999); // DEBUG
 // }
 
+void Solver::initialize(double t0){
+	// [resolved FIXME]: Where is initialization of system vars? - Now addSystemVariables() takes initial values as argument
+//	vector<double>::iterator it = state.begin() + n_statevars_system; // TODO: replace with init_sState() 
+	// for (int k=0; k<species_vec.size(); ++k){
+	// 	Species_Base* s = species_vec[k];
+	// 	initializeSpecies(s);
+	// }
+	current_time = t0;
+	odeStepper.reset(t0, control.ode_eps, control.ode_eps); // = RKCK45<vector<double>> (0, control.ode_eps, control.ode_initial_step_size);  // this is a cheap operation, but this will empty the internal containers, which will then be (automatically) resized at next 1st ODE step. Maybe add a reset function to the ODE stepper? 
+}
+
 
 void Solver::resizeStateFromSpecies(){
 	int state_size_new = n_statevars_system;
@@ -508,16 +519,6 @@ void Solver::initializeSpecies(Species_Base * s){
 }
 
 
-// void Solver::initialize(){
-// 	// [resolved FIXME]: Where is initialization of system vars? - Now addSystemVariables() takes initial values as argument
-// //	vector<double>::iterator it = state.begin() + n_statevars_system; // TODO: replace with init_sState() 
-// 	// for (int k=0; k<species_vec.size(); ++k){
-// 	// 	Species_Base* s = species_vec[k];
-// 	// 	initializeSpecies(s);
-// 	// }
-// 	resizeStateFromSpecies();
-// 	copyCohortsToState();
-// }
 
 
 // //everything is just doubled for xn here

@@ -158,6 +158,7 @@ int main(){
 	S.addSpecies({{p2.vars.height}}, &s2, 4, 1);
 	S.addSpecies({{p3.vars.height}}, &s3, 4, 1);
 	
+	S.initialize();
 	S.print();
 	
 

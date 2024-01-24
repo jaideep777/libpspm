@@ -17,7 +17,7 @@ INC_PATH := -I../../include -I./include -I../include
 LIB_PATH := -L../../lib 
 
 # flags
-CPPFLAGS = -O3 -g -pg -std=c++17 -Wno-sign-compare -Wno-unused-variable -Wno-unused-but-set-variable
+CPPFLAGS = -O2 -g -pg -std=c++17 -Wno-sign-compare -Wno-unused-variable -Wno-unused-but-set-variable
 LDFLAGS =  -g -pg
 #CPPFLAGS += -DUSE_INIT_DIST
 
