@@ -2,7 +2,8 @@
 #define DEMO_DAPHNIA_MODEL_H
 
 #include <individual_base.h>
-
+#include <solver.h>
+#include <cmath>
 class Environment : public EnvironmentBase{
 	
 	public:
@@ -17,25 +18,25 @@ class Environment : public EnvironmentBase{
 //		return E;
 //	}
 
-//	void calcRatesSystem(double t, vector<double>::iterator S, vector<double>::iterator dSdt){
+//	void calcRatesSystem(double t, std::vector<double>::iterator S, std::vector<double>::iterator dSdt){
 
 //	}
 	// This function must do any necessary precomputations to facilitate evalEnv()
 	// Therefore, this should calculate env for all X when it is a function of X
 	// In such a case, the solver's SubdivisionSpline can be ussed
-	// Note: The state vector in the solver will not be updated until the RK step is completed. 
+	// Note: The state std::vector in the solver will not be updated until the RK step is completed. 
 	// Hence, explicitly pass the state to this function.
-	void computeEnv(double t, Solver * sol, vector<double>::iterator _S, vector<double>::iterator _dSdt){
+	void computeEnv(double t, Solver * sol, std::vector<double>::iterator _S, std::vector<double>::iterator _dSdt){
 		//             _xm 
 		// Calculate _/ w(z,t)u(z,t)dz
 		//         xb
 		S = *_S;
 		
 		auto w = [sol](int i, double t) -> double {
-			double z = sol->species_vec[0]->getX(i);
+			double z = sol->species_vec[0]->getX(i)[0];
 			return z*z;
 		};
-		double E = sol->integrate_x(w, t, 0);
+		double E = sol->state_integral(w, t, 0);
 //		cout << "E = " << E << "\n";
 		
 		*_dSdt = r*S*(1-S/K) - S/(1+S)*E;
@@ -45,11 +46,11 @@ class Environment : public EnvironmentBase{
 
 
 
-class Daphnia : public IndividualBase{
+class Daphnia : public IndividualBase<1>{
 	public:
 
 	//double input_seed_rain = 1;	
-	vector <string> varnames;
+	std::vector <std::string> varnames;
 
 	int nrc = 0; // number of evals of compute_vars_phys() - derivative computations actually done by plant
 	int ndc = 0; // number of evals of mortality_rate() - derivative computations requested by solver
@@ -64,47 +65,28 @@ class Daphnia : public IndividualBase{
 	}
 
 
-	void set_size(double _x){
+	void set_size(const std::array <double, 1>& _x){
 	}
 
-	double init_density(double x, void * env, double input_seed_rain){
-		return exp(-8*pow((x-xb)/(xm-xb),3));
+	double init_density(void * env, double input_seed_rain){
+		return exp(-8*pow((x[0]-xb)/(xm-xb),3));
 	}
 
-	void preCompute(double x, double t, void * env){
-	}
-
-	double establishmentProbability(double t, void * env){
-		return 1;
-	}
-
-	double growthRate(double x, double t, void * env){
+	virtual std::array<double,1> growthRate(double t, void * env){
 		++nrc;
 		double S = ((Environment*)env)->S;
-		return fmax(S/(1+S) - x, 0);	
+		return {std::max(S/(1+S) - x[0], 0.0)};	
 	}
 
-	double mortalityRate(double x, double t, void * env){
+	double mortalityRate(double t, void * env){
 		++ndc;
 		return mu0;
 	}
 
-	double birthRate(double x, double t, void * env){
+	double birthRate(double t, void * env){
 		++nbc;
 		double S = ((Environment*)env)->S;
-		return a*x*x*S/(1+S);
-	}
-
-	void init_state(double t, void * env){
-	}
-	vector<double>::iterator set_state(vector<double>::iterator &it){
-		return it;
-	}
-	vector<double>::iterator get_state(vector<double>::iterator &it){
-		return it;
-	}
-	vector<double>::iterator get_rates(vector<double>::iterator &it){
-		return it;
+		return a*x[0]*x[0]*S/(1+S);
 	}
 
 	void print(std::ostream& out = std::cout){

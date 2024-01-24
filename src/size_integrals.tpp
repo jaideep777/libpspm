@@ -355,8 +355,8 @@ template<typename wFunc>
 double Solver::state_integral(wFunc w, double t, int species_id){
 	Species_Base* spp = species_vec[species_id];
 
-	if (method == SOLVER_CM || method == SOLVER_ICM){
-		// NOTE: This works for 1D state only! Cohorts assumed to be sorted
+	// NOTE: This works for 1D state only! Cohorts assumed to be sorted
+		if (method == SOLVER_CM || method == SOLVER_ICM){
 		// spp->sortCohortsDescending(0);
 		// copyCohortsToState();
 		// integrate using trapezoidal rule 
