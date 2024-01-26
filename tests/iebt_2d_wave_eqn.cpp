@@ -49,14 +49,14 @@ int main(){
 	Species<Wave> spp;
 	WaveEnv E;
 
-	Solver S(SOLVER_IFMU);
+	Solver S(SOLVER_IEBT);
 	S.control.ode_ifmu_stepsize = 0.02;
 	S.setEnvironment(&E);
 	S.addSpecies({25, 25}, {0, 0}, {10,10}, {false, false}, &spp, 0, -1);
 	S.print();
 
 	ofstream fout1;
-	fout1.open("ifmu2d_u.txt");
+	fout1.open("iebt2d_u.txt");
 	S.species_vec[0]->printCohortVector(fout1);
 	fout1.close();
 
@@ -67,10 +67,10 @@ int main(){
 	// 	// S.print();
 	// }
 
-	ofstream foutx("ifmu_wave_x.txt");
-	ofstream fouty("ifmu_wave_y.txt");
+	ofstream foutx("iebt_wave_x.txt");
+	ofstream fouty("iebt_wave_y.txt");
 
-	ofstream fout("ifmu_wavemodel_equil.txt");
+	ofstream fout("iebt_wavemodel_equil.txt");
 
 	for (double t=0; t <= 1; t=t+0.1) {
 		S.step_to(t);
@@ -90,7 +90,7 @@ int main(){
 
 	S.print();
 
-	fout1.open("ifmu2d_u1.txt");
+	fout1.open("iebt2d_u1.txt");
 	S.species_vec[0]->printCohortVector(fout1);
 	fout1.close();
 
