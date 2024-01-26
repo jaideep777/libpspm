@@ -4,20 +4,20 @@
 #include "solver.h"
 using namespace std;
 
-#include "test_model_2_ms.h"
+#include "wave_model_2d.h"
 
 int main(){
 
 	//TestModel M;
-	Environment E;
-	Species<TestModel> spp;
+	WaveEnv E;
+	Species<Wave> spp;
 
 	Solver S(SOLVER_ABM);
-	S.control.abm_n0 = 1000;
+	S.control.abm_n0 = 20000;
 	S.setEnvironment(&E);
-	S.addSpecies({25}, {0}, {1}, {false}, &spp, 4);
+	S.addSpecies({100, 100}, {0, 0}, {10,10}, {false, false}, &spp, 0, -1);
 
-	ofstream fout("abm_init.txt");
+	ofstream fout("abm_init_2d.txt");
 	S.species_vec[0]->printCohortVector(fout);
 	fout.close();
 

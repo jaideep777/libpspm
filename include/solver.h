@@ -70,6 +70,7 @@ class Solver{
 		double abm_burnin = 1000;
 		int abm_numChains = 4;
 		double abm_stepsize = 0.02;
+		bool abm_init_on_grid = true;
 	} control;
 	
 	bool use_log_densities = true;

@@ -443,9 +443,61 @@ void Solver::initializeSpecies(Species_Base * s){
 			s->setU(s->J-1, 0); 		
 		}
 
+		// We will sample the initial density function by gridding it
+		if (method == SOLVER_ABM && control.abm_init_on_grid){
+			// Create the initial density distribution from which we will draw individuals
+			vector<double> Uvec;
+			Uvec.reserve(s->n_grid_centres);
+			for (size_t i=0; i<s->n_grid_centres; ++i){
+				vector<double> X = id_utils::coord_value(id_utils::index(i, s->dim_centres), s->X);
+				vector<double> dx = id_utils::coord_value(id_utils::index(i, s->dim_centres), s->h);
+				double dV = std::accumulate(dx.begin(), dx.end(), 1.0, std::multiplies<double>());
+				
+				s->setX(i, X);
+				double U = s->init_density(i, env)*dV; 
+
+				cout << "i/X/U = " << i << " / " << X << " / " << U/dV << endl;
+				Uvec.push_back(U);	
+			}
+			//cout << "HERE\n";
+			//for (size_t i=0; i<s->x.size()-1; ++i) cout << s->x[i] << " " << Uvec[i] << "\n";
+
+			// Once initial density dist has been obtained, resize species to n0
+			s->resize(control.abm_n0); 
+
+			std::discrete_distribution<int> cell_sampler(Uvec.begin(), Uvec.end()); // for drawing intervals
+			std::uniform_real_distribution<> position_sampler(0,1);                         // for drawing X within interval
+
+			// Utot = sum(Uvec) = sum(u[i] * dx[i])
+			double Utot = std::accumulate(Uvec.begin(), Uvec.end(), 0.0, std::plus<double>());
+			std::cout << "Utot = " << Utot << std::endl;
+			double N_cohort = Utot/s->J;
+			s->set_ub(N_cohort);
+			for (int i=0; i<s->J; ++i){
+				int cell_loc = cell_sampler(generator);
+				std::vector<int> cell_id = id_utils::index(cell_loc, s->dim_centres);
+				vector<double> x_cell = id_utils::coord_value(cell_id, s->x);
+				vector<double> h_cell = id_utils::coord_value(cell_id, s->h);
+				std::vector<double> xi(s->istate_size);
+				for (int k=0; k<xi.size(); ++k){ 
+					xi[k] = x_cell[k] + position_sampler(generator)*h_cell[k];
+				}
+				//cout << xi << "\n";
+				s->setX(i, xi);
+				s->setU(i, N_cohort);
+			}
+			
+			// ofstream fout("abm_init.txt");
+			// for (int i=0; i<s->J; ++i){
+			// 	fout << s->getX(i) << "\t" << s->getU(i) << "\n";
+			// }		
+			// fout.close();
+		}
+
 // 		// FIXME: abm_n0 and x.size() can be different - we want higher x.size() to get a high-res initial density function, but when we draw from it, we only draw abm_n0 individuals
 // 		// FIXME: Note that X must be set before calculating U.
-// 		if (method == SOLVER_ABM){
+// 		// We will smaple the initial density function using MCMC algorithm
+// 		if (method == SOLVER_ABM && !control.abm_init_on_grid){
 // 			// Simulate initial elements using a Monte Carlo simulation 
 
 // 			/* Find total density - cheat by using the initial grid a little  */

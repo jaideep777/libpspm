@@ -79,7 +79,7 @@ plot2 = function(file, N, title){
 }
 
 
-plot1("RED_model_nD/ebtn_Redmodel.txt", 150, "EBTn")
+# plot1("RED_model_nD/ebtn_Redmodel.txt", 150, "EBTn")
 
 
 cairo_pdf("RED_Daphnia_explicit.pdf", width = 6/4*1.75*4, height=6)
