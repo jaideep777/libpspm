@@ -4,9 +4,9 @@ FILE =
 TARGET = $(patsubst %.cpp, %.exec, $(FILE)) 
 
 # files
-SRCFILES  :=  $(wildcard ../../src/*.cpp src/*.cpp)
+SRCFILES  :=  $(wildcard src/*.cpp)
 SRCFILES += $(FILE)
-HEADERS := $(wildcard ../../src/*.tpp) $(wildcard ../../include/*.h) 
+HEADERS := 
 # ------------------------------------------------------------------------------
 
 # paths
@@ -23,7 +23,7 @@ LDFLAGS =  -g -pg
 CPPFLAGS += $(INIT_DIST)
 
 # libs
-LIBS = 	# -ltbb #-lgsl -lgslcblas 	# additional libs
+LIBS = -lpspm	# -ltbb #-lgsl -lgslcblas 	# additional libs
 #LIBS = -lcudart 			# cuda libs 		
 
 # files

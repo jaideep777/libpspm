@@ -115,14 +115,17 @@ $(TEST_TARGETS): tests/%.test : tests/%.o
 	g++ $(LDFLAGS) -o $@ $(LIB_PATH) $(OBJECTS) $(ADD_OBJECTS) $< $(LIBS) 
 
 testclean: 
-	rm -f tests/*.o tests/*.test lib/*.a lib/*.so
+	rm -f tests/*.o tests/*.test lib/*.a lib/*.so tests/1
+	
+dirclean:
+	rm -f *.txt *.out tests/*.txt tests/*.out
 
 recheck: testclean check
 
 .PHONY: $(TEST_RUNS) run_tests clean testclean
 # ------------------------------------------------------------------------------
 
-demos:
+demos: $(TARGET)
 	cd demo/Daphnia_model && $(MAKE) FILE=fmu_equil.cpp && ./fmu_equil.exec
 	cd demo/Daphnia_model && $(MAKE) FILE=ifmu_equil.cpp && ./ifmu_equil.exec
 #	cd demo/Daphnia_model && $(MAKE) FILE=ifmu2_equil.cpp && ./ifmu2_equil.exec
@@ -146,7 +149,7 @@ democlean:
 	rm -f demo/Plant_model/*.o   demo/Plant_model/*.exec
 	rm -f demo/Plant_model/src/*.o	
 
-plant_demo_noFeedback:
+plant_demo_noFeedback: $(TARGET)
 	cd demo/Plant_model && $(MAKE) FILE=plant_fmu_1spp.cpp && ./plant_fmu_1spp.exec && mkdir -p outputs/fmu && mv *.txt outputs/fmu
 #	cd demo/Plant_model && $(MAKE) FILE=plant_ifmu_1spp.cpp && ./plant_ifmu_1spp.exec  && mkdir -p outputs/ifmu && mv *.txt outputs/ifmu
 #	cd demo/Plant_model && $(MAKE) FILE=plant_ifmu2_1spp.cpp && ./plant_ifmu2_1spp.exec  && mkdir -p outputs/ifmu2 && mv *.txt outputs/ifmu2
@@ -156,7 +159,7 @@ plant_demo_noFeedback:
 	cd demo/Plant_model && $(MAKE) FILE=plant_icm_1spp.cpp && ./plant_icm_1spp.exec  && mkdir -p outputs/icm && mv *.txt outputs/icm
 	cd demo/Plant_model && $(MAKE) FILE=plant_abm_1spp.cpp && ./plant_abm_1spp.exec  && mkdir -p outputs/abm && mv *.txt outputs/abm
 
-plant_demo_test:
+plant_demo_test: $(TARGET)
 	cd demo/Plant_model && \
 	$(MAKE) FILE=plant_cm_3spp_fixedmode.cpp && \
 	./plant_cm_3spp_fixedmode.exec && \
@@ -166,7 +169,7 @@ plant_demo_test:
 	rm *.txt
 
 
-plant_demo_withFeedback:
+plant_demo_withFeedback: $(TARGET)
 	cd demo/Plant_model && $(MAKE) FILE=plant_fmu_1spp.cpp && ./plant_fmu_1spp.exec -1 405.32 && mkdir -p outputs/fmu_f3 && mv *.txt outputs/fmu_f3
 #	cd demo/Plant_model && $(MAKE) FILE=plant_ifmu_1spp.cpp && ./plant_ifmu_1spp.exec -1 405.32 && mkdir -p outputs/ifmu_f3 && mv *.txt outputs/ifmu_f3
 #	cd demo/Plant_model && $(MAKE) FILE=plant_ifmu2_1spp.cpp && ./plant_ifmu2_1spp.exec -1 305.32 && mkdir -p outputs/ifmu2_f3 && mv *.txt outputs/ifmu2_f3
