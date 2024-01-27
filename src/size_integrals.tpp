@@ -183,17 +183,14 @@ double Solver::integrate_wudx_above(wFunc w, double t, const std::vector<double>
 	else if (method == SOLVER_ABM){
 		// calculate integral
 		double I = 0;
-		for (int i=0; i<spp->J; ++i){  // in EBT, cohorts are sorted descending
-		   	// bool x_ge_xlow = std::equal(spp->getX(i).begin(), spp->getX(i).end(),
-            //                             xlow.begin(), xlow.end(),
-            //                             [](int a, int b)->bool {return a >= b; });
+		for (int i=0; i<spp->J; ++i){  
 			bool x_ge_xlow = true;
 			for (int k=0; k<spp->istate_size; ++k){
 				x_ge_xlow = x_ge_xlow && spp->getX(i)[k] >= xlow[k];
 			}
 			if (x_ge_xlow) I += w(i, t)*spp->getU(i); // if X >= xlow, we include it in the intgral
 		}
-		
+		return I;
 	}
 	
 	else{

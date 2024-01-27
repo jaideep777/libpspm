@@ -3,11 +3,12 @@
 using namespace std;
 
 void Solver::stepABM(double t, double dt){
-
+	if (debug) std::cout << "Entering stepABM ..." << std::endl;
 	// Take implicit step for U
 	for (int s = 0; s<species_vec.size(); ++s){
 		Species_Base* spp = species_vec[s];
 		
+		if (debug) std::cout << "spp " << s << ": J = " << spp->J << std::endl;
 		// Calc growth and mortality rates
 		vector<vector<double>> growthArray(spp->J);
 		vector<double> mortalityArray(spp->J);
@@ -27,7 +28,7 @@ void Solver::stepABM(double t, double dt){
 		}
 		
 		double noff = birthFlux*dt/spp->get_boundary_u();  // number of offspring = birthflux / density of each superindividual
-		// cout << "noff: " << spp->noff_abm << " | " << noff << " " << birthFlux << " " << dt << " " << spp->get_boundary_u() << endl;
+		if (debug) std::cout << "noff: " << spp->noff_abm << " | " << noff << " " << birthFlux << " " << dt << " " << spp->get_boundary_u() << std::endl;
 		spp->noff_abm += noff;
 		
 		// implement growth
@@ -88,6 +89,8 @@ void Solver::stepABM(double t, double dt){
 	for (auto spp : species_vec){
 		// add recruits once they have accumulated to > 1
 		// use t and env to initialize (instead of updated values) becaues number of recruits were calculated at the beginning of the step
+		if (debug) std::cout << "spp " << spp << ": adding cohorts; n = " << int(spp->noff_abm) << std::endl;
+
 		if (spp->noff_abm > 1){
 			int nadd = int(spp->noff_abm);	
 			spp->initBoundaryCohort(t, env);
@@ -107,6 +110,7 @@ void Solver::stepABM(double t, double dt){
 	resizeStateFromSpecies();
 	copyCohortsToState();
 	//print();
+	if (debug) std::cout << "Exiting stepABM ..." << std::endl;
 
 }
 

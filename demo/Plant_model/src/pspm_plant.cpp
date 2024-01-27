@@ -19,7 +19,7 @@ double PSPM_Plant::init_density(void * _env, double input_seed_rain){
 		compute_vars_phys(*env);
 		double u0;
 #ifndef USE_INIT_DIST
-		if (x[0] < 0.5)
+		if (x[0] < 0.7)
 			u0 = fabs(input_seed_rain)*germination_probability(*env)/vars.height_dt;
 		else 
 			u0 = 0;

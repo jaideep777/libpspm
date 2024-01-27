@@ -351,6 +351,9 @@ std::vector<double> Solver::maxState(int species_id){
 	else if (method == SOLVER_CM || method == SOLVER_ICM){
 		return species_vec[species_id]->get_maxSize(0);
 	}
+	else if (method == SOLVER_ABM){
+		return species_vec[species_id]->get_maxSize(0);
+	}
 	else{
 		throw std::runtime_error("maxState() not supported for this solver");
 	}
@@ -471,7 +474,9 @@ void Solver::initializeSpecies(Species_Base * s){
 			// Utot = sum(Uvec) = sum(u[i] * dx[i])
 			double Utot = std::accumulate(Uvec.begin(), Uvec.end(), 0.0, std::plus<double>());
 			std::cout << "Utot = " << Utot << std::endl;
+			if (Utot <= 0) throw std::runtime_error("Total density is 0 or negative. Please check your initial condition function");
 			double N_cohort = Utot/s->J;
+
 			s->set_ub(N_cohort);
 			for (int i=0; i<s->J; ++i){
 				int cell_loc = cell_sampler(generator);
