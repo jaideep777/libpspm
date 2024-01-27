@@ -180,18 +180,21 @@ double Solver::integrate_wudx_above(wFunc w, double t, const std::vector<double>
 		return I;
 	}
 	
-	// else if (method == SOLVER_ABM){
-	// 	// sort cohorts descending - this is important in ABM because traits may vary
-	// 	spp->sortCohortsDescending(); 
-	// 	// calculate integral
-	// 	double I = 0;
-	// 	for (int i=0; i<spp->J; ++i){       // in ABM, cohorts are sorted descending
-	// 	   	if (spp->getX(i) < xlow) break; // if X == xlow, we still include it in the intgral
-	// 		else I += w(i, t)*spp->getU(i);
-	// 	}
+	else if (method == SOLVER_ABM){
+		// calculate integral
+		double I = 0;
+		for (int i=0; i<spp->J; ++i){  // in EBT, cohorts are sorted descending
+		   	// bool x_ge_xlow = std::equal(spp->getX(i).begin(), spp->getX(i).end(),
+            //                             xlow.begin(), xlow.end(),
+            //                             [](int a, int b)->bool {return a >= b; });
+			bool x_ge_xlow = true;
+			for (int k=0; k<spp->istate_size; ++k){
+				x_ge_xlow = x_ge_xlow && spp->getX(i)[k] >= xlow[k];
+			}
+			if (x_ge_xlow) I += w(i, t)*spp->getU(i); // if X >= xlow, we include it in the intgral
+		}
 		
-	// 	return I;
-	// }
+	}
 	
 	else{
 		throw std::runtime_error("Unsupported solver method");
@@ -414,6 +417,15 @@ double Solver::state_integral(wFunc w, double t, int species_id){
 
 			I += w(i, t)*spp->getU(i)*dV;  // TODO: Replace with std::transform after profiling
 			//std::cout << "integral: " << w(i, t) << " * " << spp->getU(i) << std::endl;
+		}
+		return I;
+	}
+
+	else if (method == SOLVER_ABM){
+		// calculate integral
+		double I = 0;
+		for (int i=0; i<spp->J; ++i){  // in EBT, cohorts are sorted descending
+			I += w(i, t)*spp->getU(i); // if X >= xlow, we include it in the intgral
 		}
 		return I;
 	}

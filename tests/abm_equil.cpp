@@ -15,38 +15,37 @@ std::vector <double> myseq(double from, double to, int len){
 
 int main(){
 
-	// Species<TestModel> spp;
-	// Environment E;
+	Species<TestModel> spp;
+	Environment E;
 
-	// Solver S(SOLVER_ABM);
-	// S.control.abm_n0 = 5000;
-	// S.setEnvironment(&E);
-	// S.addSpecies({25}, {0}, {1}, {false}, &spp, 4);
-	// S.species_vec[0]->set_bfin_is_u0in(true);	// say that input_birth_flux is u0
-	// S.resetState();
-	// S.initialize();
+	Solver S(SOLVER_ABM);
+	S.control.abm_n0 = 5000;
+	S.setEnvironment(&E);
+	S.addSpecies({25}, {0}, {1}, {false}, &spp, 4);
+	S.species_vec[0]->set_bfin_is_u0in(true);	// say that input_birth_flux is u0
+	S.initialize();
 	
-	// S.print();
+	S.print();
 	
-	// ofstream fout("abm_testmodel_equil.txt");
+	ofstream fout("abm_testmodel_equil.txt");
 
-	// for (double t=0.05; t <= 8; t=t+0.05) {
-	// 	S.step_to(t);
-	// 	fout << S.current_time << "\t" << S.u0_out(t)[0] << "\t";
-	// 	cout << S.current_time << " " << S.u0_out(t)[0] << "\n";
+	for (double t=0.05; t <= 8; t=t+0.05) {
+		S.step_to(t);
+		fout << S.current_time << "\t" << S.u0_out(t)[0] << "\t";
+		cout << S.current_time << " " << S.u0_out(t)[0] << "\n";
 		
-	// 	vector<double> breaks = myseq(0,1,26);
-	// 	vector<double> v = S.getDensitySpecies(0, breaks, Spline::QUADRATIC);
-	// 	for (auto y : v) fout << y << "\t";
-	// 	fout << endl;
-	// }
+		vector<double> breaks = myseq(0,1,26);
+		vector<double> v = S.getDensitySpecies1D(0, 0, breaks, Spline::QUADRATIC);
+		for (auto y : v) fout << y << "\t";
+		fout << endl;
+	}
 
-	// fout.close();
+	fout.close();
 
-	// cout << S.u0_out(S.current_time)[0] << endl; 
-	// cout << "Number of fn evaluations = " << S.odeStepper.get_fn_evals() << "\n";
-	// if (abs(S.u0_out(S.current_time)[0] - 1) < 0.1) return 0;
-	// else return 1;
+	cout << S.u0_out(S.current_time)[0] << endl; 
+	cout << "Number of fn evaluations = " << S.odeStepper.get_fn_evals() << "\n";
+	if (abs(S.u0_out(S.current_time)[0] - 1) < 0.1) return 0;
+	else return 1;
 
 	return 1;
 }

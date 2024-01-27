@@ -3,7 +3,7 @@
 using namespace std;
 
 void Solver::stepABM(double t, double dt){
-/*		
+
 	// Take implicit step for U
 	for (int s = 0; s<species_vec.size(); ++s){
 		Species_Base* spp = species_vec[s];
@@ -17,21 +17,15 @@ void Solver::stepABM(double t, double dt){
 		}
 
 		// calculate fecundity
-		double pe = spp->establishmentProbability(t, env);
-		vector<double> gb = spp->growthRate(-1, t, env);
 		double birthFlux;
+		double pe = spp->establishmentProbability(t, env);
 		if (spp->birth_flux_in < 0){	
-			// cout << "Species( " << s << ") | bfin<0: ";
 			birthFlux = calcSpeciesBirthFlux(s,t) * pe;
 		}
 		else{
-			double ub = spp->get_boundary_u(); // backup boundary cohort's superindividual density because it will be overwritten by calc
-			double u0 = spp->calc_boundary_u(gb, pe);
-			// cout << "Species( " << s << "): ";
-			// cout << "u0 = bf_in*pe/gb = " << spp->birth_flux_in << " * " << pe << " / " << gb << " = " << spp->get_boundary_u() << endl;
-			birthFlux = u0*std::accumulate(gb.begin(), gb.end(), 0.0);
-			spp->set_ub(ub); // restore superinvidividual density in boundary cohort
+			birthFlux = spp->birth_flux_in * pe;
 		}
+		
 		double noff = birthFlux*dt/spp->get_boundary_u();  // number of offspring = birthflux / density of each superindividual
 		// cout << "noff: " << spp->noff_abm << " | " << noff << " " << birthFlux << " " << dt << " " << spp->get_boundary_u() << endl;
 		spp->noff_abm += noff;
@@ -65,29 +59,23 @@ void Solver::stepABM(double t, double dt){
 		vector<double>::iterator itr = rates.begin() + n_statevars_system;
 		if (spp->n_accumulators > 0){
 			auto itr_prev = itr;
-			spp->accumulatorRates(itr);
-			assert(distance(itr_prev, itr) == spp->n_accumulators*spp->J); 
-			its += spp->n_accumulators*spp->J; 	
-		}
-		// if (spp->n_extra_statevars > 0){
-		// 	auto itr_prev = itr;
-		// 	auto its_prev = its;
+			auto its_prev = its;
 
-		// 	spp->copyCohortsExtraToState(its); // this will increment its
-		// 	spp->getExtraRates(itr);      // this will increment itr
-		// 	assert(distance(itr_prev, itr) == spp->n_extra_statevars*spp->J);
-		// 	assert(distance(its_prev, its) == spp->n_extra_statevars*spp->J);
+			spp->copyAccumulatorsToState(its); // this will increment its
+			spp->accumulatorRates(itr);      // this will increment itr
+			assert(distance(itr_prev, itr) == spp->n_accumulators*spp->J);
+			assert(distance(its_prev, its) == spp->n_accumulators*spp->J);
 
-		// 	itr = itr_prev; its = its_prev; // so bring them back
+			itr = itr_prev; its = its_prev; // so bring them back
 			
-		// 	for (int i=0; i< spp->n_extra_statevars*spp->J; ++i){
-		// 		*its += (*itr)*dt;
-		// 		++its; ++itr;
-		// 	}
-		// 	itr = itr_prev; its = its_prev; // so bring them back
+			for (int i=0; i< spp->n_accumulators*spp->J; ++i){
+				*its += (*itr)*dt;
+				++its; ++itr;
+			}
+			itr = itr_prev; its = its_prev; // so bring them back
 
-		// 	spp->copyExtraStateToCohorts(its); // this will increment its
-		// }
+			spp->copyAccumulatorsToCohorts(its); // this will increment its
+		}
 	}
 
 	// Q: Should updated environment be used for initializing cummulative variables in new cohorts?
@@ -119,7 +107,7 @@ void Solver::stepABM(double t, double dt){
 	resizeStateFromSpecies();
 	copyCohortsToState();
 	//print();
-*/	
+
 }
 
 

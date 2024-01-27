@@ -15,6 +15,11 @@ u1_ifmu = read.delim("~/codes/libpspm/ifmu2d_u1.txt")
 dx_ifmu = read.delim("~/codes/libpspm/ifmu_wave_x.txt", header=F)
 dy_ifmu = read.delim("~/codes/libpspm/ifmu_wave_y.txt", header=F)
 
+u_abm = read.delim("~/codes/libpspm/abm2d_u.txt")
+u1_abm = read.delim("~/codes/libpspm/abm2d_u1.txt")
+dx_abm = read.delim("~/codes/libpspm/abm_wave_x.txt", header=F)
+dy_abm = read.delim("~/codes/libpspm/abm_wave_y.txt", header=F)
+
 plot_model = function(u, u1, dx, dy, dV=1, title){
   pp0 = u %>% ggplot(aes(x=x.0., y=x.1., fill=u*dV)) + 
     geom_rect(aes(xmin=0, xmax=10, ymin=0, ymax=10), fill="#132B43")+
@@ -61,3 +66,4 @@ plot_model = function(u, u1, dx, dy, dV=1, title){
 
 plot_model(u_iebt, u1_iebt, dx_iebt, dy_iebt, title="IEBT")
 plot_model(u_ifmu, u1_ifmu, dx_ifmu, dy_ifmu, dV, title="IFMU")
+plot_model(u_abm, u1_abm, dx_abm, dy_abm, title="ABM")
