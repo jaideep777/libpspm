@@ -206,7 +206,7 @@ plot_seeds = function(y, title, ...){
   mtext(title, line=1)
 }
 
-# cairo_pdf("../seed_rains_withFeedback_t400.pdf", width = 6.6, height=7.66)
+cairo_pdf("../seed_rains_withFeedback_t400.pdf", width = 6.6, height=7.66)
 par(mfrow=c(3,1), mar = c(4,4,1,1), oma = c(1,1,4,1), cex.lab=1.2, cex.axis=1.2)
 plot_seeds(cbind(seeds_fmu$V2, 
                  # seeds_ifmu$V2, 
@@ -233,7 +233,7 @@ plot_seeds(cbind(seeds_fmu$V4,
                  # seeds_abm$V4
                  ), 
            "Species 3", xlab="Time (years)", lwd=2)
-# dev.off()
+dev.off()
 
 
 
