@@ -160,8 +160,8 @@ int main(int argc, char ** argv){
 	//exit(1);
 
     Solver S(SOLVER_IEBT, "rk45ck");	
-    S.use_log_densities = true;
-	S.control.ode_eps = 1e-4;
+    S.use_log_densities = false;
+	S.control.ode_ifmu_stepsize = 0.05;
 	S.control.ebt_ucut = 1e-10;
 	S.control.ebt_merge_dxcut = 0e-2;
 	//S.control.ode_method = "rk4";
@@ -178,9 +178,9 @@ int main(int argc, char ** argv){
 	S.addSpecies({{p2.vars.height, p1.vars.height+1e-4}}, &s2, 4, ip_seed_rain);
 	S.addSpecies({{p3.vars.height, p1.vars.height+1e-4}}, &s3, 4, ip_seed_rain);
 #else
- 	S.addSpecies(fmu_create_grid(p1.vars.height, 20), &s1, 4, ip_seed_rain);
-	S.addSpecies(fmu_create_grid(p1.vars.height, 20), &s2, 4, ip_seed_rain);
-	S.addSpecies(fmu_create_grid(p1.vars.height, 20), &s3, 4, ip_seed_rain);
+ 	S.addSpecies({fmu_create_grid(p1.vars.height, 20)}, &s1, 4, ip_seed_rain);
+	S.addSpecies({fmu_create_grid(p1.vars.height, 20)}, &s2, 4, ip_seed_rain);
+	S.addSpecies({fmu_create_grid(p1.vars.height, 20)}, &s3, 4, ip_seed_rain);
 #endif	
 	
 	S.print();
@@ -237,6 +237,8 @@ int main(int argc, char ** argv){
 
 	}
 	
+	S.print();
+
 	fli.close();
 	fseed.close();
 	sio.closeStreams();

@@ -93,6 +93,7 @@ void Solver::stepU_iEBT(double t, vector<double> &S, vector<double> &dSdt, doubl
 				for (int k=0; k<spp->istate_size; ++k){
 					XU[nk*i+k] += g[k]*dt;
 				}
+				// std::cout << "   spp = " << spp << ", x = " << spp->getX(i) << " , mort = " << spp->mortalityRate(i, t, env) << "\n";
 				XU[nk*i+spp->istate_size] /= 1+spp->mortalityRate(i, t, env)*dt;
 			}
 		);

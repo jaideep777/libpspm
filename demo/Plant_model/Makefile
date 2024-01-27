@@ -11,6 +11,7 @@ HEADERS := $(wildcard ../../src/*.tpp) $(wildcard ../../include/*.h)
 
 # paths
 #CUDA_INSTALL_PATH ?= /usr/local/cuda#-5.0
+INIT_DIST = #-DUSE_INIT_DIST
 
 # include and lib dirs (esp for cuda)
 INC_PATH := -I../../include -I./include -I../include
@@ -19,7 +20,7 @@ LIB_PATH := -L../../lib
 # flags
 CPPFLAGS = -O2 -g -pg -std=c++17 -Wno-sign-compare -Wno-unused-variable -Wno-unused-but-set-variable
 LDFLAGS =  -g -pg
-#CPPFLAGS += -DUSE_INIT_DIST
+CPPFLAGS += $(INIT_DIST)
 
 # libs
 LIBS = 	# -ltbb #-lgsl -lgslcblas 	# additional libs

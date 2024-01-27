@@ -29,7 +29,7 @@ double PSPM_Plant::init_density(void * _env, double input_seed_rain){
 		// else if (lma == 0.02625) u0 = 1e-3;
 		// else if (lma == 0.04625) u0 = 1e-4;
 		u0 = 1e-2*germination_probability(*env)/vars.height_dt;
-		return (x>15)? 1e-16 : u0*exp(-5*x/20);
+		return (x[0]>15)? 1e-16 : u0*exp(-5*x[0]/20);
 #endif
 	//}
 	//else return 0;
