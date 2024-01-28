@@ -22,6 +22,11 @@ enum PSPM_SolverType {SOLVER_FMU,
                       SOLVER_ICM};
 
 class Solver{
+	// define the type of a pointer to member functions calcRates_XXX()
+	using calcRatesPointer = void (Solver::*)(double t, std::vector<double>::iterator S, std::vector<double>::iterator dSdt);
+	// define the type of a pointer to member functions stepU_XXX()
+	using stepUPointer = void (Solver::*)(double t, std::vector<double>& S, std::vector<double>& dSdt, double dt);
+
 	private:
 	static std::map<std::string, PSPM_SolverType> methods_map;
 
@@ -138,6 +143,15 @@ class Solver{
 
 	void stepABM(double t, double dt);
 	
+	template<typename AfterStepFunc>
+	void stepTo_explicit(double tstop, AfterStepFunc & afterStep, calcRatesPointer rates_func);
+
+	template<typename AfterStepFunc>
+	void stepTo_implicit(double tstop, AfterStepFunc &afterStep, stepUPointer step_u_func);
+
+	template<typename AfterStepFunc>
+	void stepTo_abm(double tstop, AfterStepFunc & afterStep);
+
 	template<typename AfterStepFunc>
 	void step_to(double tstop, AfterStepFunc &afterStep_user);
 

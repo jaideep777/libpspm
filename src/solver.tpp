@@ -35,67 +35,35 @@ void Solver::step_to(double tstop, AfterStepFunc &afterStep_user){
 	//    +-- E0(X0,U0,S0) -->  +-- E+(X1,U1,S0) -^-->  +-- E1(X1,U1,S1)
 	//    +-- dSdt0(E0,S0) -->  +-- dSdt+(E+,S0) -^-->  +-- dSdt1(E0,S0)
 	// 
-	if (method == SOLVER_IEBT || method == SOLVER_IFMU || method == SOLVER_ICM){	
-		while (current_time < tstop){
-			double dt = std::min(control.ode_ifmu_stepsize, tstop-current_time);
-			
-			//copyStateToCohorts(state.begin()); // not needed here because it is called by the odestepper below
-			updateEnv(current_time, state.begin(), rates.begin()); // this computes E0, dSdt0
-			std::vector<double> sys_rates_prev(rates.begin(), rates.begin()+n_statevars_system);  // save system rates (dSdt0)
-			
-			// use implicit stepper to advance u
-			if      (method == SOLVER_IEBT) stepU_iEBT(current_time, state, rates, dt);
-			else if (method == SOLVER_IFMU) stepU_iFMU(current_time, state, rates, dt);
-			else if (method == SOLVER_ICM)  stepU_iCM(current_time, state, rates, dt);
-			else     throw std::runtime_error("step_to(): Invalid solver method"); // TODO: This will actually never be reached so we can refactor to remove 
-			// current_time += dt; // not needed here, as current time is advanced and state copied to cohorts by the ODE stepper below.
-			// copyStateToCohorts(state.begin());   // copy updated X/U to cohorts 
-			
-			// Step accumulators before update of system vars because system vars will update env
-			stepAccumulators(dt); // this will copyStateToCohorts before every ODE step (but not after the last step).
-			copyStateToCohorts(state.begin()); // so copy once (because stepSystemVars needs to upate env)
+	if (method == SOLVER_IEBT){ 
+		stepTo_implicit(tstop, after_step, &Solver::stepU_iEBT);
 
-			stepSystemVars(sys_rates_prev, dt);  // Computes E+, dSdt+, S1 (does not copy state at the end)
-			after_step(current_time, state.begin()); 
+		// update cohorts
+		mergeCohorts_EBT();
+		removeDeadCohorts_EBT();
+		addCohort_EBT();  // Add new cohort if N0 > 0. Add after removing dead ones otherwise this will also be removed. 
+	}
+
+	if (method == SOLVER_ICM){
+		stepTo_implicit(tstop, after_step, &Solver::stepU_iCM);
+
+		// update cohorts
+		if (control.update_cohorts){
+			addCohort_CM();		// add before so that it becomes boundary cohort and first internal cohort can be (potentially) removed
+			removeCohort_CM();
 		}
+	}
 
-		if (method == SOLVER_IEBT){
-			// update cohorts
-			mergeCohorts_EBT();
-			removeDeadCohorts_EBT();
-			addCohort_EBT();  // Add new cohort if N0 > 0. Add after removing dead ones otherwise this will also be removed. 
-		}
-		if (method == SOLVER_ICM){
-			// update cohorts
-			if (control.update_cohorts){
-				addCohort_CM();		// add before so that it becomes boundary cohort and first internal cohort can be (potentially) removed
-				removeCohort_CM();
-			}
-		}
-
-
+	if (method == SOLVER_IFMU){
+		stepTo_implicit(tstop, after_step, &Solver::stepU_iFMU);
 	}
 
 	if (method == SOLVER_FMU){	
-		auto derivs = [this](double t, std::vector<double>::iterator S, std::vector<double>::iterator dSdt, void* params){
-			copyStateToCohorts(S); 
-			updateEnv(t, S, dSdt);
-			calcRates_FMU(t, S, dSdt);
-		};
-		
-		// integrate
-		odeStepper.step_to(tstop, current_time, state, derivs, after_step); // rk4_stepsize is only used if method is "rk4"
+		stepTo_explicit(tstop, after_step, &Solver::calcRates_FMU);
 	}
 	
 	if (method == SOLVER_EBT){
-		auto derivs = [this](double t, std::vector<double>::iterator S, std::vector<double>::iterator dSdt, void* params){
-			copyStateToCohorts(S);
-			updateEnv(t, S, dSdt);
-			calcRates_EBT(t, S, dSdt);
-		};
-		
-		// integrate 
-		odeStepper.step_to(tstop, current_time, state, derivs, after_step); // rk4_stepsize is only used if method is "rk4"
+		stepTo_explicit(tstop, after_step, &Solver::calcRates_EBT);
 		
 		// update cohorts
 		mergeCohorts_EBT();
@@ -105,15 +73,7 @@ void Solver::step_to(double tstop, AfterStepFunc &afterStep_user){
 	
 
 	if (method == SOLVER_CM){
-		auto derivs = [this](double t, std::vector<double>::iterator S, std::vector<double>::iterator dSdt, void* params){
-			if (debug) std::cout << "derivs()\n";
-			copyStateToCohorts(S);  // this triggers precompute
-			updateEnv(t, S, dSdt);
-			calcRates_CM(t, S, dSdt);
-		};
-		
-		// integrate 
-		odeStepper.step_to(tstop, current_time, state, derivs, after_step); // rk4_stepsize is only used if method is "rk4"
+		stepTo_explicit(tstop, after_step, &Solver::calcRates_CM);
 		
 		// update cohorts
 		if (control.update_cohorts){
@@ -123,32 +83,9 @@ void Solver::step_to(double tstop, AfterStepFunc &afterStep_user){
 		//env->computeEnv(current_time, this); // is required here IF rescaleEnv is used in derivs
 	}
 	
+
 	if (method == SOLVER_ABM){	
-		while (current_time < tstop){
-			double dt = std::min(control.abm_stepsize, tstop-current_time);
-			
-			//copyStateToCohorts(state.begin()); // not needed here because it is called by the odestepper below
-			updateEnv(current_time, state.begin(), rates.begin());
-			std::vector<double> rates_prev(rates.begin(), rates.begin()+n_statevars_system);  // save system variable rates
-			
-			// use implicit stepper to advance u
-			stepABM(current_time, dt);  // this will step all variables, including accumulators, and copies state to cohorts
-			current_time += dt; 
-			
-			// step system vars
-			if (n_statevars_system > 0){
-				updateEnv(current_time, state.begin(), rates.begin());  // recompute env with updated u
-				// .FIXME: use fully implicit stepper here?
-				for (int i=0; i<n_statevars_system; ++i){
-					state[i] += (rates_prev[i]+rates[i])/2*dt;  // use average of old and updated rates for stepping system vars
-				}
-			}
-
-			// Need to explicitly call this because ODE solver is not used in ABM
-			// Should cohorts be copied to state here? - done within stepABM() above
-			after_step(current_time, state.begin());
-		}
-
+		stepTo_abm(tstop, after_step);
 	}
 
 	// std::cout << "Finished step to " <<std::endl;
@@ -156,40 +93,64 @@ void Solver::step_to(double tstop, AfterStepFunc &afterStep_user){
 }
 
 
-// template<typename AfterStepFunc>
-// void Solver::step_to_fmu(double tstop, AfterStepFunc &afterStep){
-
-// }
-
-// template<typename AfterStepFunc>
-// void Solver::step_to_ebt(double tstop, AfterStepFunc &afterStep){
+template<typename AfterStepFunc>
+void Solver::stepTo_explicit(double tstop, AfterStepFunc &afterStep, calcRatesPointer rates_func){
+	auto derivs = [this, rates_func](double t, std::vector<double>::iterator S, std::vector<double>::iterator dSdt, void* params){
+		if (debug) std::cout << "derivs()\n";
+		copyStateToCohorts(S); 
+		updateEnv(t, S, dSdt);
+		(this->*rates_func)(t, S, dSdt);
+	};
 	
-// }
-
-// template<typename AfterStepFunc>
-// void Solver::step_to_cm(double tstop, AfterStepFunc &afterStep){
-	
-// }
-
-// template<typename AfterStepFunc>
-// void Solver::step_to_abm(double tstop, AfterStepFunc &afterStep){
-	
-// }
-
-// template<typename AfterStepFunc>
-// void Solver::step_to_ifmu(double tstop, AfterStepFunc &afterStep){
-	
-// }
-
-// template<typename AfterStepFunc>
-// void Solver::step_to_iebt(double tstop, AfterStepFunc &afterStep){
-	
-// }
-
-// template<typename AfterStepFunc>
-// void Solver::step_to_icm(double tstop, AfterStepFunc &afterStep){
-	
-// }
+	// integrate
+	odeStepper.step_to(tstop, current_time, state, derivs, afterStep); // rk4_stepsize is only used if method is "rk4"
+}
 
 
+template<typename AfterStepFunc>
+void Solver::stepTo_implicit(double tstop, AfterStepFunc &afterStep, stepUPointer step_u_func){
+	while (current_time < tstop){
+		double dt = std::min(control.ode_ifmu_stepsize, tstop-current_time);
+		
+		//copyStateToCohorts(state.begin()); // not needed here because it is called by the odestepper below
+		updateEnv(current_time, state.begin(), rates.begin()); // this computes E0, dSdt0
+		std::vector<double> sys_rates_prev(rates.begin(), rates.begin()+n_statevars_system);  // save system rates (dSdt0)
+		
+		// use implicit stepper to advance u
+		(this->*step_u_func)(current_time, state, rates, dt);
+		// current_time += dt; // not needed here, as current time is advanced and state copied to cohorts by the ODE stepper below.
+		// copyStateToCohorts(state.begin());   // copy updated X/U to cohorts 
+		
+		// Step accumulators before update of system vars because system vars will update env
+		stepAccumulators(dt); // this will copyStateToCohorts before every ODE step (but not after the last step).
+		copyStateToCohorts(state.begin()); // so copy once (because stepSystemVars needs to upate env)
+
+		stepSystemVars(sys_rates_prev, dt);  // Computes E+, dSdt+, S1 (does not copy state at the end)
+		afterStep(current_time, state.begin()); 
+	}	
+}
+
+
+template<typename AfterStepFunc>
+void Solver::stepTo_abm(double tstop, AfterStepFunc & afterStep){
+
+	while (current_time < tstop){
+		double dt = std::min(control.abm_stepsize, tstop-current_time);
+		
+		//copyStateToCohorts(state.begin()); // not needed here because it is called by the odestepper below
+		updateEnv(current_time, state.begin(), rates.begin());
+		std::vector<double> rates_prev(rates.begin(), rates.begin()+n_statevars_system);  // save system variable rates
+		
+		// use implicit stepper to advance u
+		stepABM(current_time, dt);  // this will step all variables, including accumulators, and copies state to cohorts
+		current_time += dt; 
+		
+		// step system vars
+		stepSystemVars(rates_prev, dt);  // Computes E+, dSdt+, S1 (does not copy state at the end)
+
+		// Need to explicitly call this because ODE solver is not used in ABM
+		// Should cohorts be copied to state here? - done within stepABM() above
+		afterStep(current_time, state.begin());
+	}
+}
 
