@@ -9,7 +9,6 @@
 #include <algorithm>
 #include <functional>
 #include <fstream>
-#include "util.h"
 
 using namespace std;
 
