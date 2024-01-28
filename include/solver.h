@@ -71,6 +71,7 @@ class Solver{
 		int abm_numChains = 4;
 		double abm_stepsize = 0.02;
 		bool abm_init_on_grid = true;
+		double cohort_insertion_dt = 1e20;
 	} control;
 	
 	bool use_log_densities = true;
@@ -117,6 +118,8 @@ class Solver{
 	void calcRates_FMU(double t, std::vector<double>::iterator S, std::vector<double>::iterator dSdt);
 	
 	void calcOdeRatesImplicit(double t, std::vector<double>::iterator S, std::vector<double>::iterator dSdt);
+	void stepAccumulators(double dt); // this will step accumulators only to current_tile+dt. This is used by implicit solvers
+	void stepSystemVars(const std::vector<double> &sys_rates_prev, double dt);
 
 	void stepU_iFMU(double t, std::vector<double> &S, std::vector<double> &dSdt, double dt);
 	void stepU_iEBT(double t, std::vector<double> &S, std::vector<double> &dSdt, double dt);

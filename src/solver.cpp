@@ -710,6 +710,35 @@ void Solver::calcOdeRatesImplicit(double t, vector<double>::iterator S, vector<d
 }
 
 
+void Solver::stepAccumulators(double dt){
+	// use the ODE-stepper for other state variables
+	// this stepper is called even if there are no extra state variables, so copyStateToCohorts is accomplished here
+	// FIXME: Keep this simple and just take 1 Euler step?
+	// FIXME: use an if condition to do this only if extra i-state is requested
+	auto derivs = [this](double t, std::vector<double>::iterator S, std::vector<double>::iterator dSdt, void* params){
+		copyStateToCohorts(S);
+		// precompute and env computation is not needed here, because it depends on x and u, which are not updated by the solver.
+		calcOdeRatesImplicit(t,S,dSdt);
+	};
+	// this step below will do afterstep. -- Now doing explicitly, because when timestep is specified, we want afterstep only after the timestep is complete
+	// Q: But what if there are no extra state variables? Still works, because ODE stepper will still step X/U with zero rates
+	auto afterStep_dummy = [](double t, std::vector<double>::iterator S){};
+	odeStepper.step_to(current_time+dt, current_time, state, derivs, afterStep_dummy); // rk4_stepsize is only used if method is "rk4"
+}
+
+
+void Solver::stepSystemVars(const std::vector<double>& sys_rates_prev, double dt){
+	if (n_statevars_system <= 0) return;
+
+	updateEnv(current_time, state.begin(), rates.begin()); // computes E+, dSdt+
+
+	// .TODO: use fully implicit stepper here?
+	for (int i=0; i<n_statevars_system; ++i){
+		state[i] += (sys_rates_prev[i]+rates[i])/2*dt;  // use average of old and updated rates for stepping system vars
+	}
+}
+
+
 void Solver::step_to(double tstop){
 	auto func = [](double t){};
 	step_to(tstop, func);
