@@ -6,12 +6,18 @@ Species_Base::~Species_Base(){
 
 void Species_Base::print_extra(){
 }
-
+	
+// FIXME JJ: I am removing this because `cohort` is not the correct generic name. 
+//           We use it internally to define eithe cohort/gridcell/etc, 
+//           but the user need not be concerned with this 
+// int Species_Base::cohortsize(){
+// 	return J;
+// }
 
 //template<class Model>
 //int Species<Model>::addVar(std::string name, int stride, int offset){
 //    varnames.push_back(name);
-//    strides.push_back(stride);
+//     strides.push_back(stride);
 //    offsets.push_back(offset);
 //}
 
@@ -50,10 +56,10 @@ int Species_Base::xsize(){
 }
 
 
-//template<class Model>
-//int Species<Model>::size(){
-//    return varnames.size()*J;
-//}
+int Species_Base::stateSizeTotal(){
+	return (istate_size + 1 + n_accumulators)*J;
+	//      ^ x           ^ u      ^ accumulators
+}
 
 
 // void Species_Base::save(std::ofstream &fout){

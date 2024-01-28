@@ -13,14 +13,17 @@ int main(){
 	LightEnvironment E;
 
 	Solver S(SOLVER_IFMU);
-	S.addSpecies(150, 1, 1e6, true, &spp, 0);
+	S.control.ifmu_order = 2;
+	S.control.ode_ifmu_stepsize = 1;
+
+	S.setEnvironment(&E);
+	S.addSpecies({150}, {1}, {1e6}, {true}, &spp, 0);
 	//S.get_species(0)->set_bfin_is_u0in(true);	// say that input_birth_flux is u0
 	S.resetState();
 	S.initialize();
-	S.setEnvironment(&E);
 	//S.print();
 	
-	ofstream fout("ifmu_Redmodel.txt");
+	ofstream fout("ifmu2_Redmodel.txt");
 
 	for (double t=0.05; t <= 5000; t=t+10) {
 		S.step_to(t);

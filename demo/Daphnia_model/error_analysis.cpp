@@ -39,7 +39,7 @@ int main(){
 		Solver S(SOLVER_EBT);
 		S.setEnvironment(&E);
 
-		S.addSpecies(100, 0, 1, false, &spp, 0, -1);
+		S.addSpecies({100}, {0}, {1}, {false}, &spp, 0, -1);
 		S.addSystemVariables(1);  // this can be done either before or after addSpecies()
 
 		S.control.ebt_ucut = 1e-10;
@@ -80,7 +80,7 @@ int main(){
 		Solver S(SOLVER_IEBT);
 		S.setEnvironment(&E);
 
-		S.addSpecies(100, 0, 1, false, &spp, 0, -1);
+		S.addSpecies({100}, {0}, {1}, {false}, &spp, 0, -1);
 		S.addSystemVariables(1);  // this can be done either before or after addSpecies()
 
 		S.control.ebt_ucut = 1e-10;
@@ -246,7 +246,7 @@ int main(){
 		Solver S(SOLVER_CM);
 
 		S.setEnvironment(&E);
-		S.addSpecies(100, 0, 1, false, &spp, 0, -1);
+		S.addSpecies({100}, {0}, {1}, {false}, &spp, 0, -1);
 		S.addSystemVariables(1);  // this can be done either before or after addSpecies()
 		S.control.max_cohorts = 1000;
 		S.control.cm_remove_cohorts = true;
@@ -295,7 +295,7 @@ int main(){
 		S.control.cm_dxcut = 1e-5;
 
 		S.setEnvironment(&E);
-		S.addSpecies(100, 0, 1, false, &spp, 0, -1);
+		S.addSpecies({100}, {0}, {1}, {false}, &spp, 0, -1);
 		S.addSystemVariables(1);  // this can be done either before or after addSpecies()
 
 		S.resetState();
@@ -336,7 +336,7 @@ int main(){
 		S.setEnvironment(&E);
 		S.control.abm_n0 = N0;
 
-		S.addSpecies(100, 0, 1, false, &spp, 0, -1);
+		S.addSpecies({100}, {0}, {1}, {false}, &spp, 0, -1);
 		S.addSystemVariables(1);  // this can be done either before or after addSpecies()
 
 		S.resetState();

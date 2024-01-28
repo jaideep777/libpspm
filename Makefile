@@ -4,7 +4,8 @@ TARGET := libpspm
 
 # files
 SRCFILES  :=  $(wildcard src/*.cpp) 
-HEADERS := $(wildcard src/*.tpp) $(wildcard include/*.h) $(wildcard tests/*.h)
+TENSORFILES := $(wildcard tensorlib/include/*.h)
+HEADERS := $(wildcard tensorlib/include/*.h) $(wildcard src/*.tpp) $(wildcard include/*.h) $(wildcard tests/*.h) 
 # ------------------------------------------------------------------------------
 
 CXX = g++
@@ -14,13 +15,13 @@ AR = ar
 #CUDA_INSTALL_PATH ?= /usr/local/cuda#-5.0
 
 # include and lib dirs (esp for cuda)
-INC_PATH := -I./include 
+INC_PATH := -I./include -I./tensorlib/include
 LIB_PATH := -L./lib 
 
 PROFILING_FLAGS = -g -pg
 
 # flags
-CPPFLAGS = -O3 -std=c++17 -fPIC -Wall -Wextra -pedantic
+CPPFLAGS = -O2 -std=c++17 -fPIC -Wall -Wextra -pedantic
 LDFLAGS =  
 
 CPPFLAGS += $(PROFILING_FLAGS)
@@ -57,20 +58,24 @@ LIBS = 	# -ltbb #-lgsl -lgslcblas 	# additional libs
 #LIBS = -lcudart 			# cuda libs 		
 
 # files
-OBJECTS = $(patsubst src/%.cpp, build/%.o, $(SRCFILES))
+TENSOROBJECTS := $(patsubst tensorlib/include/%.h, tensorlib/build/%.o, $(TENSORFILES))
+OBJECTS := $(patsubst src/%.cpp, build/%.o, $(SRCFILES))
 
 
 all: dir $(TARGET)	
 
 dir: 
-	mkdir -p lib build tests/build
+	mkdir -p lib build tests/build tensorlib.build
 
-$(TARGET): $(OBJECTS) 
+$(TARGET):  $(OBJECTS) 
 	$(AR) rcs lib/$(TARGET).a $(OBJECTS) $(LIBS) 
 #	g++ $(LDFLAGS) -o $(TARGET) $(LIB_PATH) $(OBJECTS) $(LIBS) 
 
 $(OBJECTS): build/%.o : src/%.cpp $(HEADERS)
 	$(CXX) -c $(CPPFLAGS) $(INC_PATH) $< -o $@ 
+
+# $(TENSOROBJECTS): tensorlib/build/%.o : tensorlib/include/%.h $(HEADERS)
+# 	$(CXX) -c $(CPPFLAGS) $(INC_PATH) $< -o $@ 
 
 clean:
 	rm -f $(TARGET) build/*.o lib/*.a src/*.o
@@ -110,17 +115,20 @@ $(TEST_TARGETS): tests/%.test : tests/%.o
 	g++ $(LDFLAGS) -o $@ $(LIB_PATH) $(OBJECTS) $(ADD_OBJECTS) $< $(LIBS) 
 
 testclean: 
-	rm -f tests/*.o tests/*.test lib/*.a lib/*.so
+	rm -f tests/*.o tests/*.test lib/*.a lib/*.so tests/1
+	
+dirclean:
+	rm -f *.txt *.out tests/*.txt tests/*.out
 
 recheck: testclean check
 
 .PHONY: $(TEST_RUNS) run_tests clean testclean
 # ------------------------------------------------------------------------------
 
-demos:
+demos: $(TARGET)
 	cd demo/Daphnia_model && $(MAKE) FILE=fmu_equil.cpp && ./fmu_equil.exec
 	cd demo/Daphnia_model && $(MAKE) FILE=ifmu_equil.cpp && ./ifmu_equil.exec
-	cd demo/Daphnia_model && $(MAKE) FILE=ifmu2_equil.cpp && ./ifmu2_equil.exec
+#	cd demo/Daphnia_model && $(MAKE) FILE=ifmu2_equil.cpp && ./ifmu2_equil.exec
 	cd demo/Daphnia_model && $(MAKE) FILE=ebt_equil.cpp && ./ebt_equil.exec
 	cd demo/Daphnia_model && $(MAKE) FILE=iebt_equil.cpp && ./iebt_equil.exec
 	cd demo/Daphnia_model && $(MAKE) FILE=cm_equil.cpp && ./cm_equil.exec
@@ -128,7 +136,7 @@ demos:
 	cd demo/Daphnia_model && $(MAKE) FILE=abm_equil.cpp && ./abm_equil.exec
 	cd demo/RED_model && $(MAKE) FILE=fmu_equil.cpp && ./fmu_equil.exec
 	cd demo/RED_model && $(MAKE) FILE=ifmu_equil.cpp && ./ifmu_equil.exec
-	cd demo/RED_model && $(MAKE) FILE=ifmu2_equil.cpp && ./ifmu2_equil.exec
+#	cd demo/RED_model && $(MAKE) FILE=ifmu2_equil.cpp && ./ifmu2_equil.exec
 	cd demo/RED_model && $(MAKE) FILE=ebt_equil.cpp && ./ebt_equil.exec
 	cd demo/RED_model && $(MAKE) FILE=iebt_equil.cpp && ./iebt_equil.exec
 	cd demo/RED_model && $(MAKE) FILE=cm_equil.cpp && ./cm_equil.exec
@@ -141,17 +149,17 @@ democlean:
 	rm -f demo/Plant_model/*.o   demo/Plant_model/*.exec
 	rm -f demo/Plant_model/src/*.o	
 
-plant_demo_noFeedback:
-#	cd demo/Plant_model && $(MAKE) FILE=plant_fmu_1spp.cpp && ./plant_fmu_1spp.exec && mkdir -p outputs/fmu && mv *.txt outputs/fmu
+plant_demo_noFeedback: $(TARGET)
+	cd demo/Plant_model && $(MAKE) FILE=plant_fmu_1spp.cpp && ./plant_fmu_1spp.exec && mkdir -p outputs/fmu && mv *.txt outputs/fmu
 #	cd demo/Plant_model && $(MAKE) FILE=plant_ifmu_1spp.cpp && ./plant_ifmu_1spp.exec  && mkdir -p outputs/ifmu && mv *.txt outputs/ifmu
-	cd demo/Plant_model && $(MAKE) FILE=plant_ifmu2_1spp.cpp && ./plant_ifmu2_1spp.exec  && mkdir -p outputs/ifmu2 && mv *.txt outputs/ifmu2
-#	cd demo/Plant_model && $(MAKE) FILE=plant_ebt_1spp.cpp && ./plant_ebt_1spp.exec  && mkdir -p outputs/ebt && mv *.txt outputs/ebt
-#	cd demo/Plant_model && $(MAKE) FILE=plant_iebt_1spp.cpp && ./plant_iebt_1spp.exec  && mkdir -p outputs/iebt && mv *.txt outputs/iebt
-#	cd demo/Plant_model && $(MAKE) FILE=plant_cm_1spp.cpp && ./plant_cm_1spp.exec  && mkdir -p outputs/cm && mv *.txt outputs/cm
-#	cd demo/Plant_model && $(MAKE) FILE=plant_icm_1spp.cpp && ./plant_icm_1spp.exec  && mkdir -p outputs/icm && mv *.txt outputs/icm
-#	cd demo/Plant_model && $(MAKE) FILE=plant_abm_1spp.cpp && ./plant_abm_1spp.exec  && mkdir -p outputs/abm && mv *.txt outputs/abm
+#	cd demo/Plant_model && $(MAKE) FILE=plant_ifmu2_1spp.cpp && ./plant_ifmu2_1spp.exec  && mkdir -p outputs/ifmu2 && mv *.txt outputs/ifmu2
+	cd demo/Plant_model && $(MAKE) FILE=plant_ebt_1spp.cpp && ./plant_ebt_1spp.exec  && mkdir -p outputs/ebt && mv *.txt outputs/ebt
+	cd demo/Plant_model && $(MAKE) FILE=plant_iebt_1spp.cpp && ./plant_iebt_1spp.exec  && mkdir -p outputs/iebt && mv *.txt outputs/iebt
+	cd demo/Plant_model && $(MAKE) FILE=plant_cm_1spp.cpp && ./plant_cm_1spp.exec  && mkdir -p outputs/cm && mv *.txt outputs/cm
+	cd demo/Plant_model && $(MAKE) FILE=plant_icm_1spp.cpp && ./plant_icm_1spp.exec  && mkdir -p outputs/icm && mv *.txt outputs/icm
+	cd demo/Plant_model && $(MAKE) FILE=plant_abm_1spp.cpp && ./plant_abm_1spp.exec  && mkdir -p outputs/abm && mv *.txt outputs/abm
 
-plant_demo_test:
+plant_demo_test: $(TARGET)
 	cd demo/Plant_model && \
 	$(MAKE) FILE=plant_cm_3spp_fixedmode.cpp && \
 	./plant_cm_3spp_fixedmode.exec && \
@@ -161,34 +169,25 @@ plant_demo_test:
 	rm *.txt
 
 
-# plant_demo_withFeedback:
-# 	cd demo/Plant_model && $(MAKE) FILE=plant_fmu_1spp.cpp && ./plant_fmu_1spp.exec -1 205.32 && mkdir -p outputs/fmu_f && mv *.txt outputs/fmu_f
-# 	cd demo/Plant_model && $(MAKE) FILE=plant_ifmu_1spp.cpp && ./plant_ifmu_1spp.exec -1 205.32 && mkdir -p outputs/ifmu_f && mv *.txt outputs/ifmu_f
-# # 	cd demo/Plant_model && $(MAKE) FILE=plant_ifmu2_1spp.cpp && ./plant_ifmu2_1spp.exec -1 205.32 && mkdir -p outputs/ifmu2_f && mv *.txt outputs/ifmu2_f
-# 	cd demo/Plant_model && $(MAKE) FILE=plant_ebt_1spp.cpp && ./plant_ebt_1spp.exec -1 205.32 1.0 && mkdir -p outputs/ebt_f && mv *.txt outputs/ebt_f
-# 	cd demo/Plant_model && $(MAKE) FILE=plant_iebt_1spp.cpp && ./plant_iebt_1spp.exec -1 205.32 0.5 && mkdir -p outputs/iebt_f && mv *.txt outputs/iebt_f
-# 	cd demo/Plant_model && $(MAKE) FILE=plant_cm_1spp.cpp && ./plant_cm_1spp.exec -1 205.32 1.0 && mkdir -p outputs/cm_f && mv *.txt outputs/cm_f
-# #	cd demo/Plant_model && $(MAKE) FILE=plant_abm_1spp.cpp && ./plant_abm_1spp.exec -1 && mkdir -p outputs/abm && mv *.txt outputs/abm
-
-plant_demo_withFeedback:
+plant_demo_withFeedback: $(TARGET)
 	cd demo/Plant_model && $(MAKE) FILE=plant_fmu_1spp.cpp && ./plant_fmu_1spp.exec -1 405.32 && mkdir -p outputs/fmu_f3 && mv *.txt outputs/fmu_f3
-	cd demo/Plant_model && $(MAKE) FILE=plant_ifmu_1spp.cpp && ./plant_ifmu_1spp.exec -1 405.32 && mkdir -p outputs/ifmu_f3 && mv *.txt outputs/ifmu_f3
+#	cd demo/Plant_model && $(MAKE) FILE=plant_ifmu_1spp.cpp && ./plant_ifmu_1spp.exec -1 405.32 && mkdir -p outputs/ifmu_f3 && mv *.txt outputs/ifmu_f3
 #	cd demo/Plant_model && $(MAKE) FILE=plant_ifmu2_1spp.cpp && ./plant_ifmu2_1spp.exec -1 305.32 && mkdir -p outputs/ifmu2_f3 && mv *.txt outputs/ifmu2_f3
 	cd demo/Plant_model && $(MAKE) FILE=plant_ebt_1spp.cpp && ./plant_ebt_1spp.exec -1 405.32 1.0 && mkdir -p outputs/ebt_f3 && mv *.txt outputs/ebt_f3
 	cd demo/Plant_model && $(MAKE) FILE=plant_iebt_1spp.cpp && ./plant_iebt_1spp.exec -1 405.32 0.5 && mkdir -p outputs/iebt_f3 && mv *.txt outputs/iebt_f3
 	cd demo/Plant_model && $(MAKE) FILE=plant_cm_1spp.cpp && ./plant_cm_1spp.exec -1 405.32 2.0 && mkdir -p outputs/cm_f3 && mv *.txt outputs/cm_f3
 	cd demo/Plant_model && $(MAKE) FILE=plant_icm_1spp.cpp && ./plant_icm_1spp.exec -1 405.32 2.0 && mkdir -p outputs/icm_f3 && mv *.txt outputs/icm_f3
-#	cd demo/Plant_model && $(MAKE) FILE=plant_abm_1spp.cpp && ./plant_abm_1spp.exec -1 405.32 50 && mkdir -p outputs/abm_f3 && mv *.txt outputs/abm_f3
+#	cd demo/Plant_model && $(MAKE) FILE=plant_abm_1spp.cpp && ./plant_abm_1spp.exec -1 105.32 50 && mkdir -p outputs/abm_f3 && mv *.txt outputs/abm_f3
 
 plant_demo_withFeedback_IC:
-#	cd demo/Plant_model && $(MAKE) FILE=plant_fmu_1spp.cpp && ./plant_fmu_1spp.exec -1 405.32 && mkdir -p outputs/fmu_f3 && mv *.txt outputs/fmu_f3
-	cd demo/Plant_model && $(MAKE) FILE=plant_ifmu_1spp.cpp && ./plant_ifmu_1spp.exec -1 405.32 && mkdir -p outputs/ifmu_f3_ic && mv *.txt outputs/ifmu_f3_ic
-#	cd demo/Plant_model && $(MAKE) FILE=plant_ifmu2_1spp.cpp && ./plant_ifmu2_1spp.exec -1 305.32 && mkdir -p outputs/ifmu2_f3 && mv *.txt outputs/ifmu2_f3
-#	cd demo/Plant_model && $(MAKE) FILE=plant_ebt_1spp.cpp && ./plant_ebt_1spp.exec -1 405.32 1.0 && mkdir -p outputs/ebt_f3 && mv *.txt outputs/ebt_f3
-	cd demo/Plant_model && $(MAKE) FILE=plant_iebt_1spp.cpp && ./plant_iebt_1spp.exec -1 405.32 0.5 && mkdir -p outputs/iebt_f3_ic && mv *.txt outputs/iebt_f3_ic
-#	cd demo/Plant_model && $(MAKE) FILE=plant_cm_1spp.cpp && ./plant_cm_1spp.exec -1 405.32 2.0 && mkdir -p outputs/cm_f3 && mv *.txt outputs/cm_f3
-	cd demo/Plant_model && $(MAKE) FILE=plant_icm_1spp.cpp && ./plant_icm_1spp.exec -1 405.32 2.0 && mkdir -p outputs/icm_f3_ic && mv *.txt outputs/icm_f3_ic
-#	cd demo/Plant_model && $(MAKE) FILE=plant_abm_1spp.cpp && ./plant_abm_1spp.exec -1 405.32 50 && mkdir -p outputs/abm_f3 && mv *.txt outputs/abm_f3
+#	cd demo/Plant_model && $(MAKE) FILE=plant_fmu_1spp.cpp INIT_DIST=-DUSE_INIT_DIST && ./plant_fmu_1spp.exec -1 405.32 && mkdir -p outputs/fmu_f3 && mv *.txt outputs/fmu_f3
+#	cd demo/Plant_model && $(MAKE) FILE=plant_ifmu_1spp.cpp INIT_DIST=-DUSE_INIT_DIST && ./plant_ifmu_1spp.exec -1 405.32 && mkdir -p outputs/ifmu_f3_ic && mv *.txt outputs/ifmu_f3_ic
+#	cd demo/Plant_model && $(MAKE) FILE=plant_ifmu2_1spp.cpp INIT_DIST=-DUSE_INIT_DIST && ./plant_ifmu2_1spp.exec -1 305.32 && mkdir -p outputs/ifmu2_f3 && mv *.txt outputs/ifmu2_f3
+#	cd demo/Plant_model && $(MAKE) FILE=plant_ebt_1spp.cpp INIT_DIST=-DUSE_INIT_DIST && ./plant_ebt_1spp.exec -1 405.32 1.0 && mkdir -p outputs/ebt_f3 && mv *.txt outputs/ebt_f3
+	cd demo/Plant_model && $(MAKE) FILE=plant_iebt_1spp.cpp INIT_DIST=-DUSE_INIT_DIST && ./plant_iebt_1spp.exec -1 405.32 0.5 && mkdir -p outputs/iebt_f3_ic && mv *.txt outputs/iebt_f3_ic
+#	cd demo/Plant_model && $(MAKE) FILE=plant_cm_1spp.cpp INIT_DIST=-DUSE_INIT_DIST && ./plant_cm_1spp.exec -1 405.32 2.0 && mkdir -p outputs/cm_f3 && mv *.txt outputs/cm_f3
+#	cd demo/Plant_model && $(MAKE) FILE=plant_icm_1spp.cpp INIT_DIST=-DUSE_INIT_DIST && ./plant_icm_1spp.exec -1 405.32 2.0 && mkdir -p outputs/icm_f3_ic && mv *.txt outputs/icm_f3_ic
+#	cd demo/Plant_model && $(MAKE) FILE=plant_abm_1spp.cpp INIT_DIST=-DUSE_INIT_DIST && ./plant_abm_1spp.exec -1 405.32 50 && mkdir -p outputs/abm_f3 && mv *.txt outputs/abm_f3
 
 
 website:

@@ -436,7 +436,9 @@ double Plant::mortality_dt(double productivity_area,
     // If mortality probability is 1 (latency = Inf) then the rate
     // calculations break.  Setting them to zero gives the correct
     // behaviour.
-    return 0.0;		// FIXME: JAI: Shoudnt we return some very large number here so that density reduces via the differential equation?
+    // return 0.0;		
+    // Resolved [FIXME]: JAI: Shoudnt we return some very large number here so that density reduces via the differential equation?
+    return mortality_growth_independent_dt()*100; // JAI fix: return 100x the baseline mortality rate
   }
 }
 

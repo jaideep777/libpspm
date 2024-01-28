@@ -20,36 +20,42 @@ void Solver::calcRates_CM(double t, vector<double>::iterator S, vector<double>::
 		//cout << "calcRates(species = " << s << ")\n";
 		
 		// Boundary u is not used in rate calcs per se, but needed in size integral. Hence update
+		// FIXME: This boundary condition works only for 1D state
+		double birthFlux;
+		vector<double> gb = spp->growthRate(-1, t, env);
 		double pe = spp->establishmentProbability(t, env);
-		double gb = spp->growthRate(-1, spp->xb, t, env);
 		if (spp->birth_flux_in < 0){	
-			double birthFlux = calcSpeciesBirthFlux(s,t) * pe;
-			spp->set_ub(birthFlux/(gb+1e-20));
+			birthFlux = calcSpeciesBirthFlux(s,t) * pe;
 		}
 		else{
-			spp->calc_boundary_u(gb, pe); // this will set u in boundary cohort
+			birthFlux = spp->birth_flux_in * pe;
 		}
+		spp->set_ub(birthFlux/(gb[0]+1e-20));
 
-		
 		for (int i=0; i<spp->J; ++i){
-			double x = spp->getX(i);
-			vector<double> g_gx = spp->growthRateGradient(i, x, t, env, control.cm_grad_dx);  // FIXME: x can go
-			double dx =  g_gx[0];
-			double du = -(spp->mortalityRate(i, x, t, env) + g_gx[1]); 
+			vector<vector<double>> g_gx = spp->growthRateGradient(i, t, env, control.cm_grad_dx);  
+			for (int k=0; k<spp->istate_size; ++k){
+				double dx =  g_gx[0][k];
+				*itr++ = dx;
+			}
+
+			double du = -spp->mortalityRate(i, t, env); 
+			for (int k=0; k<spp->istate_size; ++k){
+				du += -g_gx[k+1][k]; 
+			}
 			if (!use_log_densities) du *= spp->getU(i);
-		
-			*itr++ = dx;
 			*itr++ = du;	
 			
-			its+=2;
+			its += (spp->istate_size+1);
 		}
 
 		
-		if (spp->n_extra_statevars > 0){
+		// extra rates
+		if (spp->n_accumulators > 0){
 			auto itr_prev = itr;
-			spp->getExtraRates(itr);
-			assert(distance(itr_prev, itr) == spp->n_extra_statevars*spp->J); 
-			its += spp->n_extra_statevars*spp->J; 	
+			spp->accumulatorRates(itr);
+			assert(distance(itr_prev, itr) == spp->n_accumulators*spp->J); 
+			its += spp->n_accumulators*spp->J; 	
 		}
 		//cout << "---\n";
 	}
@@ -64,17 +70,18 @@ void Solver::addCohort_CM(){
 		auto spp = species_vec[s];
 		
 		// calculate u for boundary cohort
-		double gb = spp->growthRate(-1, spp->xb, current_time, env);
+		vector<double> gb = spp->growthRate(-1, current_time, env);
 		double pe = spp->establishmentProbability(current_time, env);
+		double birthFlux;
 		if (spp->birth_flux_in < 0){	
-			double birthFlux = calcSpeciesBirthFlux(s,current_time) * pe;
-			spp->set_ub(birthFlux/(gb+1e-20));
+			birthFlux = calcSpeciesBirthFlux(s,current_time) * pe;
 		}
 		else{
-			spp->calc_boundary_u(gb, pe);  // init density of boundary cohort
+			birthFlux = spp->birth_flux_in * pe;
 		}
-
+		// cout << "Adding cohort: gb = " << gb[0] << '\n';
 		spp->initBoundaryCohort(current_time, env); // init extra state variables and birth time of the boundary cohort
+		spp->set_ub(birthFlux/(gb[0]+1e-20)); // FIXME: This line works only for 1D state
 		spp->addCohort();	// introduce copy of boundary cohort in system
 	}
 	
@@ -87,8 +94,9 @@ void Solver::removeCohort_CM(){
 
 	for (auto& spp : species_vec){
 		if (control.cm_remove_cohorts){ // remove a cohort if number of cohorts in the species exceeds a threshold
-			spp->removeDeadCohorts(control.ebt_ucut);
-			spp->removeDenseCohorts(control.cm_dxcut);
+			spp->markDeadCohorts(control.ebt_ucut);
+			spp->markDenseCohorts(control.cm_dxcut);
+			spp->removeMarkedCohorts();
 		}
 	}
 	

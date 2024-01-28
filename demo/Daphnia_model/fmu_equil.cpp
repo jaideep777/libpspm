@@ -16,12 +16,13 @@ int main(){
 	S.control.ode_ifmu_stepsize = 0.1;
 	
 	S.setEnvironment(&E);
-	S.addSpecies(300, 0, 1, false, &spp, 0, -1);
-	S.addSystemVariables(1);  // this can be done either before or after addSpecies()
 
-	S.resetState();
+	S.addSpecies({300}, {0}, {1}, {false}, &spp, 0, -1);
+	S.addSystemVariables({E.K});  // this can be done either before or after addSpecies()
+
+	S.control.ebt_ucut = 1e-20;
+
 	S.initialize();
-	S.state[0] = E.K;
 	//S.print();
 	
 	ofstream fout("fmu_Daphnia.txt");

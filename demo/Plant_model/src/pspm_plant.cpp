@@ -8,18 +8,18 @@ PSPM_Plant::PSPM_Plant() : plant::Plant() {
 	
 }
 
-void PSPM_Plant::set_size(double _x){
-	set_height(_x);
+void PSPM_Plant::set_size(const std::array <double, 1>& _x){
+	set_height(_x[0]);
 }
 
-double PSPM_Plant::init_density(double x, void * _env, double input_seed_rain){
+double PSPM_Plant::init_density(void * _env, double input_seed_rain){
 	//if (x == seed.vars.height){
 		//p.set_height(x);
 		EnvUsed * env = (EnvUsed*)_env;
 		compute_vars_phys(*env);
 		double u0;
 #ifndef USE_INIT_DIST
-		if (x < 0.5)
+		if (x[0] < 0.7)
 			u0 = fabs(input_seed_rain)*germination_probability(*env)/vars.height_dt;
 		else 
 			u0 = 0;
@@ -29,14 +29,14 @@ double PSPM_Plant::init_density(double x, void * _env, double input_seed_rain){
 		// else if (lma == 0.02625) u0 = 1e-3;
 		// else if (lma == 0.04625) u0 = 1e-4;
 		u0 = 1e-2*germination_probability(*env)/vars.height_dt;
-		return (x>15)? 1e-16 : u0*exp(-5*x/20);
+		return (x[0]>15)? 1e-16 : u0*exp(-5*x[0]/20);
 #endif
 	//}
 	//else return 0;
 }
 
 
-void PSPM_Plant::preCompute(double x, double t, void * _env){
+void PSPM_Plant::preCompute(double t, void * _env){
 	EnvUsed * env = (EnvUsed*)_env;
 	compute_vars_phys(*env);
 	double p_plant_survival = exp(-vars.mortality);
@@ -49,18 +49,18 @@ double PSPM_Plant::establishmentProbability(double t, void * _env){
 	return germination_probability(*env);
 }
 
-double PSPM_Plant::growthRate(double x, double t, void * env){
+std::array<double,1> PSPM_Plant::growthRate(double t, void * env){
 	//if (p.vars.height != x){
 		//p.set_height(x);
 		//compute_vars_phys(*env);
 		//++nrc;
 	////}
 	//cout << "x/g = " << x << " " << vars.height_dt << endl;
-	return vars.height_dt;
+	return {vars.height_dt};
 		
 }
 
-double PSPM_Plant::mortalityRate(double x, double t, void * env){
+double PSPM_Plant::mortalityRate(double t, void * env){
 	//assert(p.vars.height == x);
 	//if (p.vars.height != x){
 		//p.set_height(x);
@@ -70,7 +70,7 @@ double PSPM_Plant::mortalityRate(double x, double t, void * env){
 	return vars.mortality_dt;
 }
 
-double PSPM_Plant::birthRate(double x, double t, void * env){
+double PSPM_Plant::birthRate(double t, void * env){
 	// Need this here because birthRate is not called in order, and only called rarely,
 	// after completion of step_to.
 	//if (p.vars.height != x){
@@ -83,7 +83,7 @@ double PSPM_Plant::birthRate(double x, double t, void * env){
 }
 
 
-void PSPM_Plant::init_state(double t, void * _env){
+void PSPM_Plant::init_accumulators(double t, void * _env){
 	//set_size(x);	
 	EnvUsed * env = (EnvUsed*)_env;
 	vars.mortality = -log(germination_probability(*env)); ///env->patch_survival(t));    // mortality
@@ -94,7 +94,7 @@ void PSPM_Plant::init_state(double t, void * _env){
 	//vars.mortality = 0; // only for single plant testrun
 }
 
-vector<double>::iterator PSPM_Plant::set_state(vector<double>::iterator &it){
+vector<double>::iterator PSPM_Plant::set_accumulators(vector<double>::iterator &it){
 	vars.mortality      = *it++;
 	viable_seeds        = *it++;
 	vars.area_heartwood = *it++;
@@ -103,7 +103,7 @@ vector<double>::iterator PSPM_Plant::set_state(vector<double>::iterator &it){
 	return it;
 }
 
-vector<double>::iterator PSPM_Plant::get_state(vector<double>::iterator &it){
+vector<double>::iterator PSPM_Plant::get_accumulators(vector<double>::iterator &it){
 	*it++ = vars.mortality;
 	*it++ = viable_seeds;
 	*it++ = vars.area_heartwood;
@@ -111,7 +111,7 @@ vector<double>::iterator PSPM_Plant::get_state(vector<double>::iterator &it){
 	return it;
 }
 
-vector<double>::iterator PSPM_Plant::get_rates(vector<double>::iterator &it){
+vector<double>::iterator PSPM_Plant::get_accumulatorRates(vector<double>::iterator &it){
 
 	*it++ = vars.mortality_dt;	// mortality
 	*it++ = viable_seeds_dt; // viable_seeds

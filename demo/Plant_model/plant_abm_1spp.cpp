@@ -85,8 +85,8 @@ class SolverIO{
 
 			for (int i=0; i<streams[s].size(); ++i) streams[s][i] << S->current_time << "\t";
 
-			vector<double> breaks = my_log_seq(spp->xb, 20, 100);
-			vector<double> dist = S->getDensitySpecies(s, breaks);
+			vector<double> breaks = my_log_seq(spp->xb[0], 20, 100);
+			vector<double> dist = S->getDensitySpecies1D(s, 0, breaks);
 			//cout << "here: " << breaks.size() << " " << dist.size() << endl;
 
 			for (int i=0; i<100; ++i){
@@ -161,11 +161,10 @@ int main(int argc, char ** argv){
 	if (argc > 1) ip_seed_rain = stod(argv[1]);
 	cout << "Simulating with input seed rain = " << ip_seed_rain << endl;
  
-	S.addSpecies(5, p1.vars.height, 20, true, &s1, 4, ip_seed_rain);
-	S.addSpecies(5, p2.vars.height, 20, true, &s2, 4, ip_seed_rain);
-	S.addSpecies(5, p3.vars.height, 20, true, &s3, 4, ip_seed_rain);
+	S.addSpecies({5}, {p1.vars.height}, {20}, {true}, &s1, 4, ip_seed_rain);
+	S.addSpecies({5}, {p2.vars.height}, {20}, {true}, &s2, 4, ip_seed_rain);
+	S.addSpecies({5}, {p3.vars.height}, {20}, {true}, &s3, 4, ip_seed_rain);
 
-	S.resetState();
 	S.initialize();
 
 	S.print();

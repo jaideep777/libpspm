@@ -98,8 +98,8 @@ class SolverIO{
 
 			for (int i=0; i<streams[s].size(); ++i) streams[s][i] << S->current_time << "\t";
 
-			vector<double> breaks = my_log_seq(spp->xb, 20, 100);
-			vector<double> dist = S->getDensitySpecies(s, breaks);
+			vector<double> breaks = my_log_seq(spp->xb[0], 20, 100);
+			vector<double> dist = S->getDensitySpecies1D(s, 0, breaks);
 			//cout << "here: " << breaks.size() << " " << dist.size() << endl;
 
 			for (int i=0; i<100; ++i){
@@ -160,8 +160,8 @@ int main(int argc, char ** argv){
 	//exit(1);
 
     Solver S(SOLVER_IEBT, "rk45ck");	
-    S.use_log_densities = true;
-	S.control.ode_eps = 1e-4;
+    S.use_log_densities = false;
+	S.control.ode_ifmu_stepsize = 0.05;
 	S.control.ebt_ucut = 1e-10;
 	S.control.ebt_merge_dxcut = 0e-2;
 	//S.control.ode_method = "rk4";
@@ -174,18 +174,15 @@ int main(int argc, char ** argv){
 	cout << "Simulating with input seed rain = " << ip_seed_rain << endl;
  
 #ifndef USE_INIT_DIST
-	S.addSpecies({p1.vars.height, p1.vars.height+1e-4}, &s1, 4, ip_seed_rain);
-	S.addSpecies({p2.vars.height, p1.vars.height+1e-4}, &s2, 4, ip_seed_rain);
-	S.addSpecies({p3.vars.height, p1.vars.height+1e-4}, &s3, 4, ip_seed_rain);
+	S.addSpecies({{p1.vars.height, p1.vars.height+1e-4}}, &s1, 4, ip_seed_rain);
+	S.addSpecies({{p2.vars.height, p1.vars.height+1e-4}}, &s2, 4, ip_seed_rain);
+	S.addSpecies({{p3.vars.height, p1.vars.height+1e-4}}, &s3, 4, ip_seed_rain);
 #else
- 	S.addSpecies(fmu_create_grid(p1.vars.height, 20), &s1, 4, ip_seed_rain);
-	S.addSpecies(fmu_create_grid(p1.vars.height, 20), &s2, 4, ip_seed_rain);
-	S.addSpecies(fmu_create_grid(p1.vars.height, 20), &s3, 4, ip_seed_rain);
+ 	S.addSpecies({fmu_create_grid(p1.vars.height, 20)}, &s1, 4, ip_seed_rain);
+	S.addSpecies({fmu_create_grid(p1.vars.height, 20)}, &s2, 4, ip_seed_rain);
+	S.addSpecies({fmu_create_grid(p1.vars.height, 20)}, &s3, 4, ip_seed_rain);
 #endif	
 	
-	S.resetState();
-	S.initialize();
-
 	S.print();
 	
 	double tmax = 105.32;
@@ -240,6 +237,8 @@ int main(int argc, char ** argv){
 
 	}
 	
+	S.print();
+
 	fli.close();
 	fseed.close();
 	sio.closeStreams();

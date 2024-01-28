@@ -13,10 +13,8 @@ int main(){
 
 	Solver S(SOLVER_FMU);
 	S.setEnvironment(&E);
-	S.addSpecies(25, 0, 1, false, &spp, 4, -1);
+	S.addSpecies({25}, {0}, {1}, {false}, &spp, 4, -1);
 	S.species_vec[0]->set_bfin_is_u0in(true);	// say that input_birth_flux is u0
-	S.resetState();
-	S.initialize();
 	S.print();
 	
 	E.computeEnv(0,&S, S.state.begin(), S.rates.begin());
@@ -37,7 +35,7 @@ int main(){
 	    -0.001250216};
 	for (int i=0; i< 25-2; ++i){ // FIXME: skip last two because depends on first order or second order approx used
 		cout << S.rates[i] << " " << rates_exp[i] << endl;
-		//if ( fabs(S.rates[i] - rates_exp[i]) > 1e-5) return 1;
+		if ( fabs(S.rates[i] - rates_exp[i]) > 1e-5) return 1;
 	}
 	
 	return 0;

@@ -5,9 +5,10 @@
 #include "plant.h"
 
 #include <solver.h>
+#include <individual_base.h>
 
 
-class PSPM_Plant : public plant::Plant {
+class PSPM_Plant : public plant::Plant, public IndividualBase<1> {
 	public:
 	
 	double t_birth = 0;
@@ -24,22 +25,19 @@ class PSPM_Plant : public plant::Plant {
 	int nbc = 0;
 
 	PSPM_Plant(); 
-	void set_size(double _x);
-	double init_density(double x, void * _env, double input_seed_rain);
-	void preCompute(double x, double t, void * _env);
-	double establishmentProbability(double t, void * _env);
-	double growthRate(double x, double t, void * env);
-	double mortalityRate(double x, double t, void * env);
-	double birthRate(double x, double t, void * env);
+	void set_size(const std::array <double, 1>& _x);
+	double init_density(void * env, double input_seed_rain);
+	void preCompute(double t, void * env);
+	double establishmentProbability(double t, void * env);
+	std::array<double,1> growthRate(double t, void * env);
+	double mortalityRate(double t, void * env);
+	double birthRate(double t, void * env);
 	
-	void init_state(double t, void * _env);
-	std::vector<double>::iterator set_state(std::vector<double>::iterator &it);
-	std::vector<double>::iterator get_state(std::vector<double>::iterator &it);
-	std::vector<double>::iterator get_rates(std::vector<double>::iterator &it);
+	void init_accumulators(double t, void * _env);
+	std::vector<double>::iterator set_accumulators(std::vector<double>::iterator &it);
+	std::vector<double>::iterator get_accumulators(std::vector<double>::iterator &it);
+	std::vector<double>::iterator get_accumulatorRates(std::vector<double>::iterator &it);
 	void print(std::ostream &out = std::cout);
-
-	void save(std::ofstream &fout){}
-	void restore(std::ifstream &fin){}
 
 };
 

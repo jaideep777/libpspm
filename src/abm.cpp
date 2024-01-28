@@ -3,42 +3,41 @@
 using namespace std;
 
 void Solver::stepABM(double t, double dt){
-		
+	if (debug) std::cout << "Entering stepABM ..." << std::endl;
 	// Take implicit step for U
 	for (int s = 0; s<species_vec.size(); ++s){
 		Species_Base* spp = species_vec[s];
 		
+		if (debug) std::cout << "spp " << s << ": J = " << spp->J << std::endl;
 		// Calc growth and mortality rates
-		vector<double> growthArray(spp->J);
+		vector<vector<double>> growthArray(spp->J);
 		vector<double> mortalityArray(spp->J);
 		for (int i=0; i<spp->J; ++i){
-			growthArray[i]    = spp->growthRate(i, spp->getX(i), t, env);
-			mortalityArray[i] = spp->mortalityRate(i, spp->getX(i), t, env);
+			growthArray[i]    = spp->growthRate(i, t, env);
+			mortalityArray[i] = spp->mortalityRate(i, t, env);
 		}
 
 		// calculate fecundity
-		double pe = spp->establishmentProbability(t, env);
-		double gb = spp->growthRate(-1, spp->xb, t, env);
 		double birthFlux;
+		double pe = spp->establishmentProbability(t, env);
 		if (spp->birth_flux_in < 0){	
-			// cout << "Species( " << s << ") | bfin<0: ";
 			birthFlux = calcSpeciesBirthFlux(s,t) * pe;
 		}
 		else{
-			double ub = spp->get_boundary_u(); // backup boundary cohort's superindividual density because it will be overwritten by calc
-			double u0 = spp->calc_boundary_u(gb, pe);
-			// cout << "Species( " << s << "): ";
-			// cout << "u0 = bf_in*pe/gb = " << spp->birth_flux_in << " * " << pe << " / " << gb << " = " << spp->get_boundary_u() << endl;
-			birthFlux = u0*gb;
-			spp->set_ub(ub); // restore superinvidividual density in boundary cohort
+			birthFlux = spp->birth_flux_in * pe;
 		}
+		
 		double noff = birthFlux*dt/spp->get_boundary_u();  // number of offspring = birthflux / density of each superindividual
-		// cout << "noff: " << spp->noff_abm << " | " << noff << " " << birthFlux << " " << dt << " " << spp->get_boundary_u() << endl;
+		if (debug) std::cout << "noff: " << spp->noff_abm << " | " << noff << " " << birthFlux << " " << dt << " " << spp->get_boundary_u() << std::endl;
 		spp->noff_abm += noff;
 		
 		// implement growth
 		for (int i=0; i<spp->J; ++i){
-			spp->setX(i, spp->getX(i) + growthArray[i]*dt);
+			std::vector<double> X = spp->getX(i);
+			for(int k = 0; k<X.size(); ++k){
+				X[k] += growthArray[i][k] * dt;
+			}
+			spp->setX(i, X);
 		}
 
 		// implement mortality
@@ -53,27 +52,30 @@ void Solver::stepABM(double t, double dt){
 	// step extra variables
 	// these will be in order abc abc abc... 
 	// use the state vector itself to temporarily store and retrive state, since it's not used for x and u (but after system variables)
+
+	// Elisa: copied over from ebt.cpp after code reformatting
+	
 	for (auto spp : species_vec){
 		vector<double>::iterator its = state.begin() + n_statevars_system; // Skip system variables
 		vector<double>::iterator itr = rates.begin() + n_statevars_system;
-		if (spp->n_extra_statevars > 0){
+		if (spp->n_accumulators > 0){
 			auto itr_prev = itr;
 			auto its_prev = its;
 
-			spp->copyCohortsExtraToState(its); // this will increment its
-			spp->getExtraRates(itr);      // this will increment itr
-			assert(distance(itr_prev, itr) == spp->n_extra_statevars*spp->J);
-			assert(distance(its_prev, its) == spp->n_extra_statevars*spp->J);
+			spp->copyAccumulatorsToState(its); // this will increment its
+			spp->accumulatorRates(itr);      // this will increment itr
+			assert(distance(itr_prev, itr) == spp->n_accumulators*spp->J);
+			assert(distance(its_prev, its) == spp->n_accumulators*spp->J);
 
 			itr = itr_prev; its = its_prev; // so bring them back
 			
-			for (int i=0; i< spp->n_extra_statevars*spp->J; ++i){
+			for (int i=0; i< spp->n_accumulators*spp->J; ++i){
 				*its += (*itr)*dt;
 				++its; ++itr;
 			}
 			itr = itr_prev; its = its_prev; // so bring them back
 
-			spp->copyExtraStateToCohorts(its); // this will increment its
+			spp->copyAccumulatorsToCohorts(its); // this will increment its
 		}
 	}
 
@@ -87,6 +89,8 @@ void Solver::stepABM(double t, double dt){
 	for (auto spp : species_vec){
 		// add recruits once they have accumulated to > 1
 		// use t and env to initialize (instead of updated values) becaues number of recruits were calculated at the beginning of the step
+		if (debug) std::cout << "spp " << spp << ": adding cohorts; n = " << int(spp->noff_abm) << std::endl;
+
 		if (spp->noff_abm > 1){
 			int nadd = int(spp->noff_abm);	
 			spp->initBoundaryCohort(t, env);
@@ -106,7 +110,8 @@ void Solver::stepABM(double t, double dt){
 	resizeStateFromSpecies();
 	copyCohortsToState();
 	//print();
-	
+	if (debug) std::cout << "Exiting stepABM ..." << std::endl;
+
 }
 
 

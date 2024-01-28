@@ -21,18 +21,17 @@ int main(){
 
 	Solver S(SOLVER_ICM);
 
-	S.setEnvironment(&E);
-	S.addSpecies(100, 0, 1, false, &spp, 0, -1);
-	S.addSystemVariables(1);  // this can be done either before or after addSpecies()
 	S.control.max_cohorts = 200;
-	S.control.ebt_ucut = 1e-20;
+	S.control.update_cohorts = true;
+	S.control.cm_remove_cohorts = true;
 	S.use_log_densities = false;
-	
-	S.resetState();
+
+	S.setEnvironment(&E);
+
+	S.addSystemVariables({E.K});  // this can be done either before or after addSpecies()
+	S.addSpecies({100}, {0}, {1}, {false}, &spp, 0, -1);
+
 	S.initialize();
-	S.state[0] = E.K;
-	//S.print();
-	
 	
 	ofstream fout("icm_Daphnia.txt");
 
@@ -41,7 +40,7 @@ int main(){
 		fout << S.current_time << "\t" << S.newborns_out(t)[0] << "\t" << E.S << "\t";
 		cout << S.current_time << " " << S.state[0] << " " << S.species_vec[0]->xsize() << "\n";
 		
-		vector <double> dist = S.getDensitySpecies(0, seq(0,1,300));
+		vector <double> dist = S.getDensitySpecies1D(0, 0, seq(0,1,300));
 		for (auto y : dist) fout << y << "\t";
 		
 		fout << endl;

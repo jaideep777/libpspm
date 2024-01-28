@@ -13,11 +13,11 @@ int main(){
 	LightEnvironment E;
 
 	Solver S(SOLVER_FMU);
-	S.addSpecies(150, 1, 1e6, true, &spp, 0);
+	S.setEnvironment(&E);
+	S.addSpecies({150}, {1}, {1e6}, {true}, &spp, 0);
 	//S.get_species(0)->set_bfin_is_u0in(true);	// say that input_birth_flux is u0
 	S.resetState();
 	S.initialize();
-	S.setEnvironment(&E);
 	//S.print();
 	
 	ofstream fout("fmu_Redmodel.txt");

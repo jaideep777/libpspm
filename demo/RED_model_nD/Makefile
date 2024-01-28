@@ -1,12 +1,12 @@
 #-------------------------------------------------------------------------------
 # executable name
-FILE = 
+FILE = ebtn_equil.cpp
 TARGET = $(patsubst %.cpp, %.exec, $(FILE)) 
 
 # files
-SRCFILES  :=  $(wildcard plant/*.cpp)
+SRCFILES  :=  $(wildcard ../../src/*.cpp plant/*.cpp)
 SRCFILES += $(FILE)
-#HEADERS := $(wildcard ../../src/*.tpp) $(wildcard ../../include/*.h)  # only to indicate recompilation
+HEADERS := $(wildcard ../../src/*.tpp) $(wildcard ../../include/*.h) 
 # ------------------------------------------------------------------------------
 
 # paths
@@ -21,7 +21,7 @@ CPPFLAGS = -O3 -g -pg -std=c++17 -Wno-sign-compare -Wno-unused-variable -Wno-unu
 LDFLAGS =  -g -pg
 
 # libs
-LIBS = 	 -lpspm #-lgsl -lgslcblas 	# additional libs
+LIBS = 	 #-lgsl -lgslcblas 	# additional libs
 #LIBS = -lcudart 			# cuda libs 		
 
 # files

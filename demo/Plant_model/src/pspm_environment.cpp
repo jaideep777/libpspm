@@ -37,7 +37,7 @@ void LightEnvironment::computeEnv(double t, Solver * S, std::vector<double>::ite
 //				std::cout << "(" << i << "," << a << ")" << "\t";
 				return a;	
 			};
-			leaf_area_above_z += S->integrate_wudx_above(la_above, t, z, k);
+			leaf_area_above_z += S->integrate_wudx_above(la_above, t, {z}, k);
 			//leaf_area_above_z += S->integrate_x(la_above, t, state_vec, i);
 		}
 
@@ -48,7 +48,11 @@ void LightEnvironment::computeEnv(double t, Solver * S, std::vector<double>::ite
 	//cout << S->xb << " " << S->getMaxSize() << endl;	
 	//time = t;
 	//for (int s=0; s<S->n_species(); ++s) S->get_species(s)->u0_save = S->get_u0(t, s);
-	light_profile.construct(canopy_openness, 0, S->maxSize());
+	double max_size = 0;
+	for (int k=0; k<S->species_vec.size(); ++k){
+		max_size = std::max(max_size, S->maxState(k)[0]);
+	}
+	light_profile.construct(canopy_openness, 0, max_size);
 }
 
 

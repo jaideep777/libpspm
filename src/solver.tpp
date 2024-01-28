@@ -14,8 +14,12 @@
 template<typename AfterStepFunc>
 void Solver::step_to(double tstop, AfterStepFunc &afterStep_user){
 	// do nothing if tstop is <= current_time
+	// std::cout << "step to: current time: " << current_time << "\tt_stop: " << tstop << std::endl;
+
 	if (tstop <= current_time) return;
 	
+	// std::cout << "Running step to function " << std::endl;
+
 	auto after_step = [this, afterStep_user](double t, std::vector<double>::iterator S){
 		if (debug) std::cout << "After step: t = " << t << "\n";
 		copyStateToCohorts(S);
@@ -29,22 +33,22 @@ void Solver::step_to(double tstop, AfterStepFunc &afterStep_user){
 			
 			//copyStateToCohorts(state.begin()); // not needed here because it is called by the odestepper below
 			updateEnv(current_time, state.begin(), rates.begin());
-			std::vector<double> rates_prev(rates.begin(), rates.begin()+n_statevars_system);  // save system variable rates
+			std::vector<double> sys_rates_prev(rates.begin(), rates.begin()+n_statevars_system);  // save system variable rates
 			
 			// use implicit stepper to advance u
 			if      (method == SOLVER_IEBT) stepU_iEBT(current_time, state, rates, dt);
 			else if (method == SOLVER_IFMU) stepU_iFMU(current_time, state, rates, dt);
 			else if (method == SOLVER_ICM)  stepU_iCM(current_time, state, rates, dt);
-			else     throw std::runtime_error("step_to(): Invalid solver method");
+			else     throw std::runtime_error("step_to(): Invalid solver method"); // TODO: This will actually never be reached so we can refactor to remove 
 			// current_time += dt; // not needed here, as current time is advanced by the ODE stepper below.
 			copyStateToCohorts(state.begin());   // copy updated X/U to cohorts 
 			
 			if (n_statevars_system > 0){ // FIXME: maybe keep this simple and just use the env and rates at be beginning of the timestep?
 				// copyStateToCohorts(state.begin());   // not needed here as it's just done above
-				updateEnv(current_time, state.begin(), rates.begin());  // recompute env with updated u
+				updateEnv(current_time, state.begin(), rates.begin());  // FIXME: recompute env with updated u <-- is this necessary or even correct??
 				// .FIXME: use fully implicit stepper here?
 				for (int i=0; i<n_statevars_system; ++i){
-					state[i] += (rates_prev[i]+rates[i])/2*dt;  // use average of old and updated rates for stepping system vars
+					state[i] += (sys_rates_prev[i]+rates[i])/2*dt;  // use average of old and updated rates for stepping system vars
 				}
 			}
 
@@ -110,7 +114,7 @@ void Solver::step_to(double tstop, AfterStepFunc &afterStep_user){
 		addCohort_EBT();  // Add new cohort if N0 > 0. Add after removing dead ones otherwise this will also be removed. 
 	}
 	
-	
+
 	if (method == SOLVER_CM){
 		auto derivs = [this](double t, std::vector<double>::iterator S, std::vector<double>::iterator dSdt, void* params){
 			if (debug) std::cout << "derivs()\n";
@@ -157,6 +161,8 @@ void Solver::step_to(double tstop, AfterStepFunc &afterStep_user){
 		}
 
 	}
+
+	// std::cout << "Finished step to " <<std::endl;
 
 }
 

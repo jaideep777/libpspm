@@ -17,7 +17,7 @@ int main(){
 	S.control.ode_ifmu_stepsize = 1;
 
 	S.setEnvironment(&E);
-	S.addSpecies(150, 1, 1e6, true, &spp, 0);
+	S.addSpecies({150}, {1}, {1e6}, {true}, &spp, 0);
 	//S.get_species(0)->set_bfin_is_u0in(true);	// say that input_birth_flux is u0
 	S.resetState();
 	S.initialize();

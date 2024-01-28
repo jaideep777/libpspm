@@ -96,8 +96,8 @@ class RKCK45{
 	double size(){return sys_size;}
 	int get_fn_evals(){return nfe;}
 
-	void save(std::ofstream &fout);
-	void restore(std::ifstream &fin);
+	void save(std::ostream &fout);
+	void restore(std::istream &fin);
 	
 	private:
 	template <class functor>

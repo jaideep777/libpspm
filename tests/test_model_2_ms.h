@@ -17,7 +17,7 @@ class Environment : public EnvironmentBase{
 		// Calculate _/ w(z,t)u(z,t)dz
 		//         xb
 		auto w = [S](int i, double t) -> double {
-			double z = S->species_vec[0]->getX(i);
+			double z = S->species_vec[0]->getX(i)[0];
 			if (z <= 1.0/3) 
 				return 1;
 			else if (z > 1.0/3 && z <= 2.0/3) 
@@ -25,7 +25,7 @@ class Environment : public EnvironmentBase{
 			else 
 				return 0;
 		};
-		E = S->integrate_x(w, t, 0);
+		E = S->state_integral(w, t, 0);
 	}
 
 };
@@ -35,13 +35,12 @@ class Environment : public EnvironmentBase{
 class Plant{
 	public:
 	double height;
-	double mortality;
-	double viable_seeds;
-	double heart_mass;
-	double sap_mass;
+	double mortality = 0;
+	double viable_seeds = 0;
+	double heart_mass = 0;
+	double sap_mass = 0;
 
-	std::vector<std::string> varnames = {"mort", "vs", "heart", "sap"};
-
+	
 	Plant(double h){
 		height = h;
 	}
@@ -60,67 +59,67 @@ class Plant{
 
 
 
-class TestModel : public Plant{
+class TestModel : public Plant, public IndividualBase<1>{
 	public:
 	double sc = 10;
 
-	TestModel() : Plant(0) {}
-
-	double init_density(double x, void * _env, double bf){
-		return pow(1-x,2)/pow(1+x,4) + (1-x)/pow(1+x,3);
+	TestModel() : Plant(0) {
+		varnames = {"mort", "vs", "heart", "sap"};
 	}
 
-	void preCompute(double x, double t, void * _env){
+	double init_density(void * _env, double bf){
+		double _x = x[0];
+		return pow(1-_x,2)/pow(1+_x,4) + (1-_x)/pow(1+_x,3);
 	}
 
-	double growthRate(double x, double t, void * _env){
+	std::array<double,1> growthRate(double t, void * _env){
 		Environment* env = (Environment*)_env;
-		double E = env->evalEnv(x,t);
+		double _x = x[0];
+		double E = env->evalEnv(_x,t);
 		double a = 0.16+0.22*exp(-0.225*t*t);
-		return 0.225*(1-x*x)*(E/(1+E*E))*t*(1+a*a)/a;
+		return {0.225*(1-_x*_x)*(E/(1+E*E))*t*(1+a*a)/a};
 	}
 
-	double mortalityRate(double x, double t, void * _env){
+	double mortalityRate(double t, void * _env){
 		Environment* env = (Environment*)_env;
-		double E = env->evalEnv(x,t);
+		double _x = x[0];
+		double E = env->evalEnv(_x,t);
 		double a = 0.16+0.22*exp(-0.225*t*t);
 		return 1.35*t*E/a;
 	}
 
-	double birthRate(double x, double t, void * _env){
+	double birthRate(double t, void * _env){
 		Environment* env = (Environment*)_env;
-		double E = env->evalEnv(x,t);
+		double _x = x[0];
+		double E = env->evalEnv(_x,t);
 		double oneplusa = 1.16+0.22*exp(-0.225*t*t);
 		double a = 0.16+0.22*exp(-0.225*t*t);
-		double n1 = 0.225*t*x*x*(1-x)*(1-x)*E/(1+E)/(1+E)*oneplusa*oneplusa/a;
+		double n1 = 0.225*t*_x*_x*(1-_x)*(1-_x)*E/(1+E)/(1+E)*oneplusa*oneplusa/a;
 		double n2 = (1+exp(-0.225*t*t))/(61-88*log(2)+(38*log(2)-79.0/3)*exp(-0.225*t*t));
 		return n1*n2;
 	}
 
-	double establishmentProbability(double t, void  * _env){
-		return 1;
-	}
 
-
-	void set_size(double _x){
-		height = _x;
+	void set_size(const std::array <double, 1>& _x){
+		height = _x[0];
 		mortality = 0.1*height + 1e-12; //exp(-height);	
 		viable_seeds = 100*height + 1e-13;
 		heart_mass = 1000*height + 1e-14;
 		sap_mass = 10*height + 1e-15;
 	}
 
-	void init_state(double t, void * env){
+	void init_accumulators(double t, void * env){
 	}
 
-	std::vector<double>::iterator set_state(std::vector<double>::iterator &it){
+	std::vector<double>::iterator set_accumulators(std::vector<double>::iterator &it){
 		mortality    = *it++;
 		viable_seeds = *it++;
 		heart_mass   = *it++;
 		sap_mass     = *it++;
 		return it;
 	}
-	std::vector<double>::iterator get_state(std::vector<double>::iterator &it){
+
+	std::vector<double>::iterator get_accumulators(std::vector<double>::iterator &it){
 		*it++ = mortality;
 		*it++ = viable_seeds;
 		*it++ = heart_mass;
@@ -128,7 +127,7 @@ class TestModel : public Plant{
 		return it;
 	}
 
-	std::vector<double>::iterator get_rates(std::vector<double>::iterator &it){
+	std::vector<double>::iterator get_accumulatorRates(std::vector<double>::iterator &it){
 		std::vector<double> r = calcRates();
 		*it++ = r[0];
 		*it++ = r[1];
@@ -144,11 +143,11 @@ class TestModel : public Plant{
 			<< std::setw(10) << sap_mass << "\t";
 	}
 
-	void save(std::ofstream& fout){
+	void save(std::ostream& fout){
 		fout << "TestModel::v1 ";
 	}
 
-	void restore(std::ifstream& fin){
+	void restore(std::istream& fin){
 		std::string s; fin >> s; // discard version number 
 	}
 
