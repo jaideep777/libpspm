@@ -38,7 +38,6 @@ int main(){
 	ofstream fout("ebt_testmodel_equil.txt");
 
 	vector<double> breaks = myseq(0,1,26);
-	vector<double> mids = diff(breaks);
 
 	for (double t=0.05; t <= 8; t=t+0.05) {
 		S.step_to(t);

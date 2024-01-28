@@ -38,8 +38,7 @@ int main(){
 		//for (auto s : S.state) cout << s << " "; cout << endl;
 		
 		vector<double> breaks = myseq(0,1,26);
-		vector<double> mids = diff(breaks);
-
+	
 		for (t=0.05; t <= 4; t=t+0.05) {
 			S.step_to(t);
 			fout << S.current_time << "\t" << S.u0_out(t)[0] << "\t";

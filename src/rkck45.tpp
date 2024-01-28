@@ -9,7 +9,7 @@
 // On output, y and x are replaced by their new values
 template <class functor>
 void RKCK45::RKStep(container& y, container& dydx, double& x, double htry,
-				    double& hdid, double& hnext, functor& derivs){
+                    double& hdid, double& hnext, functor& derivs){
 
 	container yerr(y.size()), ytemp(y.size());	// TODO: Should these also be made class members to prevent reallocation?
 	double errmax;

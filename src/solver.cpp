@@ -16,14 +16,14 @@ using namespace std;
 // ~~~~~~~~~~~ SOLVER ~~~~~~~~~~~~~~~~~~~~~
 
 std::map<std::string, PSPM_SolverType> Solver::methods_map = 
-		{{"FMU",  SOLVER_FMU}, 
-		 {"MMU",  SOLVER_MMU}, 
-		 {"CM",   SOLVER_CM}, 
-		 {"EBT",  SOLVER_EBT}, 
-		 {"IFMU", SOLVER_IFMU}, 
-		 {"ABM",  SOLVER_ABM}, 
-		 {"IEBT", SOLVER_IEBT},
-		 {"ICM",  SOLVER_ICM}};
+	{{"FMU",  SOLVER_FMU}, 
+	 {"MMU",  SOLVER_MMU}, 
+	 {"CM",   SOLVER_CM}, 
+	 {"EBT",  SOLVER_EBT}, 
+	 {"IFMU", SOLVER_IFMU}, 
+	 {"ABM",  SOLVER_ABM}, 
+	 {"IEBT", SOLVER_IEBT},
+	 {"ICM",  SOLVER_ICM}};
 
 
 Solver::Solver(PSPM_SolverType _method, string ode_method) : odeStepper(ode_method, 0, 1e-6, 1e-6) {
@@ -69,12 +69,12 @@ void Solver::addSpecies(std::vector<std::vector<double>> xbreaks, Species_Base* 
 	// Set species birth size - xb
 	// For all solvers, xb is the lower edge of the corner cell 
 	s->x = xbreaks;
-	s->xb = id_utils::coord_value(vector<int>(s->istate_size, 0), s->x);
+	s->xb = utils::tensor::coord_value(vector<int>(s->istate_size, 0), s->x);
 
 	// Create grid centres and grid dx along each axis
 	for (int i=0; i<xbreaks.size(); ++i){
-		s->X.push_back(mids(xbreaks[i]));
-		s->h.push_back(diff(xbreaks[i]));
+		s->X.push_back(utils::sequence::mids(xbreaks[i]));
+		s->h.push_back(utils::sequence::diff(xbreaks[i]));
 	}
 
 	// FIXME: Need to properly investigate labelling of grids and how that affects boundary condition
@@ -83,13 +83,13 @@ void Solver::addSpecies(std::vector<std::vector<double>> xbreaks, Species_Base* 
 	if (method == SOLVER_IFMU && !control.ifmu_centered_grids){
 		s->X.clear(); // clear stuff set above
 		for (int i=0; i<xbreaks.size(); ++i){
-			s->X.push_back(right_edge(xbreaks[i]));
+			s->X.push_back(utils::sequence::right_edge(xbreaks[i]));
 		}
 	} 
 
 	// This was used to cross check with 1D impl, but this isnt correct
 	// if (method == SOLVER_IFMU && control.ifmu_centered_grids){
-	// 	s->xb = id_utils::coord_value(vector<int>(s->istate_size, 0), s->X);
+	// 	s->xb = utils::tensor::coord_value(vector<int>(s->istate_size, 0), s->X);
 	// }	
 
 	// Create cohorts
@@ -160,10 +160,10 @@ void Solver::addSpecies(std::vector<int> _J, std::vector<double> _xb, std::vecto
 	for (int k=0; k< s->istate_size; ++k){
 		std::vector<double> ax_breaks(_J[k]+1);
 		if (log_breaks[k]) {
-			ax_breaks = logseq(_xb[k], _xm[k], _J[k] + 1);
+			ax_breaks = utils::sequence::logseq(_xb[k], _xm[k], _J[k] + 1);
 		}
 		else {
-			ax_breaks = seq(_xb[k], _xm[k], _J[k] + 1);
+			ax_breaks = utils::sequence::seq(_xb[k], _xm[k], _J[k] + 1);
 		}
 		breaks.push_back(ax_breaks);
 	}
@@ -367,7 +367,7 @@ void Solver::initializeSpecies(Species_Base * s){
 		// set x, u for all cohorts
 		if (method == SOLVER_FMU || method == SOLVER_IFMU){
 			for (size_t i=0; i<s->J; ++i){
-				vector<double> X = id_utils::coord_value(id_utils::index(i, s->dim_centres), s->X);
+				vector<double> X = utils::tensor::coord_value(utils::tensor::index(i, s->dim_centres), s->X);
 				s->setX(i,X); 
 
 				double U = s->init_density(i, env); 
@@ -378,7 +378,7 @@ void Solver::initializeSpecies(Species_Base * s){
 		
 		if (method == SOLVER_CM || method == SOLVER_ICM){
 			for (size_t i=0; i<s->J; ++i){
-				vector<double> X = id_utils::coord_value(id_utils::index(i, s->dim_edges), s->x);
+				vector<double> X = utils::tensor::coord_value(utils::tensor::index(i, s->dim_edges), s->x);
 				s->setX(i,X);
 
 				double U = s->init_density(i, env); 
@@ -392,10 +392,10 @@ void Solver::initializeSpecies(Species_Base * s){
 		if (method == SOLVER_EBT || method == SOLVER_IEBT){
 			// x, u for internal cohorts 
 			for (size_t i=0; i<s->J-1; ++i){
-				vector<double> X = id_utils::coord_value(id_utils::index(i, s->dim_centres), s->X);
+				vector<double> X = utils::tensor::coord_value(utils::tensor::index(i, s->dim_centres), s->X);
 				s->setX(i,X); 
 
-				vector<double> dx = id_utils::coord_value(id_utils::index(i, s->dim_centres), s->h);
+				vector<double> dx = utils::tensor::coord_value(utils::tensor::index(i, s->dim_centres), s->h);
 				cout << "dx = " << dx << '\n';
 				double dV = std::accumulate(dx.begin(), dx.end(), 1.0, std::multiplies<double>());
 				cout << "dV = " << dV << '\n';
@@ -414,8 +414,8 @@ void Solver::initializeSpecies(Species_Base * s){
 			vector<double> Uvec;
 			Uvec.reserve(s->n_grid_centres);
 			for (size_t i=0; i<s->n_grid_centres; ++i){
-				vector<double> X = id_utils::coord_value(id_utils::index(i, s->dim_centres), s->X);
-				vector<double> dx = id_utils::coord_value(id_utils::index(i, s->dim_centres), s->h);
+				vector<double> X = utils::tensor::coord_value(utils::tensor::index(i, s->dim_centres), s->X);
+				vector<double> dx = utils::tensor::coord_value(utils::tensor::index(i, s->dim_centres), s->h);
 				double dV = std::accumulate(dx.begin(), dx.end(), 1.0, std::multiplies<double>());
 				
 				s->setX(i, X);
@@ -442,9 +442,9 @@ void Solver::initializeSpecies(Species_Base * s){
 			s->set_ub(N_cohort);
 			for (int i=0; i<s->J; ++i){
 				int cell_loc = cell_sampler(generator);
-				std::vector<int> cell_id = id_utils::index(cell_loc, s->dim_centres);
-				vector<double> x_cell = id_utils::coord_value(cell_id, s->x);
-				vector<double> h_cell = id_utils::coord_value(cell_id, s->h);
+				std::vector<int> cell_id = utils::tensor::index(cell_loc, s->dim_centres);
+				vector<double> x_cell = utils::tensor::coord_value(cell_id, s->x);
+				vector<double> h_cell = utils::tensor::coord_value(cell_id, s->h);
 				std::vector<double> xi(s->istate_size);
 				for (int k=0; k<xi.size(); ++k){ 
 					xi[k] = x_cell[k] + position_sampler(generator)*h_cell[k];
@@ -470,7 +470,7 @@ void Solver::initializeSpecies(Species_Base * s){
 // 			/* Find total density - cheat by using the initial grid a little  */
 // 			double Utot = 0.0; 
 // 			for (size_t i=0; i<s->J-1; ++i){
-// 				vector<double> dx = id_utils::coord_value(id_utils::index(i, s->dim_centres), s->h);
+// 				vector<double> dx = utils::tensor::coord_value(utils::tensor::index(i, s->dim_centres), s->h);
 // 				double dV = std::accumulate(dx.begin(), dx.end(), 1.0, std::multiplies<double>());
 // 				double U = s->init_density(i, env)*dV; 
 // 				Utot += U;
