@@ -1,31 +1,31 @@
 #include "index_utils.h"
 
-inline bool smaller_than(const std::vector<double>& x1, const std::vector <double>& x2){
-    for(int i = 0; i < x1.size(); ++i){
-        if(x1[i] >= x2[i]){
-			return false; 
-		}
-    }
-	return true;
-}
+// inline bool smaller_than(const std::vector<double>& x1, const std::vector <double>& x2){
+// 	for(int i = 0; i < x1.size(); ++i){
+// 		if(x1[i] >= x2[i]){
+// 			return false; 
+// 		}
+// 	}
+// 	return true;
+// }
 
-inline bool larger_than(const std::vector<double>& x1, const std::vector <double>& x2){
-    for(int i = 0; i < x1.size(); ++i){
-        if(x1[i] <= x2[i]){
-			return false; 
-		}
-    }
-	return true;
-}
+// inline bool larger_than(const std::vector<double>& x1, const std::vector <double>& x2){
+// 	for(int i = 0; i < x1.size(); ++i){
+// 		if(x1[i] <= x2[i]){
+// 			return false; 
+// 		}
+// 	}
+// 	return true;
+// }
 
-inline bool larger_or_equal(const std::vector<double>& x1, const std::vector <double>& x2){
-    for(int i = 0; i < x1.size(); ++i){
-        if(x1[i] < x2[i]){
-			return false; 
-		}
-    }
-	return true;
-}
+// inline bool larger_or_equal(const std::vector<double>& x1, const std::vector <double>& x2){
+// 	for(int i = 0; i < x1.size(); ++i){
+// 		if(x1[i] < x2[i]){
+// 			return false; 
+// 		}
+// 	}
+// 	return true;
+// }
 
 /// @param w            A function or function-object of the form `w(int i, double t)` that returns a double. 
 ///                     It can be a lambda. This function should access the 'i'th cohort and compute the weight 
@@ -165,8 +165,8 @@ double Solver::integrate_wudx_above(wFunc w, double t, const std::vector<double>
 		double I = 0;
 		for (int i=0; i<spp->J; ++i){  // in EBT, cohorts are sorted descending
 		   	// bool x_ge_xlow = std::equal(spp->getX(i).begin(), spp->getX(i).end(),
-            //                             xlow.begin(), xlow.end(),
-            //                             [](int a, int b)->bool {return a >= b; });
+			//                             xlow.begin(), xlow.end(),
+			//                             [](int a, int b)->bool {return a >= b; });
 			bool x_ge_xlow = true;
 			for (int k=0; k<spp->istate_size; ++k){
 				x_ge_xlow = x_ge_xlow && spp->getX(i)[k] >= xlow[k];

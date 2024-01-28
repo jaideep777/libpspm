@@ -17,9 +17,9 @@ enum PSPM_SolverType {SOLVER_FMU,
                       SOLVER_CM, 
                       SOLVER_EBT, 
                       SOLVER_IFMU, 
-					  SOLVER_ABM, 
-					  SOLVER_IEBT,
-					  SOLVER_ICM};
+                      SOLVER_ABM, 
+                      SOLVER_IEBT,
+                      SOLVER_ICM};
 
 class Solver{
 	private:
@@ -111,8 +111,6 @@ class Solver{
 	
 	std::vector<double> maxState(int species_id);
 
-	void printODEmethod();
-
 	void updateEnv(double t, std::vector<double>::iterator S, std::vector<double>::iterator dSdt);
 
 	/// @brief calculate \f$du/dt\f$ using the FMU solver
@@ -129,12 +127,6 @@ class Solver{
 	void addCohort_EBT();
 	void removeDeadCohorts_EBT();
 	void mergeCohorts_EBT();
-
-	/// @brief calculate \f$du/dt\f$ using the EBT solver
-	void calcRates_EBTN(double t, std::vector<double>::iterator S, std::vector<double>::iterator dSdt);
-	void addCohort_EBTN();
-	void removeDeadCohorts_EBTN();
-	void mergeCohorts_EBTN();
 
 	/// @brief calculate \f$du/dt\f$ using the CM solver
 	void calcRates_CM(double t, std::vector<double>::iterator S, std::vector<double>::iterator dSdt);
@@ -174,9 +166,6 @@ class Solver{
 	
 	void save(std::ostream &fout);
 	void restore(std::istream &fin, std::vector<Species_Base*> spp_proto);
-
-	void printCohortVector();
-	void printCohortVector(std::ostream &out);
 
 };
 

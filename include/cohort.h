@@ -100,12 +100,12 @@ class Cohort : public Ind {
 		// Then save cohort (for cohort state). This way, Individual metadata will be available when set_size() and set_state() are called in restore()
 		fout << "Cohort<Ind>::v2" << "   ";
 		fout << std::make_tuple(
-				  id
-				, group_id
-				, group_size
-				, birth_time
-				, remove
-				, need_precompute); // we actually need not save need_precompute, because set_size() will always set it to 1 during restore
+		          id
+		        , group_id
+		        , group_size
+		        , birth_time
+		        , remove
+		        , need_precompute); // we actually need not save need_precompute, because set_size() will always set it to 1 during restore
 		fout << to_vector(Ind::x) << "   " << u << "   ";
 
 		std::vector<double> cumm_vars(n_extra_vars);
@@ -122,7 +122,7 @@ class Cohort : public Ind {
 		assert(s == "Cohort<Ind>::v2");
 		fin >> id
 		    >> group_id
-			>> group_size
+		    >> group_size
 		    >> birth_time
 		    >> remove
 		    >> need_precompute;

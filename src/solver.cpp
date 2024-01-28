@@ -16,14 +16,14 @@ using namespace std;
 // ~~~~~~~~~~~ SOLVER ~~~~~~~~~~~~~~~~~~~~~
 
 std::map<std::string, PSPM_SolverType> Solver::methods_map = 
-		{{"FMU",  SOLVER_FMU}, 
-		 {"MMU",  SOLVER_MMU}, 
-		 {"CM",   SOLVER_CM}, 
-		 {"EBT",  SOLVER_EBT}, 
-		 {"IFMU", SOLVER_IFMU}, 
-		 {"ABM",  SOLVER_ABM}, 
-		 {"IEBT", SOLVER_IEBT},
-		 {"ICM",  SOLVER_ICM}};
+	{{"FMU",  SOLVER_FMU}, 
+	 {"MMU",  SOLVER_MMU}, 
+	 {"CM",   SOLVER_CM}, 
+	 {"EBT",  SOLVER_EBT}, 
+	 {"IFMU", SOLVER_IFMU}, 
+	 {"ABM",  SOLVER_ABM}, 
+	 {"IEBT", SOLVER_IEBT},
+	 {"ICM",  SOLVER_ICM}};
 
 
 Solver::Solver(PSPM_SolverType _method, string ode_method) : odeStepper(ode_method, 0, 1e-6, 1e-6) {

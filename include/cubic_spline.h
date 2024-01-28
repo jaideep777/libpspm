@@ -33,20 +33,20 @@ typedef double Float;
 //   https://en.wikibooks.org/wiki/Algorithm_Implementation/Linear_Algebra/Tridiagonal_matrix_algorithm
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 inline void thomas_solve(double* a, double* b, double* c, double* d, int n) {
-    n--; // since we start from x0 (not x1) JAI: Therefore last valid index is n for a,b, n-1 for c
-    c[0] /= b[0];
-    d[0] /= b[0];
+	n--; // since we start from x0 (not x1) JAI: Therefore last valid index is n for a,b, n-1 for c
+	c[0] /= b[0];
+	d[0] /= b[0];
 
-    for (int i = 1; i < n; i++) {
-        c[i] /= b[i] - a[i]*c[i-1];
-        d[i] = (d[i] - a[i]*d[i-1]) / (b[i] - a[i]*c[i-1]);
-    }
+	for (int i = 1; i < n; i++) {
+		c[i] /= b[i] - a[i]*c[i-1];
+		d[i] = (d[i] - a[i]*d[i-1]) / (b[i] - a[i]*c[i-1]);
+	}
 
-    d[n] = (d[n] - a[n]*d[n-1]) / (b[n] - a[n]*c[n-1]);
+	d[n] = (d[n] - a[n]*d[n-1]) / (b[n] - a[n]*c[n-1]);
 
-    for (int i = n; i-- > 0;) {
-        d[i] -= c[i]*d[i+1];		// JAI: note, i is in [0, n-1]
-    }
+	for (int i = n; i-- > 0;) {
+		d[i] -= c[i]*d[i+1];		// JAI: note, i is in [0, n-1]
+	}
 }
 
 
@@ -60,22 +60,20 @@ inline void thomas_solve(double* a, double* b, double* c, double* d, int n) {
 //   in the range [0,arrlen) which does not compare less than val.
 //   i.e. index of first element >= val.
 template <typename T>
-int my_lower_bound(const T& val, const T * arr, const int arrlen)
-{
-  int it, first=0, last=arrlen;
-  int count, step;
-  count = arrlen;
-  while (count>0)
-  {
-    it = first; step=count/2; 
-    it += step;
-    if (arr[it] < val) {              
-      first=++it;
-      count-=step+1;
-    }
-    else count=step;
-  }
-  return first;
+int my_lower_bound(const T& val, const T * arr, const int arrlen){
+	int it, first=0, last=arrlen;
+	int count, step;
+	count = arrlen;
+	while (count>0){
+		it = first; step=count/2; 
+		it += step;
+		if (arr[it] < val) {              
+			first=++it;
+			count-=step+1;
+		}
+		else count=step;
+	}
+	return first;
 }
 
 // This is a custom implementation of std::upper_bound() for arrays
@@ -85,22 +83,20 @@ int my_lower_bound(const T& val, const T * arr, const int arrlen)
 //   in the range [0,arrlen) which compares greater than val.
 //   i.e. index of first element > val.
 template <typename T>
-int my_upper_bound(const T& val, T * arr, int arrlen)
-{
-  int it, first=0, last=arrlen;
-  int count, step;
-  count = arrlen;
-  while (count>0)
-  {
-    it = first; step=count/2; 
-    it += step;
-    if (!(val<arr[it])) { 
-      first=++it;
-      count-=step+1;
-    }
-    else count=step;
-  }
-  return first;
+int my_upper_bound(const T& val, T * arr, int arrlen){
+	int it, first=0, last=arrlen;
+	int count, step;
+	count = arrlen;
+	while (count>0){
+		it = first; step=count/2; 
+		it += step;
+		if (!(val<arr[it])) { 
+			first=++it;
+			count-=step+1;
+		}
+		else count=step;
+	}
+	return first;
 }
 
 
@@ -141,7 +137,7 @@ class Spline{
 	   m_x.assign(x.begin(), x.end());
 	   m_y.assign(y.begin(), y.end());
 	   
-	    npoints = x.size();
+		npoints = x.size();
 		m_a.resize(npoints);
 		m_b.resize(npoints);
 		m_c.resize(npoints);
@@ -167,9 +163,9 @@ class Spline{
 	inline void solve_coeffs_linear(){
 		int n = npoints;  
 		for(int i=0; i<n-1; i++) {
-		     m_a[i]=0.0;
-		     m_b[i]=0.0;
-		     m_c[i]=(m_y[i+1]-m_y[i])/(m_x[i+1]-m_x[i]);
+			 m_a[i]=0.0;
+			 m_b[i]=0.0;
+			 m_c[i]=(m_y[i+1]-m_y[i])/(m_x[i+1]-m_x[i]);
 		}
 		m_a[n-1] = m_b[n-1] = 0.0;
 		m_c[n-1] = m_c[n-2];	// fn-1 is same as fn-2 - same line extends right for extrapolation
@@ -184,10 +180,10 @@ class Spline{
 		  std::vector <Float> l(n,0), m(n,0), u(n,0);	// lower, middle, and upper diagonals of thr matrix. These hold coefficients of b{i-1}, b{i}, b{i+1} respectively
 		  std::vector<double>  rhs(n);
 		  for(int i=1; i<n-1; i++) {
-		     l[i] =1.0/3.0*(m_x[i]-m_x[i-1]);
-		     m[i] =2.0/3.0*(m_x[i+1]-m_x[i-1]);
-		     u[i] =1.0/3.0*(m_x[i+1]-m_x[i]);
-		     rhs[i]=(m_y[i+1]-m_y[i])/(m_x[i+1]-m_x[i]) - (m_y[i]-m_y[i-1])/(m_x[i]-m_x[i-1]);
+			 l[i] =1.0/3.0*(m_x[i]-m_x[i-1]);
+			 m[i] =2.0/3.0*(m_x[i+1]-m_x[i-1]);
+			 u[i] =1.0/3.0*(m_x[i+1]-m_x[i]);
+			 rhs[i]=(m_y[i+1]-m_y[i])/(m_x[i+1]-m_x[i]) - (m_y[i]-m_y[i-1])/(m_x[i]-m_x[i-1]);
 		  }
 		  // boundary conditions, zero curvature b[0]=b[n-1]=0
 		  m[0]     = 2.0;
@@ -203,9 +199,9 @@ class Spline{
 
 		  // calculate parameters a[] and c[] based on b[]
 		  for(int i=0; i<n-1; i++) {
-		     m_a[i]=1.0/3.0*(m_b[i+1]-m_b[i])/(m_x[i+1]-m_x[i]);
-		     m_c[i]=(m_y[i+1]-m_y[i])/(m_x[i+1]-m_x[i])
-		            - 1.0/3.0*(2.0*m_b[i]+m_b[i+1])*(m_x[i+1]-m_x[i]);
+			 m_a[i]=1.0/3.0*(m_b[i+1]-m_b[i])/(m_x[i+1]-m_x[i]);
+			 m_c[i]=(m_y[i+1]-m_y[i])/(m_x[i+1]-m_x[i])
+					- 1.0/3.0*(2.0*m_b[i]+m_b[i+1])*(m_x[i+1]-m_x[i]);
 		  }
 		   // for the right boundary we define
 		   // f_{n-1}(x) = b*(x-x_{n-1})^2 + c*(x-x_{n-1}) + y_{n-1}

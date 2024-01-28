@@ -28,15 +28,15 @@ void RKCK45::resize(int new_size){
 void RKCK45::save(std::ostream &fout){
 	fout << "RKCK45::v1\n";
 	fout << std::make_tuple(
-			ht
-			, eps_rel
-			, eps_abs 
-			, xt
-			, t_stop
-			, nok
-			, nbad
-			, nfe
-			, sys_size);
+	            ht
+	            , eps_rel
+	            , eps_abs 
+	            , xt
+	            , t_stop
+	            , nok
+	            , nbad
+	            , nfe
+	            , sys_size);
 	fout << '\n';
 	fout << yscal;
 }
