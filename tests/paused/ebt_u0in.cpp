@@ -13,11 +13,6 @@ std::vector <double> myseq(double from, double to, int len){
 	return x;
 }
 
-std::vector <double> diff(vector <double> breaks){
-	std::vector<double> mids(breaks.size()-1);
-	for (size_t i=0; i<mids.size(); ++i) mids[i] = (breaks[i]+breaks[i+1])/2;
-	return mids;
-}
 
 int main(){
 
@@ -45,7 +40,6 @@ int main(){
 	ofstream fout("ebt_testmodel.txt");
 
 	vector<double> breaks = myseq(0,1,26);
-	vector<double> mids = diff(breaks);
 
 	for (double t=0.05; t <= 8; t=t+0.05) {
 		S.step_to(t);

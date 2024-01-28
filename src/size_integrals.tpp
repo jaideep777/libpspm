@@ -134,7 +134,7 @@ double Solver::integrate_wudx_above(wFunc w, double t, const std::vector<double>
 				x_ge_xlow = x_ge_xlow && spp->getX(i)[k] >= xlow[k];
 			}
 			if (x_ge_xlow){
-				std::vector<double> dx = id_utils::coord_value(id_utils::index(i, spp->dim_centres), spp->h);
+				std::vector<double> dx = utils::tensor::coord_value(utils::tensor::index(i, spp->dim_centres), spp->h);
 				double dV = std::accumulate(dx.begin(), dx.end(), 1.0, std::multiplies<double>()); // TODO: Better to precompute this and store in cohort
 				I += w(i, t)*spp->getU(i)*dV;
 			}
@@ -409,7 +409,7 @@ double Solver::state_integral(wFunc w, double t, int species_id){
 		// integrate using midpoint quadrature rule
 		double I=0;
 		for (unsigned int i=0; i<spp->J; ++i){
-			std::vector<double> dx = id_utils::coord_value(id_utils::index(i, spp->dim_centres), spp->h);
+			std::vector<double> dx = utils::tensor::coord_value(utils::tensor::index(i, spp->dim_centres), spp->h);
 			double dV = std::accumulate(dx.begin(), dx.end(), 1.0, std::multiplies<double>());
 
 			I += w(i, t)*spp->getU(i)*dV;  // TODO: Replace with std::transform after profiling

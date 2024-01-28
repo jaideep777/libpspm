@@ -58,8 +58,8 @@ void Solver::stepU_iFMU(double t, vector<double> &S, vector<double> &dSdt, doubl
 
 		// traverse remaining cells to fill matrix
 		for (int j=1; j<J; ++j){ // loop over all cohorts except the corner cohort
-			vector<int> id = id_utils::index(j, spp->dim_centres); // get cell index. Remember that cells are labelled by upper corner
-			vector<double> Xcell = id_utils::coord_value(id, X); // upper corner value of cell at id
+			vector<int> id = utils::tensor::index(j, spp->dim_centres); // get cell index. Remember that cells are labelled by upper corner
+			vector<double> Xcell = utils::tensor::coord_value(id, X); // upper corner value of cell at id
 
 			// Calculate diagonal elements Aj 
 			double Aj = 1 + spp->mortalityRate(j,t,env)*dt;
@@ -83,11 +83,11 @@ void Solver::stepU_iFMU(double t, vector<double> &S, vector<double> &dSdt, doubl
 					id[m] == spp->dim_centres[m]-1 ){ 
 					if (id[m] == 0) continue; // This term is 0 if id[m] = 0, so do nothing.
 					
-					int j_minus_1m = id_utils::loc_minus1k(id, m, spp->dim_centres);
+					int j_minus_1m = utils::tensor::loc_minus1k(id, m, spp->dim_centres);
 					M[j][j_minus_1m] = -growthArray[j_minus_1m][m]*dt/h[m][id[m]];
 				}
 				else{ // else use forward difference when growth rate is negative
-					int j_plus_1m = id_utils::loc_plus1k(id, m, spp->dim_centres);
+					int j_plus_1m = utils::tensor::loc_plus1k(id, m, spp->dim_centres);
 					M[j][j_plus_1m] = growthArray[j_plus_1m][m]*dt/h[m][id[m]+1];
 				}
 			}

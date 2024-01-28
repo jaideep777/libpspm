@@ -42,12 +42,12 @@ void Solver::calcRates_FMU(double t, vector<double>::iterator S, vector<double>:
 		// This growthArray calculation works for nD
 		vector <vector<double>> growthArray(spp->n_grid_edges); // We will find growth rates at all cell-edge intersections 
 		for (int i=0; i<spp->n_grid_edges; ++i){ // index i runs over gridcell edge intersections
-			vector<int> id_edge = id_utils::index(i, spp->dim_edges); // edge intersection index
-			vector<double> x_edge = id_utils::coord_value(id_edge, x);
+			vector<int> id_edge = utils::tensor::index(i, spp->dim_edges); // edge intersection index
+			vector<double> x_edge = utils::tensor::coord_value(id_edge, x);
 
 			vector<int> id_centre(id_edge.size()); // gridcell centre closest to desired intersection 
 			std::transform(id_edge.cbegin(), id_edge.cend(), id_centre.begin(), [](int x){return x-1;}); // grid centre to use for edge 'id_edge' is located at 'id_edge - 1' (one less along each dimension) 
-			int j_centre = id_utils::location(id_centre, spp->dim_centres);
+			int j_centre = utils::tensor::location(id_centre, spp->dim_centres);
 
 			bool is_boundary = std::accumulate(id_edge.begin(), id_edge.end(), 1, std::multiplies<double>()) == 0; // cell edge is on boundary if product of indices is 0 
 			if (is_boundary){ // use boundary cohort for all edges on boundary
@@ -112,7 +112,7 @@ void Solver::calcRates_FMU(double t, vector<double>::iterator S, vector<double>:
 		// [S S S u u u u u a b c a b c a b c a b c a b c] <--- full SV for species is this
 		//        ^ itr, its. Therefore, advance 1 at a time while setting dUdt, and advance its by 3*5 after.
 		for (int i=0; i<spp->J; ++i){ // dU[i] ~ u[i+1] <-- U[i],U[i-1], u[i] <-- U[i-1],U[i-2]
-			vector<int> id = id_utils::index(i, spp->dim_centres);
+			vector<int> id = utils::tensor::index(i, spp->dim_centres);
 			
 			// compute the growth rate gradient at index id
 			std::vector<double> growth_grad(id.size());
@@ -120,8 +120,8 @@ void Solver::calcRates_FMU(double t, vector<double>::iterator S, vector<double>:
 				std::vector<int>id_plus = id;
 				id_plus[k] += 1;
 
-				int j_plus   = id_utils::location(id_plus, spp->dim_edges);
-				int j_centre = id_utils::location(id, spp->dim_edges);
+				int j_plus   = utils::tensor::location(id_plus, spp->dim_edges);
+				int j_centre = utils::tensor::location(id, spp->dim_edges);
 
 				growth_grad[k] = (growthArray[j_plus][k]*u[j_plus] - growthArray[j_centre][k]*u[j_centre]) / (x[k][id_plus[k]] - x[k][id[k]]);
 			}

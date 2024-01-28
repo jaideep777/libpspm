@@ -114,7 +114,7 @@ std::vector<double> Solver::getDensitySpecies1D(int k, int dim, const std::vecto
 			double x = spp->getX(i)[dim];
 			double U = spp->getU(i);
 			
-			std::vector<double> dx = id_utils::coord_value(id_utils::index(i, spp->dim_centres), spp->h);
+			std::vector<double> dx = utils::tensor::coord_value(utils::tensor::index(i, spp->dim_centres), spp->h);
 			double dV = std::accumulate(dx.begin(), dx.end(), 1.0, std::multiplies<double>()); 
 
 			int current_interval = std::upper_bound(spp->X[dim].begin(), spp->X[dim].end(), x) - spp->X[dim].begin() -1; // this assumes breaks is sorted ascending
@@ -194,7 +194,7 @@ std::vector<double> Solver::getDensitySpecies1D(int k, int dim, const std::vecto
 // 			// while(breaks[current_interval]>x) --current_interval; // decrement interval until x fits
 // 			// cout << current_interval << ", x = " << x << "(" << N << ") in [" << breaks[current_interval] << ", " << breaks[current_interval+1] << "]\n"; cout.flush();
 // 			if (N>0){
-// 				int loc = id_utils::location(current_interval, dims);
+// 				int loc = utils::tensor::location(current_interval, dims);
 // 				points[loc].abund += N;
 // 				points[loc].count += 1;
 // 				points[loc].xmean_vec.resize(axes.size());
