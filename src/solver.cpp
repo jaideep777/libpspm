@@ -13,44 +13,6 @@
 using namespace std;
 
 
-inline std::vector <double> seq(double from, double to, int len){
-	std::vector<double> x(len);
-	for (size_t i=0; i<len; ++i) x[i] = from + i*(to-from)/(len-1);
-	return x;
-}
-
-inline std::vector <double> logseq(double from, double to, int len){
-	std::vector<double> x(len);
-	for (size_t i=0; i<len; ++i) x[i] = exp(log(from) + i*(log(to)-log(from))/(len-1));
-	return x;
-}
-
-inline std::vector <double> mids(const vector <double>& breaks){
-	std::vector<double> a(breaks.size()-1);
-	for (size_t i=0; i<a.size(); ++i) a[i] = (breaks[i]+breaks[i+1])/2;
-	return a;
-}
-
-inline std::vector <double> left_edge(const vector <double>& breaks){
-	std::vector<double> a(breaks.size()-1);
-	for (size_t i=0; i<a.size(); ++i) a[i] = breaks[i];
-	return a;
-}
-
-inline std::vector <double> right_edge(const vector <double>& breaks){
-	std::vector<double> a(breaks.size()-1);
-	for (size_t i=0; i<a.size(); ++i) a[i] = breaks[i+1];
-	return a;
-}
-
-inline std::vector <double> diff(const vector <double>& breaks){
-	std::vector<double> a(breaks.size()-1);
-	for (size_t i=0; i<a.size(); ++i) a[i] = breaks[i+1]-breaks[i];
-	return a;
-}
-
-
-
 // ~~~~~~~~~~~ SOLVER ~~~~~~~~~~~~~~~~~~~~~
 
 std::map<std::string, PSPM_SolverType> Solver::methods_map = 

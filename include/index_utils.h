@@ -144,4 +144,47 @@ void apply_permutation_in_place(std::vector<T>& vec, const std::vector<std::size
 }
 
 
+// FIXME: 
+// Define these in global namespace for now, 
+// just for merging generic_nd into develop. Later, 
+// all utilities should be streamlined
+
+inline std::vector <double> seq(double from, double to, int len){
+	std::vector<double> x(len);
+	for (size_t i=0; i<len; ++i) x[i] = from + i*(to-from)/(len-1);
+	return x;
+}
+
+inline std::vector <double> logseq(double from, double to, int len){
+	std::vector<double> x(len);
+	for (size_t i=0; i<len; ++i) x[i] = exp(log(from) + i*(log(to)-log(from))/(len-1));
+	return x;
+}
+
+inline std::vector <double> mids(const std::vector <double>& breaks){
+	std::vector<double> a(breaks.size()-1);
+	for (size_t i=0; i<a.size(); ++i) a[i] = (breaks[i]+breaks[i+1])/2;
+	return a;
+}
+
+inline std::vector <double> left_edge(const std::vector <double>& breaks){
+	std::vector<double> a(breaks.size()-1);
+	for (size_t i=0; i<a.size(); ++i) a[i] = breaks[i];
+	return a;
+}
+
+inline std::vector <double> right_edge(const std::vector <double>& breaks){
+	std::vector<double> a(breaks.size()-1);
+	for (size_t i=0; i<a.size(); ++i) a[i] = breaks[i+1];
+	return a;
+}
+
+inline std::vector <double> diff(const std::vector <double>& breaks){
+	std::vector<double> a(breaks.size()-1);
+	for (size_t i=0; i<a.size(); ++i) a[i] = breaks[i+1]-breaks[i];
+	return a;
+}
+
+
+
 #endif

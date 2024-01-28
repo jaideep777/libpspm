@@ -13,12 +13,6 @@ std::vector <double> myseq(double from, double to, int len){
 	return x;
 }
 
-std::vector <double> diff(vector <double> breaks){
-	std::vector<double> mids(breaks.size()-1);
-	for (size_t i=0; i<mids.size(); ++i) mids[i] = (breaks[i]+breaks[i+1])/2;
-	return mids;
-}
-
 int main(){
 
 	Species<TestModel> spp;
