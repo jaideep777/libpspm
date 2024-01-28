@@ -26,6 +26,7 @@ int main(){
 	S.control.max_cohorts = 26;
 	S.control.update_cohorts = true;
 	S.control.cm_remove_cohorts = true;
+	S.control.cohort_insertion_dt = 0.05;
 	S.addSpecies({25}, {0}, {1}, {false}, &spp, 4, -1);
 	S.print();
 	//for (auto s : S.state) cout << s << " "; cout << endl;

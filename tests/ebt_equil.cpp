@@ -22,6 +22,7 @@ int main(){
 
 	Solver S(SOLVER_EBT);
 	S.control.ebt_grad_dx = 0.001;
+	S.control.cohort_insertion_dt = 0.05;
 	S.setEnvironment(&E);
 	S.addSpecies({25}, {0}, {1}, {false}, &spp, 4, -1);
 

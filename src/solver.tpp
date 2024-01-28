@@ -26,31 +26,46 @@ void Solver::step_to(double tstop, AfterStepFunc &afterStep_user){
 		afterStep_user(t);
 	};
 
-	// NOTE: This does a semi implicit update of system variables, as follows:
-	// This gives better reults that using only dSdt0 to step the s-state (tested with the Daphnia model) 
-	//   t0 -----------------> t+ -------------------> t1
-	//   X0,U0 --------------> X1,U1 ----------------> X1,U1
-	//   M0 -----------------> M1 -------------------> M1
-	//   S0 --------------------+-----------------+--> S1 = f((dSdt0 + dSdt+)/2)
-	//    +-- E0(X0,U0,S0) -->  +-- E+(X1,U1,S0) -^-->  +-- E1(X1,U1,S1)
-	//    +-- dSdt0(E0,S0) -->  +-- dSdt+(E+,S0) -^-->  +-- dSdt1(E0,S0)
-	// 
-	if (method == SOLVER_IEBT){ 
-		stepTo_implicit(tstop, after_step, &Solver::stepU_iEBT);
+	if (method == SOLVER_EBT || method == SOLVER_IEBT){ 
+		if (debug) std::cout << "~~~~ start step: " << current_time	<< " --> " << tstop << "\n";
+		while(current_time < tstop){
+			double tnext = std::fmin(tstop, t_next_cohort_insertion);
 
-		// update cohorts
-		mergeCohorts_EBT();
-		removeDeadCohorts_EBT();
-		addCohort_EBT();  // Add new cohort if N0 > 0. Add after removing dead ones otherwise this will also be removed. 
+			if (debug) std::cout << std::setprecision(12) << "Stepping: " << current_time << " --> " << tnext << '\n';
+			if (method == SOLVER_IEBT) stepTo_implicit(tnext, after_step, &Solver::stepU_iEBT);
+			if (method == SOLVER_EBT)  stepTo_explicit(tnext, after_step, &Solver::calcRates_EBT);
+
+			if (current_time >= t_next_cohort_insertion){ //} (fabs(current_time - t_next_cohort_insertion)<1e-12){
+				if (debug) std::cout << std::setprecision(12) << "updating cohorts (" << current_time << ")\n";
+				// update cohorts
+				mergeCohorts_EBT();
+				removeDeadCohorts_EBT();
+				addCohort_EBT();  // Add new cohort if N0 > 0. Add after removing dead ones otherwise this will also be removed. 
+				t_next_cohort_insertion += control.cohort_insertion_dt;
+			}			
+
+		}
 	}
 
-	if (method == SOLVER_ICM){
-		stepTo_implicit(tstop, after_step, &Solver::stepU_iCM);
+	if (method == SOLVER_CM || method == SOLVER_ICM){
+		if (debug) std::cout << "~~~~ start step: " << current_time	<< " --> " << tstop << "\n";
+		while(current_time < tstop){
+			double tnext = std::fmin(tstop, t_next_cohort_insertion);
 
-		// update cohorts
-		if (control.update_cohorts){
-			addCohort_CM();		// add before so that it becomes boundary cohort and first internal cohort can be (potentially) removed
-			removeCohort_CM();
+			if (debug) std::cout << std::setprecision(12) << "Stepping: " << current_time << " --> " << tnext << '\n';
+			if (method == SOLVER_ICM) stepTo_implicit(tnext, after_step, &Solver::stepU_iCM);
+			if (method == SOLVER_CM)  stepTo_explicit(tnext, after_step, &Solver::calcRates_CM);
+
+			if (current_time >= t_next_cohort_insertion){ //} (fabs(current_time - t_next_cohort_insertion)<1e-12){
+				if (debug) std::cout << std::setprecision(12) << "updating cohorts (" << current_time << ")\n";
+				// update cohorts
+				if (control.update_cohorts){
+					addCohort_CM();		// add before so that it becomes boundary cohort and first internal cohort can be (potentially) removed
+					removeCohort_CM();
+				}
+				t_next_cohort_insertion += control.cohort_insertion_dt;
+			}			
+
 		}
 	}
 
@@ -62,34 +77,11 @@ void Solver::step_to(double tstop, AfterStepFunc &afterStep_user){
 		stepTo_explicit(tstop, after_step, &Solver::calcRates_FMU);
 	}
 	
-	if (method == SOLVER_EBT){
-		stepTo_explicit(tstop, after_step, &Solver::calcRates_EBT);
-		
-		// update cohorts
-		mergeCohorts_EBT();
-		removeDeadCohorts_EBT();
-		addCohort_EBT();  // Add new cohort if N0 > 0. Add after removing dead ones otherwise this will also be removed. 
-	}
-	
-
-	if (method == SOLVER_CM){
-		stepTo_explicit(tstop, after_step, &Solver::calcRates_CM);
-		
-		// update cohorts
-		if (control.update_cohorts){
-			addCohort_CM();		// add before so that it becomes boundary cohort and first internal cohort can be (potentially) removed
-			removeCohort_CM();
-		}
-		//env->computeEnv(current_time, this); // is required here IF rescaleEnv is used in derivs
-	}
-	
-
 	if (method == SOLVER_ABM){	
 		stepTo_abm(tstop, after_step);
 	}
 
 	// std::cout << "Finished step to " <<std::endl;
-
 }
 
 
@@ -107,10 +99,20 @@ void Solver::stepTo_explicit(double tstop, AfterStepFunc &afterStep, calcRatesPo
 }
 
 
+// NOTE: This does a semi implicit update of system variables, as follows:
+// This gives better reults that using only dSdt0 to step the s-state (tested with the Daphnia model) 
+//   t0 -----------------> t+ -------------------> t1
+//   X0,U0 --------------> X1,U1 ----------------> X1,U1
+//   M0 -----------------> M1 -------------------> M1
+//   S0 --------------------+-----------------+--> S1 = f((dSdt0 + dSdt+)/2)
+//    +-- E0(X0,U0,S0) -->  +-- E+(X1,U1,S0) -^-->  +-- E1(X1,U1,S1)
+//    +-- dSdt0(E0,S0) -->  +-- dSdt+(E+,S0) -^-->  +-- dSdt1(E0,S0)
+// 
 template<typename AfterStepFunc>
 void Solver::stepTo_implicit(double tstop, AfterStepFunc &afterStep, stepUPointer step_u_func){
 	while (current_time < tstop){
-		double dt = std::min(control.ode_ifmu_stepsize, tstop-current_time);
+		double dt = std::fmin(control.ode_ifmu_stepsize, tstop-current_time);
+		// std::cout << "   implicit step: " << current_time << " --> " << current_time + dt << "\n";
 		
 		//copyStateToCohorts(state.begin()); // not needed here because it is called by the odestepper below
 		updateEnv(current_time, state.begin(), rates.begin()); // this computes E0, dSdt0

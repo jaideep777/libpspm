@@ -84,6 +84,7 @@ class Solver{
 	private:
 	std::vector<double> pi0;
 	double N0;
+	double t_next_cohort_insertion = 0;
 
 	void realizeEbtBoundaryCohort(Species_Base * spp);
 	// void realizeEbtnBoundaryCohort(Species_Base * spp);

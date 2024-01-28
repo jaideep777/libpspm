@@ -24,6 +24,7 @@ int main(){
 	//S.control.ode_method = "rk4";
 	//S.control.ode_rk4_stepsize = 0.01;
 	S.control.ode_ifmu_stepsize = 0.001;
+	S.control.cohort_insertion_dt = 0.05;
 	S.setEnvironment(&E);
 	S.addSpecies({25}, {0}, {1}, {false}, &spp, 4, -1);
 
@@ -53,7 +54,7 @@ int main(){
 
 	fout.close();
 
-	S.print();	
+	// S.print();	
 	cout << S.u0_out(S.current_time)[0] << endl;
 	// if (abs(S.u0_out(S.current_time)[0]-0.999487) < 2e-5) return 0; // 1D version gave this answer
 	if (abs(S.u0_out(S.current_time)[0]-0.9995) < 2e-5) return 0; // nD version gives this answer
