@@ -42,7 +42,7 @@ par(mar=c(4,4,1,1), oma = c(1,4,2,1), cex.lab=1.2, cex.axis=1.2)
 layout(mat = matrix(1:24, nrow=3, byrow=F))
 
 plot_dists("outputs/fmu", "FMU", T)
-# plot_dists("outputs/ifmu", "IFMU")
+plot_dists("outputs/ifmu", "IFMU")
 # plot_dists("outputs/ifmu2", "ILUD")
 plot_dists("outputs/ebt", "EBT")
 plot_dists("outputs/iebt", "IEBT")
@@ -55,7 +55,7 @@ dev.off()
 
 setwd(dir)
 seeds_fmu = read.delim("outputs/fmu/seed_rains.txt", header = F)
-# seeds_ifmu = read.delim("outputs/ifmu/seed_rains.txt", header = F)
+seeds_ifmu = read.delim("outputs/ifmu/seed_rains.txt", header = F)
 # seeds_ifmu2 = read.delim("outputs/ifmu2/seed_rains.txt", header = F)
 seeds_ebt = read.delim("outputs/ebt/seed_rains.txt", header = F)
 seeds_iebt = read.delim("outputs/iebt/seed_rains.txt", header = F)
@@ -65,7 +65,7 @@ seeds_abm = read.delim("outputs/abm/seed_rains.txt", header = F)
 
 # cols_m = c("purple", "green3", "mediumspringgreen", "darkgoldenrod2", "red3", "pink", "#2b8cbe")
 cols_m = c("darkgreen", 
-           # "yellowgreen", 
+           "yellowgreen",
            # "green3", 
            "magenta", 
            "purple", 
@@ -73,7 +73,7 @@ cols_m = c("darkgreen",
            "darkgoldenrod3", 
            "turquoise2")
 names = c("FMU", 
-          # "IFMU", 
+          "IFMU",
           # "ILUD", 
           "EBT", 
           "IEBT", 
@@ -86,10 +86,10 @@ plot_seeds = function(y, title, ...){
   mtext(title, line=1)
 }
 
-cairo_pdf("../seed_rains_noFeedback.pdf", width = 6.6, height=7.66)
+# cairo_pdf("../seed_rains_noFeedback.pdf", width = 6.6, height=7.66)
 par(mfrow=c(3,1), mar = c(4,4,1,1), oma = c(1,1,4,1), cex.lab=1.2, cex.axis=1.2)
 plot_seeds(cbind(seeds_fmu$V2, 
-                 # seeds_ifmu$V2, 
+                 seeds_ifmu$V2,
                  # seeds_ifmu2$V2, 
                  seeds_ebt$V2, 
                  seeds_iebt$V2, 
@@ -100,7 +100,7 @@ plot_seeds(cbind(seeds_fmu$V2,
 legend(x = 60, y=400, legend = names[1:4], col=cols_m[1:4], lwd=2, bty = "n", cex=1.3)
 legend(x = 80, y=400, legend = names[5:8], col=cols_m[5:8], lwd=2, bty = "n", cex=1.3)
 plot_seeds(cbind(seeds_fmu$V3, 
-                 # seeds_ifmu$V3, 
+                 seeds_ifmu$V3,
                  # seeds_ifmu2$V3, 
                  seeds_ebt$V3, 
                  seeds_iebt$V3, 
@@ -109,7 +109,7 @@ plot_seeds(cbind(seeds_fmu$V3,
                  seeds_abm$V3), 
            "Species 2", xlab="", lwd=2, ylim=c(00,1000))
 plot_seeds(cbind(seeds_fmu$V4, 
-                 # seeds_ifmu$V4, 
+                 seeds_ifmu$V4,
                  # seeds_ifmu2$V4, 
                  seeds_ebt$V4, 
                  seeds_iebt$V4, 
@@ -117,7 +117,7 @@ plot_seeds(cbind(seeds_fmu$V4,
                  seeds_icm$V4, 
                  seeds_abm$V4), 
            "Species 3", xlab="Time (years)", lwd=2, ylim=c(00,1200))
-dev.off()
+# dev.off()
 
 
 

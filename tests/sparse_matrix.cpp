@@ -97,5 +97,24 @@ int main() {
 	if (!are_equal(X(2), 1.4)) return 1;
 	if (!are_equal(X(3), -0.7)) return 1;
 
+
+    // Get the lower, diagonal, and upper diagonals
+    SparseMatrixType M = sparse_matrix;
+	Eigen::VectorXd l(M.rows());  // Size is one less than the number of rows
+    Eigen::VectorXd d(M.rows());
+    Eigen::VectorXd u(M.rows());
+
+    // Extract diagonals
+    l(0) = 0;
+	for (int i = 0; i < M.rows()-1; ++i) l(i+1) = M.coeff(i+1, i);
+    for (int i = 0; i < M.rows();   ++i) d(i)   = M.coeff(i, i);
+    for (int i = 0; i < M.rows()-1; ++i) u(i)   = M.coeff(i, i+1);
+	u(M.rows()-1) = 0;
+
+	std::cout << "l:\n" << l << std::endl;
+	std::cout << "d:\n" << d << std::endl;
+	std::cout << "u:\n" << u << std::endl;
+
+
     return 0;
 }

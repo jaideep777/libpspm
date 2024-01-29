@@ -14,6 +14,7 @@ u_ifmu = read.delim("~/codes/libpspm/ifmu2d_u.txt")
 u1_ifmu = read.delim("~/codes/libpspm/ifmu2d_u1.txt")
 dx_ifmu = read.delim("~/codes/libpspm/ifmu_wave_x.txt", header=F)
 dy_ifmu = read.delim("~/codes/libpspm/ifmu_wave_y.txt", header=F)
+plot_model(u_ifmu, u1_ifmu, dx_ifmu, dy_ifmu, dV, title="IFMU")
 
 u_abm = read.delim("~/codes/libpspm/abm2d_u.txt")
 u1_abm = read.delim("~/codes/libpspm/abm2d_u1.txt")
@@ -52,7 +53,7 @@ plot_model = function(u, u1, dx, dy, dV=1, title){
   #                    align="hv", axis = "lbrt")
   # )
 
-  cairo_pdf(paste0(title, "_2d_wave.pdf"))
+  # cairo_pdf(paste0(title, "_2d_wave.pdf"))
   print(
   cowplot::plot_grid(
     p2+theme_classic()+labs(x="", y="U(y)")+scale_y_reverse()+theme(axis.text.y = element_blank())+scale_x_continuous(position="top")+ggtitle(paste0("\n",title)), 
@@ -61,7 +62,7 @@ plot_model = function(u, u1, dx, dy, dV=1, title){
     p1+theme_classic()+labs(x="", y="U(x)")+scale_y_reverse()+theme(axis.text.x = element_blank())+scale_x_continuous(position="top"),
     align="hv", axis = "lbrt", greedy = T)
   )
-  dev.off()
+  # dev.off()
 }
 
 plot_model(u_iebt, u1_iebt, dx_iebt, dy_iebt, title="IEBT")

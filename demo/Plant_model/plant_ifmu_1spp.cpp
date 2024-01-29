@@ -9,6 +9,7 @@ using namespace std;
 #include "pspm_plant.h"
 
 vector<double> fmu_create_grid(double xmin, double xmax, double dxmin = 1e-4, double dxmax=0.02, double multiplier=1.05){
+// vector<double> fmu_create_grid(double xmin, double xmax, double dxmin = 1e-2, double dxmax=0.1, double multiplier=1.05){
 	vector <double> xvec;
 	double x = xmin, dx = dxmin;
 	while(x<xmax){

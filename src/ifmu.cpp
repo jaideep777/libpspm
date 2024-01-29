@@ -2,16 +2,22 @@
 #include <fstream>
 #include "solver.h"
 #include "index_utils.h"
-#include "linear_system.h"
+// #include "linear_system.h"
+#include <Eigen/Sparse>
+
 using namespace std;
 
+using SparseMatrix = Eigen::SparseMatrix<double>;
+using Triplet = Eigen::Triplet<double>;
+using Vector = Eigen::VectorX<double>;
 
 // Note: This IFMU solver works only for non-negative growth functions
 void Solver::stepU_iFMU(double t, vector<double> &S, vector<double> &dSdt, double dt){
 	
 	// static matrixes for solving MU=Z
-	static Matrix M;
-	static vector<double> Z;
+	static SparseMatrix M;
+	static Vector Z;
+	std::vector<Triplet> triplets;
 
 	vector<double>::iterator its = S.begin() + n_statevars_system; // Skip system variables
 	
@@ -40,20 +46,24 @@ void Solver::stepU_iFMU(double t, vector<double> &S, vector<double> &dSdt, doubl
 		}
 		//cout << t << "\t | B*pe = " << calcSpeciesBirthFlux(s,t) << " * " << pe << " -> " << birthFlux << "\n";
 
-		// FIXME: Eventually replace this with a standard sparse matrix library
 		// Resize matrix to correct dims (J x J) and fill it with zeros
-		M.clear();
-		M.resize(J);
-		for (auto &m : M) m.resize(J, 0);
-		Z.clear(); Z.resize(J, 0);
+		// M.clear();
+		// M.resize(J);
+		// for (auto &m : M) m.resize(J, 0);
+		// Z.clear(); Z.resize(J, 0);
+		triplets.clear();
+		triplets.reserve((pow(2,spp->istate_size)+1)*J); // each element wil lhave entries for itself and 2 (+/-) along each state dimension
+		Z.resize(J);
 
 		// handle boundary condition at corner cell
 		double dV = 1; 
 		for (int ih=0; ih<h.size(); ++ih) dV *= h[ih][0]; // calc volume of corner cell
 		double A0 = 1 + spp->mortalityRate(0,t,env)*dt;
 		for (int m=0; m<spp->istate_size; ++m) A0 += growthArray[0][m]*dt/h[m][0];
-		M[0][0] = A0;
-		Z[0] = U[0] + birthFlux/dV*dt;
+		// M[0][0] = A0;
+		// Z[0] = U[0] + birthFlux/dV*dt;
+		triplets.emplace_back(0,0,A0);
+		Z(0) = U[0] + birthFlux/dV*dt;
 		// cout << "B = " << birthFlux << '\n';
 
 		// traverse remaining cells to fill matrix
@@ -73,8 +83,10 @@ void Solver::stepU_iFMU(double t, vector<double> &S, vector<double> &dSdt, doubl
 					Aj -= growthArray[j][m]*dt/h[m][id[m]+1];
 				}
 			}
-			M[j][j] = Aj;
-			Z[j] = U[j];
+			// M[j][j] = Aj;
+			// Z[j] = U[j];
+			triplets.emplace_back(j,j,Aj);
+			Z(j) = U[j];
 
 			// Calculate off-diagonal elements
 			for (int m=0; m<spp->istate_size; ++m){
@@ -84,17 +96,26 @@ void Solver::stepU_iFMU(double t, vector<double> &S, vector<double> &dSdt, doubl
 					if (id[m] == 0) continue; // This term is 0 if id[m] = 0, so do nothing.
 					
 					int j_minus_1m = utils::tensor::loc_minus1k(id, m, spp->dim_centres);
-					M[j][j_minus_1m] = -growthArray[j_minus_1m][m]*dt/h[m][id[m]];
+					// M[j][j_minus_1m] = -growthArray[j_minus_1m][m]*dt/h[m][id[m]];
+					triplets.emplace_back(j,j_minus_1m, -growthArray[j_minus_1m][m]*dt/h[m][id[m]]);
 				}
 				else{ // else use forward difference when growth rate is negative
 					int j_plus_1m = utils::tensor::loc_plus1k(id, m, spp->dim_centres);
-					M[j][j_plus_1m] = growthArray[j_plus_1m][m]*dt/h[m][id[m]+1];
+					// M[j][j_plus_1m] = growthArray[j_plus_1m][m]*dt/h[m][id[m]+1];
+					triplets.emplace_back(j,j_plus_1m, growthArray[j_plus_1m][m]*dt/h[m][id[m]+1]);
 				}
 			}
 		}
 
-		Vector Unew = lupSolve(M, Z); // FIXME: Replace with Eigen or suchlike
+		// Vector Unew = lupSolve(M, Z); // [resolved] FIXME: Replace with Eigen or suchlike
+		M.resize(J,J);
+		M.setFromTriplets(triplets.begin(), triplets.end());
+		
+		Eigen::SparseLU<SparseMatrix> solver;
+		solver.compute(M);
+		Vector Unew = solver.solve(Z);
 		for (int i=0; i<J; ++i) U[i] = Unew[i];
+
 
 		// // ~~~ Old method ~~~
 		// double B0  = 1 + dt/h[0][0]*growthArray[0][0] + dt*spp->mortalityRate(0, t, env);
@@ -151,3 +172,24 @@ void Solver::stepU_iFMU(double t, vector<double> &S, vector<double> &dSdt, doubl
 }
 
 
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// the following code uses tridiagonal solver in 1D cases,
+// but I did not see any speedup over Eigen's sparse 
+// routines
+/*
+		if (spp->istate_size == 1){
+			std::vector<double> l(M.rows());
+			std::vector<double> d(M.rows());
+			std::vector<double> u(M.rows());
+
+			// Extract diagonals
+			l[0] = 0;
+			for (int i = 0; i < M.rows()-1; ++i) l[i+1] = M.coeff(i+1, i);
+			for (int i = 0; i < M.rows();   ++i) d[i]   = M.coeff(i, i);
+			for (int i = 0; i < M.rows()-1; ++i) u[i]   = M.coeff(i, i+1);
+			u[M.rows()-1] = 0;
+
+			thomas_solve(l.data(),d.data(),u.data(),Z.data(),J);
+			for (int i=0; i<J; ++i) U[i] = Z[i];
+		}
+*/
