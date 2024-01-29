@@ -15,7 +15,7 @@ AR = ar
 #CUDA_INSTALL_PATH ?= /usr/local/cuda#-5.0
 
 # include and lib dirs (esp for cuda)
-INC_PATH := -I./include -I./tensorlib/include
+INC_PATH := -I./include -I./tensorlib/include -I/usr/include/eigen3
 LIB_PATH := -L./lib 
 
 PROFILING_FLAGS = -g -pg
