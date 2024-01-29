@@ -86,7 +86,7 @@ plot_seeds = function(y, title, ...){
   mtext(title, line=1)
 }
 
-# cairo_pdf("../seed_rains_noFeedback.pdf", width = 6.6, height=7.66)
+cairo_pdf("../seed_rains_noFeedback.pdf", width = 6.6, height=7.66)
 par(mfrow=c(3,1), mar = c(4,4,1,1), oma = c(1,1,4,1), cex.lab=1.2, cex.axis=1.2)
 plot_seeds(cbind(seeds_fmu$V2, 
                  seeds_ifmu$V2,
@@ -117,7 +117,7 @@ plot_seeds(cbind(seeds_fmu$V4,
                  seeds_icm$V4, 
                  seeds_abm$V4), 
            "Species 3", xlab="Time (years)", lwd=2, ylim=c(00,1200))
-# dev.off()
+dev.off()
 
 
 
@@ -190,7 +190,7 @@ plot_seeds(cbind(seeds_fmu$V4,
 
 setwd(dir)
 seeds_fmu = read.delim("outputs/fmu_f3/seed_rains.txt", header = F)
-# seeds_ifmu = read.delim("outputs/ifmu_f3/seed_rains.txt", header = F)
+seeds_ifmu = read.delim("outputs/ifmu_f3/seed_rains.txt", header = F)
 # seeds_ifmu2 = read.delim("outputs/ifmu2_f/seed_rains.txt", header = F)
 seeds_ebt = read.delim("outputs/ebt_f3/seed_rains.txt", header = F)
 seeds_iebt = read.delim("outputs/iebt_f3/seed_rains.txt", header = F)
@@ -198,8 +198,8 @@ seeds_cm = read.delim("outputs/cm_f3/seed_rains.txt", header = F)
 # seeds_icm = read.delim("outputs/icm_f3/seed_rains.txt", header = F)
 # seeds_abm = read.delim("outputs/abm_f3/seed_rains.txt", header = F)
 
-cols_m1 = cols_m[c(1:4, 6)]
-names1 = names[c(1:4, 6)]
+cols_m1 = cols_m[c(1:5, 7)]
+names1 = names[c(1:5, 7)]
 
 plot_seeds = function(y, title, ...){
   matplot(y = y, x=seeds_fmu$V1, type="l", lty=1, col=scales::alpha(cols_m1, alpha=0.7), ylab="Seed rain", ...)
@@ -209,16 +209,16 @@ plot_seeds = function(y, title, ...){
 cairo_pdf("../seed_rains_withFeedback_t400.pdf", width = 6.6, height=7.66)
 par(mfrow=c(3,1), mar = c(4,4,1,1), oma = c(1,1,4,1), cex.lab=1.2, cex.axis=1.2)
 plot_seeds(cbind(seeds_fmu$V2, 
-                 # seeds_ifmu$V2, 
+                 seeds_ifmu$V2,
                  seeds_ebt$V2, 
                  seeds_iebt$V2, 
                  seeds_cm$V2
                  # seeds_abm$V2
                  ), 
            "Species 1", xlab="", lwd=2)
-legend(x = 320, y=90, legend = names1, col=cols_m1, lwd=2, bty = "n", cex=1.3)
+legend(x = 320, y=60, legend = names1, col=cols_m1, lwd=2, bty = "n", cex=1.3)
 plot_seeds(cbind(seeds_fmu$V3, 
-                 # seeds_ifmu$V3, 
+                 seeds_ifmu$V3,
                  seeds_ebt$V3, 
                  seeds_iebt$V3, 
                  seeds_cm$V3
@@ -226,7 +226,7 @@ plot_seeds(cbind(seeds_fmu$V3,
                  ), 
            "Species 2", xlab="", lwd=2)
 plot_seeds(cbind(seeds_fmu$V4, 
-                 # seeds_ifmu$V4, 
+                 seeds_ifmu$V4,
                  seeds_ebt$V4, 
                  seeds_iebt$V4, 
                  seeds_cm$V4
@@ -253,28 +253,28 @@ seeds_ifmu = read.delim("outputs/ifmu_f3_ic/seed_rains.txt", header = F)
 seeds_iebt = read.delim("outputs/iebt_f3_ic/seed_rains.txt", header = F)
 # seeds_abm = read.delim("outputs/abm_f3/seed_rains.txt", header = F)
 
-cols_m1 = cols_m[c(4)]
+cols_m2 = cols_m[c(2,4)]
 
 plot_seeds = function(y, title, ...){
-  matplot(y = y, x=seeds_iebt$V1, type="l", lty=1, col=scales::alpha(cols_m1, alpha=0.7), ylab="Seed rain", ...)
+  matplot(y = y, x=seeds_iebt$V1, type="l", lty=1, col=scales::alpha(cols_m2, alpha=0.7), ylab="Seed rain", ...)
   mtext(title, line=1)
 }
 
-# cairo_pdf("../seed_rains_withFeedback_u0.pdf", width = 6.6, height=7.66)
+cairo_pdf("../seed_rains_withFeedback_u0.pdf", width = 6.6, height=7.66)
 par(mfrow=c(3,1), mar = c(4,4,1,1), oma = c(1,1,4,1), cex.lab=1.2, cex.axis=1.2)
 plot_seeds(cbind(
-  # seeds_ifmu$V2, 
+  seeds_ifmu$V2,
   seeds_iebt$V2
-  ), "Species 1", xlab="", lwd=2)
+  ), "Species 1", xlab="", lwd=2, xlim=c(0,200))
 plot_seeds(cbind(
-  # seeds_ifmu$V3, 
+  seeds_ifmu$V3,
   seeds_iebt$V3
-  ), "Species 2", xlab="", lwd=2)
-legend(x = 160, y=275, legend = c("IFMU", "IEBT"), col=cols_m1, lwd=2, bty = "n", cex=1.3)
+  ), "Species 2", xlab="", lwd=2, xlim=c(0,200))
+legend(x = 160, y=275, legend = c("IFMU", "IEBT"), col=cols_m2, lwd=2, bty = "n", cex=1.3)
 plot_seeds(cbind(
-  # seeds_ifmu$V4, 
-  seeds_iebt$V4), "Species 3", xlab="Time (years)", lwd=2)
-# dev.off()
+  seeds_ifmu$V4,
+  seeds_iebt$V4), "Species 3", xlab="Time (years)", lwd=2, xlim=c(0,200))
+dev.off()
 
 
 

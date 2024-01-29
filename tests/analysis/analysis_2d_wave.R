@@ -36,12 +36,14 @@ plot_model = function(u, u1, dx, dy, dV=1, title){
     xlim(c(0,10)) + ylim(c(0,10)) 
   
   p1 = autoplot(zoo::zoo(t(dx), order.by = seq(0,10, length.out=51)), facet = NULL) + 
-    scale_color_brewer("seq") + 
+    scale_color_manual(values = 
+                         scales::seq_gradient_pal("pink","#08306b")(seq(0,1,length.out=nrow(dx)))) + 
     # scale_y_reverse()+
     guides(colour="none") 
   p2 = autoplot(zoo::zoo(t(dy), order.by = seq(0,10, length.out=51)), facet = NULL) + 
-    scale_color_brewer("seq") + 
-    coord_flip() + 
+    scale_color_manual(values = 
+                         scales::seq_gradient_pal("pink","#08306b")(seq(0,1,length.out=nrow(dx)))) + 
+    # scale_color_brewer("seq") + 
     # scale_y+reverse()+
     guides(colour="none")
   
@@ -55,16 +57,29 @@ plot_model = function(u, u1, dx, dy, dV=1, title){
 
   # cairo_pdf(paste0(title, "_2d_wave.pdf"))
   print(
-  cowplot::plot_grid(
-    p2+theme_classic()+labs(x="", y="U(y)")+scale_y_reverse()+theme(axis.text.y = element_blank())+scale_x_continuous(position="top")+ggtitle(paste0("\n",title)), 
-    pp1+guides(fill="none")+theme_classic()+labs(x="x", y="y")+ggtitle("u(x,y, t=1)"),
-    pp0+guides(fill="none")+theme_classic()+labs(x="", y="")+ggtitle("u(x,y, t=0)"),
-    p1+theme_classic()+labs(x="", y="U(x)")+scale_y_reverse()+theme(axis.text.x = element_blank())+scale_x_continuous(position="top"),
-    align="hv", axis = "lbrt", greedy = T)
+    cowplot::plot_grid(
+      p2+theme_classic()+labs(x="", y="U(y)")+scale_y_reverse()+coord_flip()+theme(axis.text.y = element_blank())+scale_x_continuous(position="top")+ggtitle(paste0("\n",title)), 
+      pp1+guides(fill="none")+theme_classic()+labs(x="x", y="y")+ggtitle("u(x,y, t=1)"),
+      pp0+guides(fill="none")+theme_classic()+labs(x="", y="")+ggtitle("u(x,y, t=0)"),
+      p1+theme_classic()+labs(x="", y="U(x)")+scale_y_reverse()+theme(axis.text.x = element_blank())+scale_x_continuous(position="top"),
+      align="hv", axis = "lbrt", greedy = T)
   )
   # dev.off()
+  list(px=p1+theme_classic()+labs(x="x",y="U(x)")+geom_vline(xintercept=2+1*1, col="yellow2")+ylim(c(0,0.5)), 
+       py=p2+theme_classic()+labs(x="y",y="U(y)")+geom_vline(xintercept=4+2*1, col="yellow2")+ylim(c(0,0.5)),
+       pp0=pp0+guides(fill="none")+theme_classic()+labs(x="x", y="y"), 
+       pp1=pp1+guides(fill="none")+theme_classic()+labs(x="x", y="y"))
 }
 
-plot_model(u_iebt, u1_iebt, dx_iebt, dy_iebt, title="IEBT")
-plot_model(u_ifmu, u1_ifmu, dx_ifmu, dy_ifmu, dV, title="IFMU")
-plot_model(u_abm, u1_abm, dx_abm, dy_abm, title="ABM")
+l_iebt = plot_model(u_iebt, u1_iebt, dx_iebt, dy_iebt, title="IEBT")
+l_ifmu = plot_model(u_ifmu, u1_ifmu, dx_ifmu, dy_ifmu, dV, title="IFMU")
+l_abm = plot_model(u_abm, u1_abm, dx_abm, dy_abm, title="ABM")
+
+cairo_pdf("combined_2d_wave.pdf")
+cowplot::plot_grid(
+  l_iebt$px+ggtitle("IEBT"), l_iebt$py, l_iebt$pp1,
+  l_ifmu$px+ggtitle("IFMU"), l_ifmu$py, l_ifmu$pp1,
+  l_abm$px+ggtitle("ABM"), l_abm$py, l_abm$pp1,
+  align="hv", byrow = F
+)
+dev.off()
