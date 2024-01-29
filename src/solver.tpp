@@ -28,6 +28,7 @@ void Solver::step_to(double tstop, AfterStepFunc &afterStep_user){
 
 	if (method == SOLVER_EBT || method == SOLVER_IEBT){ 
 		if (debug) std::cout << "~~~~ start step: " << current_time	<< " --> " << tstop << "\n";
+		if (control.sync_cohort_insertion) t_next_cohort_insertion = tstop;
 		while(current_time < tstop){
 			double tnext = std::fmin(tstop, t_next_cohort_insertion);
 
@@ -49,6 +50,7 @@ void Solver::step_to(double tstop, AfterStepFunc &afterStep_user){
 
 	if (method == SOLVER_CM || method == SOLVER_ICM){
 		if (debug) std::cout << "~~~~ start step: " << current_time	<< " --> " << tstop << "\n";
+		if (control.sync_cohort_insertion) t_next_cohort_insertion = tstop;
 		while(current_time < tstop){
 			double tnext = std::fmin(tstop, t_next_cohort_insertion);
 

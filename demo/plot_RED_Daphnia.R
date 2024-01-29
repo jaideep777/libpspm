@@ -25,6 +25,7 @@ ueq_red = Ueq(xeq_red)
 
 N_red = integrate(Ueq, 1, 1e6, abs.tol = 1e-6, rel.tol = 1e-6)
 B_red = integrate(function(x){x*Ueq(x)}, 1, 1e6, abs.tol = 1e-6, rel.tol = 1e-6)
+Feq_red = integrate(function(x){(a*x^2*sstar/(1+sstar))*u_equil(x)}, 0, xstar*0.99999999999, abs.tol = 1e-6, rel.tol = 1e-6)
 
 plot1 = function(file, N, title){
   dat = read.delim(file, header=F)
@@ -59,6 +60,7 @@ ueq = u_equil(xeq)
 
 N = integrate(u_equil, 0, xstar*0.99999999999, abs.tol = 1e-6, rel.tol = 1e-6)
 B = integrate(function(x){x*u_equil(x)}, 0, xstar*0.99999999999, abs.tol = 1e-6, rel.tol = 1e-6)
+Feq = integrate(function(x){(a*x^2*sstar/(1+sstar))*u_equil(x)}, 0, xstar*0.99999999999, abs.tol = 1e-6, rel.tol = 1e-6)
 
 plot2 = function(file, N, title){
   dat = read.delim(file, header=F)
@@ -98,18 +100,18 @@ plot2("Daphnia_model/abm_Daphnia.txt", 300, "ABM")
 
 dev.off()
 
-cairo_pdf("RED_Daphnia_implicit.pdf", width = 6/4*1.75*4, height=6)
+cairo_pdf("RED_Daphnia_implicit.pdf", width = 6/4*1.75*3, height=6)
 
-par(mfrow = c(2,4), mar=c(4,4,4,1), oma=c(1,1,1,1), cex.lab=1.2, cex.axis=1.2)
+par(mfrow = c(2,3), mar=c(4,4,4,1), oma=c(1,1,1,1), cex.lab=1.2, cex.axis=1.2)
 
 
 plot1("RED_model/ifmu_Redmodel.txt", 150, "IFMU")
-plot1("RED_model/ifmu2_Redmodel.txt", 150, "ILUD")
+# plot1("RED_model/ifmu2_Redmodel.txt", 150, "ILUD")
 plot1("RED_model/iebt_Redmodel.txt", 150, "IEBT")
 plot1("RED_model/icm_Redmodel.txt", 150, "ICM")
 
 plot2("Daphnia_model/ifmu_Daphnia.txt", 300, "IFMU")
-plot2("Daphnia_model/ifmu2_Daphnia.txt", 300, "ILUD")
+# plot2("Daphnia_model/ifmu2_Daphnia.txt", 300, "ILUD")
 plot2("Daphnia_model/iebt_Daphnia.txt", 300, "IEBT")
 plot2("Daphnia_model/icm_Daphnia.txt", 300, "ICM")
 
@@ -117,8 +119,22 @@ dev.off()
 
 
 cols = scales::alpha(c("purple", "green3", "mediumspringgreen", "darkgoldenrod2", "red3", "pink", "#2b8cbe"), alpha=0.7)
-cols = scales::alpha(c("darkgreen", "yellowgreen", "green3", "magenta", "purple", "darkgoldenrod2", "darkgoldenrod3", "turquoise2"), alpha=0.7)
-names = c("FMU", "IFMU", "ILUD", "EBT", "IEBT", "CM", "ICM", "ABM")
+cols = scales::alpha(c("darkgreen", 
+                       "yellowgreen", 
+                       # "green3", 
+                       "magenta", 
+                       "purple", 
+                       "darkgoldenrod2", 
+                       "darkgoldenrod3", 
+                       "turquoise2"), alpha=0.7)
+names = c("FMU", 
+          "IFMU", 
+          # "ILUD", 
+          "EBT", 
+          "IEBT", 
+          "CM", 
+          "ICM", 
+          "ABM")
 
 plotS = function(file, N, title){
   dat = read.delim(file, header=F)
@@ -135,8 +151,9 @@ idx = 1
 plot(x=1,y=NA, xlim=c(0,100), ylim=c(0,3))
 plotS("Daphnia_model/fmu_Daphnia.txt", 300, "FMU")
 plotS("Daphnia_model/ifmu_Daphnia.txt", 300, "IFMU")
-plotS("Daphnia_model/ifmu2_Daphnia.txt", 300, "ILUD")
+# plotS("Daphnia_model/ifmu2_Daphnia.txt", 300, "ILUD")
 plotS("Daphnia_model/ebt_Daphnia.txt", 300, "EBT")
+plotS("Daphnia_model/iebt_Daphnia.txt", 300, "EBT")
 plotS("Daphnia_model/cm_Daphnia.txt", 300, "CM")
 plotS("Daphnia_model/icm_Daphnia.txt", 300, "ICM")
 plotS("Daphnia_model/abm_Daphnia.txt", 300, "ABM")
@@ -160,19 +177,20 @@ plot(x=1,y=NA, xlim=c(0,100), ylim=c(0,0.5), ylab="Reproduction rate", xlab="Tim
 plot_seeds("Daphnia_model/fmu_Daphnia.txt")
 mtext(side=3, line=0.5, text = "Daphnia model")
 plot_seeds("Daphnia_model/ifmu_Daphnia.txt")
-plot_seeds("Daphnia_model/ifmu2_Daphnia.txt")
+# plot_seeds("Daphnia_model/ifmu2_Daphnia.txt")
 plot_seeds("Daphnia_model/ebt_Daphnia.txt")
 plot_seeds("Daphnia_model/iebt_Daphnia.txt")
 plot_seeds("Daphnia_model/cm_Daphnia.txt")
 plot_seeds("Daphnia_model/icm_Daphnia.txt")
 plot_seeds("Daphnia_model/abm_Daphnia.txt")
+abline(h=Feq$value, col="black")
 
 idx = 1
 plot(x=1,y=NA, xlim=c(0,5000), ylim=c(0,50), ylab="Reproduction rate", xlab="Time")
 mtext(side=3, line=0.5, text = "RED model")
 plot_seeds("RED_model/fmu_Redmodel.txt")
 plot_seeds("RED_model/ifmu_Redmodel.txt")
-plot_seeds("RED_model/ifmu2_Redmodel.txt")
+# plot_seeds("RED_model/ifmu2_Redmodel.txt")
 plot_seeds("RED_model/ebt_Redmodel.txt")
 plot_seeds("RED_model/iebt_Redmodel.txt")
 plot_seeds("RED_model/cm_Redmodel.txt")

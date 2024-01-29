@@ -46,14 +46,14 @@ class Solver{
 	// The current state of the system, {t, S, dS/dt} 
 	// FIXME: Setting initial value of current_time to anything other than 0 breaks Falster17 seed rain in Plant model. Investigate. 
 	//  ^ Solution: init of current_time must happen before species_initialization. Maybe via an argument to solver constructor?
-	double current_time = 0;			// these are synced with ODE solver only after a successful step
-	std::vector <double> state;		// +-- They are NOT synced during the ODE solver's internal steps
+	double current_time = 0;        // these are synced with ODE solver only after a successful step
+	std::vector <double> state;     // +-- They are NOT synced during the ODE solver's internal steps
 	std::vector <double> rates; 
 
 	std::vector<Species_Base*> species_vec;	
 
 	struct{
-		double ode_eps = 1e-6;	// FIXME: Need a function to set these params, so ODE solver can be reset
+		double ode_eps = 1e-6;
 		double ode_initial_step_size = 1e-6;
 		double convergence_eps = 1e-6;
 		std::vector<double> cm_grad_dx = {1e-6};
@@ -63,9 +63,7 @@ class Solver{
 		double cm_dxcut = 1e-10;
 		double ebt_ucut = 1e-10;
 		double ebt_grad_dx = 1e-6;
-		std::vector<double> ebtn_grad_dx = {1e-6, 1e-6};
 		double ebt_merge_dxcut = 0; //1e-6;
-		std::vector<double> ebtn_merge_dxcut = {0}; //1e-6;
 		double ode_rk4_stepsize = 0.1;
 		double ode_ifmu_stepsize = 0.1;
 		bool ifmu_centered_grids = true;
@@ -77,6 +75,7 @@ class Solver{
 		double abm_stepsize = 0.02;
 		bool abm_init_on_grid = true;
 		double cohort_insertion_dt = 1e20;
+		bool sync_cohort_insertion = false;
 	} control;
 	
 	bool use_log_densities = true;

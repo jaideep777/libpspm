@@ -162,6 +162,7 @@ int main(int argc, char ** argv){
     S.use_log_densities = true;
 	S.control.ode_eps = 1e-4;
 	S.control.ebt_ucut = 1e-6;
+	S.control.sync_cohort_insertion = true;
 	//S.control.ode_method = "rk4";
 	//S.control.ode_rk4_stepsize = 0.5;
 	S.setEnvironment(&env);

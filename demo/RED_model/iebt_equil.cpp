@@ -21,6 +21,7 @@ int main(){
 
 	Solver S(SOLVER_IEBT);
 	S.control.ebt_ucut = 1e-20;
+	S.control.cohort_insertion_dt = 10;
 
 	S.setEnvironment(&E);
 	S.addSpecies({100}, {1}, {1e6}, {true}, &spp, 0);

@@ -165,6 +165,7 @@ int main(int argc, char ** argv){
 	S.control.cm_remove_cohorts = false;
 	S.control.ebt_ucut = 1e-20;
 	S.control.cm_dxcut = 1e-20;
+	S.control.sync_cohort_insertion = true;
 	S.setEnvironment(&env);
 	//    S.createSizeStructuredVariables({"mort", "fec", "heart_area", "heart_mass"});
     

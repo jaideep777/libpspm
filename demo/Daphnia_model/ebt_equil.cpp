@@ -20,12 +20,14 @@ int main(){
 	Environment E;
 
 	Solver S(SOLVER_EBT);
+	S.control.ebt_ucut = 1e-20;
+	S.control.cohort_insertion_dt = 0.2;
+	S.control.sync_cohort_insertion = false;
+
 	S.setEnvironment(&E);
 
 	S.addSpecies({100}, {0}, {1}, {false}, &spp, 0, -1);
 	S.addSystemVariables({E.K});  // this can be done either before or after addSpecies()
-
-	S.control.ebt_ucut = 1e-20;
 
 	S.initialize();
 	//S.print();
