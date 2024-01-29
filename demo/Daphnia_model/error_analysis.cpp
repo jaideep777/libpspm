@@ -37,26 +37,22 @@ int main(){
 		Environment E;
 
 		Solver S(SOLVER_EBT);
-		S.setEnvironment(&E);
-
-		S.addSpecies({100}, {0}, {1}, {false}, &spp, 0, -1);
-		S.addSystemVariables(1);  // this can be done either before or after addSpecies()
-
+		S.control.cohort_insertion_dt = Dt;
 		S.control.ebt_ucut = 1e-10;
 
-		S.resetState();
+		S.setEnvironment(&E);
+		S.addSpecies({100}, {0}, {1}, {false}, &spp, 0, -1);
+		S.addSystemVariables({E.K});  // this can be done either before or after addSpecies()
+
 		S.initialize();
-		S.state[0] = E.K;
 		//S.print();
 		
 		auto t1 = high_resolution_clock::now();
-		for (double t=0.0001; t <= 150; t=t+Dt) {
-			S.step_to(t);
-		}
-	    auto t2 = high_resolution_clock::now();
+		S.step_to(150);
+		auto t2 = high_resolution_clock::now();
 		duration<double, std::milli> ms_double = t2 - t1;
    
-		double B = S.integrate_x([&S](int i, double t){return S.species_vec[0]->getX(i);}, S.current_time, 0);
+		double B = S.state_integral([&S](int i, double t){return S.species_vec[0]->getX(i)[0];}, S.current_time, 0);
 		ferr << N0 << "\t" << S.species_vec[0]->xsize() << "\t" << Dt << "\t" << B << "\t" << fabs(B-1.298077)/1.298077 << "\t" << ms_double.count() << "\n";
 	}
 
@@ -78,26 +74,22 @@ int main(){
 		Environment E;
 
 		Solver S(SOLVER_IEBT);
-		S.setEnvironment(&E);
-
-		S.addSpecies({100}, {0}, {1}, {false}, &spp, 0, -1);
-		S.addSystemVariables(1);  // this can be done either before or after addSpecies()
-
+		S.control.cohort_insertion_dt = Dt;
 		S.control.ebt_ucut = 1e-10;
 
-		S.resetState();
+		S.setEnvironment(&E);
+		S.addSpecies({100}, {0}, {1}, {false}, &spp, 0, -1);
+		S.addSystemVariables({E.K});  // this can be done either before or after addSpecies()
+
 		S.initialize();
-		S.state[0] = E.K;
 		//S.print();
 		
 		auto t1 = high_resolution_clock::now();
-		for (double t=0.0001; t <= 150; t=t+Dt) {
-			S.step_to(t);
-		}
-	    auto t2 = high_resolution_clock::now();
+		S.step_to(150);
+		auto t2 = high_resolution_clock::now();
 		duration<double, std::milli> ms_double = t2 - t1;
    
-		double B = S.integrate_x([&S](int i, double t){return S.species_vec[0]->getX(i);}, S.current_time, 0);
+		double B = S.state_integral([&S](int i, double t){return S.species_vec[0]->getX(i)[0];}, S.current_time, 0);
 		ferr << N0 << "\t" << S.species_vec[0]->xsize() << "\t" << Dt << "\t" << B << "\t" << fabs(B-1.298077)/1.298077 << "\t" << ms_double.count() << "\n";
 	}
 
@@ -120,23 +112,18 @@ int main(){
 
 		Solver S(SOLVER_FMU);
 		S.setEnvironment(&E);
-		
-		S.addSpecies(N0, 0, 1, false, &spp, 0, -1);
-		S.addSystemVariables(1);  // this can be done either before or after addSpecies()
+		S.addSpecies({N0}, {0}, {1}, {false}, &spp, 0, -1);
+		S.addSystemVariables({E.K});  // this can be done either before or after addSpecies()
 
-		S.resetState();
 		S.initialize();
-		S.state[0] = E.K;
 		//S.print();
 		
 		auto t1 = high_resolution_clock::now();
-		for (double t=0.05; t <= 150; t=t+1) {
-			S.step_to(t);
-		}
+		S.step_to(150);
 	    auto t2 = high_resolution_clock::now();
 		duration<double, std::milli> ms_double = t2 - t1;
 		
-		double B = S.integrate_x([&S](int i, double t){return S.species_vec[0]->getX(i);}, S.current_time, 0);
+		double B = S.state_integral([&S](int i, double t){return S.species_vec[0]->getX(i)[0];}, S.current_time, 0);
 		ferr << N0 << "\t" << S.species_vec[0]->xsize() << "\t" << 0 << "\t" << B << "\t" << fabs(B-1.298077)/1.298077 << "\t" << ms_double.count() << "\n";
 	}
 
@@ -145,88 +132,80 @@ int main(){
 
 
 
-	{
-	cout << "running IFMU...\n";
-	// IFMU
-	ofstream ferr("ifmu_error_analysis.txt");
-	ferr << "N0\tNf\tdt\tB\tEb\ttsys\n";
+	// {
+	// cout << "running IFMU...\n";
+	// // IFMU
+	// ofstream ferr("ifmu_error_analysis.txt");
+	// ferr << "N0\tNf\tdt\tB\tEb\ttsys\n";
 	
-		for (int i=3; i<13; ++i){
-		int N0 = pow(2,i);
-		cout << "N0 = " << N0 << endl;
+	// 	for (int i=3; i<13; ++i){
+	// 	int N0 = pow(2,i);
+	// 	cout << "N0 = " << N0 << endl;
 		
-		Species<Daphnia> spp;
-		Environment E;
+	// 	Species<Daphnia> spp;
+	// 	Environment E;
 
-		Solver S(SOLVER_IFMU);
-		S.control.ode_ifmu_stepsize = 0.02;
-		S.control.ifmu_order = 1;
+	// 	Solver S(SOLVER_IFMU);
+	// 	S.control.ode_ifmu_stepsize = 0.02;
+	// 	S.control.ifmu_order = 1;
 		
-		S.setEnvironment(&E);
-		S.addSpecies(N0, 0, 1, false, &spp, 0, -1);
-		S.addSystemVariables(1);  // this can be done either before or after addSpecies()
+	// 	S.setEnvironment(&E);
+	// 	S.addSpecies({N0}, {0}, {1}, {false}, &spp, 0, -1);
+	// 	S.addSystemVariables({E.K});  // this can be done either before or after addSpecies()
 
-		S.resetState();
-		S.initialize();
-		S.state[0] = E.K;
-		//S.print();
+	// 	S.initialize();
+	// 	//S.print();
 		
-		auto t1 = high_resolution_clock::now();
-		for (double t=0.05; t <= 150; t=t+1) {
-			S.step_to(t);
-		}
-	    auto t2 = high_resolution_clock::now();
-    	duration<double, std::milli> ms_double = t2 - t1;
+	// 	auto t1 = high_resolution_clock::now();
+	// 	S.step_to(150);
+	//     auto t2 = high_resolution_clock::now();
+    // 	duration<double, std::milli> ms_double = t2 - t1;
 		
 		
-		double B = S.integrate_x([&S](int i, double t){return S.species_vec[0]->getX(i);}, S.current_time, 0);
-		ferr << N0 << "\t" << S.species_vec[0]->xsize() << "\t" << 0 << "\t" << B << "\t" << fabs(B-1.298077)/1.298077 << "\t" << ms_double.count() << "\n";
-	}
+	// 	double B = S.state_integral([&S](int i, double t){return S.species_vec[0]->getX(i)[0];}, S.current_time, 0);
+	// 	ferr << N0 << "\t" << S.species_vec[0]->xsize() << "\t" << 0 << "\t" << B << "\t" << fabs(B-1.298077)/1.298077 << "\t" << ms_double.count() << "\n";
+	// }
 
-	ferr.close();
-	}
+	// ferr.close();
+	// }
 
 
-	{
-	cout << "running IFMU(O2)...\n";
-	// IFMU
-	ofstream ferr("ifmu2_error_analysis.txt");
-	ferr << "N0\tNf\tdt\tB\tEb\ttsys\n";
+	// {
+	// cout << "running IFMU(O2)...\n";
+	// // IFMU
+	// ofstream ferr("ifmu2_error_analysis.txt");
+	// ferr << "N0\tNf\tdt\tB\tEb\ttsys\n";
 	
-	for (int i=3; i<13; ++i){
-		int N0 = pow(2,i);
-		cout << "N0 = " << N0 << endl;
+	// for (int i=3; i<13; ++i){
+	// 	int N0 = pow(2,i);
+	// 	cout << "N0 = " << N0 << endl;
 		
-		Species<Daphnia> spp;
-		Environment E;
+	// 	Species<Daphnia> spp;
+	// 	Environment E;
 
-		Solver S(SOLVER_IFMU);
-		S.control.ode_ifmu_stepsize = 0.02;
-		S.control.ifmu_order = 2;
+	// 	Solver S(SOLVER_IFMU);
+	// 	S.control.ode_ifmu_stepsize = 0.02;
+	// 	S.control.ifmu_order = 2;
 		
-		S.setEnvironment(&E);
-		S.addSpecies(N0, 0, 1, false, &spp, 0, -1);
-		S.addSystemVariables(1);  // this can be done either before or after addSpecies()
+	// 	S.setEnvironment(&E);
+	// 	S.addSpecies({N0}, {0}, {1}, {false}, &spp, 0, -1);
+	// 	S.addSystemVariables({E.K});  // this can be done either before or after addSpecies()
 
-		S.resetState();
-		S.initialize();
-		S.state[0] = E.K;
-		//S.print();
+	// 	S.initialize();
+	// 	//S.print();
 		
-		auto t1 = high_resolution_clock::now();
-		for (double t=0.05; t <= 150; t=t+1) {
-			S.step_to(t);
-		}
-	    auto t2 = high_resolution_clock::now();
-    	duration<double, std::milli> ms_double = t2 - t1;
+	// 	auto t1 = high_resolution_clock::now();
+	// 	S.step_to(150);
+	//     auto t2 = high_resolution_clock::now();
+    // 	duration<double, std::milli> ms_double = t2 - t1;
 		
 		
-		double B = S.integrate_x([&S](int i, double t){return S.species_vec[0]->getX(i);}, S.current_time, 0);
-		ferr << N0 << "\t" << S.species_vec[0]->xsize() << "\t" << 0 << "\t" << B << "\t" << fabs(B-1.298077)/1.298077 << "\t" << ms_double.count() << "\n";
-	}
+	// 	double B = S.state_integral([&S](int i, double t){return S.species_vec[0]->getX(i)[0];}, S.current_time, 0);
+	// 	ferr << N0 << "\t" << S.species_vec[0]->xsize() << "\t" << 0 << "\t" << B << "\t" << fabs(B-1.298077)/1.298077 << "\t" << ms_double.count() << "\n";
+	// }
 
-	ferr.close();
-	}
+	// ferr.close();
+	// }
 
 
 	{
@@ -244,18 +223,17 @@ int main(){
 		Environment E;
 
 		Solver S(SOLVER_CM);
-
-		S.setEnvironment(&E);
-		S.addSpecies({100}, {0}, {1}, {false}, &spp, 0, -1);
-		S.addSystemVariables(1);  // this can be done either before or after addSpecies()
+		S.control.cohort_insertion_dt = Dt;
 		S.control.max_cohorts = 1000;
 		S.control.cm_remove_cohorts = true;
 		S.control.ebt_ucut = 1e-10;
 		S.control.cm_dxcut = 1e-5;
 
-		S.resetState();
+		S.setEnvironment(&E);
+		S.addSpecies({100}, {0}, {1}, {false}, &spp, 0, -1);
+		S.addSystemVariables({E.K});  // this can be done either before or after addSpecies()
+
 		S.initialize();
-		S.state[0] = E.K;
 		//S.print();
 	
 		auto t1 = high_resolution_clock::now();
@@ -266,7 +244,7 @@ int main(){
     	duration<double, std::milli> ms_double = t2 - t1;
 		
 		
-		double B = S.integrate_x([&S](int i, double t){return S.species_vec[0]->getX(i);}, S.current_time, 0);
+		double B = S.state_integral([&S](int i, double t){return S.species_vec[0]->getX(i)[0];}, S.current_time, 0);
 		ferr << N0 << "\t" << S.species_vec[0]->xsize() << "\t" << 0 << "\t" << B << "\t" << fabs(B-1.298077)/1.298077 << "\t" << ms_double.count() << "\n";
 	}
 
@@ -293,14 +271,13 @@ int main(){
 		S.control.cm_remove_cohorts = true;
 		S.control.ebt_ucut = 1e-10;
 		S.control.cm_dxcut = 1e-5;
+		S.control.cohort_insertion_dt = Dt;
 
 		S.setEnvironment(&E);
 		S.addSpecies({100}, {0}, {1}, {false}, &spp, 0, -1);
-		S.addSystemVariables(1);  // this can be done either before or after addSpecies()
+		S.addSystemVariables({E.K});  // this can be done either before or after addSpecies()
 
-		S.resetState();
 		S.initialize();
-		S.state[0] = E.K;
 		//S.print();
 	
 		auto t1 = high_resolution_clock::now();
@@ -311,7 +288,7 @@ int main(){
     	duration<double, std::milli> ms_double = t2 - t1;
 		
 		
-		double B = S.integrate_x([&S](int i, double t){return S.species_vec[0]->getX(i);}, S.current_time, 0);
+		double B = S.state_integral([&S](int i, double t){return S.species_vec[0]->getX(i)[0];}, S.current_time, 0);
 		ferr << N0 << "\t" << S.species_vec[0]->xsize() << "\t" << 0 << "\t" << B << "\t" << fabs(B-1.298077)/1.298077 << "\t" << ms_double.count() << "\n";
 	}
 
@@ -333,15 +310,13 @@ int main(){
 		Environment E;
 
 		Solver S(SOLVER_ABM);
-		S.setEnvironment(&E);
 		S.control.abm_n0 = N0;
 
+		S.setEnvironment(&E);
 		S.addSpecies({100}, {0}, {1}, {false}, &spp, 0, -1);
-		S.addSystemVariables(1);  // this can be done either before or after addSpecies()
+		S.addSystemVariables({E.K});  // this can be done either before or after addSpecies()
 
-		S.resetState();
 		S.initialize();
-		S.state[0] = E.K;
 		//S.print();
 		
 		auto t1 = high_resolution_clock::now();
@@ -352,7 +327,7 @@ int main(){
 		duration<double, std::milli> ms_double = t2 - t1;
 	
 		
-		double B = S.integrate_x([&S](int i, double t){return S.species_vec[0]->getX(i);}, S.current_time, 0);
+		double B = S.state_integral([&S](int i, double t){return S.species_vec[0]->getX(i)[0];}, S.current_time, 0);
 		ferr << N0 << "\t" << S.species_vec[0]->xsize() << "\t" << 0 << "\t" << B << "\t" << fabs(B-1.298077)/1.298077 << "\t" << ms_double.count() << "\n";
 	}
 

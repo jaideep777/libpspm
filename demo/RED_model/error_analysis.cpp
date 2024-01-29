@@ -38,23 +38,21 @@ int main(){
 
 		Solver S(SOLVER_EBT);
 		S.control.ebt_ucut = 1e-20;
+		S.control.cohort_insertion_dt = Dt;
 
 		S.setEnvironment(&E);
 		S.addSpecies({100}, {1}, {1e6}, {true}, &spp, 0);
 		//S.get_species(0)->set_bfin_is_u0in(true);	// say that input_birth_flux is u0
-		S.resetState();
 		S.initialize();
 		//S.print();
 
 		
 		auto t1 = high_resolution_clock::now();
-		for (double t=0; t <= 5000; t=t+Dt) {
-			S.step_to(t);
-		}
+		S.step_to(5000);
 	    auto t2 = high_resolution_clock::now();
    		duration<double, std::milli> ms_double = t2 - t1;
    
-		double B = S.integrate_x([&S](int i, double t){return S.species_vec[0]->getX(i);}, S.current_time, 0);
+		double B = S.state_integral([&S](int i, double t){return S.species_vec[0]->getX(i)[0];}, S.current_time, 0);
 		ferr << N0 << "\t" << S.species_vec[0]->xsize() << "\t" << Dt << "\t" << B << "\t" << fabs(B-13933.16)/13933.16 << "\t" << ms_double.count() << "\n";
 	}
 
@@ -78,23 +76,20 @@ int main(){
 
 		Solver S(SOLVER_IEBT);
 		S.control.ebt_ucut = 1e-20;
+		S.control.cohort_insertion_dt = Dt;
 
 		S.setEnvironment(&E);
 		S.addSpecies({100}, {1}, {1e6}, {true}, &spp, 0);
 		//S.get_species(0)->set_bfin_is_u0in(true);	// say that input_birth_flux is u0
-		S.resetState();
 		S.initialize();
 		//S.print();
-
 		
 		auto t1 = high_resolution_clock::now();
-		for (double t=0; t <= 5000; t=t+Dt) {
-			S.step_to(t);
-		}
+		S.step_to(5000);
 	    auto t2 = high_resolution_clock::now();
    		duration<double, std::milli> ms_double = t2 - t1;
    
-		double B = S.integrate_x([&S](int i, double t){return S.species_vec[0]->getX(i);}, S.current_time, 0);
+		double B = S.state_integral([&S](int i, double t){return S.species_vec[0]->getX(i)[0];}, S.current_time, 0);
 		ferr << N0 << "\t" << S.species_vec[0]->xsize() << "\t" << Dt << "\t" << B << "\t" << fabs(B-13933.16)/13933.16 << "\t" << ms_double.count() << "\n";
 	}
 
@@ -118,20 +113,17 @@ int main(){
 
 		Solver S(SOLVER_FMU);
 		S.setEnvironment(&E);
-		S.addSpecies(N0, 1, 1e6, true, &spp, 0);
+		S.addSpecies({N0}, {1}, {1e6}, {true}, &spp, 0);
 		//S.get_species(0)->set_bfin_is_u0in(true);	// say that input_birth_flux is u0
-		S.resetState();
 		S.initialize();
 		//S.print();
 			
 		auto t1 = high_resolution_clock::now();
-		for (double t=0; t <= 5000; t=t+10) {
-			S.step_to(t);
-		}
+		S.step_to(5000);
 	    auto t2 = high_resolution_clock::now();
    		duration<double, std::milli> ms_double = t2 - t1;
 		
-		double B = S.integrate_x([&S](int i, double t){return S.species_vec[0]->getX(i);}, S.current_time, 0);
+		double B = S.state_integral([&S](int i, double t){return S.species_vec[0]->getX(i)[0];}, S.current_time, 0);
 		ferr << N0 << "\t" << S.species_vec[0]->xsize() << "\t" << 0 << "\t" << B << "\t" << fabs(B-13933.16)/13933.16 << "\t" << ms_double.count() << "\n";
 	}
 
@@ -140,84 +132,78 @@ int main(){
 
 
 
-	{
-	cout << "running IFMU...\n";
-	// IFMU
-	ofstream ferr("ifmu_error_analysis.txt");
-	ferr << "N0\tNf\tdt\tB\tEb\ttsys\n";
+	// {
+	// cout << "running IFMU...\n";
+	// // IFMU
+	// ofstream ferr("ifmu_error_analysis.txt");
+	// ferr << "N0\tNf\tdt\tB\tEb\ttsys\n";
 	
-		for (int i=3; i<11; ++i){
-		int N0 = pow(2,i);
-		cout << "N0 = " << N0 << endl;
+	// 	for (int i=3; i<11; ++i){
+	// 	int N0 = pow(2,i);
+	// 	cout << "N0 = " << N0 << endl;
 		
-		Species<RED_Plant> spp;
-		LightEnvironment E;
+	// 	Species<RED_Plant> spp;
+	// 	LightEnvironment E;
 
-		Solver S(SOLVER_IFMU);
-		S.control.ifmu_order = 1;
-		S.control.ode_ifmu_stepsize = 0.1;
+	// 	Solver S(SOLVER_IFMU);
+	// 	S.control.ifmu_order = 1;
+	// 	S.control.ode_ifmu_stepsize = 0.1;
 
-		S.setEnvironment(&E);
-		S.addSpecies(N0, 1, 1e6, true, &spp, 0);
-		//S.get_species(0)->set_bfin_is_u0in(true);	// say that input_birth_flux is u0
-		S.resetState();
-		S.initialize();
-		//S.print();
+	// 	S.setEnvironment(&E);
+	// 	S.addSpecies({N0}, {1}, {1e6}, {true}, &spp, 0);
+	// 	//S.get_species(0)->set_bfin_is_u0in(true);	// say that input_birth_flux is u0
+	// 	S.initialize();
+	// 	//S.print();
 			
-		auto t1 = high_resolution_clock::now();
-		for (double t=0; t <= 5000; t=t+10) {
-			S.step_to(t);
-		}
-	    auto t2 = high_resolution_clock::now();
-   		duration<double, std::milli> ms_double = t2 - t1;
+	// 	auto t1 = high_resolution_clock::now();
+	// 	S.step_to(5000);
+	//     auto t2 = high_resolution_clock::now();
+   	// 	duration<double, std::milli> ms_double = t2 - t1;
 		
 		
-		double B = S.integrate_x([&S](int i, double t){return S.species_vec[0]->getX(i);}, S.current_time, 0);
-		ferr << N0 << "\t" << S.species_vec[0]->xsize() << "\t" << 0 << "\t" << B << "\t" << fabs(B-13933.16)/13933.16 << "\t" << ms_double.count() << "\n";
-	}
+	// 	double B = S.state_integral([&S](int i, double t){return S.species_vec[0]->getX(i)[0];}, S.current_time, 0);
+	// 	ferr << N0 << "\t" << S.species_vec[0]->xsize() << "\t" << 0 << "\t" << B << "\t" << fabs(B-13933.16)/13933.16 << "\t" << ms_double.count() << "\n";
+	// }
 
-	ferr.close();
-	}
+	// ferr.close();
+	// }
 
 
-	{
-	cout << "running IFMU(O2)...\n";
-	// IFMU
-	ofstream ferr("ifmu2_error_analysis.txt");
-	ferr << "N0\tNf\tdt\tB\tEb\ttsys\n";
+	// {
+	// cout << "running IFMU(O2)...\n";
+	// // IFMU
+	// ofstream ferr("ifmu2_error_analysis.txt");
+	// ferr << "N0\tNf\tdt\tB\tEb\ttsys\n";
 	
-		for (int i=3; i<11; ++i){
-		int N0 = pow(2,i);
-		cout << "N0 = " << N0 << endl;
+	// 	for (int i=3; i<11; ++i){
+	// 	int N0 = pow(2,i);
+	// 	cout << "N0 = " << N0 << endl;
 		
-		Species<RED_Plant> spp;
-		LightEnvironment E;
+	// 	Species<RED_Plant> spp;
+	// 	LightEnvironment E;
 
-		Solver S(SOLVER_IFMU);
-		S.control.ifmu_order = 2;
-		S.control.ode_ifmu_stepsize = 0.1;
+	// 	Solver S(SOLVER_IFMU);
+	// 	S.control.ifmu_order = 2;
+	// 	S.control.ode_ifmu_stepsize = 0.1;
 
-		S.setEnvironment(&E);
-		S.addSpecies(N0, 1, 1e6, true, &spp, 0);
-		//S.get_species(0)->set_bfin_is_u0in(true);	// say that input_birth_flux is u0
-		S.resetState();
-		S.initialize();
-		//S.print();
+	// 	S.setEnvironment(&E);
+	// 	S.addSpecies({N0}, {1}, {1e6}, {true}, &spp, 0);
+	// 	//S.get_species(0)->set_bfin_is_u0in(true);	// say that input_birth_flux is u0
+	// 	S.initialize();
+	// 	//S.print();
 			
-		auto t1 = high_resolution_clock::now();
-		for (double t=0; t <= 5000; t=t+10) {
-			S.step_to(t);
-		}
-	    auto t2 = high_resolution_clock::now();
-   		duration<double, std::milli> ms_double = t2 - t1;
+	// 	auto t1 = high_resolution_clock::now();
+	// 	S.step_to(5000);
+	//     auto t2 = high_resolution_clock::now();
+   	// 	duration<double, std::milli> ms_double = t2 - t1;
 		
 		
-		double B = S.integrate_x([&S](int i, double t){return S.species_vec[0]->getX(i);}, S.current_time, 0);
-		ferr << N0 << "\t" << S.species_vec[0]->xsize() << "\t" << 0 << "\t" << B << "\t" << fabs(B-13933.16)/13933.16 << "\t" << ms_double.count() << "\n";
-	}
+	// 	double B = S.state_integral([&S](int i, double t){return S.species_vec[0]->getX(i)[0];}, S.current_time, 0);
+	// 	ferr << N0 << "\t" << S.species_vec[0]->xsize() << "\t" << 0 << "\t" << B << "\t" << fabs(B-13933.16)/13933.16 << "\t" << ms_double.count() << "\n";
+	// }
 
-	ferr.close();
-	}
+	// ferr.close();
+	// }
 
 
 	{
@@ -235,25 +221,21 @@ int main(){
 		LightEnvironment E;
 
 		Solver S(SOLVER_CM);
+		S.control.cohort_insertion_dt = Dt;
 		S.setEnvironment(&E);
-		S.addSpecies(N0, 1, 1e6, true, &spp, 0);
+		S.addSpecies({N0}, {1}, {1e6}, {true}, &spp, 0);
 		//S.get_species(0)->set_bfin_is_u0in(true);	// say that input_birth_flux is u0
 		//S.control.max_cohorts = N0;
-		S.resetState();
 		S.initialize();
 		//S.print();
 
 		
 		auto t1 = high_resolution_clock::now();
-		for (double t=0; t <= 5000; t=t+Dt) {
-			S.step_to(t);
-			// cout << S.current_time << "\t" << S.newborns_out(t)[0] << "\t";
-			// cout << S.current_time << " " << S.species_vec[0]->xsize() << "\n";
-		}
+		S.step_to(5000);
 	    auto t2 = high_resolution_clock::now();
     	duration<double, std::milli> ms_double = t2 - t1;
     
-		double B = S.integrate_x([&S](int i, double t){return S.species_vec[0]->getX(i);}, S.current_time, 0);
+		double B = S.state_integral([&S](int i, double t){return S.species_vec[0]->getX(i)[0];}, S.current_time, 0);
 		ferr << N0 << "\t" << S.species_vec[0]->xsize() << "\t" << Dt << "\t" << B << "\t" << fabs(B-13933.16)/13933.16 << "\t" << ms_double.count() << "\n";
 	}
 
@@ -276,26 +258,22 @@ int main(){
 
 		Solver S(SOLVER_ICM);
 		S.use_log_densities = false;
+		S.control.cohort_insertion_dt = Dt;
 
 		S.setEnvironment(&E);
-		S.addSpecies(N0, 1, 1e6, true, &spp, 0);
+		S.addSpecies({N0}, {1}, {1e6}, {true}, &spp, 0);
 		//S.get_species(0)->set_bfin_is_u0in(true);	// say that input_birth_flux is u0
 		//S.control.max_cohorts = N0;
-		S.resetState();
 		S.initialize();
 		//S.print();
 
 		
 		auto t1 = high_resolution_clock::now();
-		for (double t=0; t <= 5000; t=t+Dt) {
-			S.step_to(t);
-			// cout << S.current_time << "\t" << S.newborns_out(t)[0] << "\t";
-			// cout << S.current_time << " " << S.species_vec[0]->xsize() << "\n";
-		}
+		S.step_to(5000);
 	    auto t2 = high_resolution_clock::now();
     	duration<double, std::milli> ms_double = t2 - t1;
     
-		double B = S.integrate_x([&S](int i, double t){return S.species_vec[0]->getX(i);}, S.current_time, 0);
+		double B = S.state_integral([&S](int i, double t){return S.species_vec[0]->getX(i)[0];}, S.current_time, 0);
 		ferr << N0 << "\t" << S.species_vec[0]->xsize() << "\t" << Dt << "\t" << B << "\t" << fabs(B-13933.16)/13933.16 << "\t" << ms_double.count() << "\n";
 	}
 
@@ -321,19 +299,16 @@ int main(){
 		S.setEnvironment(&E);
 		S.addSpecies({100}, {1}, {1e6}, {true}, &spp, 0);
 		//S.get_species(0)->set_bfin_is_u0in(true);	// say that input_birth_flux is u0
-		S.resetState();
 		S.initialize();
 		//S.print();
 			
 		auto t1 = high_resolution_clock::now();
-		for (double t=0; t <= 5000; t=t+10) {
-			S.step_to(t);
-		}
+		S.step_to(5000);
 		auto t2 = high_resolution_clock::now();
    		duration<double, std::milli> ms_double = t2 - t1;
 	
 		
-		double B = S.integrate_x([&S](int i, double t){return S.species_vec[0]->getX(i);}, S.current_time, 0);
+		double B = S.state_integral([&S](int i, double t){return S.species_vec[0]->getX(i)[0];}, S.current_time, 0);
 		ferr << N0 << "\t" << S.species_vec[0]->xsize() << "\t" << 0 << "\t" << B << "\t" << fabs(B-13933.16)/13933.16 << "\t" << ms_double.count() << "\n";
 	}
 

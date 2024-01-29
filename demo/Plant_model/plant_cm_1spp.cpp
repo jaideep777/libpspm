@@ -178,9 +178,9 @@ int main(int argc, char ** argv){
 	S.addSpecies({vector<double>(1, p2.vars.height)}, &s2, 4, ip_seed_rain);
 	S.addSpecies({vector<double>(1, p3.vars.height)}, &s3, 4, ip_seed_rain);
 #else
- 	S.addSpecies(fmu_create_grid(p1.vars.height, 20), &s1, 4, ip_seed_rain);
-	S.addSpecies(fmu_create_grid(p1.vars.height, 20), &s2, 4, ip_seed_rain);
-	S.addSpecies(fmu_create_grid(p1.vars.height, 20), &s3, 4, ip_seed_rain);
+ 	S.addSpecies({fmu_create_grid(p1.vars.height, 20)}, &s1, 4, ip_seed_rain);
+	S.addSpecies({fmu_create_grid(p1.vars.height, 20)}, &s2, 4, ip_seed_rain);
+	S.addSpecies({fmu_create_grid(p1.vars.height, 20)}, &s3, 4, ip_seed_rain);
 #endif	
 
 	S.initialize();

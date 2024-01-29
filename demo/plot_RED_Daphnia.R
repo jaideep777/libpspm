@@ -24,7 +24,7 @@ xeq_red = exp(seq(log(1), log(1e6), length.out=1000))
 ueq_red = Ueq(xeq_red)
 
 N_red = integrate(Ueq, 1, 1e6, abs.tol = 1e-6, rel.tol = 1e-6)
-B_red = integrate(function(x){x*Ueq(x)}, 1, 1e6, abs.tol = 1e-6, rel.tol = 1e-6)
+B_red = integrate(function(x){x*Ueq(x)}, 1, 1e6, abs.tol = 1e-8, rel.tol = 1e-8)
 Feq_red = integrate(function(x){(a*x^2*sstar/(1+sstar))*u_equil(x)}, 0, xstar*0.99999999999, abs.tol = 1e-6, rel.tol = 1e-6)
 
 plot1 = function(file, N, title){
