@@ -14,15 +14,12 @@ inline std::vector <double> seq(double from, double to, int len){
 	return x;
 }
 
-
-int main(){
-
     using std::chrono::high_resolution_clock;
     using std::chrono::duration_cast;
     using std::chrono::duration;
     using std::chrono::milliseconds;
 
-	{
+void run_ebt(){
 	cout << "running EBT...\n";
 	// EBT
 	ofstream ferr("ebt_error_analysis.txt");
@@ -57,9 +54,9 @@ int main(){
 	}
 
 	ferr.close();
-	}
+}
 	
-	{
+void run_iebt(){
 	cout << "running IEBT...\n";
 	// EBT
 	ofstream ferr("iebt_error_analysis.txt");
@@ -94,10 +91,10 @@ int main(){
 	}
 
 	ferr.close();
-	}
+}
 		
 	
-	{
+void run_fmu(){
 	cout << "running FMU...\n";
 	// FMU
 	ofstream ferr("fmu_error_analysis.txt");
@@ -128,46 +125,46 @@ int main(){
 	}
 
 	ferr.close();
+}
+
+
+
+void run_ifmu(){
+	cout << "running IFMU...\n";
+	// IFMU
+	ofstream ferr("ifmu_error_analysis.txt");
+	ferr << "N0\tNf\tdt\tB\tEb\ttsys\n";
+	
+		for (int i=3; i<13; ++i){
+		int N0 = pow(2,i);
+		cout << "N0 = " << N0 << endl;
+		
+		Species<Daphnia> spp;
+		Environment E;
+
+		Solver S(SOLVER_IFMU);
+		S.control.ode_ifmu_stepsize = 0.02;
+		S.control.ifmu_order = 1;
+		
+		S.setEnvironment(&E);
+		S.addSpecies({N0}, {0}, {1}, {false}, &spp, 0, -1);
+		S.addSystemVariables({E.K});  // this can be done either before or after addSpecies()
+
+		S.initialize();
+		//S.print();
+		
+		auto t1 = high_resolution_clock::now();
+		S.step_to(150);
+	    auto t2 = high_resolution_clock::now();
+    	duration<double, std::milli> ms_double = t2 - t1;
+		
+		
+		double B = S.state_integral([&S](int i, double t){return S.species_vec[0]->getX(i)[0];}, S.current_time, 0);
+		ferr << N0 << "\t" << S.species_vec[0]->xsize() << "\t" << 0 << "\t" << B << "\t" << fabs(B-1.298077)/1.298077 << "\t" << ms_double.count() << "\n";
 	}
 
-
-
-	// {
-	// cout << "running IFMU...\n";
-	// // IFMU
-	// ofstream ferr("ifmu_error_analysis.txt");
-	// ferr << "N0\tNf\tdt\tB\tEb\ttsys\n";
-	
-	// 	for (int i=3; i<13; ++i){
-	// 	int N0 = pow(2,i);
-	// 	cout << "N0 = " << N0 << endl;
-		
-	// 	Species<Daphnia> spp;
-	// 	Environment E;
-
-	// 	Solver S(SOLVER_IFMU);
-	// 	S.control.ode_ifmu_stepsize = 0.02;
-	// 	S.control.ifmu_order = 1;
-		
-	// 	S.setEnvironment(&E);
-	// 	S.addSpecies({N0}, {0}, {1}, {false}, &spp, 0, -1);
-	// 	S.addSystemVariables({E.K});  // this can be done either before or after addSpecies()
-
-	// 	S.initialize();
-	// 	//S.print();
-		
-	// 	auto t1 = high_resolution_clock::now();
-	// 	S.step_to(150);
-	//     auto t2 = high_resolution_clock::now();
-    // 	duration<double, std::milli> ms_double = t2 - t1;
-		
-		
-	// 	double B = S.state_integral([&S](int i, double t){return S.species_vec[0]->getX(i)[0];}, S.current_time, 0);
-	// 	ferr << N0 << "\t" << S.species_vec[0]->xsize() << "\t" << 0 << "\t" << B << "\t" << fabs(B-1.298077)/1.298077 << "\t" << ms_double.count() << "\n";
-	// }
-
-	// ferr.close();
-	// }
+	ferr.close();
+}
 
 
 	// {
@@ -208,7 +205,7 @@ int main(){
 	// }
 
 
-	{
+void run_cm(){
 	cout << "running CM...\n";
 	// IFMU
 	ofstream ferr("cm_error_analysis.txt");
@@ -249,9 +246,9 @@ int main(){
 	}
 
 	ferr.close();
-	}
+}
 
-	{
+void run_icm(){
 	cout << "running ICM...\n";
 	// IFMU
 	ofstream ferr("icm_error_analysis.txt");
@@ -293,10 +290,10 @@ int main(){
 	}
 
 	ferr.close();
-	}
+}
 
 
-	{
+void run_abm(){
 	cout << "running ABM...\n";
 	// ABM
 	ofstream ferr("abm_error_analysis.txt");
@@ -332,8 +329,19 @@ int main(){
 	}
 
 	ferr.close();
-	}	
+}	
 
+
+int main(){
+	run_fmu();
+	run_ifmu();
+	run_ebt();
+	run_iebt();
+	run_cm();
+	run_icm();
+	run_abm();
+
+	return 0;
 }
 
 

@@ -30,7 +30,7 @@ class Wave : public IndividualBase<2>{
 		return 0;
 	}
 	double birthRate(double t, void * env){
-		return 0.5;
+		return 0.05;
 	}
 
 };

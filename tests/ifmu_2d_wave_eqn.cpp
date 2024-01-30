@@ -22,7 +22,7 @@ int main(){
 	Solver S(SOLVER_IFMU);
 	S.control.ode_ifmu_stepsize = 0.02;
 	S.setEnvironment(&E);
-	S.addSpecies({25, 25}, {0, 0}, {10,10}, {false, false}, &spp, 0, -1);
+	S.addSpecies({100, 100}, {0, 0}, {10,10}, {false, false}, &spp, 0, -1);
 	S.print();
 
 	ofstream fout1;
@@ -47,7 +47,7 @@ int main(){
 		fout << S.current_time << "\t" << S.u0_out(t)[0] << "\t";
 		cout << S.current_time << " " << S.u0_out(t)[0] << "\n";
 		
-		vector<double> breaks = myseq(0,10,51);
+		vector<double> breaks = myseq(0,10,201);
 		vector<double> vx = S.getDensitySpecies1D(0, 0, breaks, Spline::QUADRATIC);
 		for (auto x : vx) foutx << x << "\t";
 		foutx << endl;
