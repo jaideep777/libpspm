@@ -1,9 +1,12 @@
 library(tidyverse)
 
-N_fmu = 100
-dV = (10/N_fmu)^2
+Nx = 50
+Ny = 50
+dV = (10/Nx)*(10/Ny)
 x = seq(0,10, length.out=201)
 y = seq(0,10, length.out=201)
+
+setwd("~/codes/libpspm/")
 
 u_iebt = read.delim("~/codes/libpspm/iebt2d_u.txt")
 u1_iebt = read.delim("~/codes/libpspm/iebt2d_u1.txt")
@@ -42,13 +45,13 @@ plot_model = function(u, u1, dx, dy, dV=1, title){
     
     pp0 = u %>% ggplot(aes(x=x.0., y=x.1., fill=u*dV)) + 
       geom_rect(aes(xmin=0, xmax=10, ymin=0, ymax=10), fill="#132B43")+
-      geom_tile(width=10/N_fmu, height=10/N_fmu) + 
+      geom_tile(width=10/Nx, height=10/Ny) + 
       geom_point(aes(x=2,y=4), col="red", size=0.2) + 
       xlim(c(0,10)) + ylim(c(0,10))
     
     pp1 = u1 %>% ggplot(aes(x=x.0., y=x.1., fill=u*dV)) + 
       geom_rect(aes(xmin=0, xmax=10, ymin=0, ymax=10), fill="#132B43")+
-      geom_tile(width=10/N_fmu, height=10/N_fmu) + 
+      geom_tile(width=10/Nx, height=10/Ny) + 
       geom_point(aes(x=2,y=4), col="red", size=0.2) +
       geom_point(aes(x=2+1*1,y=4+2*1), col="yellow", size=0.2) +
       xlim(c(0,10)) + ylim(c(0,10)) 
@@ -74,16 +77,16 @@ plot_model = function(u, u1, dx, dy, dV=1, title){
   #                    align="hv", axis = "lbrt")
   # )
 
-  cairo_pdf(paste0(title, "_2d_wave.pdf"))
-  print(
-    cowplot::plot_grid(
-      p2+theme_classic()+labs(x="", y="U(y)")+scale_y_reverse()+coord_flip()+theme(axis.text.y = element_blank())+scale_x_continuous(position="top")+ggtitle(paste0("\n",title)), 
-      pp1+guides(fill="none")+theme_classic()+labs(x="x", y="y")+ggtitle("u(x,y, t=1)"),
-      pp0+guides(fill="none")+theme_classic()+labs(x="", y="")+ggtitle("u(x,y, t=0)"),
-      p1+theme_classic()+labs(x="", y="U(x)")+scale_y_reverse()+theme(axis.text.x = element_blank())+scale_x_continuous(position="top"),
-      align="hv", axis = "lbrt", greedy = T)
-  )
-  dev.off()
+  # cairo_pdf(paste0(title, "_2d_wave.pdf"))
+  # print(
+  #   cowplot::plot_grid(
+  #     p2+theme_classic()+labs(x="", y="U(y)")+scale_y_reverse()+coord_flip()+theme(axis.text.y = element_blank())+scale_x_continuous(position="top")+ggtitle(paste0("\n",title)), 
+  #     pp1+guides(fill="none")+theme_classic()+labs(x="x", y="y")+ggtitle("u(x,y, t=1)"),
+  #     pp0+guides(fill="none")+theme_classic()+labs(x="", y="")+ggtitle("u(x,y, t=0)"),
+  #     p1+theme_classic()+labs(x="", y="U(x)")+scale_y_reverse()+theme(axis.text.x = element_blank())+scale_x_continuous(position="top"),
+  #     align="hv", axis = "lbrt", greedy = T)
+  # )
+  # dev.off()
   list(px=p1+theme_classic()+labs(x="x",y="U(x)")+geom_vline(xintercept=2+1*1, col="yellow2")+ylim(c(0,0.6)), 
        py=p2+theme_classic()+labs(x="y",y="U(y)")+geom_vline(xintercept=4+2*1, col="yellow2")+ylim(c(0,0.6)),
        pp0=pp0+guides(fill="none")+theme_classic()+labs(x="x", y="y"), 
@@ -94,7 +97,8 @@ l_iebt = plot_model(u_iebt, u1_iebt, dx_iebt, dy_iebt, title="IEBT")
 l_ifmu = plot_model(u_ifmu, u1_ifmu, dx_ifmu, dy_ifmu, dV, title="IFMU")
 l_abm = plot_model(u_abm, u1_abm, dx_abm, dy_abm, title="ABM")
 
-cairo_pdf("combined_2d_wave.pdf")
+# cairo_pdf("combined_2d_wave.pdf")
+png(filename = "tests/figures/combined_2d_wave.png", height=3*700, width=3*700, res=300)
 print(
 cowplot::plot_grid(
   l_iebt$px+ggtitle("IEBT"), l_iebt$py, l_iebt$pp1,
