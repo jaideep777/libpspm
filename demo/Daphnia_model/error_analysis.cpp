@@ -263,7 +263,7 @@ void run_icm(){
 		Environment E;
 
 		Solver S(SOLVER_ICM);
-		S.use_log_densities = false;
+		S.control.cm_use_log_densities = false;
 		S.control.max_cohorts = 1000;
 		S.control.cm_remove_cohorts = true;
 		S.control.ebt_ucut = 1e-10;

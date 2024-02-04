@@ -25,7 +25,7 @@ int main(){
 	S.control.cm_remove_cohorts = true;
 	S.control.cohort_insertion_dt = 0.5;
 	// S.control.sync_cohort_insertion = false;
-	S.use_log_densities = true;
+	S.control.cm_use_log_densities = true;
 
 	S.setEnvironment(&E);
 

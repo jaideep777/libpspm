@@ -22,7 +22,7 @@ int main(){
 	Solver S(SOLVER_CM);
 	S.control.max_cohorts = 200;
 	S.control.ebt_ucut = 1e-20;
-	S.use_log_densities = false;
+	S.control.cm_use_log_densities = false;
 	S.control.cohort_insertion_dt = 10;
 	
 	S.setEnvironment(&E);

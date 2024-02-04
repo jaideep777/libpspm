@@ -41,7 +41,7 @@ void Solver::stepU_iCM(double t, vector<double> &S, vector<double> &dSdt, double
 			for (int k=0; k<spp->istate_size; ++k){
 				du += g_gx[k+1][k]; 
 			}
-			if (!use_log_densities) *its++ /= 1 + du*dt;
+			if (!control.cm_use_log_densities) *its++ /= 1 + du*dt;
 			else *its++ -= du*dt;
 		}
 

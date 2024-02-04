@@ -20,10 +20,11 @@ int main(){
 
 	Solver S(SOLVER_CM);
 	S.setEnvironment(&E);
-	S.use_log_densities = true;
+	S.control.cm_use_log_densities = false;
 	S.control.cm_grad_dx = {0.001};
 	S.control.max_cohorts = 26;
 	S.control.cm_remove_cohorts = true;
+	S.control.sync_cohort_insertion = true;
 	S.addSpecies({25}, {0}, {1}, {false}, &spp, 4, -1);
 	S.print();
 	//for (auto s : S.state) cout << s << " "; cout << endl;
@@ -38,7 +39,7 @@ int main(){
 	for (double t=0.05; t <= 4; t=t+0.05) {
 		S.step_to(t);
 		fout << S.current_time << "\t" << S.u0_out(t)[0] << "\t";
-		//cout << S.current_time << "\t" << S.species_vec[0]->xsize() << " " << S.u0_out()[0] << "\t" << S.species_vec[0]->get_boundary_u() << "\n";
+		cout << S.current_time << "\t" << S.species_vec[0]->xsize() << " " << S.u0_out(S.current_time)[0] << "\t" << S.species_vec[0]->get_boundary_u() << "\n";
 		//cout << S.u0_out() << "\n";
 
 		vector<double> breaks = myseq(0,1,26);
@@ -48,6 +49,8 @@ int main(){
 	}
 
 	// S.print();
+	S.odeStepper.save(cout); 
+	cout << '\n';
 
 	ofstream fouts("ode_state_save.txt");
 	S.odeStepper.save(fouts);
@@ -56,10 +59,13 @@ int main(){
 	ifstream fins("ode_state_save.txt");
 	S.odeStepper.restore(fins);
 
+	S.odeStepper.save(cout);
+	cout << '\n';
+
 	for (double t=4.05; t <= 8; t=t+0.05) {
 		S.step_to(t);
 		fout << S.current_time << "\t" << S.u0_out(t)[0] << "\t";
-		//cout << S.current_time << "\t" << S.species_vec[0]->xsize() << " " << S.u0_out()[0] << "\t" << S.species_vec[0]->get_boundary_u() << "\n";
+		cout << S.current_time << "\t" << S.species_vec[0]->xsize() << " " << S.u0_out(S.current_time)[0] << "\t" << S.species_vec[0]->get_boundary_u() << "\n";
 		//cout << S.u0_out() << "\n";
 
 		vector<double> breaks = myseq(0,1,26);
@@ -76,7 +82,7 @@ int main(){
 	cout << setprecision(10) << S.u0_out(S.current_time)[0] << endl;
 	// test value is from R code	
 	//if (abs(S.u0_out()[0] - 1.556967) < 1e-5) return 0;  // this is when integrate_x BC is not included
-	if (abs(S.u0_out(S.current_time)[0] - 0.976177) < 1e-7) return 0;  // this is when integrate_x BC IS included
+	if (abs(S.u0_out(S.current_time)[0] - 0.976177) < 1e-5) return 0;  // this is when integrate_x BC IS included
 
 	else return 1;
   

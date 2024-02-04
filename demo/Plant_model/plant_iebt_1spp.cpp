@@ -160,7 +160,7 @@ int main(int argc, char ** argv){
 	//exit(1);
 
     Solver S(SOLVER_IEBT, "rk45ck");	
-    S.use_log_densities = false;
+    S.control.cm_use_log_densities = false;
 	S.control.ode_ifmu_stepsize = 0.05;
 	S.control.ebt_ucut = 1e-10;
 	S.control.ebt_merge_dxcut = 0e-2;

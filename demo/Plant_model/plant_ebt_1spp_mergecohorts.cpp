@@ -159,7 +159,7 @@ int main(int argc, char ** argv){
 	//exit(1);
 
     Solver S(SOLVER_EBT, "rk45ck");
-    S.use_log_densities = true;
+    S.control.cm_use_log_densities = true;
 	S.control.ode_eps = 1e-4;
 	S.control.ebt_ucut = 1e-6;
 	S.control.ebt_merge_dxcut = 1e-2;

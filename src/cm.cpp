@@ -43,7 +43,7 @@ void Solver::calcRates_CM(double t, vector<double>::iterator S, vector<double>::
 			for (int k=0; k<spp->istate_size; ++k){
 				du += -g_gx[k+1][k]; 
 			}
-			if (!use_log_densities) du *= spp->getU(i);
+			if (!control.cm_use_log_densities) du *= spp->getU(i);
 			*itr++ = du;	
 			
 			its += (spp->istate_size+1);

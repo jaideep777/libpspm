@@ -24,7 +24,7 @@ int main(){
 	S.control.max_cohorts = 200;
 	S.control.update_cohorts = true;
 	S.control.cm_remove_cohorts = true;
-	S.use_log_densities = false;
+	S.control.cm_use_log_densities = false;
 	S.control.cohort_insertion_dt = 0.5;
 
 	S.setEnvironment(&E);

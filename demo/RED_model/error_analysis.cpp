@@ -254,7 +254,7 @@ void run_icm(){
 		LightEnvironment E;
 
 		Solver S(SOLVER_ICM);
-		S.use_log_densities = false;
+		S.control.cm_use_log_densities = false;
 		S.control.cohort_insertion_dt = Dt;
 
 		S.setEnvironment(&E);

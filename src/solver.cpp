@@ -384,7 +384,7 @@ void Solver::initializeSpecies(Species_Base * s){
 				double U = s->init_density(i, env); 
 				s->setU(i,U);
 				// *it++ = X;									// x in state
-				// *it++ = (use_log_densities)? log(U) : U;	// u in state 
+				// *it++ = (control.cm_use_log_densities)? log(U) : U;	// u in state 
 			}
 			s->sortCohortsDescending(0);
 		}
@@ -615,7 +615,7 @@ void Solver::copyStateToCohorts(std::vector<double>::iterator state_begin){
 				vector<double> X(s->istate_size);
 				for (double& xx : X) xx = *it++;	// get x from state
 				double U = *it++;	// get u from state
-			    U = (use_log_densities)? exp(U) : U;	// u in cohorts 
+			    U = (control.cm_use_log_densities)? exp(U) : U;	// u in cohorts 
 				s->setX(i,X); 
 				s->setU(i,U);
 			}
@@ -662,7 +662,7 @@ void Solver::copyCohortsToState(){
 			for (size_t i=0; i<s->J; ++i){
 				vector<double> X = s->getX(i); 
 				double U = s->getU(i);
-			    U = (use_log_densities)? log(U) : U;	// log(u) in state 
+			    U = (control.cm_use_log_densities)? log(U) : U;	// log(u) in state 
 				for (double& xx : X) *it++ = xx;	// get x from state
 				*it++ = U;	// set u to state
 			}
@@ -812,7 +812,7 @@ void Solver::save(std::ostream &fout){
 		  m
 		, n_statevars_system
 		, current_time
-		, use_log_densities
+		, control.cm_use_log_densities
 		, N0);
 	fout << '\n';
 	fout << pi0 << '\n';
@@ -833,7 +833,7 @@ void Solver::restore(std::istream &fin, vector<Species_Base*> spp_proto){
 	fin >> m
 	    >> n_statevars_system
 		>> current_time
-		>> use_log_densities
+		>> control.cm_use_log_densities
 		>> N0;
 	fin >> pi0;
 	method = PSPM_SolverType(m);

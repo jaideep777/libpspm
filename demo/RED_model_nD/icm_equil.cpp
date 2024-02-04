@@ -20,7 +20,7 @@ int main(){
 	LightEnvironment E;
 
 	Solver S(SOLVER_ICM);
-	S.use_log_densities = false;
+	S.control.cm_use_log_densities = false;
 	S.control.ebt_ucut = 1e-20;
 
 	S.setEnvironment(&E);

@@ -7,7 +7,7 @@ int main(){
 	Environment E;
 
 	Solver S(SOLVER_CM);
-	S.use_log_densities = true;
+	S.control.cm_use_log_densities = true;
 	S.setEnvironment(&E);
 
 	Species<TestModel> spp;

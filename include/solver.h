@@ -52,6 +52,7 @@ class Solver{
 
 	std::vector<Species_Base*> species_vec;	
 
+	// FIXME: Should these control params be saved when saving solver state?
 	struct{
 		double ode_eps = 1e-6;
 		double ode_initial_step_size = 1e-6;
@@ -76,9 +77,9 @@ class Solver{
 		bool abm_init_on_grid = true;
 		double cohort_insertion_dt = 1e20;
 		bool sync_cohort_insertion = false;
+		bool cm_use_log_densities = true;
 	} control;
 	
-	bool use_log_densities = true;
 
 	private:
 	std::vector<double> pi0;

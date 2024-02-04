@@ -20,6 +20,7 @@ int main(){
 
 	Solver S(SOLVER_EBT);
 	S.control.ebt_grad_dx = 0.001;
+	S.control.sync_cohort_insertion = true;
 	//S.control.ode_method = "rk4";
 	//S.control.ode_rk4_stepsize = 0.01;
 	S.setEnvironment(&E);

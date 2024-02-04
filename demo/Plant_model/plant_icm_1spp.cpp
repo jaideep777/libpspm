@@ -160,7 +160,7 @@ int main(int argc, char ** argv){
 	//exit(1);
 
     Solver S(SOLVER_ICM, "rk45ck");	
-    S.use_log_densities = false;
+    S.control.cm_use_log_densities = false;
 	S.control.ode_eps = 1e-4;
 	S.control.ebt_ucut = 1e-10;
 	S.control.cm_remove_cohorts = false;

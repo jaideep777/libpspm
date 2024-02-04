@@ -190,7 +190,7 @@ int main(){
 	//exit(1);
 
     Solver S(SOLVER_CM);
-    S.use_log_densities = true;
+    S.control.cm_use_log_densities = true;
 	S.control.ode_eps = 1e-4;
 	S.setEnvironment(&env);
 	//    S.createSizeStructuredVariables({"mort", "fec", "heart_area", "heart_mass"});

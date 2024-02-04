@@ -20,7 +20,7 @@ int main(){
 
 	Solver S(SOLVER_ICM);
 	S.setEnvironment(&E);
-	S.use_log_densities = false;
+	S.control.cm_use_log_densities = false;
 	S.control.cm_grad_dx = {0.001};
 	S.control.ode_ifmu_stepsize = 0.001;
 	S.control.max_cohorts = 26;

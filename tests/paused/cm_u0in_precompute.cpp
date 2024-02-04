@@ -13,7 +13,7 @@ int main(){
 	Environment E;
 
 	Solver S(SOLVER_CM);
-	S.use_log_densities = true;
+	S.control.cm_use_log_densities = true;
 	S.control.cm_grad_dx = 0.001;
 	S.control.max_cohorts = 26;
 	S.setEnvironment(&E);

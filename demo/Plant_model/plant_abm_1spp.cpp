@@ -149,7 +149,7 @@ int main(int argc, char ** argv){
 	if (argc > 3) n0 = stod(argv[3]);
 
     Solver S(SOLVER_ABM, "rk45ck");
-    S.use_log_densities = true;
+    S.control.cm_use_log_densities = true;
 	S.control.ode_eps = 1e-4;
 	S.control.abm_n0 = n0;
 	S.control.abm_stepsize = 0.1;

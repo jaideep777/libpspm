@@ -275,7 +275,7 @@ int main(){
 		LightEnvironment E;
 
 		Solver S(SOLVER_ICM);
-		S.use_log_densities = false;
+		S.control.cm_use_log_densities = false;
 
 		S.setEnvironment(&E);
 		S.addSpecies(N0, 1, 1e6, true, &spp, 0);
