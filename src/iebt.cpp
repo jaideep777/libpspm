@@ -37,7 +37,7 @@ double identity_matrix(int i, int j){
 // |(1+mu*dt)I - [  g1   dg1/dx0      ...  dg1/dxn ]dt | * [ p1(t+1) ] = [ p1        ]               
 // |             [  ..   ..           ...   ..     ]   |   [ ..      ] = [ ..        ]   
 //  \            [  gn   dgn/dx0      ...  dgn/dxn ]  /    [ pn(t+1) ] = [ pn        ]   
-//   
+//               <---------------- A -------------->                     <---- B ---->
 //  /                         \.     
 // |(1+mu*dt)I - [ 0   -mx ]dt | X(t+1) = X(t)+ Bdt*[1]
 // |             [ g'   gx']   |                    [0]
@@ -103,32 +103,32 @@ void Solver::stepU_iEBT(double t, vector<double> &S, vector<double> &dSdt, doubl
 		);
 
 		// pi0 cohort
-		Matrix A(spp->istate_size+1, Vector(spp->istate_size+1, 0)); // create (n+1)x(n+1) Zero matrix
+		int K = spp->istate_size;
+		Matrix A(K+1, Vector(K+1, 0)); // create (n+1)x(n+1) Zero matrix
 
-		// 1. Construct the matrix -A*dt (negative A)
-		// In comments below, K = istate_size
+		// 1. Construct the matrix -A*dt (note negative A)
 		// top-left element is 0
 		A[0][0] = 0; // included for clarity. 
 		// first row (i=0), columns j=[1..K] contains mortality gradient vector
-		for (int j=0; j<spp->istate_size; ++j){
+		for (int j=0; j<K; ++j){
 			A[0][j+1] = m_mx[j+1]*dt; // m_mx[1..K] is mortality gradient, m_mx[0] is the mortality rate
 		}
 		// all other rows (i=1..K), columns (j=0..K) contain the transposed g_gx matrix
-		for (int i=0; i<spp->istate_size; ++i){ // row index goes from 0..K-1
-			for (int j=0; j<spp->istate_size+1; ++j){ // column index goes from 0..K
+		for (int i=0; i<K; ++i){ // row index goes from 0..K-1
+			for (int j=0; j<K+1; ++j){ // column index goes from 0..K
 				A[i+1][j] = -g_gx[j][i]*dt; 
 				// ^ i+1 here because we need to skip the first row in A
 			}
 		}
 		// 2. Add (1+mu*dt)I to (-A*dt)
-		for (int i=0; i<spp->istate_size+1; ++i){
+		for (int i=0; i<K+1; ++i){
 			A[i][i] += 1 + m_mx[0]*dt;
 		}
 
 		// 3. Construct B
-		Vector B(spp->istate_size+1, 0);
+		Vector B(K+1, 0);
 		B[0] = N0 + birthFlux*dt;
-		for (int i=0; i<spp->istate_size; ++i){
+		for (int i=0; i<K; ++i){
 			B[i+1] = pi0[i];
 		}
 		// std::cout << "Species " << s << ", t = " << t << ", a1/b1/c1/a2/b2/c2 = " << A[0][0] << "/" << A[0][1] << "/" << B[0] << "/" << A[1][0] << "/" << A[1][1] << "/" << B[1] << '\n';
