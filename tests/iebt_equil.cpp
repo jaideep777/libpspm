@@ -55,9 +55,8 @@ int main(){
 	fout.close();
 
 	// S.print();	
-	cout << S.u0_out(S.current_time)[0] << endl;
-	// if (abs(S.u0_out(S.current_time)[0]-0.999487) < 2e-5) return 0; // 1D version gave this answer
-	if (abs(S.u0_out(S.current_time)[0]-0.9995) < 2e-5) return 0; // nD version gives this answer
+	cout << setprecision(6) << S.u0_out(S.current_time)[0] << endl;
+	if (abs(S.u0_out(S.current_time)[0]-0.999487) < 1e-6) return 0; // 1D version gave this answer
 	else return 1;
 }
 
