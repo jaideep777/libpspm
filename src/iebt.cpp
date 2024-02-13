@@ -57,14 +57,16 @@ void Solver::stepU_iEBT(double t, vector<double> &S, vector<double> &dSdt, doubl
 
 		std::vector<double> pi0 = spp->getX(spp->J-1);	 // last cohort is pi0, N0
 		double N0 = spp->getU(spp->J-1);
-		//std::cout << "pi = " << pi0 << ", N0 = " << N0 << "\n";
+		// std::cout << "Species " << s << ", t = " << t << ", pi = " << pi0 << ", N0 = " << N0 << "\n";
 
 		std::vector<double> grad_dx(spp->istate_size, control.ebt_grad_dx);
 
 		std::vector<std::vector<double>> g_gx = spp->growthRateGradient(-1, t, env, grad_dx);
 		std::vector<double> m_mx = spp->mortalityRateGradient(-1, t, env, grad_dx);
-		//std::cout << "g = " << g_gx[0] << ", gx = " << g_gx[1] << "\n";
-		//std::cout << "m = " << m_mx[0] << ", mx = " << m_mx[1] << "\n";
+		// std::cout << "Species " << s << ", t = " << t << ", ";
+		// std::cout << "g = " << g_gx[0] << ", gx = " << g_gx[1] << "\n";
+		// std::cout << "Species " << s << ", t = " << t << ", ";
+		// std::cout << "m = " << m_mx[0] << ", mx = " << m_mx[1] << "\n";
 
 		double birthFlux;
 		double pe = spp->establishmentProbability(t, env);
@@ -74,6 +76,8 @@ void Solver::stepU_iEBT(double t, vector<double> &S, vector<double> &dSdt, doubl
 		else{
 			birthFlux = spp->birth_flux_in * pe;
 		}
+		// std::cout << "Species " << s << ", t = " << t << ", bf = " << birthFlux << '\n';
+
 
 		// internal cohorts
 		// for (int i=0; i<J-1; ++i){
@@ -102,15 +106,16 @@ void Solver::stepU_iEBT(double t, vector<double> &S, vector<double> &dSdt, doubl
 		Matrix A(spp->istate_size+1, Vector(spp->istate_size+1, 0)); // create (n+1)x(n+1) Zero matrix
 
 		// 1. Construct the matrix -A*dt (negative A)
+		// In comments below, K = istate_size
 		// top-left element is 0
 		A[0][0] = 0; // included for clarity. 
-		// first row contains mortality gradient vector
-		for (int i=0; i<spp->istate_size; ++i){
-			A[0][i+1] = m_mx[i+1]*dt; // m_mx[0] is the mortality rate
+		// first row (i=0), columns j=[1..K] contains mortality gradient vector
+		for (int j=0; j<spp->istate_size; ++j){
+			A[0][j+1] = m_mx[j+1]*dt; // m_mx[1..K] is mortality gradient, m_mx[0] is the mortality rate
 		}
-		// all other rows contain the transposed g_gx matrix
-		for (int i=0; i<spp->istate_size; ++i){ // row index
-			for (int j=0; j<spp->istate_size; ++j){ // column index
+		// all other rows (i=1..K), columns (j=0..K) contain the transposed g_gx matrix
+		for (int i=0; i<spp->istate_size; ++i){ // row index goes from 0..K-1
+			for (int j=0; j<spp->istate_size+1; ++j){ // column index goes from 0..K
 				A[i+1][j] = -g_gx[j][i]*dt; 
 				// ^ i+1 here because we need to skip the first row in A
 			}
@@ -126,6 +131,7 @@ void Solver::stepU_iEBT(double t, vector<double> &S, vector<double> &dSdt, doubl
 		for (int i=0; i<spp->istate_size; ++i){
 			B[i+1] = pi0[i];
 		}
+		// std::cout << "Species " << s << ", t = " << t << ", a1/b1/c1/a2/b2/c2 = " << A[0][0] << "/" << A[0][1] << "/" << B[0] << "/" << A[1][0] << "/" << A[1][1] << "/" << B[1] << '\n';
 
 		Vector X = lupSolve(A, B);
 
@@ -146,6 +152,7 @@ void Solver::stepU_iEBT(double t, vector<double> &S, vector<double> &dSdt, doubl
 		}
 		if (X[0] < 0) throw std::runtime_error("u0 < 0: "+std::to_string(X[0]));
 		XU[nk*(J-1)+spp->istate_size] = X[0];
+		// std::cout << "Species " << s << ", t = " << t << ", N0 = " << X[0] << ", pi0 = " << X[1] << '\n';
 		
 		its += J*(nk+spp->n_accumulators);
 
