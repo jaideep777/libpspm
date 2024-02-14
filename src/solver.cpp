@@ -232,6 +232,7 @@ void Solver::initialize(double t0){
 	// 	initializeSpecies(s);
 	// }
 	current_time = t0;
+	t_next_cohort_insertion = t0 + control.cohort_insertion_dt;
 	odeStepper.reset(t0, control.ode_eps, control.ode_eps); // = RKCK45<vector<double>> (0, control.ode_eps, control.ode_initial_step_size);  // this is a cheap operation, but this will empty the internal containers, which will then be (automatically) resized at next 1st ODE step. Maybe add a reset function to the ODE stepper? 
 }
 

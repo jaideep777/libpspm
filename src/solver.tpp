@@ -19,7 +19,6 @@ void Solver::step_to(double tstop, AfterStepFunc &afterStep_user){
 	if (tstop <= current_time) return;
 	
 	// std::cout << "Running step to function " << std::endl;
-
 	auto after_step = [this, afterStep_user](double t, std::vector<double>::iterator S){
 		if (debug) std::cout << "After step: t = " << t << "\n";
 		copyStateToCohorts(S);
@@ -32,7 +31,7 @@ void Solver::step_to(double tstop, AfterStepFunc &afterStep_user){
 		while(current_time < tstop){
 			double tnext = std::fmin(tstop, t_next_cohort_insertion);
 
-			if (debug) std::cout << std::setprecision(12) << "Stepping: " << current_time << " --> " << tnext << '\n';
+			if (debug) std::cout << std::setprecision(12) << "Stepping: " << ((tnext < tstop)? "(substep)":"") << current_time << " --> " << tnext << '\n';
 			if (method == SOLVER_IEBT) stepTo_implicit(tnext, after_step, &Solver::stepU_iEBT);
 			if (method == SOLVER_EBT)  stepTo_explicit(tnext, after_step, &Solver::calcRates_EBT);
 
