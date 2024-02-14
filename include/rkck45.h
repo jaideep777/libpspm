@@ -59,6 +59,7 @@ class RKCK45{
 	int nok=0, nbad=0; // number of bad and good steps
 	container dydx;    // temporary current derivatives
 	int nfe = 0;
+	double hmin = 1e-6;
 
 	container k1, k2, k3, k4, k5, yt;
 	
@@ -72,6 +73,7 @@ class RKCK45{
 	// 4) accuracy -- desired accuracy
 	// 5) h1       -- trial size of the first step
 	RKCK45(double t_start_, double accuracy, double h1);
+	RKCK45(double t_start_, double accuracy, double h1, double _hmin);
 	~RKCK45();
 
 	// Resize the container 
@@ -84,7 +86,7 @@ class RKCK45{
 	//           2) y      -- current solution (dependent variable)
 	//           3) derivs -- function which evaluates derivatives
 	template <class functor>
-	void Step(double& x, container& y, functor& derivs, double hmax=1e20, double hmin=1e-6);
+	void Step(double& x, container& y, functor& derivs, double hmax=1e20);
  
 	//template <class functor>
 	//void Step_RK4(double &x, double h, container& y, functor& derivs);

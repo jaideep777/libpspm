@@ -100,7 +100,7 @@ void RKCK45::RKTry(container& y, container& dydx, double& x, double h, container
 //           2) y      -- current solution (dependent variable)
 //           3) derivs -- function which evaluates derivatives
 template <class functor>
-void RKCK45::Step(double& x, container& y, functor& derivs, double hmax, double hmin){
+void RKCK45::Step(double& x, container& y, functor& derivs, double hmax){
 	
 	// resize the container if necessary
 	if (y.size() != sys_size) resize(y.size());
