@@ -20,7 +20,7 @@ void RKCK45::RKStep(container& y, container& dydx, double& x, double htry,
 		errmax=0.0;                               // Evaluate accuracy.
 		for (int i=0; i<y.size(); i++) errmax=std::max(errmax, fabs(yerr[i]/yscal[i]));
 		//errmax /= eps;                            // Scale relative to required tolerance.
-		// std:: cout << "x = " << x << ", h = " << h << ", errmax = " << errmax << "\n";
+		std:: cout << "x = " << x << ", h = " << h << ", errmax = " << errmax << "\n";
 		if (errmax <= 1.1) break;                 // Step succeeded. Compute size of next step.
 		double htemp=h*fmax(SAFETY*pow(errmax,PSHRNK), 0.2); // Truncation error too large, reduce stepsize, max by a factor of 0.2.
 		h=htemp; //(h >= 0.0 ? std::max(htemp,0.1*h) : std::min(htemp,0.1*h)); // No more than a factor of 10.
@@ -28,7 +28,7 @@ void RKCK45::RKStep(container& y, container& dydx, double& x, double htry,
 	}
 	if (errmax < 0.5) hnext=h*fmin(SAFETY*pow(errmax,PGROW), 5); // Step is too small, increase it next time, no more than 5 times
 	else hnext=h;                                      
-	// std::cout << "hnext = " << hnext << "\n";
+	std::cout << "hnext = " << hnext << "\n";
 	hdid=h;
 	x += h;
 	for (int i=0; i<y.size();i++) y[i] = ytemp[i];
@@ -148,10 +148,20 @@ void RKCK45::Step(double& x, container& y, functor& derivs, double hmax){
 
 template <class functor, class AfterStep>
 void RKCK45::Step_to(double t_stop, double& x, container& y, functor& derivs, AfterStep &after_step){
-		while (x < t_stop-1e-12){
-			Step(x,y,derivs, t_stop-x);
-			after_step(x, y.begin());
+	std::cout << "ode step: " << x << " --> " << t_stop << '\n';
+	while (x < t_stop){
+		// Advance x without stepping if t_stop is within hmin
+		// this case mostly arises due to float comparisons in manual stepping
+		// doing this prevents reset of h to hmin
+		if ((t_stop - x) < hmin){
+			x = t_stop; 
+			break;
 		}
+
+		// Otherwise, take RK steps until tstop
+		Step(x,y,derivs, t_stop-x);
+		after_step(x, y.begin());
+	}
 }
 
 
