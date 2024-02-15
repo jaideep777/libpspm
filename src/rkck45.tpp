@@ -148,7 +148,7 @@ void RKCK45::Step(double& x, container& y, functor& derivs, double hmax){
 
 template <class functor, class AfterStep>
 void RKCK45::Step_to(double t_stop, double& x, container& y, functor& derivs, AfterStep &after_step){
-		while (x < t_stop){
+		while (x < t_stop-1e-12){
 			Step(x,y,derivs, t_stop-x);
 			after_step(x, y.begin());
 		}

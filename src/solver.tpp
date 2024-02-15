@@ -28,15 +28,21 @@ void Solver::step_to(double tstop, AfterStepFunc &afterStep_user){
 
 	if (method == SOLVER_EBT || method == SOLVER_IEBT){ 
 		if (step_debug) std::cout << "~~~~ start step: " << current_time	<< " --> " << tstop << "\n";
+
 		if (control.sync_cohort_insertion) t_next_cohort_insertion = tstop;
+
+		// prevent a tiny substep due to inexact match (floating point comparison) between t_next_cohort_insertion and tstop
+		if (std::fabs(tstop - t_next_cohort_insertion) < control.cohort_insertion_tol) t_next_cohort_insertion = tstop; 
+
 		while(current_time < tstop){
 			double tnext = std::fmin(tstop, t_next_cohort_insertion);
-
-			if (step_debug) std::cout << std::setprecision(12) << "Stepping: " << ((tnext < tstop)? "(substep)":"") << current_time << " --> " << tnext << '\n';
+			
+			if (step_debug) std::cout << std::setprecision(20) << "Stepping: " << ((tnext < tstop)? "(substep) ":"") << current_time << " --> " << tnext << '\n';
 			if (method == SOLVER_IEBT) stepTo_implicit(tnext, after_step, &Solver::stepU_iEBT);
 			if (method == SOLVER_EBT)  stepTo_explicit(tnext, after_step, &Solver::calcRates_EBT);
 
-			if (current_time >= t_next_cohort_insertion){ //} (fabs(current_time - t_next_cohort_insertion)<1e-12){
+			if (tnext >= t_next_cohort_insertion){ 
+
 				if (step_debug) std::cout << std::setprecision(12) << "updating cohorts (" << current_time << ")\n";
 				// update cohorts
 				mergeCohorts_EBT();
@@ -122,12 +128,12 @@ void Solver::stepTo_implicit(double tstop, AfterStepFunc &afterStep, stepUPointe
 		
 		// use implicit stepper to advance u
 		(this->*step_u_func)(current_time, state, rates, dt);
-		double t_new = current_time + dt; // expected new time, after stepping - ODE solver below will update current_time
+		// double t_new = current_time + dt; // expected new time, after stepping - ODE solver below will update current_time
 		// copyStateToCohorts(state.begin());   // copy updated X/U to cohorts - not needed here as copyStateToCohorts is called by ODE solver below
 		
 		// Step accumulators before update of system vars because system vars will update env
 		stepAccumulators(dt); // this will copyStateToCohorts before every ODE step (but not after the last step).
-		current_time = t_new; // explicitly set, because ODE solver sometimes oversteps by 1e-6 (hmin) // FIXME.
+		// current_time = t_new; // explicitly set, because ODE solver sometimes oversteps by 1e-6 (hmin) // FIXME.
 		copyStateToCohorts(state.begin()); // so copy once (because stepSystemVars needs to upate env)
 
 		stepSystemVars(sys_rates_prev, dt);  // Computes E+, dSdt+, S1 (does not copy state at the end)

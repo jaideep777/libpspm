@@ -76,6 +76,7 @@ class Solver{
 		double abm_stepsize = 0.02;
 		bool abm_init_on_grid = true;
 		double cohort_insertion_dt = 1e20;
+		double cohort_insertion_tol = 1e-12;
 		bool sync_cohort_insertion = false;
 		bool cm_use_log_densities = true;
 	} control;
