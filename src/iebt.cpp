@@ -76,7 +76,7 @@ void Solver::stepU_iEBT(double t, vector<double> &S, vector<double> &dSdt, doubl
 		else{
 			birthFlux = spp->birth_flux_in * pe;
 		}
-		// std::cout << "Species " << s << ", t = " << t << ", bf = " << birthFlux << '\n';
+		if (debug) std::cout << "Species " << s << ", t = " << t << ", bf = " << birthFlux << '\n';
 
 
 		// internal cohorts

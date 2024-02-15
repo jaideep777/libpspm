@@ -747,7 +747,7 @@ void Solver::step_to(double tstop){
 
 
 void Solver::updateEnv(double t, std::vector<double>::iterator S, std::vector<double>::iterator dSdt){
-	if (debug) std::cout << "update Env..." << std::endl;
+	if (debug) std::cout << "update Env... t = " << t << std::endl;
 	for (auto spp : species_vec) spp->triggerPreCompute();
 	env->computeEnv(t, this, S, dSdt);
 }
@@ -766,11 +766,11 @@ double Solver::calcSpeciesBirthFlux(int k, double t){
 }
 
 
-vector<double> Solver::newborns_out(double t){  // TODO: make recompute env optional
+vector<double> Solver::newborns_out(double t, bool recompute_env){  // TODO: make recompute env optional
 	// update Environment from latest state
 	//copyStateToCohorts(state.begin());  // not needed here because this is done in afterStep or upon cohorts update
 	//env->computeEnv(t, this, state.begin(), rates.begin());
-	updateEnv(t, state.begin(), rates.begin()); // this will trigger a precompute
+	if (recompute_env) updateEnv(t, state.begin(), rates.begin()); // this will trigger a precompute
 //	for (int k = 0; k<species_vec.size(); ++k) preComputeSpecies(k,t);	
 
 	vector<double> b_out;

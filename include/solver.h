@@ -159,8 +159,20 @@ class Solver{
 
 	void step_to(double tstop);
 
+	/// @brief Calculate total flux of newborns, without updating environment
+	/// This function is used internally by the solver, because the solver explicitly manages environment computation. 
+	/// In the solver, all E,g,m,f,B are all calculated at the beginning of the step, in that order, 
+	/// so we dont want to again update E during the calculation of B
 	double calcSpeciesBirthFlux(int k, double t); // TODO: Make this private. Because this does not update Env, so unsafe for users to call. Users should call newborns_out() instead because it does updateEnv + calcSpeciesBirthFlux()
-	std::vector<double> newborns_out(double t);  // This is the actual system reproduction (fitness) hence biologically relevant
+	
+	/// @brief Calculate the total flux of newborns given the current population structure, optionally after recomputing environment  
+	/// @param t             current time
+	/// @param recompute_env whether environment should be recomputed before calculating fecundity rates
+	/// @return              birth flux
+	/// This function is the same as calcSpeciesBirthFlux but provides the option to update env before computing f,B. 
+	/// Typically, this function is meant to be used at the end of a timestep, like so: E,g,m,f,B,u -----> u'--> afterStep: {E',B'}
+	/// For consistency, i.e., B' ~ u',E' (not ~ u',E), it's necessary to update env. 
+	std::vector<double> newborns_out(double t, bool recompute_env = true);  // This is the actual system reproduction (fitness) hence biologically relevant
 	std::vector<double> u0_out(double t);        // This is used for equilibrium solving, because in general, u0 rather than birthFlux, will approach a constant value
 
 	void print();
