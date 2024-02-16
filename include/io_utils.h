@@ -18,7 +18,7 @@ std::ostream& operator << (std::ostream &os, const std::vector<T> &v) {
 	for (const auto &x : v) {
 		os << x << ' ';
 	}
-	// os << '\n'; // FIXME: remove this newline and insert newline in every save() function
+	// os << '\n'; // .FIXME: remove this newline and insert newline in every save() function
 	return os;
 }
 
@@ -46,7 +46,7 @@ std::ostream& operator << (std::ostream &os, const std::array<T,n> &v) {
 	for (const auto &x : v) {
 		os << x << ' ';
 	}
-	// os << '\n'; // FIXME: remove this newline and insert newline in every save() function
+	// os << '\n'; // .FIXME: remove this newline and insert newline in every save() function
 	return os;
 }
 

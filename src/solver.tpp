@@ -15,7 +15,7 @@ template<typename AfterStepFunc>
 void Solver::step_to(double tstop, AfterStepFunc &afterStep_user){
 	// do nothing if tstop is <= current_time
 	// std::cout << "step to: current time: " << current_time << "\tt_stop: " << tstop << std::endl;
-	bool step_debug = true;
+	bool step_debug = false;
 	
 	if (tstop <= current_time) return;
 	
