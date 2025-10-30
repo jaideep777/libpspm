@@ -61,11 +61,11 @@ int main(){
 
 	ifstream fins("species_state_save.txt");
 	Species<TestModel> spp_restored;
-	spp_restored.restore(fins);
+	spp_restored.restore(fins, S.control.verbose);
 
 	ifstream fins2("ode_state_save.txt");
-	S.odeStepper = OdeSolver("lsoda", 0,1,1);;
-	S.odeStepper.restore(fins2);
+	S.odeStepper = OdeSolver("lsoda", 0,1,1, S.control.verbose);;
+	S.odeStepper.restore(fins2, S.control.verbose);
 
 
 	cout << "  ------------ compare saved and restored species -------------\n";

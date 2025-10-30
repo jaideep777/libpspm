@@ -31,18 +31,18 @@ class OdeSolver{
 		solver = nullptr;	
 	}
 
-	inline void createSolver(double t_start, double rtol, double atol){
-		if      (type == ODE_RKCK45) solver = new RKCK45(t_start, rtol, 1e-8);
+	inline void createSolver(double t_start, double rtol, double atol, bool verbose){
+		if      (type == ODE_RKCK45) solver = new RKCK45(t_start, rtol, 1e-8, verbose);
 		else if (type == ODE_LSODA)  solver = new LSODA();
 	}
 
 	public:
-	OdeSolver(std::string method, double t_start, double rtol, double atol){
+	OdeSolver(std::string method, double t_start, double rtol, double atol, bool verbose){
 		if      (method == "rk45ck") type = ODE_RKCK45;
 		else if (method == "lsoda")  type = ODE_LSODA;
 		else throw std::runtime_error("Fatal: Unknown ODE method " + method);
 		
-		createSolver(t_start, rtol, atol);
+		createSolver(t_start, rtol, atol, verbose);
 	}
 
 	~OdeSolver(){
@@ -74,12 +74,12 @@ class OdeSolver{
 		return *this;
 	}
 
-	void reset(double t_start, double rtol, double atol){
+	void reset(double t_start, double rtol, double atol, double verbose){
 		nfe_cumm = 0;
 		control.abs_tol = atol;
 		control.rel_tol = rtol;
 		deleteSolver();
-		createSolver(t_start, rtol, atol);
+		createSolver(t_start, rtol, atol, verbose);
 	}
 
 
@@ -135,7 +135,7 @@ class OdeSolver{
 		else if (type == ODE_LSODA)  throw std::runtime_error("Cannot save the state for LSODA solver.");
 	}
 
-	void restore(std::istream &fin){
+	void restore(std::istream &fin, bool verbose){
 		deleteSolver(); // delete current solver as its type may be different from the saved type...
 
 		std::string s; fin >> s; // discard version number
@@ -148,7 +148,8 @@ class OdeSolver{
 		type = SolverType(m);
 
 		// ...then recreate solver based on saved type
-		createSolver(0,0,0); // dummy arguments here are fine, as all variables will be recreated from saved file
+		// todo: fix so that we have this properly done 
+		createSolver(0,0,0, verbose); // dummy arguments here are fine, as all variables will be recreated from saved file
 
 		if      (type == ODE_RKCK45) static_cast<RKCK45*>(solver)->restore(fin);	
 		else if (type == ODE_LSODA)  throw std::runtime_error("Cannot restore the state for LSODA solver at this point.");

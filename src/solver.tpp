@@ -19,7 +19,6 @@ void Solver::step_to(double tstop, AfterStepFunc &afterStep_user){
 	
 	if (tstop <= current_time) return;
 	
-	// std::cout << "Running step to function " << std::endl;
 	auto after_step = [this, step_debug, afterStep_user](double t, std::vector<double>::iterator S){
 		if (step_debug) std::cout << "After step: t = " << t << "\n";
 		copyStateToCohorts(S);
@@ -88,8 +87,6 @@ void Solver::step_to(double tstop, AfterStepFunc &afterStep_user){
 	if (method == SOLVER_ABM){	
 		stepTo_abm(tstop, after_step);
 	}
-
-	// std::cout << "Finished step to " <<std::endl;
 }
 
 

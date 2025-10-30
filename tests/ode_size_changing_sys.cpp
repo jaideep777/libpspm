@@ -24,7 +24,7 @@ int main(){
 	  nsys = 0;
 	  vector<double> y;
 
-	  OdeSolver stepper(str, t_start, 1e-8, 1e-8); // RK class for adaptive step
+	  OdeSolver stepper(str, t_start, 1e-8, 1e-8, false); // RK class for adaptive step
 	  
 	  //cout.precision(15);
 	  

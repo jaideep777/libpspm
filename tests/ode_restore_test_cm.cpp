@@ -55,9 +55,9 @@ int main(){
 	ofstream fouts("ode_state_save.txt");
 	S.odeStepper.save(fouts);
 	fouts.close();
-	S.odeStepper.reset(0,1e-6,1e-6);
+	S.odeStepper.reset(0,1e-6,1e-6, false);
 	ifstream fins("ode_state_save.txt");
-	S.odeStepper.restore(fins);
+	S.odeStepper.restore(fins, S.control.verbose);
 
 	S.odeStepper.save(cout);
 	cout << '\n';

@@ -56,7 +56,7 @@ int main(){
 
 	ifstream fins("species_state_save.txt");
 	Species<TestModel> spp_restored;
-	spp_restored.restore(fins);
+	spp_restored.restore(fins, S.control.verbose);
 
 	cout << "  ------------ compare saved and restored species -------------\n";
 

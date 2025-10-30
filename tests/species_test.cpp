@@ -257,7 +257,7 @@ int main(){
 
 	ifstream fin("Si_save.txt");
 	Species<Insect> Si_restored(I1);
-	Si_restored.restore(fin);
+	Si_restored.restore(fin, false);
 	Si_restored.save(cout);
 	// Verify manually that console output is same as in the saved file.
 

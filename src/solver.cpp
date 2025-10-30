@@ -26,7 +26,7 @@ std::map<std::string, PSPM_SolverType> Solver::methods_map =
 	 {"ICM",  SOLVER_ICM}};
 
 
-Solver::Solver(PSPM_SolverType _method, string ode_method) : odeStepper(ode_method, 0, 1e-6, 1e-6) {
+Solver::Solver(PSPM_SolverType _method, string ode_method) : odeStepper(ode_method, 0, 1e-6, 1e-6, control.verbose) {
 	method = _method;
 
 	// JJ: Commenting out because the variable seems useless now, will always be 1 (u), as x is determined later per species
@@ -101,7 +101,6 @@ void Solver::addSpecies(std::vector<std::vector<double>> xbreaks, Species_Base* 
 	s->n_grid_edges   = std::accumulate(s->dim_edges.begin(),   s->dim_edges.end(),   1, std::multiplies<int>());
 	if (s->n_grid_edges > 1e6) cout << "**** WARNING ****: The number of cohorts/cells may exceed 1M. Consider using a lower resolution\n\n";
 
-	std::cout << "Find J" << std::endl;
 	int J = 1;
 	if      (method == SOLVER_FMU)   J = s->n_grid_centres; // xbreaks.size()-1;	
 	else if (method == SOLVER_IFMU)  J = s->n_grid_centres;	// as many as grid centres but labelled by upper edge
@@ -112,13 +111,10 @@ void Solver::addSpecies(std::vector<std::vector<double>> xbreaks, Species_Base* 
 	else if (method == SOLVER_ABM)   J = s->n_grid_centres;    // For ABM solver, this is a temporary size thats used to generate the initial density distribution. s will be resized during init to abm_n0. FIXME JJ: Can ABM init be kept identical to EBT?
 	else    throw std::runtime_error("Unsupported method");
 
-	std::cout << "Resize with J" << std::endl;
 	s->resize(J);
 
-	std::cout << "Add species to vector" << std::endl;
 	species_vec.push_back(s);
 
-	std::cout << "Initialise species" << std::endl;
 	initializeSpecies(s);
 
 	// Test Print out X, x and h from the new species
@@ -150,11 +146,9 @@ void Solver::addSpecies(std::vector<int> _J, std::vector<double> _xb, std::vecto
 	// }
 	// Initialise as a grid and assume each dimension starts off with _J numbers
 
-	std::cout << "Initialise as a grid and assume each dimension starts off with _J[k] numbers" << std::endl;
 	int total_states = std::accumulate(_J.begin(), _J.end(), 1, std::multiplies<int>()) +1;
 
 	//  Initialise as a grid
-	std::cout << "Initialise as a grid" << std::endl;
 	std::vector<std::vector<double>> breaks;
 
 	for (int k=0; k< s->istate_size; ++k){
@@ -180,7 +174,6 @@ void Solver::addSpecies(std::vector<int> _J, std::vector<double> _xb, std::vecto
 	// 	xnbreaks[i] = xn;
 	// }
 
-	std::cout << "Grid populated:" << std::endl;
 	for (auto& b : breaks) std::cout << b << '\n';
 	std::cout.flush();
 
@@ -192,13 +185,17 @@ void Solver::addSpecies(std::vector<int> _J, std::vector<double> _xb, std::vecto
 void Solver::removeSpecies(Species_Base * spp){
 	std::vector<Species_Base*>::iterator it = std::find(species_vec.begin(), species_vec.end(), spp);
 	if (it != species_vec.end()){
-		std::cout << "Removing species: " << spp << "\n";
+		if(control.verbose){
+			std::cout << "Removing species: " << spp << "\n";
+		}
 		// Not freeing memory here: allocation of memory for species is done by user, so freeing should also be done by user
 		species_vec.erase(it);
 		resizeStateFromSpecies();
 	}
 	else{
-		std::cout << "Species " << spp << " not found in the solver.\n";
+		if(control.verbose){
+			std::cout << "Species " << spp << " not found in the solver.\n";
+		}
 	}
 }
 
@@ -233,7 +230,7 @@ void Solver::initialize(double t0){
 	// }
 	current_time = t0;
 	t_next_cohort_insertion = t0 + control.cohort_insertion_dt;
-	odeStepper.reset(t0, control.ode_eps, control.ode_eps); // = RKCK45<vector<double>> (0, control.ode_eps, control.ode_initial_step_size);  // this is a cheap operation, but this will empty the internal containers, which will then be (automatically) resized at next 1st ODE step. Maybe add a reset function to the ODE stepper? 
+	odeStepper.reset(t0, control.ode_eps, control.ode_eps, control.verbose); // = RKCK45<vector<double>> (0, control.ode_eps, control.ode_initial_step_size);  // this is a cheap operation, but this will empty the internal containers, which will then be (automatically) resized at next 1st ODE step. Maybe add a reset function to the ODE stepper? 
 }
 
 
@@ -244,10 +241,8 @@ void Solver::resizeStateFromSpecies(){
 		state_size_new += spp->J*(spp->n_accumulators); // add accumulators for all solvers
 	}
 	
-	// std::cout << "In Solver::resizeStateFromSpecies before resize " <<std::endl;
 	state.resize(state_size_new, -999);
 	rates.resize(state_size_new, -999);
-	// std::cout << "In Solver::resizeStateFromSpecies after resize " <<std::endl;
 }
 
 
@@ -353,18 +348,14 @@ void Solver::initializeSpecies(Species_Base * s){
 		// set x and u of boundary cohort
 		// Boundary cohort is not in state, but used as a reference.	
 
-		std::cout << "Set up boundary" << std::endl;
 		s->set_xb(s->xb); // set x of boundary cohort - this is needed to set any other variables that depend on size
-		std::cout << "Set up u at boundary" << std::endl;
 		s->set_ub(0);     // set initial density of boundary cohort to 0.
 		
-		std::cout << "set birthtime" << std::endl;
 		// set birth time for each cohort to current_time
 		// FIXME: current_time has never been initialized till this point. It is only init in resetState() 
 		for (int i=0; i<s->J; ++i) s->set_birthTime(i, current_time); // FIXME: doesnt make sense, because larger cohorts would have been born earlier, but birthTime is not used anyways
 
 
-		std::cout << "set x and u for all cohorts" << std::endl;
 		// set x, u for all cohorts
 		if (method == SOLVER_FMU || method == SOLVER_IFMU){
 			for (size_t i=0; i<s->J; ++i){
@@ -397,12 +388,10 @@ void Solver::initializeSpecies(Species_Base * s){
 				s->setX(i,X); 
 
 				vector<double> dx = utils::tensor::coord_value(utils::tensor::index(i, s->dim_centres), s->h);
-				cout << "dx = " << dx << '\n';
 				double dV = std::accumulate(dx.begin(), dx.end(), 1.0, std::multiplies<double>());
-				cout << "dV = " << dV << '\n';
 				double U = s->init_density(i, env)*dV; 
 				s->setU(i,U);
-				cout << "Init: X = " << X << " / U = " << U << '\n';
+				// cout << "Init: X = " << X << " / U = " << U << '\n';
 			}
 			// set pi0, N0 as x, u for the last cohort. This scheme allows using this last cohort with xb+pi0 in integrals etc 
 			s->setX(s->J-1, vector<double>(s->istate_size, 0)); 
@@ -422,10 +411,9 @@ void Solver::initializeSpecies(Species_Base * s){
 				s->setX(i, X);
 				double U = s->init_density(i, env)*dV; 
 
-				cout << "i/X/U = " << i << " / " << X << " / " << U/dV << endl;
+				// cout << "i/X/U = " << i << " / " << X << " / " << U/dV << endl;
 				Uvec.push_back(U);	
 			}
-			//cout << "HERE\n";
 			//for (size_t i=0; i<s->x.size()-1; ++i) cout << s->x[i] << " " << Uvec[i] << "\n";
 
 			// Once initial density dist has been obtained, resize species to n0
@@ -436,7 +424,7 @@ void Solver::initializeSpecies(Species_Base * s){
 
 			// Utot = sum(Uvec) = sum(u[i] * dx[i])
 			double Utot = std::accumulate(Uvec.begin(), Uvec.end(), 0.0, std::plus<double>());
-			std::cout << "Utot = " << Utot << std::endl;
+			// std::cout << "Utot = " << Utot << std::endl;
 			if (Utot <= 0) throw std::runtime_error("Total density is 0 or negative. Please check your initial condition function");
 			double N_cohort = Utot/s->J;
 
@@ -850,12 +838,12 @@ void Solver::restore(std::istream &fin, vector<Species_Base*> spp_proto){
 	species_vec = spp_proto;
 
 	for (auto spp : species_vec){
-		spp->restore(fin);
+		spp->restore(fin, control.verbose);
 	}
 	resizeStateFromSpecies(); // this includes system vars
 	copyCohortsToState(); // this will overwrite species state (except system vars), but I guess this is better for sake of consistency
 	
-	odeStepper.restore(fin);
+	odeStepper.restore(fin, control.verbose);
 }
 
 

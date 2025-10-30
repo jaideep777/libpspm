@@ -91,7 +91,7 @@ class Plant : public IndividualBase<1>{
 		fout << "TestPlant::v1" << "   ";
 		fout << lma << "   ";
 	}
-	void restore(std::istream& fin){
+	void restore(std::istream& fin, bool verbose){
 		std::string s; fin >> s; // discard version number
 		assert(s == "TestPlant::v1");
 		fin >> lma;

@@ -43,7 +43,7 @@ int main(){
 	  //    y[0,1] = [xmax*sin(t), xmax*cos(t)]
 
 
-	  OdeSolver stepper(str, t_start, 1e-8, 1e-8); // RK class for adaptive step
+	  OdeSolver stepper(str, t_start, 1e-8, 1e-8, false); // RK class for adaptive step
 	  
 	  cout.precision(15);
 	  //int M = static_cast<int>((t_stop-t_start)/dh+0.5); // Number of timesteps

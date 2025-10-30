@@ -56,7 +56,7 @@ class IndividualBase{
 	virtual void print(std::ostream &out = std::cout) const {}
 
 	virtual void save(std::ostream& fout){}
-	virtual void restore(std::istream& fin){}
+	virtual void restore(std::istream& fin, bool verbose){}
 
 };
 

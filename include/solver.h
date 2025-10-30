@@ -79,6 +79,7 @@ class Solver{
 		double cohort_insertion_tol = 1e-12;
 		bool sync_cohort_insertion = false;
 		bool cm_use_log_densities = true;
+		bool verbose = false;
 	} control;
 	
 

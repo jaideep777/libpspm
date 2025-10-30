@@ -72,8 +72,8 @@ class RKCK45{
 	// 3) size     -- number of equations 
 	// 4) accuracy -- desired accuracy
 	// 5) h1       -- trial size of the first step
-	RKCK45(double t_start_, double accuracy, double h1);
-	RKCK45(double t_start_, double accuracy, double h1, double _hmin);
+	RKCK45(double t_start_, double accuracy, double h1, bool verbose);
+	RKCK45(double t_start_, double accuracy, double h1, double _hmin, bool verbose);
 	~RKCK45();
 
 	// Resize the container 

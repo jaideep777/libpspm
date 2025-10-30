@@ -158,7 +158,7 @@ class TestModel : public Plant, public IndividualBase<1>{
 		fout << "TestModel::v1 ";
 	}
 
-	void restore(std::istream& fin){
+	void restore(std::istream& fin, bool verbose){
 		std::string s; fin >> s; // discard version number 
 	}
 

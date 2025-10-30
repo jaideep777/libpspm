@@ -115,8 +115,8 @@ class Cohort : public Ind {
 	}
 
 
-	void restore(std::istream &fin, int n_extra_vars){
-		Ind::restore(fin);
+	void restore(std::istream &fin, int n_extra_vars, bool verbose){
+		Ind::restore(fin, verbose);
 
 		std::string s; fin >> s; // discard version number
 		assert(s == "Cohort<Ind>::v2");

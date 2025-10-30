@@ -346,7 +346,6 @@ double Species<Model>::establishmentProbability(double t, void * env){
 
 template <class Model>
 double Species<Model>::calc_boundary_u(std::vector<double> gb, double pe){
-	//std::cout << "calc_boundary_u\n";
 	if (bfin_is_u0in){
 		boundaryCohort.u = birth_flux_in;
 	}
@@ -671,9 +670,11 @@ void Species<Model>::save(std::ostream &fout){
 }
 
 template <class Model>
-void Species<Model>::restore(std::istream &fin){
-//	Species_Base::restore(fin);
-	std::cout << "Restoring Species<T>" << std::endl;
+void Species<Model>::restore(std::istream &fin, bool verbose){
+	// Species_Base::restore(fin, verbose);
+	if(verbose){
+		std::cout << "Restoring Species<T>" << std::endl;
+	}
 	std::string s; fin >> s; // version number (discard)
 	assert(s == "Species<T>::v2");
 	fin >> J
@@ -693,10 +694,10 @@ void Species<Model>::restore(std::istream &fin){
 	for (int i=0; i<x.size(); ++i) fin >> x[i];
 	for (int i=0; i<h.size(); ++i) fin >> h[i];
 
-	boundaryCohort.restore(fin, n_accumulators);
+	boundaryCohort.restore(fin, n_accumulators, verbose);
 	cohorts.resize(J, boundaryCohort); // cohorts must always be copy-constructed from the boundary cohort
 
-	for (auto& C : cohorts) C.restore(fin, n_accumulators);
+	for (auto& C : cohorts) C.restore(fin, n_accumulators, verbose);
 }
 
 
@@ -706,7 +707,6 @@ void Species<Model>::printCohortVector(std::ostream &out){
 
 	for (int i=0; i<istate_size; ++i) out << "x[" << i << "]" << '\t';
 	out << "u\n";
-	// std::cout << "J is " << J << std::endl;
 	for(int i=0; i < cohorts.size(); ++i){
 		for (auto xx : cohorts[i].x) out << xx << "\t";
 		out << cohorts[i].u << "\n";

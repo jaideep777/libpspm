@@ -116,7 +116,7 @@ class Species_Base{
 	virtual void sortCohortsAscending(size_t dim, int skip=0) = 0;
 	
 	virtual void save(std::ostream &fout) = 0;
-	virtual void restore(std::istream &fin) = 0;
+	virtual void restore(std::istream &fin, bool verbose) = 0;
 
 	virtual void printCohortVector(std::ostream &out) = 0;
 
@@ -213,7 +213,7 @@ class Species : public Species_Base{
 	void sortCohortsAscending(size_t dim, int skip=0);
 	
 	void save(std::ostream &fout);
-	void restore(std::istream &fin);
+	void restore(std::istream &fin, bool verbose);
 
 	void printCohortVector(std::ostream &out);
 
