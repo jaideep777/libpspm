@@ -1,4 +1,23 @@
 #include "index_utils.h"
+#include "solver.h"
+
+// Trapezoid integration
+inline double trapz(const std::vector<double>& y, const std::vector<double>& x) {
+    double sum = 0.0;
+    for (size_t i = 1; i < x.size(); ++i) {
+        sum += (x[i] - x[i-1]) * (y[i] + y[i-1]) * 0.5;
+    }
+    return sum;
+}
+
+// Cumulative trapezoid integration
+inline std::vector<double> cumtrapz(const std::vector<double>& y, const std::vector<double>& x) {
+    std::vector<double> result(x.size(), 0.0);
+    for (size_t i = 1; i < x.size(); ++i) {
+        result[i] = result[i-1] + (x[i] - x[i-1]) * (y[i] + y[i-1]) * 0.5;
+    }
+    return result;
+}
 
 // inline bool smaller_than(const std::vector<double>& x1, const std::vector <double>& x2){
 // 	for(int i = 0; i < x1.size(); ++i){
@@ -193,8 +212,15 @@ double Solver::integrate_wudx_above(wFunc w, double t, const std::vector<double>
 		return I;
 	}
 	
+	else if (method == SOLVER_EQ){
+		// calculate using the trapz / cumm_trapz functions // TODO
+		double I = 0;
+
+		return 0;
+	}
+
 	else{
-		throw std::runtime_error("Unsupported solver method");
+		throw std::runtime_error("Integral: Unsupported solver method");
 	}
 }
 
@@ -250,7 +276,7 @@ double Solver::integrate_wudx_above(wFunc w, double t, const std::vector<double>
 // 	}
 	
 // 	else{
-// 		throw std::runtime_error("Unsupported solver method");
+// 		throw std::runtime_error("Integral: Unsupported solver method");
 // 	}
 // }
 
@@ -342,7 +368,7 @@ double Solver::integrate_wudx_above(wFunc w, double t, const std::vector<double>
 // 	}
 	
 // 	else{
-// 		throw std::runtime_error("Unsupported solver method");
+// 		throw std::runtime_error("Integral: Unsupported solver method");
 // 	}
 // }
 
@@ -427,7 +453,37 @@ double Solver::state_integral(wFunc w, double t, int species_id){
 		return I;
 	}
 
+	else if (method == SOLVER_EQ){
+		// calculate integral using trapz
+		double I = 0;
+
+		return I;
+	}
+
 	else{
-		throw std::runtime_error("Unsupported solver method");
+		throw std::runtime_error("Integral: Unsupported solver method");
+	}
+}
+
+
+
+
+//             _xm 
+// Calculate _/ w(z,t)u(z,t)dz
+//         xb
+// This will eventually be replaced with a call to integrate_wudx_above
+template<typename wFunc>
+std::vector<double> Solver::cummumulative_state_integral(wFunc w, double t, int species_id){
+	Species_Base* spp = species_vec[species_id];
+
+	// NOTE: This solver currently works for Equilibrium solver only
+	if (method == SOLVER_EQ){
+		std::vector<double> I(spp->J, 0);
+
+		return I;
+	}
+
+	else{
+		throw std::runtime_error("Integral: Unsupported solver method");
 	}
 }

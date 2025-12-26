@@ -3,6 +3,7 @@
 
 #include <vector>
 #include <numeric>
+#include <cassert>
 
 // From tensorlib
 

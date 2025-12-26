@@ -199,3 +199,11 @@ abline(h=37.5845, col="black")
 legend(x = 2500, y=26, legend = names, col=cols, lwd=2, bty = "n", cex=1.)
 
 dev.off()
+
+x_num_red = exp(seq(log(1), log(1e6), length.out=50))
+u_num_red = c(451.116, 326.013, 233.165, 164.889, 115.188, 79.4081, 53.9608, 36.1013, 23.748, 15.3383, 9.71179, 6.01824, 3.64335, 2.1505, 1.23498, 0.68843, 0.371579, 0.193667, 0.0971841, 0.0468041, 0.0215585, 0.00946173, 0.00394072, 0.00155066, 0.000573746, 0.00019858, 6.39324e-05, 1.90298e-05, 5.20243e-06, 1.29696e-06, 2.92569e-07, 5.92182e-08, 1.06572e-08, 1.6885e-09, 2.33007e-10, 2.76821e-11, 2.79587e-12, 2.36804e-13, 1.65722e-14, 9.43016e-16, 4.28785e-17, 1.52878e-18, 4.18739e-20, 8.6179e-22, 1.30098e-23, 1.40353e-25, 1.0519e-27, 5.31152e-30, 1.7479e-32, 3.61591e-35)
+# Plot analytical vs numerical equilibrium distributions for RED
+plot(x=xeq_red, y=ueq_red, type="l", log="xy", col="orange", lwd=3,
+     xlab="Size", ylab="Density", main="RED model equilibrium")
+points(x=x_num_red, y=u_num_red, col="black", pch=16)
+

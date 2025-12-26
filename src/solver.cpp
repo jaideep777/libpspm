@@ -23,7 +23,9 @@ std::map<std::string, PSPM_SolverType> Solver::methods_map =
 	 {"IFMU", SOLVER_IFMU}, 
 	 {"ABM",  SOLVER_ABM}, 
 	 {"IEBT", SOLVER_IEBT},
-	 {"ICM",  SOLVER_ICM}};
+	 {"ICM",  SOLVER_ICM},
+	 {"EQ",   SOLVER_EQ}
+	};
 
 
 Solver::Solver(PSPM_SolverType _method, string ode_method) : odeStepper(ode_method, 0, 1e-6, 1e-6) {
@@ -110,7 +112,8 @@ void Solver::addSpecies(std::vector<std::vector<double>> xbreaks, Species_Base* 
 	else if (method == SOLVER_EBT)   J = s->n_grid_centres+1;  // As many cohorts as grid centers + 1 boundary cohort
 	else if (method == SOLVER_IEBT)  J = s->n_grid_centres+1;
 	else if (method == SOLVER_ABM)   J = s->n_grid_centres;    // For ABM solver, this is a temporary size thats used to generate the initial density distribution. s will be resized during init to abm_n0. FIXME JJ: Can ABM init be kept identical to EBT?
-	else    throw std::runtime_error("Unsupported method");
+	else if (method == SOLVER_EQ)    J = s->n_grid_edges; // xbreaks.size(), since we will be using trapezoid integration in EQ solver	
+	else    throw std::runtime_error("addSpecies: Unsupported method");
 
 	std::cout << "Resize with J" << std::endl;
 	s->resize(J);
@@ -327,7 +330,7 @@ std::vector<double> Solver::maxState(int species_id){
 
 void Solver::print(){
 	std::cout << ">> SOLVER \n";
-	string types[] = {"FMU", "MMU", "CM", "EBT", "IFMU", "ABM", "IEBT", "ICM", "EBTN", "IEBTN"};
+	string types[] = {"FMU", "MMU", "CM", "EBT", "IFMU", "ABM", "IEBT", "ICM", "EQ"};
 	std::cout << "+ Type: " << types[method] << std::endl;
 
 	std::cout << "+ State size = " << state.size() << "\n";
@@ -366,7 +369,7 @@ void Solver::initializeSpecies(Species_Base * s){
 
 		std::cout << "set x and u for all cohorts" << std::endl;
 		// set x, u for all cohorts
-		if (method == SOLVER_FMU || method == SOLVER_IFMU){
+		if (method == SOLVER_FMU || method == SOLVER_IFMU || method == SOLVER_EQ){
 			for (size_t i=0; i<s->J; ++i){
 				vector<double> X = utils::tensor::coord_value(utils::tensor::index(i, s->dim_centres), s->X);
 				s->setX(i,X); 

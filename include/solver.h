@@ -19,7 +19,9 @@ enum PSPM_SolverType {SOLVER_FMU,
                       SOLVER_IFMU, 
                       SOLVER_ABM, 
                       SOLVER_IEBT,
-                      SOLVER_ICM};
+                      SOLVER_ICM,
+                      SOLVER_EQ
+                    };
 
 class Solver{
 	// define the type of a pointer to member functions calcRates_XXX()
@@ -191,6 +193,9 @@ class Solver{
 
 	template<typename wFunc>
 	double state_integral(wFunc w, double t, int species_id);
+
+	template <typename wFunc>
+	std::vector<double> cummumulative_state_integral(wFunc w, double t, int species_id);
 
 	std::vector<double> getDensitySpecies1D(int k, int dim, const std::vector<double>& breaks, Spline::Extr extrapolation_method = Spline::ZERO);
 	// std::vector<std::vector<double>> getDensitySpecies2D(int k, const std::vector<int>& axes, const std::vector<std::vector<double>>& breaks, Spline::Extr extrapolation_method);
