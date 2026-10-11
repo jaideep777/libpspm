@@ -44,6 +44,7 @@ class Cohort : public Ind {
 	void print_xu(std::ostream &out = std::cout){
 		out << std::setw(6)  << std::setprecision(4) << birth_time;
 		for (auto xx : Ind::x) out << std::setw(12) << std::setprecision(4) << xx; 
+		out << std::setw(12) << std::setprecision(4) << Ind::q; 
 		out << std::setw(12) << std::setprecision(4) << u; 
 	}
 
@@ -98,7 +99,7 @@ class Cohort : public Ind {
 		Ind::save(fout);
 
 		// Then save cohort (for cohort state). This way, Individual metadata will be available when set_size() and set_state() are called in restore()
-		fout << "Cohort<Ind>::v2" << "   ";
+		fout << "Cohort<Ind>::v3" << "   ";
 		fout << std::make_tuple(
 		          id
 		        , group_id
@@ -106,7 +107,7 @@ class Cohort : public Ind {
 		        , birth_time
 		        , remove
 		        , need_precompute); // we actually need not save need_precompute, because set_size() will always set it to 1 during restore
-		fout << to_vector(Ind::x) << "   " << u << "   ";
+		fout << to_vector(Ind::x) << "   " << Ind::q << "   " << u << "   ";
 
 		std::vector<double> cumm_vars(n_extra_vars);
 		auto it = cumm_vars.begin();
@@ -119,7 +120,7 @@ class Cohort : public Ind {
 		Ind::restore(fin);
 
 		std::string s; fin >> s; // discard version number
-		assert(s == "Cohort<Ind>::v2");
+		assert(s == "Cohort<Ind>::v3");
 		fin >> id
 		    >> group_id
 		    >> group_size
@@ -128,8 +129,10 @@ class Cohort : public Ind {
 		    >> need_precompute;
 
 		std::vector<double> _x;
-		fin >> _x >> u;
+		int _q;
+		fin >> _x >> _q >> u;
 		set_size(_x);
+		Ind::set_category(_q);
 
 		std::vector<double> cumm_vars(n_extra_vars);
 		fin >> cumm_vars;

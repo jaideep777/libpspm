@@ -14,7 +14,8 @@ class IndividualBase{
 
 	// Since we cant force users to manage x, these variables are managed by Cohort.
 	// But it is defined here becuase it is templated and Cohort doesnt have access to `dim`
-	std::array<double, dim> x; 
+	std::array<double, dim> x;   // Continuous states
+	int q = 0;                   // Categorical state (defaults to 0)
 	// ---
 
 	public:
@@ -22,13 +23,17 @@ class IndividualBase{
 	std::vector<std::string> varnames;
 	
 	// essential functions which must be defined by user
-	virtual void set_size(const std::array <double, dim>& _x) = 0; // Note that Ind::set_size() is not guaranteed to set x.
+	virtual void set_size(const std::array <double, dim>& _x) = 0; // Note that user-supplied Ind::set_size() is not guaranteed to set x.
 	virtual double init_density(void * _env, double bf) = 0; 
 	virtual std::array<double,dim> growthRate(double t, void * _env) = 0;
 	virtual double mortalityRate(double t, void * _env) = 0;
 	virtual double birthRate(double t, void * _env) = 0;
 
 	// optional functions which can be defined by user through overloads
+	virtual void set_category(int _q){
+		q = _q;
+	}
+
 	virtual ~IndividualBase(){
 	}
 	
@@ -51,6 +56,9 @@ class IndividualBase{
 	virtual std::vector<double>::iterator get_accumulatorRates(std::vector<double>::iterator &it){
 		return it;
 	} 
+
+	// Function to initialize category
+	virtual void init_category(double t, void * _env){}
 
 	// printing
 	virtual void print(std::ostream &out = std::cout) const {}
