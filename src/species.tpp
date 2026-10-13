@@ -102,7 +102,7 @@ void Species<Model>::print(){
 	for (int i=0; i<istate_size; ++i){
 		std::cout << std::setw(12) << "x[" << i << "]"; 
 	}
-	std::cout << std::setw(12) << "u" << " ";
+	std::cout << std::setw(10) << "q" << std::setw(12) << "u" << " ";
 	if (!cohorts.empty()){
 		for (auto s : cohorts[0].varnames) std::cout << std::setw(12) << s << " ";
 	}
@@ -134,6 +134,11 @@ std::vector<double> Species<Model>::getX(int i){
 	else return to_vector(cohorts[i].x);
 }
 
+template <class Model>
+inline int Species<Model>::getC(int i){
+	if (i == -1) return boundaryCohort.q;
+	else return cohorts[i].q;
+}
 
 template <class Model>
 double Species<Model>::getU(int i){
@@ -168,6 +173,11 @@ void Species<Model>::set_birthTime(int i, double t0){
 template <class Model>
 void Species<Model>::setX(int i, std::vector<double> _x){
 	cohorts[i].set_size(_x);
+}
+
+template <class Model>
+inline void Species<Model>::setC(int i, int _q){
+	cohorts[i].q = _q;
 }
 
 template <class Model>

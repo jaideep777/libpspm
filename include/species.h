@@ -65,9 +65,11 @@ class Species_Base{
 	virtual void set_ub(double _ub) = 0;
 	virtual void set_birthTime(int i, double t0) = 0;
 	virtual void setX(int i, std::vector<double> _x) = 0;
+	virtual void setC(int i, int _q) = 0;
 	virtual void setU(int i, double _u) = 0;
 
 	virtual std::vector<double> getX(int i) = 0;
+	virtual int getC(int i) = 0;
 	virtual double getU(int i) = 0;
 
 	// virtual double dXn (int i) = 0;
@@ -159,9 +161,11 @@ class Species : public Species_Base{
 	void set_ub(double _ub);
 	void set_birthTime(int i, double t0);
 	void setX(int i, std::vector<double> _x);
+	void setC(int i, int _q);
 	void setU(int i, double _u);
 
 	std::vector<double> getX(int i);
+	int getC(int i);
 	double getU(int i);
 
 	// double dXn (int i);
