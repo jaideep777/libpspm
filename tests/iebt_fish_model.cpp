@@ -21,6 +21,7 @@ int main(){
 
 	Solver S(SOLVER_IEBT);
 	S.control.ode_ifmu_stepsize = 0.02;
+	S.control.cohort_insertion_dt = 1;
 	S.setEnvironment(&E);
 	S.addSpecies({5}, {0}, {10}, {false}, &spp, 0, -1);
 	S.print();
@@ -54,6 +55,14 @@ int main(){
 	}
 
 	S.print();
+
+	S.species_vec[0]->setC(1, 1);
+	S.species_vec[0]->setC(3, 1);
+
+	S.print();
+
+    S.splitCohortsByStateTransitionSpecies_EBT(0, {{0.8, 0.2},
+	                                               {0.0, 1.0}});
 
 	fout1.open("iebt_fish_u1.txt");
 	S.species_vec[0]->printCohortVector(fout1);

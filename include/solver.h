@@ -137,6 +137,7 @@ class Solver{
 	void addCohort_EBT();
 	void removeDeadCohorts_EBT();
 	void mergeCohorts_EBT();
+	void splitCohortsByStateTransitionSpecies_EBT(int k, const std::vector<std::vector<double>>& P);
 
 	/// @brief calculate \f$du/dt\f$ using the CM solver
 	void calcRates_CM(double t, std::vector<double>::iterator S, std::vector<double>::iterator dSdt);

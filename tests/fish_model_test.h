@@ -31,7 +31,7 @@ class Fish : public IndividualBase<DIM>{
 		return 0.5;
 	}
 	double birthRate(double t, void * env){
-		return 0.1;
+		return 0.5;
 	}
 
 };
