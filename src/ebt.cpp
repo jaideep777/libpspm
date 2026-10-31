@@ -122,16 +122,16 @@ void Solver::mergeCohorts_EBT(){
 }
 
 
-std::vector<double> split_cohort(double u, int q, const std::vector<std::vector<double>>& P){
-	const int n_cat = P.size();
-	std::vector<double> u_new(n_cat);
+// std::vector<double> split_cohort(double u, int q, const std::vector<std::vector<double>>& P){
+// 	const int n_cat = P.size();
+// 	std::vector<double> u_new(n_cat);
 
-	for (int i = 0; i < n_cat; ++i) {
-		u_new[i] = u * P[q][i];
-	}
+// 	for (int i = 0; i < n_cat; ++i) {
+// 		u_new[i] = u * P[q][i];
+// 	}
 
-	return u_new;
-}
+// 	return u_new;
+// }
 
 
 void Solver::splitCohortsByStateTransitionSpecies_EBT(int k, const std::vector<std::vector<double>>& P) {
@@ -140,16 +140,7 @@ void Solver::splitCohortsByStateTransitionSpecies_EBT(int k, const std::vector<s
 
 	auto spp = species_vec[k];
 	
-	for (int i = 0; i < spp->J; ++i){
-		std::vector<double> newU = split_cohort(spp->getU(i), spp->getC(i), P);
-
-		std::cout << "Final Matrix:" << std::endl;
-		for (const auto& value : newU) {
-			std::cout << value << " ";
-		}
-		std::cout << std::endl;
-
-	}
-    // resizeStateFromSpecies();
+	spp->splitCohortsByStateTransition(P);
+	// resizeStateFromSpecies();
     // copyCohortsToState();
 }

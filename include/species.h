@@ -107,6 +107,8 @@ class Species_Base{
 	virtual void addCohort(int n = 1) = 0;
 	template<class T> void addCohort(T bc);
 
+	virtual void splitCohortsByStateTransition(const std::vector<std::vector<double>> &P) = 0;
+
 	virtual void markCohortForRemoval(int i) = 0;
 	virtual void markDensestCohort() = 0;
 	virtual void markDenseCohorts(double dxcut) = 0;
@@ -202,6 +204,8 @@ class Species : public Species_Base{
 
 	void addCohort(int n = 1);
 	template<class T> void addCohort(T bc);
+	
+	void splitCohortsByStateTransition(const std::vector<std::vector<double>> &P);
 
 	void markCohortForRemoval(int i);
 	// JJ Note: A sorting-independent way to implement the following would be to use FoF algo. 
