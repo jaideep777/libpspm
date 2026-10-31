@@ -71,6 +71,8 @@ int main(){
 	fout.close();
 	foutx.close();
 
+	S.print();
+
 	// cout << S.u0_out(S.current_time)[0] << endl; 
 	// if (abs(S.u0_out(S.current_time)[0] - 1.30639) < 1e-5) return 0;
 	// else return 1;

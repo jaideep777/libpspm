@@ -8,7 +8,7 @@
 
 #include "io_utils.h"
 
-template<size_t dim = 1>
+template<size_t dim = 1, size_t cat = 1>
 class IndividualBase{
 	public:
 
@@ -20,6 +20,7 @@ class IndividualBase{
 
 	public:
 	size_t state_size = dim;
+	size_t n_cat = cat;
 	std::vector<std::string> varnames;
 	
 	// essential functions which must be defined by user
@@ -31,7 +32,6 @@ class IndividualBase{
 
 	// optional functions which can be defined by user through overloads
 	virtual void set_category(int _q){
-		q = _q;
 	}
 
 	virtual ~IndividualBase(){

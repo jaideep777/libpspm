@@ -140,7 +140,7 @@ void Solver::splitCohortsByStateTransitionSpecies_EBT(int k, const std::vector<s
 
 	auto spp = species_vec[k];
 	
-	spp->splitCohortsByStateTransition(P);
+	spp->splitCohortsByStateTransition(current_time, P);
 	// resizeStateFromSpecies();
     // copyCohortsToState();
 }

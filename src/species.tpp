@@ -28,6 +28,7 @@ template<class Model>
 template <typename... ARGS>
 Species<Model>::Species(ARGS... args) : boundaryCohort(args...){
 	istate_size = boundaryCohort.state_size;
+	icat_size = boundaryCohort.n_cat;
 }
 
 
@@ -84,6 +85,7 @@ void Species<Model>::print(){
 	std::cout << "xb = " << boundaryCohort.x << " / " << xb << "\n";
 	std::cout << "xsize = " << J << "\n";
 	std::cout << "istate size = " << istate_size << '\n';
+	std::cout << "discrete states = " << icat_size << '\n';
 	std::cout << "Extra state variables: " << n_accumulators << "\n";
 	std::cout << "Total state size: " << stateSizeTotal() << "\n";
 	std::cout << "Input birth flux = " << birth_flux_in << "\n";
@@ -519,21 +521,44 @@ inline std::vector<double> split_density(double u, int q, const std::vector<std:
 	return u_new;
 }
 
+
+/// P has the format
+///             to
+///   	        0    1
+///   From 0 [ 0.8, 0.2 ],
+///        1 [ 0.0, 1.0 ]
+///   
 template <class Model>
-void Species<Model>::splitCohortsByStateTransition(const std::vector<std::vector<double>>& P) {
-    assert(P.size() == P[0].size()); // Ensure square matrix
-	const int n_cat = P.size();
+void Species<Model>::splitCohortsByStateTransition(double t, const std::vector<std::vector<double>>& P) {
+	assert(P.size() == P[0].size()); // Ensure square matrix
+	assert(P.size() == icat_size);   // Ensure number of rows in transition matrix matches number of categories in individual
+
+	std::vector<Cohort<Model>> new_cohorts;
 
 	for (int i = 0; i < J; ++i){
-		std::vector<double> newU = split_density(getU(i), getC(i), P);
+		int q = getC(i);
+		std::vector<double> newU = split_density(getU(i), q, P);
 
-		std::cout << "Final Matrix:" << std::endl;
-		for (const auto& value : newU) {
-			std::cout << value << " ";
+		cohorts[i].u = newU[q]; // Update the original cohort's density
+		for (int j = 0; j < icat_size; ++j){
+			if (newU[j] > 0 && j != q) {
+				Cohort<Model> newCohort = cohorts[i];
+				newCohort.birth_time = t;   // Set the birth time for the new cohort
+				newCohort.set_category(j);  // Set the category for the new cohort
+				newCohort.u = newU[j];      // Set the density for the new cohort
+				new_cohorts.push_back(newCohort);
+			}
 		}
-		std::cout << std::endl;
+
+		// std::cout << "Final Matrix:" << std::endl;
+		// for (const auto& value : newU) {
+		// 	std::cout << value << " ";
+		// }
+		// std::cout << std::endl;
 
 	}
+
+	cohorts.insert(cohorts.end(), new_cohorts.begin(), new_cohorts.end());
 }
 
 
@@ -606,7 +631,7 @@ void Species<Model>::markDenseCohorts(double dxcut){
 			}
 			prev_group_id = cohorts[i].group_id; // Update the previous group_id
 		}
-    }	
+	}	
 
 	// // mark cohorts to remove; skip 1st and last cohort
 	// if (cohorts.size() < 3) return; // do nothing if there are 2 or fewer cohorts
@@ -690,10 +715,11 @@ void Species<Model>::sortCohortsAscending(size_t dim, int skip){
 template <class Model>
 void Species<Model>::save(std::ostream &fout){
 //	Species_Base::save(fout);
-	fout << "Species<T>::v2\n";
+	fout << "Species<T>::v3\n";
 	fout << std::make_tuple(
 		J
 	  , istate_size
+	  , icat_size
 	  , n_accumulators
 	  , noff_abm
 	  , birth_flux_in
@@ -714,9 +740,10 @@ void Species<Model>::restore(std::istream &fin){
 //	Species_Base::restore(fin);
 	std::cout << "Restoring Species<T>" << std::endl;
 	std::string s; fin >> s; // version number (discard)
-	assert(s == "Species<T>::v2");
+	assert(s == "Species<T>::v3");
 	fin >> J
 	    >> istate_size
+	    >> icat_size
 	    >> n_accumulators
 	    >> noff_abm
 	    >> birth_flux_in
@@ -744,11 +771,11 @@ template <class Model>
 void Species<Model>::printCohortVector(std::ostream &out){
 
 	for (int i=0; i<istate_size; ++i) out << "x[" << i << "]" << '\t';
-	out << "u\n";
+	out << "q\tu\n";
 	// std::cout << "J is " << J << std::endl;
 	for(int i=0; i < cohorts.size(); ++i){
 		for (auto xx : cohorts[i].x) out << xx << "\t";
-		out << cohorts[i].u << "\n";
+		out << cohorts[i].q << "\t" << cohorts[i].u << "\n";
 	}
 }
 

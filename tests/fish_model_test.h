@@ -13,9 +13,9 @@ class SeaEnv : public EnvironmentBase{
 
 };
 
-const int DIM = 1;
+const int DIM = 1, CAT = 2;
 
-class Fish : public IndividualBase<DIM>{
+class Fish : public IndividualBase<DIM, CAT>{
 	public:
 	double init_density(void * _env, double bf){
 		return 1.0/x[0];
