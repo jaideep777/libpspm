@@ -59,7 +59,7 @@ class Cohort : public Ind {
 		Ind::set_size(Ind::x);
 	}
 
-	void set_category(int _q){
+	void set_category(size_t _q){
 		Ind::q = _q;
 		Ind::set_category(_q);
 		need_precompute = true; // when category is updated, next rate calc will need precompute

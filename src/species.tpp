@@ -529,18 +529,17 @@ inline std::vector<double> split_density(double u, int q, const std::vector<std:
 ///        1 [ 0.0, 1.0 ]
 ///   
 template <class Model>
-void Species<Model>::splitCohortsByStateTransition(double t, const std::vector<std::vector<double>>& P) {
-	assert(P.size() == P[0].size()); // Ensure square matrix
-	assert(P.size() == icat_size);   // Ensure number of rows in transition matrix matches number of categories in individual
+void Species<Model>::splitCohortsByStateTransition(double t, double dt, void * env) {
 
 	std::vector<Cohort<Model>> new_cohorts;
 
 	for (int i = 0; i < J; ++i){
 		int q = getC(i);
+		auto P = cohorts[i].get_transition_matrix(t, dt, env); // Get the transition matrix for the current time and dt
 		std::vector<double> newU = split_density(getU(i), q, P);
 
 		cohorts[i].u = newU[q]; // Update the original cohort's density
-		for (int j = 0; j < icat_size; ++j){
+		for (size_t j = 0; j < icat_size; ++j){
 			if (newU[j] > 0 && j != q) {
 				Cohort<Model> newCohort = cohorts[i];
 				newCohort.birth_time = t;   // Set the birth time for the new cohort

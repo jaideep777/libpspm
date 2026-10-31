@@ -31,9 +31,6 @@ class IndividualBase{
 	virtual double birthRate(double t, void * _env) = 0;
 
 	// optional functions which can be defined by user through overloads
-	virtual void set_category(int _q){
-	}
-
 	virtual ~IndividualBase(){
 	}
 	
@@ -57,8 +54,19 @@ class IndividualBase{
 		return it;
 	} 
 
-	// Function to initialize category
-	virtual void init_category(double t, void * _env){}
+	// Function related to discrete states
+	virtual size_t init_category(double t, void * _env){
+		return 0;
+	}
+
+	virtual void set_category(size_t _q){
+	}
+
+	virtual std::vector<std::vector<double>> get_transition_matrix(double t, double dt, void * _env){
+		std::vector<std::vector<double>> matrix(n_cat, std::vector<double>(n_cat, 0.0));
+		for (size_t i = 0; i < n_cat; ++i) matrix[i][i] = 1.0;
+		return matrix;
+	}
 
 	// printing
 	virtual void print(std::ostream &out = std::cout) const {}

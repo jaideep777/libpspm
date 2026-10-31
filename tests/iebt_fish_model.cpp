@@ -61,8 +61,7 @@ int main(){
 
 	S.print();
 
-    S.splitCohortsByStateTransitionSpecies_EBT(0, {{0.8, 0.2},
-	                                               {0.0, 1.0}});
+	S.splitCohortsByStateTransition_EBT(1);
 
 	fout1.open("iebt_fish_u1.txt");
 	S.species_vec[0]->printCohortVector(fout1);

@@ -134,13 +134,19 @@ void Solver::mergeCohorts_EBT(){
 // }
 
 
-void Solver::splitCohortsByStateTransitionSpecies_EBT(int k, const std::vector<std::vector<double>>& P) {
-    assert(P.size() == P[0].size()); // Ensure square matrix
-	const int n_cat = P.size();
+// void Solver::splitCohortsByStateTransitionSpecies_EBT(int k, const std::vector<std::vector<double>>& P) {
+//     assert(P.size() == P[0].size()); // Ensure square matrix
+// 	const int n_cat = P.size();
 
-	auto spp = species_vec[k];
+// 	auto spp = species_vec[k];
 	
-	spp->splitCohortsByStateTransition(current_time, P);
-	// resizeStateFromSpecies();
-    // copyCohortsToState();
+// 	spp->splitCohortsByStateTransition(current_time, P);
+// 	// resizeStateFromSpecies();
+//     // copyCohortsToState();
+// }
+
+void Solver::splitCohortsByStateTransition_EBT(double dt) {
+	for (auto spp : species_vec){
+		spp->splitCohortsByStateTransition(current_time, dt, env);
+	}
 }

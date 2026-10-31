@@ -34,5 +34,16 @@ class Fish : public IndividualBase<DIM, CAT>{
 		return 0.5;
 	}
 
+	size_t init_category(double t, void * _env){
+		return 0;
+	}
+
+	void set_category(size_t _q){
+	}
+
+	std::vector<std::vector<double>> get_transition_matrix(double t, double dt, void * _env){
+		return {{0.8*dt, 0.2*dt}, {0.0*dt, 1.0*dt}};
+	}
+
 };
 

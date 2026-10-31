@@ -137,7 +137,9 @@ class Solver{
 	void addCohort_EBT();
 	void removeDeadCohorts_EBT();
 	void mergeCohorts_EBT();
-	void splitCohortsByStateTransitionSpecies_EBT(int k, const std::vector<std::vector<double>>& P);
+
+	// void splitCohortsByStateTransitionSpecies_EBT(int k, const std::vector<std::vector<double>>& P);
+	void splitCohortsByStateTransition_EBT(double dt); // dt is the amount of time since the last split. This is used to compute the transition matrix for each cohort, which depends on dt.
 
 	/// @brief calculate \f$du/dt\f$ using the CM solver
 	void calcRates_CM(double t, std::vector<double>::iterator S, std::vector<double>::iterator dSdt);
