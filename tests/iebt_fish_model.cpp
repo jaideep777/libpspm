@@ -20,7 +20,7 @@ int main(){
 	SeaEnv E;
 
 	Solver S(SOLVER_IEBT);
-	S.control.ode_ifmu_stepsize = 0.1;
+	S.control.ode_ifmu_stepsize = 0.05;
 	S.control.cohort_insertion_dt = 1;
 	S.setEnvironment(&E);
 	S.addSpecies({5}, {0.5}, {5.5}, {false}, &spp, 0, -1);
@@ -46,7 +46,7 @@ int main(){
 	for (double t=0; t <= 100; t=t+1) {
 		S.step_to(t);
 		fout << S.current_time << "\t" << S.u0_out(t)[0] << "\t";
-		cout << S.current_time << " " << S.u0_out(t)[0] << " " << S.species_vec[0]->xsize() << "\n";
+		cout << S.current_time << " " << static_cast<SeaEnv*>(S.env)->ssb/1e9 << " " << S.species_vec[0]->xsize() << "\n";
 
 		// S.print();
 		// // cout.flush();
@@ -78,7 +78,7 @@ int main(){
 	foutx.close();
 	foutp.close();
 
-	S.print();
+	// S.print();
 
 	// cout << S.u0_out(S.current_time)[0] << endl; 
 	// if (abs(S.u0_out(S.current_time)[0] - 1.30639) < 1e-5) return 0;
