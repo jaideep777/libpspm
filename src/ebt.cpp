@@ -149,4 +149,7 @@ void Solver::splitCohortsByStateTransition_EBT(double dt) {
 	for (auto spp : species_vec){
 		spp->splitCohortsByStateTransition(current_time, dt, env);
 	}
+
+	resizeStateFromSpecies();
+	copyCohortsToState();
 }

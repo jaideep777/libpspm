@@ -522,7 +522,7 @@ inline std::vector<double> split_density(double u, int q, const std::vector<std:
 }
 
 
-/// P has the format
+/// P has the format, where transition rates are per unit time
 ///             to
 ///   	        0    1
 ///   From 0 [ 0.8, 0.2 ],
@@ -535,10 +535,23 @@ void Species<Model>::splitCohortsByStateTransition(double t, double dt, void * e
 
 	for (int i = 0; i < J; ++i){
 		int q = getC(i);
-		auto P = cohorts[i].get_transition_matrix(t, dt, env); // Get the transition matrix for the current time and dt
-		std::vector<double> newU = split_density(getU(i), q, P);
+		auto Q = cohorts[i].get_transition_matrix(t, env); // Get the transition matrix for the current time and dt
+		for (int k=0; k<Q.size(); ++k) Q[k][k] -= 1;  // Get intensity matrix (Q = P - I)
+		for (int l=0; l<Q.size(); ++l){
+			for (int m=0; m<Q[l].size(); ++m){
+				Q[l][m] *= dt;  // Scale by dt --> Q*dt
+			}
+		}
+		for (int k=0; k<Q.size(); ++k) Q[k][k] += 1;  // convert to transition probabilities (I + Q*dt)
 
+		if(debug) for (auto& qq : Q) std::cout << qq << '\n';
+
+		std::vector<double> newU = split_density(getU(i), q, Q);
+
+		if (debug) std::cout << "newU = " << newU << "\n";
+		if (debug) std::cout << "Cohort " << i << " (q=" << q << ", u=" << getU(i) << ", x=" << getX(i) << ") split into: ";
 		cohorts[i].u = newU[q]; // Update the original cohort's density
+		if (debug) std::cout << "(q=" << q << ", u=" << cohorts[i].u << ", x = " << cohorts[i].x << ") + ";
 		for (size_t j = 0; j < icat_size; ++j){
 			if (newU[j] > 0 && j != q) {
 				Cohort<Model> newCohort = cohorts[i];
@@ -546,8 +559,10 @@ void Species<Model>::splitCohortsByStateTransition(double t, double dt, void * e
 				newCohort.set_category(j);  // Set the category for the new cohort
 				newCohort.u = newU[j];      // Set the density for the new cohort
 				new_cohorts.push_back(newCohort);
+				if (debug) std::cout << "(q=" << j << ", u=" << newCohort.u << ", x = " << newCohort.x << ") + ";
 			}
 		}
+		if (debug) std::cout << "\n";
 
 		// std::cout << "Final Matrix:" << std::endl;
 		// for (const auto& value : newU) {
@@ -557,7 +572,8 @@ void Species<Model>::splitCohortsByStateTransition(double t, double dt, void * e
 
 	}
 
-	cohorts.insert(cohorts.end(), new_cohorts.begin(), new_cohorts.end());
+	cohorts.insert(prev(cohorts.end()), new_cohorts.begin(), new_cohorts.end());  // Insert before the last cohort, which is the boundary cohort
+	J += new_cohorts.size();
 }
 
 

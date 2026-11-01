@@ -69,7 +69,7 @@ class IndividualBase{
 	}
 
 	// printing
-	virtual void print(std::ostream &out = std::cout) const {}
+	virtual void print(std::ostream &out = std::cout) {}
 
 	virtual void save(std::ostream& fout){}
 	virtual void restore(std::istream& fin){}

@@ -50,7 +50,7 @@ LDFLAGS += $(PROFILING_FLAGS)
 #-Wwrite-strings 
 
 CPPFLAGS += -Wno-unused-variable -Wno-sign-compare \
--Wno-unused-parameter
+-Wno-unused-parameter -Wno-overloaded-virtual
 # -Wno-unused-but-set-variable
 
 # libs

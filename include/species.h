@@ -18,6 +18,8 @@ class Species_Base{
 	protected: // private members
 	int J = 0;	
 
+	bool debug = false;
+
 	// std::list<double> birth_flux_out_history;                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    
 	
 	// These are only used by FMU solver. 

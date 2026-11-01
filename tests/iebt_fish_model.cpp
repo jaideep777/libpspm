@@ -6,7 +6,7 @@
 #include "individual_base.h"
 using namespace std;
 
-#include "fish_model_test.h"
+#include "cod_model.h"
 
 std::vector <double> myseq(double from, double to, int len){
 	std::vector<double> x(len);
@@ -16,14 +16,14 @@ std::vector <double> myseq(double from, double to, int len){
 
 int main(){
 
-	Species<Fish> spp;
+	Species<PSPMFish> spp;
 	SeaEnv E;
 
 	Solver S(SOLVER_IEBT);
-	S.control.ode_ifmu_stepsize = 0.02;
+	S.control.ode_ifmu_stepsize = 0.1;
 	S.control.cohort_insertion_dt = 1;
 	S.setEnvironment(&E);
-	S.addSpecies({5}, {0}, {10}, {false}, &spp, 0, -1);
+	S.addSpecies({5}, {0.5}, {5.5}, {false}, &spp, 0, -1);
 	S.print();
 
 	ofstream fout1;
@@ -41,27 +41,34 @@ int main(){
 	ofstream foutx("iebt_fish_x.txt");
 
 	ofstream fout("iebt_fishmodel_equil.txt");
+	ofstream foutp("iebt_fishmodel_communityprops.txt");
 
-	for (double t=0; t <= 10; t=t+0.1) {
+	for (double t=0; t <= 100; t=t+1) {
 		S.step_to(t);
 		fout << S.current_time << "\t" << S.u0_out(t)[0] << "\t";
 		cout << S.current_time << " " << S.u0_out(t)[0] << " " << S.species_vec[0]->xsize() << "\n";
-		
-		vector<double> breaks = myseq(0,10,201);
-		vector<double> vx = S.getDensitySpecies1D(0, 0, breaks, Spline::QUADRATIC);
-		for (auto x : vx) foutx << x << "\t";
-		foutx << endl;
 
+		// S.print();
+		// // cout.flush();
+		// cout << "U integral = " << S.state_integral([](int i, double t){return 1;}, t, 0) << "\n";
+
+		// vector<double> breaks = myseq(0,10,201);
+		// vector<double> vx = S.getDensitySpecies1D(0, 0, breaks, Spline::QUADRATIC);
+		// for (auto x : vx) foutx << x << "\t";
+		// foutx << endl;
+
+		for (double a=1; a<30; a+=1){
+			double U_mat = S.integrate_wudx_above([&S](int i, double t){return (S.species_vec[0]->getC(i) == 1)? 1:0;}, 0, {a}, 0)
+						- S.integrate_wudx_above([&S](int i, double t){return (S.species_vec[0]->getC(i) == 1)? 1:0;}, 0, {a-0.99999}, 0);
+			double U_tot = S.integrate_wudx_above([&S](int i, double t){return 1;}, 0, {a}, 0)
+						- S.integrate_wudx_above([&S](int i, double t){return 1;}, 0, {a-0.99999}, 0);
+			double mat = (U_mat)/(U_tot+1e-6);
+			// cout << "Umat/Utot = " << mat << " at x = " << a << "\n";
+			foutp << t << "\t" << a << "\t" << "U_tot\t" << U_tot << "\n";
+			foutp << t << "\t" << a << "\t" << "mat\t" << mat << "\n";
+		}
+		foutp << t << "\t" << "NA" << "\t" << "ssb\t" << static_cast<SeaEnv*>(S.env)->ssb << "\n";
 	}
-
-	S.print();
-
-	S.species_vec[0]->setC(1, 1);
-	S.species_vec[0]->setC(3, 1);
-
-	S.print();
-
-	S.splitCohortsByStateTransition_EBT(1);
 
 	fout1.open("iebt_fish_u1.txt");
 	S.species_vec[0]->printCohortVector(fout1);
@@ -69,6 +76,7 @@ int main(){
 
 	fout.close();
 	foutx.close();
+	foutp.close();
 
 	S.print();
 

@@ -48,7 +48,7 @@ class Cohort : public Ind {
 		out << std::setw(12) << std::setprecision(4) << u; 
 	}
 
-	void print(std::ostream &out = std::cout){
+	void print(std::ostream &out = std::cout) override {
 		print_xu(out);
 		Ind::print(out);
 	}

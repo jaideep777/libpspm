@@ -48,6 +48,7 @@ void Solver::step_to(double tstop, AfterStepFunc &afterStep_user){
 				mergeCohorts_EBT();
 				removeDeadCohorts_EBT();
 				addCohort_EBT();  // Add new cohort if N0 > 0. Add after removing dead ones otherwise this will also be removed. 
+				splitCohortsByStateTransition_EBT(control.cohort_insertion_dt);
 				t_next_cohort_insertion += control.cohort_insertion_dt;
 			}			
 
