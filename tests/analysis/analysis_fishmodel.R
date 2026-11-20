@@ -1,5 +1,8 @@
 library(tidyverse)
 
+source(here::here("demo/Cod_model/ref/parameters.cod.R"))
+source(here::here("demo/Cod_model/ref/simulator.7.R"))
+
 u = read.delim("iebt_fish_x.txt", header=F)
 
 x = seq(0, 10, length.out = 201)

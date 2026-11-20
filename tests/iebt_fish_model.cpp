@@ -17,13 +17,15 @@ std::vector <double> myseq(double from, double to, int len){
 int main(){
 
 	Species<PSPMFish> spp;
+
 	SeaEnv E;
 
 	Solver S(SOLVER_IEBT);
-	S.control.ode_ifmu_stepsize = 0.05;
+	S.control.ode_ifmu_stepsize = 1/96.0; //0.01;
 	S.control.cohort_insertion_dt = 1;
 	S.setEnvironment(&E);
 	S.addSpecies({5}, {0.5}, {5.5}, {false}, &spp, 0, -1);
+	S.species_vec[0]->set_xb({0.001});
 	S.print();
 
 	ofstream fout1;

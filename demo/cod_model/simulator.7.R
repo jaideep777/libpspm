@@ -10,8 +10,8 @@ mat<-c(mat,rep(1,times=ages-length(mat))); names(mat)<-1:ages
 
 # initialisation of other data structures
 N<-matrix(0,nrow=years+1,ncol=ages)	# numbers at age
-N[1,1]<-N.ini
-for(i in 2:ages) N[1,i]<-N.ini*exp(-sum(M[1:(i-1)])) 	# numbers at age, year 1
+N[1,1]<- N.ini
+#for(i in 2:ages) N[1,i]<-N.ini*exp(-sum(M[1:(i-1)])) 	# numbers at age, year 1 # JAI: commented to match with IBM
 Res<-data.frame(year=1:years,N=NA,TSB=NA,SSB=NA,Y=NA,R=NA,E=NA,Ereal=NA,Fratio=NA,F.hypo=NA,
 	D.sea=NA,D.shr=NA,D.tot=NA,P.sea=NA,P.shr=NA,P.tot=NA) # results
   
@@ -51,6 +51,7 @@ simulate<-function(h.prop,LF50,display=FALSE){
 	F.max<- -log(1-h.prop)
 	age.fish<-min((1:ages)[1/(1+exp(-SF*(L-LF50)))>0.5])
 	F2E.factor<-ifelse(b==1,F.max/q,F.max*(exp(-(F.max+M[ages])*(1-b))-1)/(q*(F.max+M[ages])*(b-1))) # Liu & Heino 2014
+	F.ratio=0
 	for(year in 1:years){ # 
 		if(h.prop>0){
 			# determine the effective fishing mortality
@@ -62,15 +63,15 @@ simulate<-function(h.prop,LF50,display=FALSE){
 			E.real<-D.eff/d.sea					# realized effort (~vessel days)
 			F.real<-ifelse(b==1,q*E.real,optimize(f=simul,interval=c(0,F.max),parms=c(N.rel,E.real),tol=0.0001)$minimum)
 			F.ratio = F.real/F.max
-			#F.real=F.max  # JAI: Remove effort dynamics for testing
+			F.real=F.max  # JAI: Remove effort dynamics for testing
 			# population dynamics
 			F<-F.real/(1+exp(-SF*(L-LF50)))		# fishing mortality at age
 		}
 		else{
 			F<-0; E<-0; E.real<-0; F.real<-0
 			D.sea.demand<-0
-			F.ratio = 0
 		}	
+	  # Mortality
 		Z<-M+F								# total mortality
 		s<-exp(-Z)							# survival
 		Y<-sum(F/Z*(1-s)*N[year,]*W)
@@ -79,7 +80,9 @@ simulate<-function(h.prop,LF50,display=FALSE){
 		}else F.hypo<-0
 		TSB<-sum(N[year,]*W)
 		SSB<-sum(N[year,]*W*mat)
+		# Recruitment
 		N[year+1,1]<-r0*SSB/(1+SSB/Bhalf)#*exp(rnorm(n=1,mean=-sf^2/2,sd=sf))  # JAI:: Remove environmental stoch for testing
+		# Growth
 		N[year+1,2:ages]<-N[year,1:(ages-1)]*s[1:(ages-1)]
 		# economic calculations
 		profit.sea<-Y*price.sea - scale.catch*(D.sea.demand*s.sea + E*varC.sea + fixedC.sea)

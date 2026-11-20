@@ -24,7 +24,7 @@ p2 = df |> setNames(c("t", "a", "var", "value")) |>
   ggplot() + 
   geom_line(aes(x=a, y=value, group=t, col=t)) + 
   scale_color_viridis_c(direction = -1) + 
-  geom_point(data = tibble(x=1:length(matobs), y=matobs), aes(x=x, y=y), col="red")+
+  geom_point(data = tibble(x=1:length(matobs)+1, y=matobs), aes(x=x, y=y), col="red")+
   labs(y="maturity", x="age") + 
   xlim(c(0,15))
 
@@ -36,7 +36,7 @@ p3 = df |> setNames(c("t", "a", "var", "value")) |>
   scale_color_viridis_c(direction = -1) + 
   scale_x_log10() + 
   scale_y_log10() + 
-  geom_point(data = tibble(y=res$N[250,]/1e9, x=1:30),
+  geom_point(data = tibble(y=res$N[250,]/1e9, x=1:30+1),
              aes(x=x,y=y), col="red") + 
   labs(y="Number (billions)", x="age") 
 

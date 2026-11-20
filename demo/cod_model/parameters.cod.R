@@ -1,9 +1,9 @@
 ### parameters
 # implementation parameters and age ranges
-ages<-30			# maximum age
+ages<-30			# maximum age 
 years<-250			# simulation years
 skip<-200			# transient years to be skipped
-N.ini<-1e8			# initial numbers at age 1
+N.ini<-1e9			# initial numbers at age 1
 
 # biological parameters
 r0<-21.77072		# maximum age 1 recruits per kg SSB
@@ -36,6 +36,6 @@ price.shr<-17.0		# selling price NOK/kg
 s.sea<-1078000			# employment cost sea NOK/FTE
 s.shr<-348000			# employment cost shore NOK/FTE
 fixedC.sea<-351123000	# fixed costs sea NOK (=average per unit * #units)
-fixedC.shr<-103246800	# fixed costs shore NOK
+fixedC.shr<-1032468000	# fixed costs shore NOK # JAI: modified as per SI
 varC.sea<-65000 		# variable costs NOK/vessel day
-scale.catch<-0.53 		# percentage of total codfish catch that is cod
+scale.catch<-0.356 #0.53 		# percentage of total codfish catch that is cod JAI: Modified as per SI

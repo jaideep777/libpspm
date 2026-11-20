@@ -48,7 +48,7 @@ class Fish{
 	double weight;	// weight in kg
 
 	public:
-	void set_age(int _a){
+	void set_age(double _a){
 		age = _a;
 
 		// in an explicity age-length model, this will go.
@@ -63,7 +63,8 @@ class Fish{
 	
 	double maturation_rate(){
 		int a  = int(age);
-		return (a > par.amax)? 1e20 : (par.ma[a+1]-par.ma[a])/(1 - par.ma[a]);
+		// return (a > par.amax)? 1e20 : (par.ma[a+1]-par.ma[a])/(1 - par.ma[a]);
+		return (a > par.amax)? 1e20 : (par.ma[a]-par.ma[a-1])/(1 - par.ma[a-1]);
 	}
 	
 	double naturalMortalityRate(bool isMature){
@@ -81,7 +82,7 @@ class Fish{
 class PSPMFish : public IndividualBase<DIM, CAT>, public Fish{
 	public:
 	double init_density(void * _env, double bf){
-		return 1.0e9/x[0];
+		return (fabs(x[0] - 1)<1e-6)? 1.0e9 : 0;
 	}
 
 	// "size" is age in this model
@@ -91,11 +92,15 @@ class PSPMFish : public IndividualBase<DIM, CAT>, public Fish{
 
 	// age-growth rate is always 1
 	array<double,DIM> growthRate(double t, void * env){
-		return {1};
+		bool growth_window = fmodf(t, 1) >= 0.75; 
+		double growth_rate = (growth_window)? 4 : 0;
+		return {growth_rate};
 	}
 
 	double mortalityRate(double t, void * env){
-		return Fish::naturalMortalityRate(q);
+		bool mortality_window = (fmodf(t, 1) > 0.25) && (fmodf(t, 1) <= 0.5); 
+		double mort_rate = (mortality_window)? Fish::naturalMortalityRate(q)*4 : 0;
+		return mort_rate;
 	}
 
 	double birthRate(double t, void * _env);
@@ -108,7 +113,8 @@ class PSPMFish : public IndividualBase<DIM, CAT>, public Fish{
 	}
 
 	std::vector<std::vector<double>> get_transition_matrix(double t, void * _env){
-		double p = Fish::maturation_rate();
+		bool maturation_window = fmodf(t, 1) < 0.25; 
+		double p = (maturation_window)? Fish::maturation_rate() : 0;
 		p = (p > 1)? 1 : p; // cap at 1
 		return {{1-p, p}, {0.0, 1.0}};
 		// return {{0.8, 0.2}, {0.0, 1.0}};
@@ -141,7 +147,9 @@ class SeaEnv : public EnvironmentBase{
 
 
 double PSPMFish::birthRate(double t, void * _env){
+	bool spawning_window = (fmodf(t, 1) > 0.5) && (fmodf(t, 1) <= 0.75); 
 	auto env = static_cast<SeaEnv*>(_env);
-	return q*par.r0*weight / (1 + env->ssb/par.Bhalf);
+	double birth_rate_annualized = q*par.r0*weight / (1 + env->ssb/par.Bhalf);
+	return (spawning_window)? birth_rate_annualized*4 : 0;
 	// return 0;
 }
