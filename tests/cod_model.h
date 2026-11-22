@@ -63,7 +63,7 @@ class Fish{
 	
 	double maturation_rate(){
 		int a  = int(age);
-		// return (par.ma[a] == 1)? 1e20 : (par.ma[a+1]-par.ma[a])/(1 - par.ma[a]);
+		// return (par.ma[a] == 1)? 1 : (par.ma[a+1]-par.ma[a])/(1 - par.ma[a]);
 		return (par.ma[a-1] == 1)? 1e20 : (par.ma[a]-par.ma[a-1])/(1 - par.ma[a-1]);
 	}
 	
@@ -73,9 +73,7 @@ class Fish{
 		if (isMature) rate = (a > par.amax)? 1e20 : par.mam[a]; // FIXME: use inf
 		else          rate = (a > par.amax)? 1e20 : par.mai[a]; // FIXME: use inf
 		
-		double dt = _FISHERY_DT_;
-		double rate_corrected = (exp(rate * dt)-1) / dt;
-		return rate_corrected;
+		return rate;
 	}
 
 };
@@ -85,7 +83,7 @@ class Fish{
 class PSPMFish : public IndividualBase<DIM, CAT>, public Fish{
 	public:
 	double init_density(void * _env, double bf){
-		return 1.0e8/x[0];
+		return 5.0e8/x[0];
 	}
 
 	// "size" is age in this model
@@ -102,8 +100,12 @@ class PSPMFish : public IndividualBase<DIM, CAT>, public Fish{
 
 	double mortalityRate(double t, void * env){
 		bool mortality_window = (fmodf(t, 1) > 0.25) && (fmodf(t, 1) <= 0.5); 
-		double mort_rate = (mortality_window)? Fish::naturalMortalityRate(q)*4 : 0;
-		return mort_rate;
+		double mort_rate = (mortality_window)? Fish::naturalMortalityRate(q) : 0;
+
+		double dt = _FISHERY_DT_;
+		double rate_corrected = (exp(mort_rate*4*dt)-1) / dt;
+
+		return rate_corrected;
 	}
 
 	double birthRate(double t, void * _env);

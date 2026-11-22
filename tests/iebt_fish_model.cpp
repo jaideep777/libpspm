@@ -6,7 +6,7 @@
 #include "individual_base.h"
 using namespace std;
 
-#define _FISHERY_DT_ (1/96.0)
+#define _FISHERY_DT_ (1/12.0)
 
 #include "cod_model.h"
 
