@@ -3,7 +3,7 @@
 ages<-30			# maximum age 
 years<-250			# simulation years
 skip<-200			# transient years to be skipped
-N.ini<-1e9			# initial numbers at age 1
+N.ini<-1e8			# initial numbers at age 1
 
 # biological parameters
 r0<-21.77072		# maximum age 1 recruits per kg SSB

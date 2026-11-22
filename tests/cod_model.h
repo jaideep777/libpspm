@@ -63,8 +63,8 @@ class Fish{
 	
 	double maturation_rate(){
 		int a  = int(age);
-		// return (a > par.amax)? 1e20 : (par.ma[a+1]-par.ma[a])/(1 - par.ma[a]);
-		return (a > par.amax)? 1e20 : (par.ma[a]-par.ma[a-1])/(1 - par.ma[a-1]);
+		// return (par.ma[a] == 1)? 1e20 : (par.ma[a+1]-par.ma[a])/(1 - par.ma[a]);
+		return (par.ma[a-1] == 1)? 1e20 : (par.ma[a]-par.ma[a-1])/(1 - par.ma[a-1]);
 	}
 	
 	double naturalMortalityRate(bool isMature){
@@ -72,7 +72,10 @@ class Fish{
 		double rate;
 		if (isMature) rate = (a > par.amax)? 1e20 : par.mam[a]; // FIXME: use inf
 		else          rate = (a > par.amax)? 1e20 : par.mai[a]; // FIXME: use inf
-		return rate;
+		
+		double dt = _FISHERY_DT_;
+		double rate_corrected = (exp(rate * dt)-1) / dt;
+		return rate_corrected;
 	}
 
 };
@@ -82,7 +85,7 @@ class Fish{
 class PSPMFish : public IndividualBase<DIM, CAT>, public Fish{
 	public:
 	double init_density(void * _env, double bf){
-		return (fabs(x[0] - 1)<1e-6)? 1.0e9 : 0;
+		return 1.0e8/x[0];
 	}
 
 	// "size" is age in this model
@@ -114,7 +117,7 @@ class PSPMFish : public IndividualBase<DIM, CAT>, public Fish{
 
 	std::vector<std::vector<double>> get_transition_matrix(double t, void * _env){
 		bool maturation_window = fmodf(t, 1) < 0.25; 
-		double p = (maturation_window)? Fish::maturation_rate() : 0;
+		double p = (maturation_window)? Fish::maturation_rate() : 0; // No scaling up here because this is applied once per year
 		p = (p > 1)? 1 : p; // cap at 1
 		return {{1-p, p}, {0.0, 1.0}};
 		// return {{0.8, 0.2}, {0.0, 1.0}};

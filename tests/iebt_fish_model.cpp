@@ -6,6 +6,8 @@
 #include "individual_base.h"
 using namespace std;
 
+#define _FISHERY_DT_ (1/96.0)
+
 #include "cod_model.h"
 
 std::vector <double> myseq(double from, double to, int len){
@@ -21,10 +23,10 @@ int main(){
 	SeaEnv E;
 
 	Solver S(SOLVER_IEBT);
-	S.control.ode_ifmu_stepsize = 1/96.0; //0.01;
+	S.control.ode_ifmu_stepsize = _FISHERY_DT_;
 	S.control.cohort_insertion_dt = 1;
 	S.setEnvironment(&E);
-	S.addSpecies({5}, {0.5}, {5.5}, {false}, &spp, 0, -1);
+	S.addSpecies({30}, {0.5}, {30.5}, {false}, &spp, 0, -1);
 	S.species_vec[0]->set_xb({0.001});
 	S.print();
 
@@ -66,10 +68,11 @@ int main(){
 						- S.integrate_wudx_above([&S](int i, double t){return 1;}, 0, {a-0.99999}, 0);
 			double mat = (U_mat)/(U_tot+1e-6);
 			// cout << "Umat/Utot = " << mat << " at x = " << a << "\n";
-			foutp << t << "\t" << a << "\t" << "U_tot\t" << U_tot << "\n";
-			foutp << t << "\t" << a << "\t" << "mat\t" << mat << "\n";
+			foutp << t << "\t" << a-1 << "\t" << "U_tot\t" << U_tot << "\n";
+			foutp << t << "\t" << a-1 << "\t" << "mat\t" << mat << "\n";
 		}
 		foutp << t << "\t" << "NA" << "\t" << "ssb\t" << static_cast<SeaEnv*>(S.env)->ssb << "\n";
+		foutp << t << "\t" << "NA" << "\t" << "tsb\t" << static_cast<SeaEnv*>(S.env)->tsb << "\n";
 	}
 
 	fout1.open("iebt_fish_u1.txt");
